@@ -1,0 +1,35 @@
+{
+    "type": "forge:ore_shaped",
+    "result": {
+        "item": "packagedauto:recipe_holder",
+        "count": 1,
+        "data": 0
+    },
+    "pattern": [
+        "TRT",
+        "RGR",
+        "ICI"
+    ],
+    "key": {
+        "C": {
+            "item": "packagedauto:package_component",
+            "data": 0
+        },
+        "G": {
+            "type": "forge:ore_dict",
+            "ore": "glowstone"
+        },
+        "T": {
+            "type": "forge:ore_dict",
+            "ore": "blockGlass"
+        },
+        "I": {
+            "type": "forge:ore_dict",
+            "ore": "ingotIron"
+        },
+        "R": {
+            "type": "forge:ore_dict",
+            "ore": "dustRedstone"
+        }
+    }
+}

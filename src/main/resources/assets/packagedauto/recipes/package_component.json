@@ -1,0 +1,27 @@
+{
+    "type": "forge:ore_shaped",
+    "result": {
+        "item": "packagedauto:package_component",
+        "count": 1,
+        "data": 0
+    },
+    "pattern": [
+        "GWG",
+        "WEW",
+        "GWG"
+    ],
+    "key": {
+        "E": {
+            "item": "minecraft:ender_eye",
+            "data": 0
+        },
+        "W": {
+            "type": "forge:ore_dict",
+            "ore": "plankWood"
+        },
+        "G": {
+            "type": "forge:ore_dict",
+            "ore": "ingotGold"
+        }
+    }
+}

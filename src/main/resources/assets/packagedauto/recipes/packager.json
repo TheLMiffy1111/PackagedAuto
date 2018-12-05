@@ -1,0 +1,35 @@
+{
+    "type": "forge:ore_shaped",
+    "result": {
+        "item": "packagedauto:packager",
+        "count": 1,
+        "data": 0
+    },
+    "pattern": [
+        "ICI",
+        "RTR",
+        "IPI"
+    ],
+    "key": {
+        "C": {
+            "item": "packagedauto:package_component",
+            "data": 0
+        },
+        "T": {
+            "item": "minecraft:crafting_table",
+            "data": 0
+        },
+        "P": {
+            "item": "minecraft:piston",
+            "data": 0
+        },
+        "I": {
+            "type": "forge:ore_dict",
+            "ore": "ingotIron"
+        },
+        "R": {
+            "type": "forge:ore_dict",
+            "ore": "dustRedstone"
+        }
+    }
+}

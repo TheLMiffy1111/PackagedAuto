@@ -1,0 +1,178 @@
+package thelm.packagedauto.client.gui;
+
+import java.awt.Color;
+import java.io.IOException;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.translation.I18n;
+import thelm.packagedauto.PackagedAuto;
+import thelm.packagedauto.api.IRecipeType;
+import thelm.packagedauto.container.ContainerEncoder;
+import thelm.packagedauto.network.PacketHandler;
+import thelm.packagedauto.network.packet.PacketCycleRecipeType;
+import thelm.packagedauto.network.packet.PacketSaveRecipeList;
+import thelm.packagedauto.network.packet.PacketSetPatternIndex;
+
+public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
+
+	public static final ResourceLocation BACKGROUND = new ResourceLocation(PackagedAuto.MOD_ID, "textures/gui/encoder.png");
+
+	public GuiEncoder(ContainerEncoder container) {
+		super(container);
+		xSize = 258;
+		ySize = 314;
+	}
+
+	@Override
+	protected ResourceLocation getBackgroundTexture() {
+		return BACKGROUND;
+	}
+
+	@Override
+	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
+		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
+		IRecipeType recipeType = container.patternInventory.recipeType;
+		for(int i = 0; i < 9; ++i) {
+			for(int j = 0; j < 9; ++j) {
+				Color color = recipeType.getSlotColor(i*9+j);
+				GlStateManager.color(color.getRed()/255F, color.getGreen()/255F, color.getBlue()/255F, color.getAlpha()/255F);
+				drawModalRectWithCustomSizedTexture(guiLeft+8+j*18, guiTop+56+i*18, 258, 0, 16, 16, 512, 512);
+			}
+		}
+		for(int i = 0; i < 3; ++i) {
+			for(int j = 0; j < 3; ++j) {
+				Color color = recipeType.getSlotColor(81+i*3+j);
+				GlStateManager.color(color.getRed()/255F, color.getGreen()/255F, color.getBlue()/255F, color.getAlpha()/255F);
+				drawModalRectWithCustomSizedTexture(guiLeft+198+j*18, guiTop+110+i*18, 258, 0, 16, 16, 512, 512);
+			}
+		}
+		GlStateManager.color(1, 1, 1, 1);
+	}
+
+	@Override
+	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
+		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
+		String s = container.inventory.getDisplayName().getUnformattedText();
+		fontRenderer.drawString(s, xSize/2 - fontRenderer.getStringWidth(s)/2, 6, 0x404040);
+		fontRenderer.drawString(container.playerInventory.getDisplayName().getUnformattedText(), 49, ySize-96+3, 0x404040);
+		String str = fontRenderer.trimStringToWidth(container.patternInventory.recipeType.getLocalizedNameShort(), 86);
+		fontRenderer.drawString(str, 212 - fontRenderer.getStringWidth(str)/2, 64, 0x404040);
+		for(GuiButton guibutton : buttonList) {
+			if(guibutton.isMouseOver()) {
+				guibutton.drawButtonForegroundLayer(mouseX-guiLeft, mouseY-guiTop);
+				break;
+			}
+		}
+	}
+
+	@Override
+	public void initGui() {
+		buttonList.clear();
+		super.initGui();
+		for(int i = 0; i < 2; ++i) {
+			for(int j = 0; j < 10; ++j) {
+				addButton(new GuiButtonPatternSlot(i*10+j, guiLeft+29+j*18, guiTop+16+i*18));
+			}
+		}
+		addButton(new GuiButtonRecipeType(0, guiLeft+204, guiTop+74));
+		addButton(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+25, I18n.translateToLocal("tile.packagedauto.encoder.save")));
+	}
+
+	@Override
+	protected void actionPerformed(GuiButton button) throws IOException {
+		if(button instanceof GuiButtonPatternSlot) {
+			PacketHandler.INSTANCE.sendToServer(new PacketSetPatternIndex(button.id));
+			container.tile.setPatternIndex(button.id);
+			container.setupSlots();
+		}
+		if(button instanceof GuiButtonRecipeType) {
+			PacketHandler.INSTANCE.sendToServer(new PacketCycleRecipeType());
+			container.patternInventory.cycleRecipeType();
+			container.setupSlots();
+		}
+		if(button instanceof GuiButtonSavePatterns) {
+			PacketHandler.INSTANCE.sendToServer(new PacketSaveRecipeList());
+		}
+	}
+
+	class GuiButtonPatternSlot extends GuiButton {
+
+		GuiButtonPatternSlot(int buttonId, int x, int y) {
+			super(buttonId, x, y, 18, 18, "");
+		}
+
+		@Override
+		protected int getHoverState(boolean mouseOver) {
+			if(container.tile.patternIndex == id) {
+				return 2;
+			}
+			return super.getHoverState(mouseOver);
+		}
+
+		@Override
+		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+			super.drawButton(mc, mouseX, mouseY, partialTicks);
+			for(int i = 81; i < 90; ++i) {
+				ItemStack stack = container.tile.patternInventories[id].stacks.get(i);
+				if(!stack.isEmpty()) {
+					RenderHelper.enableGUIStandardItemLighting();
+					GlStateManager.color(1, 1, 1, 1);
+					mc.getRenderItem().renderItemIntoGUI(stack, x+1, y+1);
+					RenderHelper.disableStandardItemLighting();
+					break;
+				}
+			}
+		}
+
+		@Override
+		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
+			drawHoveringText(I18n.translateToLocalFormatted("tile.packagedauto.encoder.pattern_slot", String.format("%02d", id)), mouseX, mouseY);
+		}
+	}
+
+	class GuiButtonRecipeType extends GuiButton {
+
+		GuiButtonRecipeType(int buttonId, int x, int y) {
+			super(buttonId, x, y, 18, 18, "");
+		}
+
+		@Override
+		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+			super.drawButton(mc, mouseX, mouseY, partialTicks);
+			IRecipeType recipeType = container.patternInventory.recipeType;
+			if(recipeType != null) {
+				Object rep = recipeType.getRepresentation();
+				if(rep instanceof TextureAtlasSprite) {
+					GlStateManager.color(1, 1, 1, 1);
+					mc.renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
+					drawTexturedModalRect(x+1, y+1, (TextureAtlasSprite)rep, 16, 16);
+				}
+				if(rep instanceof ItemStack) {
+					RenderHelper.enableGUIStandardItemLighting();
+					GlStateManager.color(1, 1, 1, 1);
+					mc.getRenderItem().renderItemIntoGUI((ItemStack)rep, x+1, y+1);
+					RenderHelper.disableStandardItemLighting();
+				}
+			}
+		}
+
+		@Override
+		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
+			drawHoveringText(I18n.translateToLocal("tile.packagedauto.encoder.change_recipe_type"), mouseX, mouseY);
+		}
+	}
+
+	class GuiButtonSavePatterns extends GuiButton {
+
+		GuiButtonSavePatterns(int buttonId, int x, int y, String text) {
+			super(buttonId, x, y, 38, 18, text);
+		}
+	}
+}

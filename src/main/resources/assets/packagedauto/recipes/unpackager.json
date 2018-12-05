@@ -1,0 +1,35 @@
+{
+    "type": "forge:ore_shaped",
+    "result": {
+        "item": "packagedauto:unpackager",
+        "count": 1,
+        "data": 0
+    },
+    "pattern": [
+        "ICI",
+        "RSR",
+        "IHI"
+    ],
+    "key": {
+        "C": {
+            "item": "packagedauto:package_component",
+            "data": 0
+        },
+        "S": {
+            "type": "forge:ore_dict",
+            "ore": "chestWood"
+        },
+        "H": {
+            "item": "minecraft:hopper",
+            "data": 0
+        },
+        "I": {
+            "type": "forge:ore_dict",
+            "ore": "ingotIron"
+        },
+        "R": {
+            "type": "forge:ore_dict",
+            "ore": "dustRedstone"
+        }
+    }
+}

@@ -1,0 +1,35 @@
+{
+    "type": "forge:ore_shaped",
+    "result": {
+        "item": "packagedauto:encoder",
+        "count": 1,
+        "data": 0
+    },
+    "pattern": [
+        "ICI",
+        "TGT",
+        "IRI"
+    ],
+    "key": {
+        "C": {
+            "item": "packagedauto:package_component",
+            "data": 0
+        },
+        "G": {
+            "type": "forge:ore_dict",
+            "ore": "glowstone"
+        },
+        "R": {
+            "item": "minecraft:comparator",
+            "data": 0
+        },
+        "T": {
+            "item": "minecraft:crafting_table",
+            "data": 0
+        },
+        "I": {
+            "type": "forge:ore_dict",
+            "ore": "ingotIron"
+        }
+    }
+}
