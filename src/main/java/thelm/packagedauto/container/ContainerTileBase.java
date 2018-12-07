@@ -1,6 +1,5 @@
 package thelm.packagedauto.container;
 
-import cofh.core.util.helpers.ItemHelper;
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntRBTreeMap;
 import net.minecraft.entity.player.EntityPlayer;
@@ -12,6 +11,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.inventory.InventoryTileBase;
 import thelm.packagedauto.slot.SlotFalseCopy;
 import thelm.packagedauto.tile.TileBase;
@@ -114,7 +114,7 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 				if(!existingStack.isEmpty()) {
 					int maxStack = Math.min(stack.getMaxStackSize(), slot.getSlotStackLimit());
 					int rmv = Math.min(maxStack, stack.getCount());
-					if(slot.isItemValid(ItemHelper.cloneStack(stack, rmv)) && existingStack.getItem().equals(stack.getItem()) && (!stack.getHasSubtypes() || stack.getItemDamage() == existingStack.getItemDamage()) && ItemStack.areItemStackTagsEqual(stack, existingStack)) {
+					if(slot.isItemValid(MiscUtil.cloneStack(stack, rmv)) && existingStack.getItem().equals(stack.getItem()) && (!stack.getHasSubtypes() || stack.getItemDamage() == existingStack.getItemDamage()) && ItemStack.areItemStackTagsEqual(stack, existingStack)) {
 						int existingSize = existingStack.getCount() + stack.getCount();
 						if(existingSize <= maxStack) {
 							stack.setCount(0);
@@ -145,7 +145,7 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 				if(existingStack.isEmpty()) {
 					int maxStack = Math.min(stack.getMaxStackSize(), slot.getSlotStackLimit());
 					int rmv = Math.min(maxStack, stack.getCount());
-					if(slot.isItemValid(ItemHelper.cloneStack(stack, rmv))) {
+					if(slot.isItemValid(MiscUtil.cloneStack(stack, rmv))) {
 						existingStack = stack.splitStack(rmv);
 						slot.putStack(existingStack);
 						successful = true;

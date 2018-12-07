@@ -137,4 +137,13 @@ public class MiscUtil {
 			return ItemStack.EMPTY;
 		}
 	}
+
+	public static ItemStack cloneStack(ItemStack stack, int stackSize) {
+		if(stack.isEmpty()) {
+			return ItemStack.EMPTY;
+		}
+		ItemStack retStack = stack.copy();
+		retStack.setCount(stackSize);
+		return retStack;
+	}
 }
