@@ -38,6 +38,8 @@ public class BlockPackager extends BlockBase {
 
 	protected BlockPackager() {
 		super(Material.IRON);
+		setHardness(15F);
+		setResistance(25F);
 		setSoundType(SoundType.METAL);
 		setUnlocalizedName("packagedauto.packager");
 		setRegistryName("packagedauto:packager");

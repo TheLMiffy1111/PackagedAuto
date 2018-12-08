@@ -38,6 +38,8 @@ public class BlockEncoder extends BlockBase {
 
 	protected BlockEncoder() {
 		super(Material.IRON);
+		setHardness(15F);
+		setResistance(25F);
 		setSoundType(SoundType.METAL);
 		setUnlocalizedName("packagedauto.encoder");
 		setRegistryName("packagedauto:encoder");

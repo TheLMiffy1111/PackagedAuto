@@ -30,6 +30,8 @@ public class BlockUnpackager extends BlockBase {
 
 	protected BlockUnpackager() {
 		super(Material.IRON);
+		setHardness(15F);
+		setResistance(25F);
 		setSoundType(SoundType.METAL);
 		setUnlocalizedName("packagedauto.unpackager");
 		setRegistryName("packagedauto:unpackager");
