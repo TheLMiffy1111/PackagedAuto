@@ -6,8 +6,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Triple;
+
+import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
@@ -24,6 +27,14 @@ public class MiscUtil {
 
 	public static List<ItemStack> condenseStacks(ItemStack... stacks) {
 		return condenseStacks(Arrays.asList(stacks));
+	}
+
+	public static List<ItemStack> condenseStacks(Stream<ItemStack> stacks) {
+		return condenseStacks(stacks.collect(Collectors.toList()));
+	}
+
+	public static List<ItemStack> condenseStacks(Iterable<ItemStack> stacks) {
+		return condenseStacks(stacks instanceof List<?> ? (List<ItemStack>)stacks : Lists.newArrayList(stacks));
 	}
 
 	public static List<ItemStack> condenseStacks(List<ItemStack> stacks) {

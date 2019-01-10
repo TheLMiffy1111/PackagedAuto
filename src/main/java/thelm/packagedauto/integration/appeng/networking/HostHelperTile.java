@@ -5,6 +5,7 @@ import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.IActionHost;
 import appeng.me.helpers.MachineSource;
+import net.minecraft.nbt.NBTTagCompound;
 import thelm.packagedauto.tile.TileBase;
 
 public class HostHelperTile<TILE extends TileBase & IGridHost & IActionHost> {
@@ -36,5 +37,13 @@ public class HostHelperTile<TILE extends TileBase & IGridHost & IActionHost> {
 
 	public boolean isActive() {
 		return getNode().isActive();
+	}
+
+	public void readFromNBT(NBTTagCompound nbt) {
+
+	}
+
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		return nbt;
 	}
 }

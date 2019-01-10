@@ -52,9 +52,9 @@ import thelm.packagedauto.inventory.InventoryPackager;
 })
 public class TilePackager extends TileBase implements ITickable, IGridHost, IActionHost, ICraftingProvider {
 
-	public static int maxEnergy = 5000;
-	public static int maxProgress = 500;
-	public static int maxEnergyUsage = 100;
+	public static int energyCapacity = 5000;
+	public static int energyReq = 500;
+	public static int energyUsage = 100;
 
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
@@ -64,7 +64,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 
 	public TilePackager() {
 		setInventory(new InventoryPackager(this));
-		setEnergyStorage(new EnergyStorage(this, maxEnergy));
+		setEnergyStorage(new EnergyStorage(this, energyCapacity));
 	}
 
 	@Override
@@ -104,6 +104,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 					isWorking = true;
 				}
 			}
+			chargeEnergy();
 			if(world.getTotalWorldTime() % 8 == 0) {
 				if(hostHelper != null && hostHelper.isActive()) {
 					if(!inventory.getStackInSlot(9).isEmpty()) {
@@ -115,7 +116,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 					ejectItem();
 				}
 			}
-			chargeEnergy();
+			energyStorage.updateIfChanged();
 		}
 	}
 
@@ -176,7 +177,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	}
 
 	protected void tickProcess() {
-		int energy = energyStorage.extractEnergy(maxEnergyUsage, false);
+		int energy = energyStorage.extractEnergy(energyUsage, false);
 		remainingProgress -= energy;
 	}
 
@@ -216,7 +217,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	}
 
 	protected void startProcess() {
-		remainingProgress = maxProgress;
+		remainingProgress = energyReq;
 	}
 
 	public void endProcess() {
@@ -240,7 +241,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 					}
 				}
 			}
-		}		
+		}
 	}
 
 	protected void chargeEnergy() {
@@ -383,7 +384,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		if(remainingProgress <= 0) {
 			return 0;
 		}
-		return scale * (maxProgress-remainingProgress) / maxProgress;
+		return scale * (energyReq-remainingProgress) / energyReq;
 	}
 
 	@SideOnly(Side.CLIENT)

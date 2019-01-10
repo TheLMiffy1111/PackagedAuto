@@ -1,11 +1,11 @@
 package thelm.packagedauto.inventory;
 
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.NavigableMap;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
@@ -69,7 +69,19 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 	public void updateRecipeInfo() {
 		validateRecipeType();
 		IRecipeInfo info = recipeType.getNewRecipeInfo();
-		info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList());
+		try {
+			info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), tile.getWorld());
+		}
+		catch(AbstractMethodError error) {
+			try {
+				Method oldGenerateFromStacksMethod = info.getClass().getMethod("generateFromStacks", List.class, List.class);
+				oldGenerateFromStacksMethod.invoke(info, stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList());
+			}
+			catch(Exception exception) {
+				exception.addSuppressed(error);
+				exception.printStackTrace();
+			}
+		}
 		if(info.isValid()) {
 			recipeInfo = info;
 			if(!recipeType.canSetOutput()) {
@@ -77,7 +89,7 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 				int size = stacks.size();
 				int startIndex = 81;
 				switch(size) {
-				case 1: startIndex += 1; 
+				case 1: startIndex += 1;
 				case 2:
 				case 3: startIndex += 3;
 				}
@@ -107,19 +119,23 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 
 	public void cycleRecipeType() {
 		validateRecipeType();
-		NavigableMap<ResourceLocation, IRecipeType> registry = RecipeTypeRegistry.getRegistry();
-		Entry<ResourceLocation, IRecipeType> entry = registry.higherEntry(recipeType.getName());
-		if(entry == null) {
-			entry = registry.firstEntry();
+		recipeType = RecipeTypeRegistry.getNextRecipeType(recipeType);
+		validateRecipeType();
+		IntSet enabledSlots = recipeType.getEnabledSlots();
+		for(int i = 0; i < 90; ++i) {
+			if(!enabledSlots.contains(i)) {
+				stacks.set(i, ItemStack.EMPTY);
+			}
 		}
-		recipeType = entry.getValue();
 		updateRecipeInfo();
 	}
 
 	public void setRecipe(Int2ObjectMap<ItemStack> map) {
 		stacks.clear();
-		for(Int2ObjectMap.Entry<ItemStack> entry : map.int2ObjectEntrySet()) {
-			stacks.set(entry.getIntKey(), entry.getValue());
+		if(map != null) {
+			for(Int2ObjectMap.Entry<ItemStack> entry : map.int2ObjectEntrySet()) {
+				stacks.set(entry.getIntKey(), entry.getValue());
+			}
 		}
 		updateRecipeInfo();
 	}

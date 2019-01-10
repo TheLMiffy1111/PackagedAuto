@@ -1,12 +1,11 @@
 package thelm.packagedauto.client.gui;
 
 import net.minecraft.util.ResourceLocation;
-import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.container.ContainerPackager;
 
 public class GuiPackager extends GuiContainerTileBase<ContainerPackager> {
 
-	public static final ResourceLocation BACKGROUND = new ResourceLocation(PackagedAuto.MOD_ID, "textures/gui/packager.png");
+	public static final ResourceLocation BACKGROUND = new ResourceLocation("packagedauto:textures/gui/packager.png");
 
 	public GuiPackager(ContainerPackager container) {
 		super(container);
@@ -30,7 +29,7 @@ public class GuiPackager extends GuiContainerTileBase<ContainerPackager> {
 		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 		String s = container.inventory.getDisplayName().getUnformattedText();
 		fontRenderer.drawString(s, xSize/2 - fontRenderer.getStringWidth(s)/2, 6, 0x404040);
-		fontRenderer.drawString(container.playerInventory.getDisplayName().getUnformattedText(), 8, ySize-96+3, 0x404040);
+		fontRenderer.drawString(container.playerInventory.getDisplayName().getUnformattedText(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
 		if(mouseX-guiLeft >= 10 && mouseY-guiTop >= 10 && mouseX-guiLeft <= 21 && mouseY-guiTop <= 49) {
 			drawHoveringText(container.tile.getEnergyStorage().getEnergyStored()+" / "+container.tile.getEnergyStorage().getMaxEnergyStored()+" FE", mouseX-guiLeft, mouseY-guiTop);
 		}

@@ -28,16 +28,19 @@ public class HostHelperTilePackager extends HostHelperTile<TilePackager> {
 		if(storageGrid == null) {
 			return;
 		}
+		IEnergyGrid energyGrid = grid.getCache(IEnergyGrid.class);
+		if(energyGrid == null) {
+			return;
+		}
 		IItemStorageChannel storageChannel = AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class);
 		IMEMonitor<IAEItemStack> inventory = storageGrid.getInventory(storageChannel);
 		IAEItemStack stack = storageChannel.createStack(tile.getInventory().getStackInSlot(9));
-		IAEItemStack rem = inventory.injectItems(stack, Actionable.SIMULATE, source);
+		IAEItemStack rem = AEApi.instance().storage().poweredInsert(energyGrid, inventory, stack, source, Actionable.MODULATE);
 		if(rem == null || rem.getStackSize() == 0) {
-			inventory.injectItems(stack, Actionable.MODULATE, source);
 			tile.getInventory().setInventorySlotContents(9, ItemStack.EMPTY);
 		}
 		else if(rem.getStackSize() < stack.getStackSize()) {
-			tile.getInventory().setInventorySlotContents(9, inventory.injectItems(stack, Actionable.MODULATE, source).createItemStack());
+			tile.getInventory().setInventorySlotContents(9, rem.createItemStack());
 		}
 	}
 

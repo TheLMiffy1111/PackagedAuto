@@ -58,7 +58,7 @@ import thelm.packagedauto.inventory.InventoryUnpackager;
 })
 public class TileUnpackager extends TileBase implements ITickable, IGridHost, IActionHost, ICraftingProvider {
 
-	public static int maxEnergy = 5000;
+	public static int energyCapacity = 5000;
 	public static int energyUsage = 50;
 
 	public final PackageTracker[] trackers = new PackageTracker[10];
@@ -66,7 +66,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 
 	public TileUnpackager() {
 		setInventory(new InventoryUnpackager(this));
-		setEnergyStorage(new EnergyStorage(this, maxEnergy));
+		setEnergyStorage(new EnergyStorage(this, energyCapacity));
 		for(int i = 0; i < trackers.length; ++i) {
 			trackers[i] = new PackageTracker();
 		}
@@ -80,6 +80,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Override
 	public void update() {
 		if(!world.isRemote) {
+			chargeEnergy();
 			if(world.getTotalWorldTime() % 8 == 0) {
 				fillTrackers();
 				emptyTrackers();
@@ -87,7 +88,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 					hostHelper.chargeEnergy();
 				}
 			}
-			chargeEnergy();
+			energyStorage.updateIfChanged();
 		}
 	}
 
@@ -271,7 +272,9 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	public void provideCrafting(ICraftingProviderHelper craftingTracker) {
 		ItemStack patternStack = inventory.getStackInSlot(9);
 		for(IRecipeInfo pattern : recipeList) {
-			craftingTracker.addCraftingOption(this, new RecipeCraftingPatternHelper(patternStack, pattern));
+			if(!pattern.getOutputs().isEmpty()) {
+				craftingTracker.addCraftingOption(this, new RecipeCraftingPatternHelper(patternStack, pattern));
+			}
 		}
 	}
 

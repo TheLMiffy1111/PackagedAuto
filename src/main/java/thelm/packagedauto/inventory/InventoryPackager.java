@@ -1,7 +1,5 @@
 package thelm.packagedauto.inventory;
 
-import java.util.stream.Collectors;
-
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;

@@ -35,6 +35,7 @@ public class BlockUnpackager extends BlockBase {
 		setSoundType(SoundType.METAL);
 		setUnlocalizedName("packagedauto.unpackager");
 		setRegistryName("packagedauto:unpackager");
+		setCreativeTab(PackagedAuto.CREATIVE_TAB);
 	}
 
 	@Override

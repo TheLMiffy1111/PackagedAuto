@@ -5,13 +5,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import com.google.common.collect.Lists;
-
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraftforge.common.crafting.IngredientNBT;
+import net.minecraft.world.World;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeType;
@@ -69,7 +68,7 @@ public class RecipeInfoProcessing implements IRecipeInfo {
 	}
 
 	@Override
-	public void generateFromStacks(List<ItemStack> input, List<ItemStack> output) {
+	public void generateFromStacks(List<ItemStack> input, List<ItemStack> output, World world) {
 		this.input.clear();
 		this.input.addAll(MiscUtil.condenseStacks(input));
 		this.output.clear();
@@ -78,6 +77,18 @@ public class RecipeInfoProcessing implements IRecipeInfo {
 		for(int i = 0; i*9 < this.input.size(); ++i) {
 			patterns.add(new PatternHelper(this, i));
 		}
+	}
+
+	@Override
+	public Int2ObjectMap<ItemStack> getEncoderStacks() {
+		Int2ObjectMap<ItemStack> map = new Int2ObjectOpenHashMap<>();
+		for(int i = 0; i < input.size(); ++i) {
+			map.put(i, input.get(i));
+		}
+		for(int i = 0; i < output.size(); ++i) {
+			map.put(i+81, output.get(i));
+		}
+		return map;
 	}
 
 	@Override

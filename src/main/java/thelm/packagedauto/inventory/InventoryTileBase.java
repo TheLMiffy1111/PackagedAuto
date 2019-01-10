@@ -145,6 +145,7 @@ public class InventoryTileBase implements ISidedInventory {
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {
+		stacks.clear();
 		ItemStackHelper.loadAllItems(nbt, stacks);
 	}
 

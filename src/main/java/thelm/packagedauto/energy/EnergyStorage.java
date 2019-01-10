@@ -7,6 +7,7 @@ import thelm.packagedauto.tile.TileBase;
 public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 
 	public final TileBase tile;
+	public int prevEnergy;
 
 	public EnergyStorage(TileBase tile, int capacity) {
 		this(tile, capacity, capacity, capacity, 0);
@@ -73,28 +74,6 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 		return maxExtract;
 	}
 
-	@Override
-	public int receiveEnergy(int maxReceive, boolean simulate) {
-		int prevEnergy = getEnergyStored();
-		int ret = super.receiveEnergy(maxReceive, simulate);
-		if(!tile.getWorld().isRemote && prevEnergy != getEnergyStored()) {
-			PacketSyncEnergy.syncEnergy(tile.getPos(), getEnergyStored(), tile.getWorld().provider.getDimension(), 32);
-			tile.markDirty();
-		}
-		return ret;
-	}
-
-	@Override
-	public int extractEnergy(int maxExtract, boolean simulate) {
-		int prevEnergy = getEnergyStored();
-		int ret = super.extractEnergy(maxExtract, simulate);
-		if(!tile.getWorld().isRemote && prevEnergy != getEnergyStored()) {
-			PacketSyncEnergy.syncEnergy(tile.getPos(), getEnergyStored(), tile.getWorld().provider.getDimension(), 32);
-			tile.markDirty();
-		}
-		return ret;
-	}
-
 	public void setEnergyStored(int energy) {
 		boolean flag = !tile.getWorld().isRemote && this.energy != energy;
 		this.energy = energy;
@@ -103,10 +82,6 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 		}
 		else if(this.energy < 0) {
 			this.energy = 0;
-		}
-		if(flag) {
-			PacketSyncEnergy.syncEnergy(tile.getPos(), getEnergyStored(), tile.getWorld().provider.getDimension(), 32);
-			tile.markDirty();
 		}
 	}
 
@@ -118,9 +93,14 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 		else if(this.energy < 0) {
 			this.energy = 0;
 		}
-		if(!tile.getWorld().isRemote && energy != 0) {
-			PacketSyncEnergy.syncEnergy(tile.getPos(), getEnergyStored(), tile.getWorld().provider.getDimension(), 32);
+	}
+
+	public void updateIfChanged() {
+		int currentEnergy = getEnergyStored();
+		if(!tile.getWorld().isRemote && prevEnergy != currentEnergy) {
+			PacketSyncEnergy.syncEnergy(tile.getPos(), currentEnergy, tile.getWorld().provider.getDimension(), 8);
 			tile.markDirty();
 		}
+		prevEnergy = currentEnergy;
 	}
 }

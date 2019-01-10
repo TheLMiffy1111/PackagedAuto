@@ -2,14 +2,11 @@ package thelm.packagedauto.network.packet;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import thelm.packagedauto.container.ContainerEncoder;
 import thelm.packagedauto.network.ISelfHandleMessage;
-import thelm.packagedauto.tile.TileEncoder;
 
 public class PacketSetPatternIndex implements ISelfHandleMessage<IMessage> {
 

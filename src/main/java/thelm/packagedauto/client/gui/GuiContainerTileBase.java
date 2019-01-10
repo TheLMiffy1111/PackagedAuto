@@ -1,15 +1,9 @@
 package thelm.packagedauto.client.gui;
 
-import org.lwjgl.opengl.GL11;
-
 import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GlStateManager;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.ResourceLocation;
 import thelm.packagedauto.container.ContainerTileBase;
-import thelm.packagedauto.inventory.InventoryTileBase;
 
 public abstract class GuiContainerTileBase<CONTAINER extends ContainerTileBase<?>> extends GuiContainer {
 
@@ -20,6 +14,7 @@ public abstract class GuiContainerTileBase<CONTAINER extends ContainerTileBase<?
 		this.container = container;
 	}
 
+	@Override
 	public void drawScreen(int mouseX, int mouseY, float partialTicks) {
 		drawDefaultBackground();
 		super.drawScreen(mouseX, mouseY, partialTicks);

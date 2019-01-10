@@ -1,14 +1,13 @@
 package thelm.packagedauto.inventory;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
 import thelm.packagedauto.api.IRecipeListItem;
 import thelm.packagedauto.tile.TileEncoder;
 
 public class InventoryEncoder extends InventoryTileBase {
 
 	public final TileEncoder tile;
-	
+
 	public InventoryEncoder(TileEncoder tile) {
 		super(tile, 1);
 		this.tile = tile;

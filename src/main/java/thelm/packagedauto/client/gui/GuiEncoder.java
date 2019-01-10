@@ -12,17 +12,19 @@ import net.minecraft.client.renderer.texture.TextureMap;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
-import thelm.packagedauto.PackagedAuto;
+import net.minecraftforge.fml.common.Loader;
 import thelm.packagedauto.api.IRecipeType;
 import thelm.packagedauto.container.ContainerEncoder;
+import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.PacketCycleRecipeType;
+import thelm.packagedauto.network.packet.PacketLoadRecipeList;
 import thelm.packagedauto.network.packet.PacketSaveRecipeList;
 import thelm.packagedauto.network.packet.PacketSetPatternIndex;
 
 public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 
-	public static final ResourceLocation BACKGROUND = new ResourceLocation(PackagedAuto.MOD_ID, "textures/gui/encoder.png");
+	public static final ResourceLocation BACKGROUND = new ResourceLocation("packagedauto:textures/gui/encoder.png");
 
 	public GuiEncoder(ContainerEncoder container) {
 		super(container);
@@ -61,7 +63,7 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
 		String s = container.inventory.getDisplayName().getUnformattedText();
 		fontRenderer.drawString(s, xSize/2 - fontRenderer.getStringWidth(s)/2, 6, 0x404040);
-		fontRenderer.drawString(container.playerInventory.getDisplayName().getUnformattedText(), 49, ySize-96+3, 0x404040);
+		fontRenderer.drawString(container.playerInventory.getDisplayName().getUnformattedText(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
 		String str = fontRenderer.trimStringToWidth(container.patternInventory.recipeType.getLocalizedNameShort(), 86);
 		fontRenderer.drawString(str, 212 - fontRenderer.getStringWidth(str)/2, 64, 0x404040);
 		for(GuiButton guibutton : buttonList) {
@@ -82,7 +84,11 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 			}
 		}
 		addButton(new GuiButtonRecipeType(0, guiLeft+204, guiTop+74));
-		addButton(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+25, I18n.translateToLocal("tile.packagedauto.encoder.save")));
+		addButton(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+16, I18n.translateToLocal("tile.packagedauto.encoder.save")));
+		addButton(new GuiButtonLoadPatterns(0, guiLeft+213, guiTop+34, I18n.translateToLocal("tile.packagedauto.encoder.load")));
+		if(Loader.isModLoaded("jei")) {
+			addButton(new GuiButtonShowRecipesJEI(0, guiLeft+172, guiTop+129));
+		}
 	}
 
 	@Override
@@ -99,6 +105,15 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		}
 		if(button instanceof GuiButtonSavePatterns) {
 			PacketHandler.INSTANCE.sendToServer(new PacketSaveRecipeList());
+		}
+		if(button instanceof GuiButtonLoadPatterns) {
+			PacketHandler.INSTANCE.sendToServer(new PacketLoadRecipeList());
+		}
+		if(button instanceof GuiButtonShowRecipesJEI && Loader.isModLoaded("jei")) {
+			IRecipeType recipeType = container.patternInventory.recipeType;
+			if(recipeType != null) {
+				PackagedAutoJEIPlugin.showCategories(container.patternInventory.recipeType.getJEICategories());
+			}
 		}
 	}
 
@@ -173,6 +188,36 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 
 		GuiButtonSavePatterns(int buttonId, int x, int y, String text) {
 			super(buttonId, x, y, 38, 18, text);
+		}
+	}
+
+	class GuiButtonLoadPatterns extends GuiButton {
+
+		GuiButtonLoadPatterns(int buttonId, int x, int y, String text) {
+			super(buttonId, x, y, 38, 18, text);
+		}
+	}
+
+	class GuiButtonShowRecipesJEI extends GuiButton {
+
+		GuiButtonShowRecipesJEI(int buttonId, int x, int y) {
+			super(buttonId, x, y, 22, 16, "");
+		}
+
+		@Override
+		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+			if(visible) {
+				hovered = mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
+				mouseDragged(mc, mouseX, mouseY);
+			}
+		}
+
+		@Override
+		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
+			IRecipeType recipeType = container.patternInventory.recipeType;
+			if(recipeType != null && !recipeType.getJEICategories().isEmpty()) {
+				drawHoveringText(I18n.translateToLocal("jei.tooltip.show.recipes"), mouseX, mouseY);
+			}
 		}
 	}
 }

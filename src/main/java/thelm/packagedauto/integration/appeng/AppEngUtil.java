@@ -8,7 +8,7 @@ import appeng.api.storage.data.IAEItemStack;
 public class AppEngUtil {
 
 	private AppEngUtil() {}
-	
+
 	public static IAEItemStack[] condenseStacks(IAEItemStack... stacks) {
 		Map<IAEItemStack, IAEItemStack> map = new LinkedHashMap<>();
 		for(IAEItemStack stack : stacks) {

@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import net.minecraft.client.renderer.block.model.ModelBakery;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
@@ -18,6 +19,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeList;
 import thelm.packagedauto.api.IRecipeListItem;
@@ -33,6 +35,7 @@ public class ItemRecipeHolder extends Item implements IRecipeListItem, IModelReg
 	public ItemRecipeHolder() {
 		setUnlocalizedName("packagedauto.recipe_holder");
 		setRegistryName("packagedauto:recipe_holder");
+		setCreativeTab(PackagedAuto.CREATIVE_TAB);
 	}
 
 	@Override
@@ -68,6 +71,6 @@ public class ItemRecipeHolder extends Item implements IRecipeListItem, IModelReg
 	@Override
 	public void registerModels() {
 		ModelLoader.setCustomMeshDefinition(this, stack->stack.hasTagCompound() ? MODEL_LOCATION_FILLED : MODEL_LOCATION);
-		ModelLoader.registerItemVariants(this, MODEL_LOCATION, MODEL_LOCATION_FILLED);
+		ModelBakery.registerItemVariants(this, MODEL_LOCATION, MODEL_LOCATION_FILLED);
 	}
 }

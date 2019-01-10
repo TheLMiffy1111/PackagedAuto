@@ -21,7 +21,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorldNameable;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Loader;
 import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.client.IModelRegister;
 import thelm.packagedauto.tile.TileBase;

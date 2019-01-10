@@ -3,7 +3,6 @@ package thelm.packagedauto.proxy;
 import java.util.ArrayList;
 import java.util.List;
 
-import codechicken.lib.model.ModelRegistryHelper;
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
@@ -13,7 +12,7 @@ import thelm.packagedauto.client.ModelUtil;
 public class ClientProxy extends CommonProxy {
 
 	private static List<IModelRegister> modelRegisterList = new ArrayList<>();
-	
+
 	@Override
 	public void registerBlock(Block block) {
 		super.registerBlock(block);
@@ -31,7 +30,7 @@ public class ClientProxy extends CommonProxy {
 	}
 
 	@Override
-	public void registerModels() {
+	protected void registerModels() {
 		MinecraftForge.EVENT_BUS.register(new ModelUtil());
 		for(IModelRegister model : modelRegisterList) {
 			model.registerModels();

@@ -55,6 +55,6 @@ public class PacketSyncEnergy implements ISelfHandleMessage<IMessage> {
 	}
 
 	public static void syncEnergy(BlockPos pos, int energy, int dimension, double range) {
-		PacketHandler.INSTANCE.sendToAllAround(new PacketSyncEnergy(pos, energy), new TargetPoint(dimension, pos.getX(), pos.getY(), pos.getZ(), range));
+		PacketHandler.INSTANCE.sendToAllAround(new PacketSyncEnergy(pos, energy), new TargetPoint(dimension, pos.getX()+0.5D, pos.getY()+0.5D, pos.getZ()+0.5D, range));
 	}
 }

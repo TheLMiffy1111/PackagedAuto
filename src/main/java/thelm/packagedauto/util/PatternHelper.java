@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.item.ItemPackage;

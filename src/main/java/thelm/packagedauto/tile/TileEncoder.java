@@ -18,6 +18,7 @@ import thelm.packagedauto.client.gui.GuiEncoder;
 import thelm.packagedauto.container.ContainerEncoder;
 import thelm.packagedauto.inventory.InventoryEncoder;
 import thelm.packagedauto.inventory.InventoryEncoderPattern;
+import thelm.packagedauto.recipe.RecipeTypeProcessing;
 
 public class TileEncoder extends TileBase {
 
@@ -76,6 +77,32 @@ public class TileEncoder extends TileBase {
 			recipeListItem.setRecipeList(recipeList);
 			NBTTagCompound nbt = recipeListItem.writeToNBT(new NBTTagCompound());
 			inventory.getStackInSlot(0).setTagCompound(nbt);
+		}
+	}
+
+	public void loadRecipeList() {
+		ItemStack stack = inventory.getStackInSlot(0);
+		if(stack.getItem() instanceof IRecipeListItem) {
+			IRecipeList recipeListItem = ((IRecipeListItem)stack.getItem()).getRecipeList(stack);
+			List<IRecipeInfo> recipeList = recipeListItem.getRecipeList();
+			for(int i = 0; i < patternInventories.length; ++i) {
+				InventoryEncoderPattern inv = patternInventories[i];
+				if(i < recipeList.size()) {
+					IRecipeInfo recipe = recipeList.get(i);
+					inv.recipeType = recipe.getRecipeType();
+					inv.setRecipe(recipe.getEncoderStacks());
+				}
+				else {
+					inv.recipeType = RecipeTypeProcessing.INSTANCE;
+					inv.setRecipe(null);
+				}
+			}
+		}
+		else {
+			for(InventoryEncoderPattern inv : patternInventories) {
+				inv.recipeType = RecipeTypeProcessing.INSTANCE;
+				inv.setRecipe(null);
+			}
 		}
 	}
 

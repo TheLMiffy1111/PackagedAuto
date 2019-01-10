@@ -131,7 +131,8 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 	@Override
 	public boolean hasCapability(Capability<?> capability, EnumFacing from) {
 		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ||
-				capability == CapabilityEnergy.ENERGY || super.hasCapability(capability, from);
+				capability == CapabilityEnergy.ENERGY && energyStorage.getMaxEnergyStored() > 0 ||
+				super.hasCapability(capability, from);
 	}
 
 	protected IItemHandler unsidedItemHandler = null;
@@ -144,7 +145,7 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 				if(sidedItemHandlers.containsKey(facing)) {
 					return (T)sidedItemHandlers.get(facing);
 				}
-				IItemHandler handler = new SidedInvWrapper((ISidedInventory)inventory, facing);
+				IItemHandler handler = new SidedInvWrapper(inventory, facing);
 				sidedItemHandlers.put(facing, handler);
 				return (T)handler;
 			}
@@ -155,7 +156,7 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 				return (T)(unsidedItemHandler = new InvWrapper(inventory));
 			}
 		}
-		else if(capability == CapabilityEnergy.ENERGY) {
+		else if(capability == CapabilityEnergy.ENERGY && energyStorage.getMaxEnergyStored() > 0) {
 			return (T)energyStorage;
 		}
 		return super.getCapability(capability, facing);

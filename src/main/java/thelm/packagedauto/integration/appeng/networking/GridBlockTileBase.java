@@ -18,6 +18,7 @@ public class GridBlockTileBase<TILE extends TileBase & IGridHost> implements IGr
 
 	public final TILE tile;
 	public double idlePower = 1;
+	public final EnumSet<GridFlags> flags = EnumSet.of(GridFlags.REQUIRE_CHANNEL);
 
 	public GridBlockTileBase(TILE tile) {
 		this.tile = tile;
@@ -30,7 +31,7 @@ public class GridBlockTileBase<TILE extends TileBase & IGridHost> implements IGr
 
 	@Override
 	public EnumSet<GridFlags> getFlags() {
-		return EnumSet.of(GridFlags.REQUIRE_CHANNEL);
+		return flags;
 	}
 
 	@Override

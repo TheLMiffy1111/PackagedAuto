@@ -7,7 +7,7 @@ import net.minecraft.item.ItemStack;
 public class SlotBase extends Slot {
 
 	public final IInventory inventory;
-	
+
 	public SlotBase(IInventory inventory, int index, int xPosition, int yPosition) {
 		super(inventory, index, xPosition, yPosition);
 		this.inventory = inventory;
@@ -15,6 +15,6 @@ public class SlotBase extends Slot {
 
 	@Override
 	public boolean isItemValid(ItemStack stack) {
-        return inventory.isItemValidForSlot(getSlotIndex(), stack);
-    }
+		return inventory.isItemValidForSlot(getSlotIndex(), stack);
+	}
 }

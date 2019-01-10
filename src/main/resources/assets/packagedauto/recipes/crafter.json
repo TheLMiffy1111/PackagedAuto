@@ -1,0 +1,37 @@
+{
+    "conditions": [
+        {
+            "type": "minecraft:item_exists",
+            "item": "packagedauto:crafter"
+        }
+    ],
+    "type": "forge:ore_shaped",
+    "result": {
+        "item": "packagedauto:crafter",
+        "count": 1
+    },
+    "pattern": [
+        "ICI",
+        "RTR",
+        "IHI"
+    ],
+    "key": {
+        "C": {
+            "item": "#machine_package_component"
+        },
+        "T": {
+            "item": "minecraft:crafting_table"
+        },
+        "H": {
+            "item": "minecraft:hopper"
+        },
+        "I": {
+            "type": "forge:ore_dict",
+            "ore": "ingotIron"
+        },
+        "R": {
+            "type": "forge:ore_dict",
+            "ore": "dustRedstone"
+        }
+    }
+}
