@@ -7,6 +7,7 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import thelm.packagedauto.PackagedAuto;
+import thelm.packagedauto.network.packet.PacketChangeBlocking;
 import thelm.packagedauto.network.packet.PacketCycleRecipeType;
 import thelm.packagedauto.network.packet.PacketLoadRecipeList;
 import thelm.packagedauto.network.packet.PacketSaveRecipeList;
@@ -26,6 +27,7 @@ public class PacketHandler<REQ extends ISelfHandleMessage> implements IMessageHa
 		INSTANCE.registerMessage(get(), PacketSaveRecipeList.class, id++, Side.SERVER);
 		INSTANCE.registerMessage(get(), PacketSetRecipe.class, id++, Side.SERVER);
 		INSTANCE.registerMessage(get(), PacketLoadRecipeList.class, id++, Side.SERVER);
+		INSTANCE.registerMessage(get(), PacketChangeBlocking.class, id++, Side.SERVER);
 	}
 
 	public static <REQ extends ISelfHandleMessage> PacketHandler<REQ> get() {

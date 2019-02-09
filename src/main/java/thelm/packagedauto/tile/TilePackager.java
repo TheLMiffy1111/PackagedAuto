@@ -55,6 +55,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static boolean drawMEEnergy = true;
 
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
@@ -80,11 +81,8 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 				if(remainingProgress <= 0 && isInputValid()) {
 					energyStorage.receiveEnergy(Math.abs(remainingProgress), false);
 					finishProcess();
-					if(hostHelper != null && hostHelper.isActive()) {
-						if(!inventory.getStackInSlot(9).isEmpty()) {
-							hostHelper.ejectItem();
-						}
-						hostHelper.chargeEnergy();
+					if(hostHelper != null && hostHelper.isActive() && !inventory.getStackInSlot(9).isEmpty()) {
+						hostHelper.ejectItem();
 					}
 					else if(!inventory.getStackInSlot(9).isEmpty()) {
 						ejectItem();
@@ -110,7 +108,9 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 					if(!inventory.getStackInSlot(9).isEmpty()) {
 						hostHelper.ejectItem();
 					}
-					hostHelper.chargeEnergy();
+					if(drawMEEnergy) {
+						hostHelper.chargeEnergy();
+					}
 				}
 				else if(!inventory.getStackInSlot(9).isEmpty()) {
 					ejectItem();
@@ -344,7 +344,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 				IRecipeInfo recipe = recipeType.getNewRecipeInfo();
 				recipe.readFromNBT(tag);
 				if(recipe.isValid()) {
-					currentPattern = recipe.getPatterns().get(tag.getInteger("Index"));
+					currentPattern = recipe.getPatterns().get(tag.getByte("Index"));
 					lockPattern = true;
 				}
 			}
@@ -359,7 +359,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		if(lockPattern) {
 			NBTTagCompound tag = currentPattern.getRecipeInfo().writeToNBT(new NBTTagCompound());
 			tag.setString("RecipeType", currentPattern.getRecipeInfo().getRecipeType().getName().toString());
-			tag.setInteger("Index", currentPattern.getIndex());
+			tag.setByte("Index", (byte)currentPattern.getIndex());
 			nbt.setTag("Pattern", tag);
 		}
 		return nbt;

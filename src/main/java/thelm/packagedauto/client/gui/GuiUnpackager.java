@@ -1,7 +1,15 @@
 package thelm.packagedauto.client.gui;
 
+import java.io.IOException;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiButton;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.translation.I18n;
 import thelm.packagedauto.container.ContainerUnpackager;
+import thelm.packagedauto.network.PacketHandler;
+import thelm.packagedauto.network.packet.PacketChangeBlocking;
 import thelm.packagedauto.tile.TileUnpackager.PackageTracker;
 
 public class GuiUnpackager extends GuiContainerTileBase<ContainerUnpackager> {
@@ -43,6 +51,47 @@ public class GuiUnpackager extends GuiContainerTileBase<ContainerUnpackager> {
 		fontRenderer.drawString(container.playerInventory.getDisplayName().getUnformattedText(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
 		if(mouseX-guiLeft >= 10 && mouseY-guiTop >= 10 && mouseX-guiLeft <= 21 && mouseY-guiTop <= 49) {
 			drawHoveringText(container.tile.getEnergyStorage().getEnergyStored()+" / "+container.tile.getEnergyStorage().getMaxEnergyStored()+" FE", mouseX-guiLeft, mouseY-guiTop);
+		}
+		for(GuiButton guibutton : buttonList) {
+			if(guibutton.isMouseOver()) {
+				guibutton.drawButtonForegroundLayer(mouseX-guiLeft, mouseY-guiTop);
+				break;
+			}
+		}
+	}
+
+	@Override
+	public void initGui() {
+		buttonList.clear();
+		super.initGui();
+		addButton(new GuiButtonChangeBlocking(0, guiLeft+98, guiTop+16));
+	}
+
+	@Override
+	protected void actionPerformed(GuiButton button) throws IOException {
+		if(button instanceof GuiButtonChangeBlocking) {
+			PacketHandler.INSTANCE.sendToServer(new PacketChangeBlocking());
+			container.tile.changeBlockingMode();
+		}
+	}
+
+	class GuiButtonChangeBlocking extends GuiButton {
+
+		public GuiButtonChangeBlocking(int buttonId, int x, int y) {
+			super(buttonId, x, y, 16, 18, "");
+		}
+
+		@Override
+		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+			super.drawButton(mc, mouseX, mouseY, partialTicks);
+			GlStateManager.color(1, 1, 1, 1);
+			mc.renderEngine.bindTexture(BACKGROUND);
+			drawTexturedModalRect(x+1, y+2, 176, container.tile.blocking ? 64 : 50, 14, 14);
+		}
+
+		@Override
+		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
+			drawHoveringText(I18n.translateToLocal("tile.packagedauto.unpackager.blocking."+container.tile.blocking), mouseX, mouseY);
 		}
 	}
 }

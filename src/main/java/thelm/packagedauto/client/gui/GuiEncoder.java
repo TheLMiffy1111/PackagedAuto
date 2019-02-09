@@ -78,10 +78,9 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 	public void initGui() {
 		buttonList.clear();
 		super.initGui();
-		for(int i = 0; i < 2; ++i) {
-			for(int j = 0; j < 10; ++j) {
-				addButton(new GuiButtonPatternSlot(i*10+j, guiLeft+29+j*18, guiTop+16+i*18));
-			}
+		int patternSlots = container.tile.patternInventories.length;
+		for(int i = 0; i < patternSlots; ++i) {
+			addButton(new GuiButtonPatternSlot(i, guiLeft+29+(i%10)*18, guiTop+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
 		}
 		addButton(new GuiButtonRecipeType(0, guiLeft+204, guiTop+74));
 		addButton(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+16, I18n.translateToLocal("tile.packagedauto.encoder.save")));

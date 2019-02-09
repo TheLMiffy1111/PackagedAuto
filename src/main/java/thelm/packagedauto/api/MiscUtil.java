@@ -20,6 +20,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.NonNullList;
+import net.minecraftforge.items.IItemHandler;
 
 public class MiscUtil {
 
@@ -73,10 +74,12 @@ public class MiscUtil {
 	public static NBTTagList saveAllItems(NBTTagList tagList, List<ItemStack> list) {
 		for(int i = 0; i < list.size(); ++i) {
 			ItemStack stack = list.get(i);
-			NBTTagCompound nbt = new NBTTagCompound();
-			nbt.setByte("Index", (byte)i);
-			stack.writeToNBT(nbt);
-			tagList.appendTag(nbt);
+			if(!stack.isEmpty() || i == list.size()-1) {
+				NBTTagCompound nbt = new NBTTagCompound();
+				nbt.setByte("Index", (byte)i);
+				stack.writeToNBT(nbt);
+				tagList.appendTag(nbt);
+			}
 		}
 		return tagList;
 	}
@@ -156,5 +159,14 @@ public class MiscUtil {
 		ItemStack retStack = stack.copy();
 		retStack.setCount(stackSize);
 		return retStack;
+	}
+
+	public static boolean isEmpty(IItemHandler itemHandler) {
+		for(int i = 0; i < itemHandler.getSlots(); ++i) {
+			if(!itemHandler.getStackInSlot(i).isEmpty()) {
+				return false;
+			}
+		}
+		return true;
 	}
 }

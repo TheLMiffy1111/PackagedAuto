@@ -83,26 +83,30 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 			}
 		}
 		if(info.isValid()) {
-			recipeInfo = info;
-			if(!recipeType.canSetOutput()) {
-				List<ItemStack> stacks = info.getOutputs();
-				int size = stacks.size();
-				int startIndex = 81;
-				switch(size) {
-				case 1: startIndex += 1;
-				case 2:
-				case 3: startIndex += 3;
+			if(recipeInfo == null || !recipeInfo.equals(info)) {
+				recipeInfo = info;
+				if(!recipeType.canSetOutput()) {
+					List<ItemStack> stacks = info.getOutputs();
+					int size = stacks.size();
+					int startIndex = 81;
+					switch(size) {
+					case 1: startIndex += 1;
+					case 2:
+					case 3: startIndex += 3;
+					}
+					for(int i = 0; i < size; ++i) {
+						this.stacks.set(startIndex+i, stacks.get(i).copy());
+					}
 				}
-				for(int i = 0; i < size; ++i) {
-					this.stacks.set(startIndex+i, stacks.get(i).copy());
+				List<IPackagePattern> patterns = info.getPatterns();
+				for(int i = 0; i < patterns.size() && i < 9; ++i) {
+					this.stacks.set(90+i, patterns.get(i).getOutput().copy());
 				}
-			}
-			List<IPackagePattern> patterns = info.getPatterns();
-			for(int i = 0; i < patterns.size() && i < 9; ++i) {
-				this.stacks.set(90+i, patterns.get(i).getOutput().copy());
+				syncTile(false);
+				markDirty();
 			}
 		}
-		else {
+		else if(recipeInfo != null) {
 			recipeInfo = null;
 			if(!recipeType.canSetOutput()) {
 				for(int i = 81; i < 90; ++i) {
@@ -112,9 +116,9 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 			for(int i = 90; i < 99; ++i) {
 				stacks.set(i, ItemStack.EMPTY);
 			}
+			syncTile(false);
+			markDirty();
 		}
-		syncTile(false);
-		markDirty();
 	}
 
 	public void cycleRecipeType() {

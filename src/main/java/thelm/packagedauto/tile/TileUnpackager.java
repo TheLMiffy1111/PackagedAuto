@@ -60,9 +60,11 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 
 	public static int energyCapacity = 5000;
 	public static int energyUsage = 50;
+	public static boolean drawMEEnergy = true;
 
 	public final PackageTracker[] trackers = new PackageTracker[10];
 	public List<IRecipeInfo> recipeList = new ArrayList<>();
+	public boolean blocking = false;
 
 	public TileUnpackager() {
 		setInventory(new InventoryUnpackager(this));
@@ -84,7 +86,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			if(world.getTotalWorldTime() % 8 == 0) {
 				fillTrackers();
 				emptyTrackers();
-				if(hostHelper != null && hostHelper.isActive()) {
+				if(drawMEEnergy && hostHelper != null && hostHelper.isActive()) {
 					hostHelper.chargeEnergy();
 				}
 			}
@@ -152,27 +154,35 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 						tracker.setupToSend();
 					}
 					for(EnumFacing facing : EnumFacing.VALUES) {
+						if(tracker.facing != null && tracker.facing != facing) {
+							continue;
+						}
 						TileEntity tile = world.getTileEntity(pos.offset(facing));
-						if(tile != null && !(tile instanceof TilePackager) && tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
-							IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
-							for(int i = 0; i < tracker.toSend.size(); ++i) {
-								ItemStack stack = tracker.toSend.get(i);
-								for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-									ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-									if(stackRem.getCount() < stack.getCount()) {
-										stack = stackRem;
-									}
-									if(stack.isEmpty()) {
-										break;
-									}
+						if(tile == null || tile instanceof TilePackager || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
+							continue;
+						}
+						IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
+						if(blocking && tracker.facing != facing && !MiscUtil.isEmpty(itemHandler)) {
+							continue;
+						}
+						tracker.facing = facing;
+						for(int i = 0; i < tracker.toSend.size(); ++i) {
+							ItemStack stack = tracker.toSend.get(i);
+							for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
+								ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
+								if(stackRem.getCount() < stack.getCount()) {
+									stack = stackRem;
 								}
-								tracker.toSend.set(i, stack);
+								if(stack.isEmpty()) {
+									break;
+								}
 							}
-							tracker.toSend.removeIf(ItemStack::isEmpty);
-							if(tracker.toSend.isEmpty()) {
-								tracker.clearRecipe();
-								break;
-							}
+							tracker.toSend.set(i, stack);
+						}
+						tracker.toSend.removeIf(ItemStack::isEmpty);
+						if(tracker.toSend.isEmpty()) {
+							tracker.clearRecipe();
+							break;
 						}
 					}
 				}
@@ -288,6 +298,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Override
 	public void readSyncNBT(NBTTagCompound nbt) {
 		super.readSyncNBT(nbt);
+		blocking = nbt.getBoolean("Blocking");
 		for(int i = 0; i < trackers.length; ++i) {
 			trackers[i].readFromNBT(nbt.getCompoundTag(String.format("Tracker%02d", i)));
 		}
@@ -296,12 +307,17 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Override
 	public NBTTagCompound writeSyncNBT(NBTTagCompound nbt) {
 		super.writeSyncNBT(nbt);
+		nbt.setBoolean("Blocking", blocking);
 		for(int i = 0; i < trackers.length; ++i) {
 			NBTTagCompound subNBT = new NBTTagCompound();
 			trackers[i].writeToNBT(subNBT);
 			nbt.setTag(String.format("Tracker%02d", i), subNBT);
 		}
 		return nbt;
+	}
+
+	public void changeBlockingMode() {
+		blocking = !blocking;
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -321,15 +337,17 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 		public int amount;
 		public BooleanList received = new BooleanArrayList();
 		public List<ItemStack> toSend = new ArrayList<>();
+		public EnumFacing facing;
 
 		public void setRecipe(IRecipeInfo recipe) {
 			this.recipe = recipe;
 		}
 
 		public void clearRecipe() {
-			this.recipe = null;
+			recipe = null;
 			amount = 0;
 			received.clear();
+			facing = null;
 			if(world != null && !world.isRemote) {
 				syncTile(false);
 				markDirty();
@@ -393,7 +411,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 				recipe.readFromNBT(tag);
 				if(recipe.isValid()) {
 					this.recipe = recipe;
-					amount = nbt.getInteger("Amount");
+					amount = nbt.getByte("Amount");
 					received.size(amount);
 					byte[] receivedArray = nbt.getByteArray("Received");
 					for(int i = 0; i < received.size(); ++i) {
@@ -402,6 +420,9 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 				}
 			}
 			MiscUtil.loadAllItems(nbt.getTagList("ToSend", 10), toSend);
+			if(nbt.hasKey("Facing")) {
+				facing = EnumFacing.getFront(nbt.getByte("Facing"));
+			}
 		}
 
 		public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
@@ -409,7 +430,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 				NBTTagCompound tag = new NBTTagCompound();
 				tag.setString("RecipeType", recipe.getRecipeType().getName().toString());
 				nbt.setTag("Recipe", recipe.writeToNBT(tag));
-				nbt.setInteger("Amount", amount);
+				nbt.setByte("Amount", (byte)amount);
 				byte[] receivedArray = new byte[received.size()];
 				for(int i = 0; i < received.size(); ++i) {
 					receivedArray[i] = (byte)(received.getBoolean(i) ? 1 : 0);
@@ -417,6 +438,9 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 				nbt.setByteArray("Received", receivedArray);
 			}
 			nbt.setTag("ToSend", MiscUtil.saveAllItems(new NBTTagList(), toSend));
+			if(facing != null) {
+				nbt.setByte("Facing", (byte)facing.getIndex());
+			}
 			return nbt;
 		}
 	}

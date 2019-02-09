@@ -22,7 +22,9 @@ import thelm.packagedauto.recipe.RecipeTypeProcessing;
 
 public class TileEncoder extends TileBase {
 
-	public final InventoryEncoderPattern[] patternInventories = new InventoryEncoderPattern[20];
+	public static int patternSlots = 20;
+
+	public final InventoryEncoderPattern[] patternInventories = new InventoryEncoderPattern[patternSlots];
 	public int patternIndex;
 
 	public TileEncoder() {
@@ -40,7 +42,7 @@ public class TileEncoder extends TileBase {
 	@Override
 	public void readSyncNBT(NBTTagCompound nbt) {
 		super.readSyncNBT(nbt);
-		patternIndex = nbt.getInteger("PatternIndex");
+		patternIndex = nbt.getByte("PatternIndex");
 		for(int i = 0; i < patternInventories.length; ++i) {
 			patternInventories[i].readFromNBT(nbt.getCompoundTag(String.format("Pattern%02d", i)));
 		}
@@ -49,7 +51,7 @@ public class TileEncoder extends TileBase {
 	@Override
 	public NBTTagCompound writeSyncNBT(NBTTagCompound nbt) {
 		super.writeSyncNBT(nbt);
-		nbt.setInteger("PatternIndex", patternIndex);
+		nbt.setByte("PatternIndex", (byte)patternIndex);
 		for(int i = 0; i < patternInventories.length; ++i) {
 			NBTTagCompound subNBT = new NBTTagCompound();
 			patternInventories[i].writeToNBT(subNBT);
