@@ -3,6 +3,7 @@ package thelm.packagedauto.tile;
 import java.util.EnumMap;
 
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
@@ -43,6 +44,8 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 	public void setEnergyStorage(EnergyStorage energyStorage) {
 		this.energyStorage = energyStorage;
 	}
+	
+	public void setPlacer(EntityPlayer placer) {}
 
 	protected abstract String getLocalizedName();
 

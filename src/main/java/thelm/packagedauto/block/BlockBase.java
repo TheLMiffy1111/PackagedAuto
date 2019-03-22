@@ -82,10 +82,15 @@ public abstract class BlockBase extends Block implements ITileEntityProvider, IM
 	@Override
 	public void onBlockPlacedBy(World worldIn, BlockPos pos, IBlockState state, EntityLivingBase placer, ItemStack stack) {
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
-		if(stack.hasDisplayName()) {
+		if(!worldIn.isRemote) {
 			TileEntity tileentity = worldIn.getTileEntity(pos);
 			if(tileentity instanceof TileBase) {
-				((TileBase)tileentity).setCustomName(stack.getDisplayName());
+				if(stack.hasDisplayName()) {
+					((TileBase)tileentity).setCustomName(stack.getDisplayName());
+				}
+				if(placer instanceof EntityPlayer) {
+					((TileBase)tileentity).setPlacer((EntityPlayer)placer);
+				}
 			}
 		}
 	}

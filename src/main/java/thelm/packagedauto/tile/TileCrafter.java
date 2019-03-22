@@ -2,6 +2,7 @@ package thelm.packagedauto.tile;
 
 import java.util.List;
 
+import appeng.api.AEApi;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.IActionHost;
@@ -56,6 +57,9 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 	public TileCrafter() {
 		setInventory(new InventoryCrafter(this));
 		setEnergyStorage(new EnergyStorage(this, energyCapacity));
+		if(Loader.isModLoaded("appliedenergistics2")) {
+			hostHelper = new HostHelperTileCrafter(this);
+		}
 	}
 
 	@Override
@@ -202,11 +206,11 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 		}
 	}
 
+	@Optional.Method(modid="appliedenergistics2")
 	@Override
-	public void onLoad() {
-		if(Loader.isModLoaded("appliedenergistics2")) {
-			hostHelper = new HostHelperTileCrafter(this);
-		}
+	public void setPlacer(EntityPlayer placer) {
+		super.setPlacer(placer);
+		getActionableNode().setPlayerID(AEApi.instance().registries().players().getID(placer));
 	}
 
 	@Optional.Method(modid="appliedenergistics2")
@@ -228,10 +232,24 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public IGridNode getActionableNode() {
-		if(hostHelper == null) {
-			hostHelper = new HostHelperTileCrafter(this);
-		}
 		return hostHelper.getNode();
+	}
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		if(hostHelper != null) {
+			hostHelper.readFromNBT(nbt);
+		}
+	}
+
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		if(hostHelper != null) {
+			hostHelper.writeToNBT(nbt);
+		}
+		return nbt;
 	}
 
 	@Override

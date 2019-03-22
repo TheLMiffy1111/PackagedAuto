@@ -22,7 +22,7 @@ public class HostHelperTile<TILE extends TileBase & IGridHost & IActionHost> {
 	}
 
 	public IGridNode getNode() {
-		if(gridNode == null && !tile.getWorld().isRemote) {
+		if(gridNode == null && tile.hasWorld() && !tile.getWorld().isRemote) {
 			gridNode = AEApi.instance().grid().createGridNode(gridBlock);
 			gridNode.updateState();
 		}
@@ -36,14 +36,19 @@ public class HostHelperTile<TILE extends TileBase & IGridHost & IActionHost> {
 	}
 
 	public boolean isActive() {
-		return getNode().isActive();
+		return tile.hasWorld() && getNode().isActive();
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {
-
+		if(tile.hasWorld() && nbt.hasKey("Node")) {
+			getNode().loadFromNBT("Node", nbt);
+		}
 	}
 
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		if(gridNode != null) {
+			gridNode.saveToNBT("Node", nbt);
+		}
 		return nbt;
 	}
 }

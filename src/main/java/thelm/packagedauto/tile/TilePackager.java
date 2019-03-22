@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 
+import appeng.api.AEApi;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.crafting.ICraftingPatternDetails;
@@ -66,6 +67,9 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	public TilePackager() {
 		setInventory(new InventoryPackager(this));
 		setEnergyStorage(new EnergyStorage(this, energyCapacity));
+		if(Loader.isModLoaded("appliedenergistics2")) {
+			hostHelper = new HostHelperTilePackager(this);
+		}
 	}
 
 	@Override
@@ -120,6 +124,10 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		}
 	}
 
+	protected static Ingredient getIngredient(ItemStack stack) {
+		return stack.hasTagCompound() ? new IngredientNBT(stack) {} : Ingredient.fromStacks(stack);
+	}
+
 	public boolean isInputValid() {
 		if(currentPattern == null) {
 			getPattern();
@@ -128,7 +136,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 			return false;
 		}
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
-		List<Ingredient> matchers = Lists.transform(currentPattern.getInputs(), stack->new IngredientNBT(stack) {});
+		List<Ingredient> matchers = Lists.transform(currentPattern.getInputs(), TilePackager::getIngredient);
 		int[] matches = RecipeMatcher.findMatches(input, matchers);
 		if(matches == null) {
 			return false;
@@ -168,7 +176,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		lockPattern = false;
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
 		for(IPackagePattern pattern : patternList) {
-			List<Ingredient> matchers = Lists.transform(pattern.getInputs(), stack->new IngredientNBT(stack) {});
+			List<Ingredient> matchers = Lists.transform(pattern.getInputs(), TilePackager::getIngredient);
 			int[] matches = RecipeMatcher.findMatches(input, matchers);
 			if(matches != null) {
 				currentPattern = pattern;
@@ -190,7 +198,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 			return;
 		}
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
-		List<Ingredient> matchers = Lists.transform(currentPattern.getInputs(), stack->new IngredientNBT(stack) {});
+		List<Ingredient> matchers = Lists.transform(currentPattern.getInputs(), TilePackager::getIngredient);
 		int[] matches = RecipeMatcher.findMatches(input, matchers);
 		if(matches == null) {
 			endProcess();
@@ -266,11 +274,11 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		}
 	}
 
+	@Optional.Method(modid="appliedenergistics2")
 	@Override
-	public void onLoad() {
-		if(Loader.isModLoaded("appliedenergistics2")) {
-			hostHelper = new HostHelperTilePackager(this);
-		}
+	public void setPlacer(EntityPlayer placer) {
+		super.setPlacer(placer);
+		getActionableNode().setPlayerID(AEApi.instance().registries().players().getID(placer));
 	}
 
 	@Optional.Method(modid="appliedenergistics2")
@@ -292,9 +300,6 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public IGridNode getActionableNode() {
-		if(hostHelper == null) {
-			hostHelper = new HostHelperTilePackager(this);
-		}
 		return hostHelper.getNode();
 	}
 
@@ -330,6 +335,23 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		for(IPackagePattern pattern : patternList) {
 			craftingTracker.addCraftingOption(this, new PackageCraftingPatternHelper(patternStack, pattern));
 		}
+	}
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		if(hostHelper != null) {
+			hostHelper.readFromNBT(nbt);
+		}
+	}
+
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		if(hostHelper != null) {
+			hostHelper.writeToNBT(nbt);
+		}
+		return nbt;
 	}
 
 	@Override

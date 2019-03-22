@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 
+import appeng.api.AEApi;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.crafting.ICraftingPatternDetails;
@@ -71,6 +72,9 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 		setEnergyStorage(new EnergyStorage(this, energyCapacity));
 		for(int i = 0; i < trackers.length; ++i) {
 			trackers[i] = new PackageTracker();
+		}
+		if(Loader.isModLoaded("appliedenergistics2")) {
+			hostHelper = new HostHelperTileUnpackager(this);
 		}
 	}
 
@@ -158,7 +162,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 							continue;
 						}
 						TileEntity tile = world.getTileEntity(pos.offset(facing));
-						if(tile == null || tile instanceof TilePackager || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
+						if(tile == null || tile instanceof TilePackager || tile instanceof TileUnpackager || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
 							continue;
 						}
 						IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
@@ -212,11 +216,11 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 		}
 	}
 
+	@Optional.Method(modid="appliedenergistics2")
 	@Override
-	public void onLoad() {
-		if(Loader.isModLoaded("appliedenergistics2")) {
-			hostHelper = new HostHelperTileUnpackager(this);
-		}
+	public void setPlacer(EntityPlayer placer) {
+		super.setPlacer(placer);
+		getActionableNode().setPlayerID(AEApi.instance().registries().players().getID(placer));
 	}
 
 	@Optional.Method(modid="appliedenergistics2")
@@ -238,9 +242,6 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public IGridNode getActionableNode() {
-		if(hostHelper == null) {
-			hostHelper = new HostHelperTileUnpackager(this);
-		}
 		return hostHelper.getNode();
 	}
 
@@ -293,6 +294,23 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			return 0;
 		}
 		return scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored();
+	}
+
+	@Override
+	public void readFromNBT(NBTTagCompound nbt) {
+		super.readFromNBT(nbt);
+		if(hostHelper != null) {
+			hostHelper.readFromNBT(nbt);
+		}
+	}
+
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		if(hostHelper != null) {
+			hostHelper.writeToNBT(nbt);
+		}
+		return nbt;
 	}
 
 	@Override
