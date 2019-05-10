@@ -1,23 +1,19 @@
 package thelm.packagedauto.inventory;
 
-import com.google.common.collect.Streams;
-
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.energy.CapabilityEnergy;
 import thelm.packagedauto.api.IRecipeListItem;
-import thelm.packagedauto.tile.TilePackager;
 import thelm.packagedauto.tile.TilePackagerExtension;
 
-public class InventoryPackager extends InventoryTileBase {
+public class InventoryPackagerExtension extends InventoryTileBase {
 
-	public static final int[] SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-	public final TilePackager tile;
+	public static final int[] SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	public final TilePackagerExtension tile;
 
-	public InventoryPackager(TilePackager tile) {
-		super(tile, 12);
+	public InventoryPackagerExtension(TilePackagerExtension tile) {
+		super(tile, 11);
 		this.tile = tile;
 	}
 
@@ -31,9 +27,6 @@ public class InventoryPackager extends InventoryTileBase {
 			}
 		}
 		super.setInventorySlotContents(index, stack);
-		if(index == 10) {
-			updatePatternList();
-		}
 	}
 
 	@Override
@@ -46,9 +39,6 @@ public class InventoryPackager extends InventoryTileBase {
 				}
 			}
 		}
-		if(index == 10) {
-			updatePatternList();
-		}
 		return stack;
 	}
 
@@ -56,8 +46,7 @@ public class InventoryPackager extends InventoryTileBase {
 	public boolean isItemValidForSlot(int index, ItemStack stack) {
 		switch(index) {
 		case 9: return false;
-		case 10: return stack.getItem() instanceof IRecipeListItem;
-		case 11: return stack.hasCapability(CapabilityEnergy.ENERGY, null);
+		case 10: return stack.hasCapability(CapabilityEnergy.ENERGY, null);
 		default: return tile.isWorking ? !getStackInSlot(index).isEmpty() : true;
 		}
 	}
@@ -90,34 +79,12 @@ public class InventoryPackager extends InventoryTileBase {
 	}
 
 	@Override
-	public void readFromNBT(NBTTagCompound nbt) {
-		super.readFromNBT(nbt);
-		updatePatternList();
-	}
-
-	@Override
 	public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
 		return index < 9;
 	}
 
 	@Override
 	public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-		return index == 9 || direction == EnumFacing.UP && index != 10 && index != 11;
-	}
-
-	public void updatePatternList() {
-		tile.patternList.clear();
-		ItemStack listStack = getStackInSlot(10);
-		if(listStack.getItem() instanceof IRecipeListItem) {
-			((IRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(tile.patternList::add));
-		}
-		if(tile.getWorld() != null && !tile.getWorld().isRemote && tile.hostHelper != null) {
-			tile.hostHelper.postPatternChange();
-		}
-		if(tile.getWorld() != null) {
-			Streams.stream(BlockPos.getAllInBox(tile.getPos().add(-1, -1, -1), tile.getPos().add(1, 1, 1))).
-			map(tile.getWorld()::getTileEntity).filter(t->t instanceof TilePackagerExtension).
-			map(t->(TilePackagerExtension)t).forEach(t->t.updatePatternList());
-		}
+		return index == 9;
 	}
 }

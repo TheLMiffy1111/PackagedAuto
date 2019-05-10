@@ -18,6 +18,8 @@ import appeng.api.util.AEPartLocation;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
@@ -26,6 +28,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.crafting.IngredientNBT;
 import net.minecraftforge.common.util.RecipeMatcher;
@@ -37,21 +40,17 @@ import net.minecraftforge.fml.relauncher.SideOnly;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
+import thelm.packagedauto.api.IRecipeListItem;
 import thelm.packagedauto.api.IRecipeType;
 import thelm.packagedauto.api.RecipeTypeRegistry;
-import thelm.packagedauto.client.gui.GuiPackager;
-import thelm.packagedauto.container.ContainerPackager;
+import thelm.packagedauto.client.gui.GuiPackagerExtension;
+import thelm.packagedauto.container.ContainerPackagerExtension;
 import thelm.packagedauto.energy.EnergyStorage;
-import thelm.packagedauto.integration.appeng.networking.HostHelperTilePackager;
+import thelm.packagedauto.integration.appeng.networking.HostHelperTilePackagerExtension;
 import thelm.packagedauto.integration.appeng.recipe.PackageCraftingPatternHelper;
-import thelm.packagedauto.inventory.InventoryPackager;
+import thelm.packagedauto.inventory.InventoryPackagerExtension;
 
-@Optional.InterfaceList({
-	@Optional.Interface(iface="appeng.api.networking.IGridHost", modid="appliedenergistics2"),
-	@Optional.Interface(iface="appeng.api.networking.security.IActionHost", modid="appliedenergistics2"),
-	@Optional.Interface(iface="appeng.api.networking.crafting.ICraftingProvider", modid="appliedenergistics2")
-})
-public class TilePackager extends TileBase implements ITickable, IGridHost, IActionHost, ICraftingProvider {
+public class TilePackagerExtension extends TileBase implements ITickable, IGridHost, IActionHost, ICraftingProvider {
 
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
@@ -60,21 +59,27 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
+	public IInventory listStackInventory = new InventoryBasic("Recipe List", false, 1);
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
 
-	public TilePackager() {
-		setInventory(new InventoryPackager(this));
+	public TilePackagerExtension() {
+		setInventory(new InventoryPackagerExtension(this));
 		setEnergyStorage(new EnergyStorage(this, energyCapacity));
 		if(Loader.isModLoaded("appliedenergistics2")) {
-			hostHelper = new HostHelperTilePackager(this);
+			hostHelper = new HostHelperTilePackagerExtension(this);
 		}
 	}
 
 	@Override
 	protected String getLocalizedName() {
-		return I18n.translateToLocal("tile.packagedauto.packager.name");
+		return I18n.translateToLocal("tile.packagedauto.packager_extension.name");
+	}
+
+	@Override
+	public void onLoad() {
+		updatePatternList();
 	}
 
 	@Override
@@ -184,6 +189,27 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		}
 	}
 
+	public void updatePatternList() {
+		patternList.clear();
+		if(world != null) {
+			for(BlockPos posP : BlockPos.getAllInBoxMutable(pos.add(-1, -1, -1), pos.add(1, 1, 1))) {
+				TileEntity te = world.getTileEntity(posP);
+				if(te instanceof TilePackager) {
+					TilePackager packager = (TilePackager)te;
+					ItemStack listStack = packager.inventory.getStackInSlot(10);
+					listStackInventory.setInventorySlotContents(0, listStack);
+					if(listStack.getItem() instanceof IRecipeListItem) {
+						((IRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(patternList::add));
+					}
+					break;
+				}
+			}
+			if(!world.isRemote && hostHelper != null) {
+				hostHelper.postPatternChange();
+			}
+		}
+	}
+
 	protected void tickProcess() {
 		int energy = energyStorage.extractEnergy(energyUsage, false);
 		remainingProgress -= energy;
@@ -254,17 +280,17 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 
 	protected void chargeEnergy() {
 		int prevStored = energyStorage.getEnergyStored();
-		ItemStack energyStack = inventory.getStackInSlot(11);
+		ItemStack energyStack = inventory.getStackInSlot(10);
 		if(energyStack.hasCapability(CapabilityEnergy.ENERGY, null)) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
 			energyStorage.receiveEnergy(energyStack.getCapability(CapabilityEnergy.ENERGY, null).extractEnergy(energyRequest, false), false);
 			if(energyStack.getCount() <= 0) {
-				inventory.setInventorySlotContents(11, ItemStack.EMPTY);
+				inventory.setInventorySlotContents(10, ItemStack.EMPTY);
 			}
 		}
 	}
 
-	public HostHelperTilePackager hostHelper;
+	public HostHelperTilePackagerExtension hostHelper;
 
 	@Override
 	public void invalidate() {
@@ -331,7 +357,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public void provideCrafting(ICraftingProviderHelper craftingTracker) {
-		ItemStack listStack = inventory.getStackInSlot(10);
+		ItemStack listStack = listStackInventory.getStackInSlot(0);
 		for(IPackagePattern pattern : patternList) {
 			craftingTracker.addCraftingOption(this, new PackageCraftingPatternHelper(listStack, pattern));
 		}
@@ -340,6 +366,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
+		updatePatternList();
 		if(hostHelper != null) {
 			hostHelper.readFromNBT(nbt);
 		}
@@ -412,11 +439,11 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	@SideOnly(Side.CLIENT)
 	@Override
 	public GuiContainer getClientGuiElement(EntityPlayer player, Object... args) {
-		return new GuiPackager(new ContainerPackager(player.inventory, this));
+		return new GuiPackagerExtension(new ContainerPackagerExtension(player.inventory, this));
 	}
 
 	@Override
 	public Container getServerGuiElement(EntityPlayer player, Object... args) {
-		return new ContainerPackager(player.inventory, this);
+		return new ContainerPackagerExtension(player.inventory, this);
 	}
 }

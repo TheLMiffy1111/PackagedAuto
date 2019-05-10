@@ -9,6 +9,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import thelm.packagedauto.tile.TileCrafter;
 import thelm.packagedauto.tile.TileEncoder;
 import thelm.packagedauto.tile.TilePackager;
+import thelm.packagedauto.tile.TilePackagerExtension;
 import thelm.packagedauto.tile.TileUnpackager;
 
 public class PackagedAutoConfig {
@@ -37,6 +38,11 @@ public class PackagedAutoConfig {
 		TileUnpackager.energyCapacity = config.get(category, "energy_capacity", TileUnpackager.energyCapacity, "How much FE the Unpackager should hold.", 0, Integer.MAX_VALUE).getInt();
 		TileUnpackager.energyUsage = config.get(category, "energy_usage", TileUnpackager.energyUsage, "How much FE/t maximum the Unpackager should use.", 0, Integer.MAX_VALUE).getInt();
 		TileUnpackager.drawMEEnergy = config.get(category, "draw_me_energy", TileUnpackager.drawMEEnergy, "Should the Unpackager draw energy from ME systems.").getBoolean();
+		category = "blocks.packager_extension";
+		TilePackagerExtension.energyCapacity = config.get(category, "energy_capacity", TilePackagerExtension.energyCapacity, "How much FE the Packager Extension should hold.", 0, Integer.MAX_VALUE).getInt();
+		TilePackagerExtension.energyReq = config.get(category, "energy_req", TilePackagerExtension.energyReq, "How much FE the Packager Extension should use.", 0, Integer.MAX_VALUE).getInt();
+		TilePackagerExtension.energyUsage = config.get(category, "energy_usage", TilePackagerExtension.energyUsage, "How much FE/t maximum the Packager Extension should use.", 0, Integer.MAX_VALUE).getInt();
+		TilePackagerExtension.drawMEEnergy = config.get(category, "draw_me_energy", TilePackagerExtension.drawMEEnergy, "Should the Packager Extension draw energy from ME systems.").getBoolean();
 		category = "blocks.crafter";
 		TileCrafter.enabled = config.get(category, "enabled", TileCrafter.enabled, "Should the Package Crafter be enabled.").setRequiresMcRestart(true).getBoolean();
 		TileCrafter.energyCapacity = config.get(category, "energy_capacity", TileCrafter.energyCapacity, "How much FE the Package Crafter should hold.", 0, Integer.MAX_VALUE).getInt();

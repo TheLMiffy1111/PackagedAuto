@@ -48,6 +48,7 @@ import thelm.packagedauto.api.RecipeTypeRegistry;
 import thelm.packagedauto.client.gui.GuiUnpackager;
 import thelm.packagedauto.container.ContainerUnpackager;
 import thelm.packagedauto.energy.EnergyStorage;
+import thelm.packagedauto.integration.appeng.AppEngUtil;
 import thelm.packagedauto.integration.appeng.networking.HostHelperTileUnpackager;
 import thelm.packagedauto.integration.appeng.recipe.RecipeCraftingPatternHelper;
 import thelm.packagedauto.inventory.InventoryUnpackager;
@@ -65,6 +66,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 
 	public final PackageTracker[] trackers = new PackageTracker[10];
 	public List<IRecipeInfo> recipeList = new ArrayList<>();
+	public boolean powered = false;
 	public boolean blocking = false;
 
 	public TileUnpackager() {
@@ -81,6 +83,11 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Override
 	protected String getLocalizedName() {
 		return I18n.translateToLocal("tile.packagedauto.unpackager.name");
+	}
+
+	@Override
+	public void onLoad() {
+		updatePowered();
 	}
 
 	@Override
@@ -137,59 +144,101 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	}
 
 	protected void emptyTrackers() {
-		for(PackageTracker tracker : trackers) {
-			if(tracker.isFilled()) {
-				if(tracker.recipe != null && tracker.toSend.isEmpty() && tracker.recipe.getRecipeType().hasMachine()) {
-					for(EnumFacing facing : EnumFacing.VALUES) {
-						TileEntity tile = world.getTileEntity(pos.offset(facing));
-						if(tile instanceof IPackageCraftingMachine) {
-							IPackageCraftingMachine machine = (IPackageCraftingMachine)tile;
-							if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), facing.getOpposite())) {
-								tracker.clearRecipe();
-								syncTile(false);
-								markDirty();
-								break;
-							}
-						}
-					}
-				}
-				else {
-					if(tracker.toSend.isEmpty()) {
-						tracker.setupToSend();
-					}
-					for(EnumFacing facing : EnumFacing.VALUES) {
-						if(tracker.facing != null && tracker.facing != facing) {
-							continue;
-						}
-						TileEntity tile = world.getTileEntity(pos.offset(facing));
-						if(tile == null || tile instanceof TilePackager || tile instanceof TileUnpackager || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
-							continue;
-						}
-						IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
-						if(blocking && tracker.facing != facing && !MiscUtil.isEmpty(itemHandler)) {
-							continue;
-						}
-						tracker.facing = facing;
-						for(int i = 0; i < tracker.toSend.size(); ++i) {
-							ItemStack stack = tracker.toSend.get(i);
-							for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-								ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-								if(stackRem.getCount() < stack.getCount()) {
-									stack = stackRem;
-								}
-								if(stack.isEmpty()) {
-									break;
-								}
-							}
-							tracker.toSend.set(i, stack);
-						}
-						tracker.toSend.removeIf(ItemStack::isEmpty);
-						if(tracker.toSend.isEmpty()) {
+		for(EnumFacing facing : EnumFacing.VALUES) {
+			TileEntity tile = world.getTileEntity(pos.offset(facing));
+			if(tile instanceof IPackageCraftingMachine) {
+				IPackageCraftingMachine machine = (IPackageCraftingMachine)tile;
+				for(PackageTracker tracker : trackers) {
+					if(tracker.isFilled() && tracker.recipe != null && tracker.recipe.getRecipeType().hasMachine()) {
+						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), facing.getOpposite())) {
 							tracker.clearRecipe();
+							syncTile(false);
+							markDirty();
 							break;
 						}
 					}
 				}
+				continue;
+			}
+		}
+		for(EnumFacing facing : EnumFacing.VALUES) {
+			TileEntity tile = world.getTileEntity(pos.offset(facing));
+			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.facing == facing).findFirst().orElse(null);
+			if(trackerToEmpty == null) {
+				continue;
+			}
+			if(trackerToEmpty.toSend.isEmpty()) {
+				trackerToEmpty.setupToSend();
+			}
+			if(trackerToEmpty.recipe != null && trackerToEmpty.recipe.getRecipeType().hasMachine()) {
+				trackerToEmpty.facing = null;
+				continue;
+			}
+			if(tile == null || tile instanceof TilePackager || tile instanceof TileUnpackager || isInterface(tile, facing.getOpposite()) || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
+				trackerToEmpty.facing = null;
+				continue;
+			}
+			IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
+			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
+				ItemStack stack = trackerToEmpty.toSend.get(i);
+				for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
+					ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
+					if(stackRem.getCount() < stack.getCount()) {
+						stack = stackRem;
+					}
+					if(stack.isEmpty()) {
+						break;
+					}
+				}
+				trackerToEmpty.toSend.set(i, stack);
+			}
+			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
+			if(trackerToEmpty.toSend.isEmpty()) {
+				trackerToEmpty.clearRecipe();
+			}
+			markDirty();
+		}
+		for(EnumFacing facing : EnumFacing.VALUES) {
+			TileEntity tile = world.getTileEntity(pos.offset(facing));
+			if(tile == null || tile instanceof TilePackager || tile instanceof TileUnpackager || isInterface(tile, facing.getOpposite()) || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
+				continue;
+			}
+			IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
+			if(powered || blocking && !MiscUtil.isEmpty(itemHandler)) {
+				continue;
+			}
+			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.isFilled()).filter(t->t.facing == null).findFirst().orElse(null);
+			if(trackerToEmpty == null) {
+				continue;
+			}
+			if(trackerToEmpty.toSend.isEmpty()) {
+				trackerToEmpty.setupToSend();
+			}
+			if(trackerToEmpty.recipe != null && trackerToEmpty.recipe.getRecipeType().hasMachine()) {
+				continue;
+			}
+			boolean inserted = false;
+			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
+				ItemStack stack = trackerToEmpty.toSend.get(i);
+				for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
+					ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
+					if(stackRem.getCount() < stack.getCount()) {
+						stack = stackRem;
+						inserted = true;
+					}
+					if(stack.isEmpty()) {
+						break;
+					}
+				}
+				trackerToEmpty.toSend.set(i, stack);
+			}
+			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
+			if(inserted) {
+				trackerToEmpty.facing = facing;
+				if(trackerToEmpty.toSend.isEmpty()) {
+					trackerToEmpty.clearRecipe();
+				}
+				markDirty();
 			}
 		}
 	}
@@ -203,6 +252,14 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			if(energyStack.getCount() <= 0) {
 				inventory.setInventorySlotContents(10, ItemStack.EMPTY);
 			}
+		}
+	}
+
+	public void updatePowered() {
+		if(world.getRedstonePowerFromNeighbors(pos) > 0 != powered) {
+			powered = !powered;
+			syncTile(false);
+			markDirty();
 		}
 	}
 
@@ -289,6 +346,13 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 		}
 	}
 
+	protected boolean isInterface(TileEntity tile, EnumFacing facing) {
+		if(Loader.isModLoaded("appliedenergistics2")) {
+			return AppEngUtil.isInterface(tile, facing);
+		}
+		return false;
+	}
+
 	public int getScaledEnergy(int scale) {
 		if(energyStorage.getMaxEnergyStored() <= 0) {
 			return 0;
@@ -317,6 +381,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	public void readSyncNBT(NBTTagCompound nbt) {
 		super.readSyncNBT(nbt);
 		blocking = nbt.getBoolean("Blocking");
+		powered = nbt.getBoolean("Powered");
 		for(int i = 0; i < trackers.length; ++i) {
 			trackers[i].readFromNBT(nbt.getCompoundTag(String.format("Tracker%02d", i)));
 		}
@@ -326,6 +391,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	public NBTTagCompound writeSyncNBT(NBTTagCompound nbt) {
 		super.writeSyncNBT(nbt);
 		nbt.setBoolean("Blocking", blocking);
+		nbt.setBoolean("Powered", powered);
 		for(int i = 0; i < trackers.length; ++i) {
 			NBTTagCompound subNBT = new NBTTagCompound();
 			trackers[i].writeToNBT(subNBT);
@@ -401,6 +467,9 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			if(!toSend.isEmpty()) {
 				return true;
 			}
+			if(received.isEmpty()) {
+				return false;
+			}
 			for(boolean b : received) {
 				if(!b) {
 					return false;
@@ -439,7 +508,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			}
 			MiscUtil.loadAllItems(nbt.getTagList("ToSend", 10), toSend);
 			if(nbt.hasKey("Facing")) {
-				facing = EnumFacing.getFront(nbt.getByte("Facing"));
+				facing = EnumFacing.byIndex(nbt.getByte("Facing"));
 			}
 		}
 

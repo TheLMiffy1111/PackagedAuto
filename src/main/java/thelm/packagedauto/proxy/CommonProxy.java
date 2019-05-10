@@ -12,6 +12,7 @@ import thelm.packagedauto.api.RecipeTypeRegistry;
 import thelm.packagedauto.block.BlockCrafter;
 import thelm.packagedauto.block.BlockEncoder;
 import thelm.packagedauto.block.BlockPackager;
+import thelm.packagedauto.block.BlockPackagerExtension;
 import thelm.packagedauto.block.BlockUnpackager;
 import thelm.packagedauto.config.PackagedAutoConfig;
 import thelm.packagedauto.item.ItemMisc;
@@ -24,6 +25,7 @@ import thelm.packagedauto.recipe.RecipeTypeProcessing;
 import thelm.packagedauto.tile.TileCrafter;
 import thelm.packagedauto.tile.TileEncoder;
 import thelm.packagedauto.tile.TilePackager;
+import thelm.packagedauto.tile.TilePackagerExtension;
 import thelm.packagedauto.tile.TileUnpackager;
 
 public class CommonProxy {
@@ -54,6 +56,7 @@ public class CommonProxy {
 		registerBlock(BlockPackager.INSTANCE);
 		registerBlock(BlockEncoder.INSTANCE);
 		registerBlock(BlockUnpackager.INSTANCE);
+		registerBlock(BlockPackagerExtension.INSTANCE);
 		if(TileCrafter.enabled) {
 			registerBlock(BlockCrafter.INSTANCE);
 		}
@@ -63,6 +66,7 @@ public class CommonProxy {
 		registerItem(BlockPackager.ITEM_INSTANCE);
 		registerItem(BlockEncoder.ITEM_INSTANCE);
 		registerItem(BlockUnpackager.ITEM_INSTANCE);
+		registerItem(BlockPackagerExtension.ITEM_INSTANCE);
 		if(TileCrafter.enabled) {
 			registerItem(BlockCrafter.ITEM_INSTANCE);
 		}
@@ -79,6 +83,7 @@ public class CommonProxy {
 		GameRegistry.registerTileEntity(TilePackager.class, new ResourceLocation("packagedauto:packager"));
 		GameRegistry.registerTileEntity(TileEncoder.class, new ResourceLocation("packagedauto:encoder"));
 		GameRegistry.registerTileEntity(TileUnpackager.class, new ResourceLocation("packagedauto:unpackager"));
+		GameRegistry.registerTileEntity(TilePackagerExtension.class, new ResourceLocation("packagedauto:packager_extension"));
 		if(TileCrafter.enabled) {
 			GameRegistry.registerTileEntity(TileCrafter.class, new ResourceLocation("packagedauto:crafter"));
 		}

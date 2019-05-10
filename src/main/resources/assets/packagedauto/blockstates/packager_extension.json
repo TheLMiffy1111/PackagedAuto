@@ -1,0 +1,14 @@
+{
+    "forge_marker": 1,
+    "defaults": {
+        "textures": {
+            "side": "packagedauto:blocks/packager_side",
+            "top": "packagedauto:blocks/packager_extension_top",
+            "bottom": "packagedauto:blocks/machine_bottom"
+        },
+        "model": "cube_bottom_top"
+    },
+    "variants": {
+        "normal": [{}]
+    }
+}

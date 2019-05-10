@@ -2,8 +2,10 @@ package thelm.packagedauto.block;
 
 import java.util.List;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.properties.PropertyBool;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.inventory.InventoryHelper;
@@ -33,7 +35,7 @@ public class BlockUnpackager extends BlockBase {
 		setHardness(15F);
 		setResistance(25F);
 		setSoundType(SoundType.METAL);
-		setUnlocalizedName("packagedauto.unpackager");
+		setTranslationKey("packagedauto.unpackager");
 		setRegistryName("packagedauto:unpackager");
 		setCreativeTab(PackagedAuto.CREATIVE_TAB);
 	}
@@ -68,6 +70,14 @@ public class BlockUnpackager extends BlockBase {
 			}
 		}
 		super.breakBlock(worldIn, pos, state);
+	}
+
+	@Override
+	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
+		TileEntity tileentity = worldIn.getTileEntity(pos);
+		if(tileentity instanceof TileUnpackager) {
+			((TileUnpackager)tileentity).updatePowered();
+		}
 	}
 
 	@SideOnly(Side.CLIENT)

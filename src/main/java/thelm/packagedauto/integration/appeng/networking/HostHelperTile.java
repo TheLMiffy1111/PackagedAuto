@@ -11,14 +11,14 @@ import thelm.packagedauto.tile.TileBase;
 public class HostHelperTile<TILE extends TileBase & IGridHost & IActionHost> {
 
 	public final TILE tile;
-	public GridBlockTileBase gridBlock;
+	public GridBlockTileBase<TILE> gridBlock;
 	public MachineSource source;
 	public IGridNode gridNode;
 
 	public HostHelperTile(TILE tile) {
 		this.tile = tile;
 		source = new MachineSource(tile);
-		gridBlock = new GridBlockTileBase(tile);
+		gridBlock = new GridBlockTileBase<>(tile);
 	}
 
 	public IGridNode getNode() {

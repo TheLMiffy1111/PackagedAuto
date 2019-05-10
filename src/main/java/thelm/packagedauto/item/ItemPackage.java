@@ -26,7 +26,7 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister {
 
 	protected ItemPackage() {
 		setRegistryName("packagedauto:package");
-		setUnlocalizedName("packagedauto.package");
+		setTranslationKey("packagedauto.package");
 		setCreativeTab(null);
 	}
 

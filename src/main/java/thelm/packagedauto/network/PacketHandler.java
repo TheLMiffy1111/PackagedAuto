@@ -15,7 +15,7 @@ import thelm.packagedauto.network.packet.PacketSetPatternIndex;
 import thelm.packagedauto.network.packet.PacketSetRecipe;
 import thelm.packagedauto.network.packet.PacketSyncEnergy;
 
-public class PacketHandler<REQ extends ISelfHandleMessage> implements IMessageHandler<REQ, IMessage> {
+public class PacketHandler<REQ extends ISelfHandleMessage<? extends IMessage>> implements IMessageHandler<REQ, IMessage> {
 
 	public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(PackagedAuto.MOD_ID);
 
@@ -30,12 +30,12 @@ public class PacketHandler<REQ extends ISelfHandleMessage> implements IMessageHa
 		INSTANCE.registerMessage(get(), PacketChangeBlocking.class, id++, Side.SERVER);
 	}
 
-	public static <REQ extends ISelfHandleMessage> PacketHandler<REQ> get() {
+	public static <REQ extends ISelfHandleMessage<? extends IMessage>> PacketHandler<REQ> get() {
 		return new PacketHandler<>();
 	}
 
 	@Override
-	public IMessage onMessage(ISelfHandleMessage message, MessageContext ctx) {
+	public IMessage onMessage(REQ message, MessageContext ctx) {
 		return message.onMessage(ctx);
 	}
 }

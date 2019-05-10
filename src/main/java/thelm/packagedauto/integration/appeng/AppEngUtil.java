@@ -3,7 +3,12 @@ package thelm.packagedauto.integration.appeng;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import appeng.api.parts.IPartHost;
 import appeng.api.storage.data.IAEItemStack;
+import appeng.helpers.IInterfaceHost;
+import appeng.tile.misc.TileInterface;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 
 public class AppEngUtil {
 
@@ -30,5 +35,9 @@ public class AppEngUtil {
 			++i;
 		}
 		return ret;
+	}
+	
+	public static boolean isInterface(TileEntity tile, EnumFacing facing) {
+		return tile instanceof IInterfaceHost || tile instanceof IPartHost && ((IPartHost)tile).getPart(facing) instanceof IInterfaceHost;
 	}
 }

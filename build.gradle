@@ -28,7 +28,7 @@ repositories {
     }
 }
 
-version = "1.12.2-1.0.1.5"
+version = "1.12.2-1.0.2.6"
 group= "thelm.packagedauto"
 archivesBaseName = "PackagedAuto"
 
@@ -38,14 +38,14 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2768"
+    version = "1.12.2-14.23.5.2824"
     runDir = "run"
-    mappings = "snapshot_20170624"
+    mappings = "stable_39"
     makeObfSourceJar = false
 }
 
 dependencies {
-    deobfCompile "mezz.jei:jei_1.12.2:4.13.1.225"
+    deobfCompile "mezz.jei:jei_1.12.2:4.15.0.273"
     deobfCompile "codechicken:CodeChickenLib:1.12.2-3.2.1.351:universal"
     deobfCompile "cofh:RedstoneFlux:1.12-2.0.2.3:universal"
     deobfCompile("cofh:CoFHCore:1.12.2-4.5.3.20:universal") {

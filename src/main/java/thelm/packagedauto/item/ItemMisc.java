@@ -13,7 +13,7 @@ public class ItemMisc extends Item implements IModelRegister {
 
 	protected ItemMisc(String registryName, String unlocalizedName, String modelLocation, CreativeTabs creativeTab) {
 		setRegistryName(registryName);
-		setUnlocalizedName(unlocalizedName);
+		setTranslationKey(unlocalizedName);
 		this.modelLocation = new ModelResourceLocation(modelLocation);
 		setCreativeTab(creativeTab);
 	}

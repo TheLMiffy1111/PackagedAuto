@@ -24,7 +24,7 @@ public class BlockCrafter extends BlockBase {
 		setHardness(15F);
 		setResistance(25F);
 		setSoundType(SoundType.METAL);
-		setUnlocalizedName("packagedauto.crafter");
+		setTranslationKey("packagedauto.crafter");
 		setRegistryName("packagedauto:crafter");
 		setCreativeTab(PackagedAuto.CREATIVE_TAB);
 	}

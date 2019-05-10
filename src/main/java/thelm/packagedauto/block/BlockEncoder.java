@@ -24,7 +24,7 @@ public class BlockEncoder extends BlockBase {
 		setHardness(15F);
 		setResistance(25F);
 		setSoundType(SoundType.METAL);
-		setUnlocalizedName("packagedauto.encoder");
+		setTranslationKey("packagedauto.encoder");
 		setRegistryName("packagedauto:encoder");
 		setCreativeTab(PackagedAuto.CREATIVE_TAB);
 	}

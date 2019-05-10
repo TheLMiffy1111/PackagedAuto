@@ -33,7 +33,7 @@ public class ItemRecipeHolder extends Item implements IRecipeListItem, IModelReg
 	public static final ModelResourceLocation MODEL_LOCATION_FILLED = new ModelResourceLocation("packagedauto:recipe_holder_filled#inventory");
 
 	public ItemRecipeHolder() {
-		setUnlocalizedName("packagedauto.recipe_holder");
+		setTranslationKey("packagedauto.recipe_holder");
 		setRegistryName("packagedauto:recipe_holder");
 		setCreativeTab(PackagedAuto.CREATIVE_TAB);
 	}

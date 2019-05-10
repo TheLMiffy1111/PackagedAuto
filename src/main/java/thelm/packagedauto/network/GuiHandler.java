@@ -21,7 +21,7 @@ public class GuiHandler implements IGuiHandler {
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
 		EnumFacing side = null;
 		if(ID <= 5) {
-			side = EnumFacing.getFront(ID);
+			side = EnumFacing.byIndex(ID);
 		}
 		BlockPos pos = new BlockPos(x, y, z);
 		TileEntity tile = world.getTileEntity(pos);
@@ -38,7 +38,7 @@ public class GuiHandler implements IGuiHandler {
 	public Object getServerGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {
 		EnumFacing side = null;
 		if(ID <= 5) {
-			side = EnumFacing.getFront(ID);
+			side = EnumFacing.byIndex(ID);
 		}
 		BlockPos pos = new BlockPos(x, y, z);
 		TileEntity tile = world.getTileEntity(pos);

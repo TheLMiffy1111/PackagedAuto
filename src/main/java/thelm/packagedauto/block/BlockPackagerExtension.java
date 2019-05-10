@@ -11,27 +11,27 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.tile.TileBase;
-import thelm.packagedauto.tile.TilePackager;
+import thelm.packagedauto.tile.TilePackagerExtension;
 
-public class BlockPackager extends BlockBase {
+public class BlockPackagerExtension extends BlockBase {
 
-	public static final BlockPackager INSTANCE = new BlockPackager();
-	public static final Item ITEM_INSTANCE = new ItemBlock(INSTANCE).setRegistryName("packagedauto:packager");
-	public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation("packagedauto:packager#normal");
+	public static final BlockPackagerExtension INSTANCE = new BlockPackagerExtension();
+	public static final Item ITEM_INSTANCE = new ItemBlock(INSTANCE).setRegistryName("packagedauto:packager_extension");
+	public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation("packagedauto:packager_extension#normal");
 
-	protected BlockPackager() {
+	protected BlockPackagerExtension() {
 		super(Material.IRON);
 		setHardness(15F);
 		setResistance(25F);
 		setSoundType(SoundType.METAL);
-		setTranslationKey("packagedauto.packager");
-		setRegistryName("packagedauto:packager");
+		setTranslationKey("packagedauto.packager_extension");
+		setRegistryName("packagedauto:packager_extension");
 		setCreativeTab(PackagedAuto.CREATIVE_TAB);
 	}
 
 	@Override
 	public TileBase createNewTileEntity(World worldIn, int meta) {
-		return new TilePackager();
+		return new TilePackagerExtension();
 	}
 
 	@SideOnly(Side.CLIENT)

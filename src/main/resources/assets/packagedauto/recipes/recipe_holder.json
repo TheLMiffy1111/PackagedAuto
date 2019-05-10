@@ -2,7 +2,7 @@
     "type": "forge:ore_shaped",
     "result": {
         "item": "packagedauto:recipe_holder",
-        "count": 1
+        "count": 2
     },
     "pattern": [
         "TRT",
