@@ -74,8 +74,12 @@ public class InventoryPackager extends InventoryTileBase {
 	@Override
 	public void setField(int id, int value) {
 		switch(id) {
-		case 0: tile.remainingProgress = value;
-		case 1: tile.isWorking = value != 0;
+		case 0:
+			tile.remainingProgress = value;
+			break;
+		case 1:
+			tile.isWorking = value != 0;
+			break;
 		}
 	}
 

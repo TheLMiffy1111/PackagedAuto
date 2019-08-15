@@ -86,8 +86,11 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 			if(recipeInfo == null || !recipeInfo.equals(info)) {
 				recipeInfo = info;
 				if(!recipeType.canSetOutput()) {
-					List<ItemStack> stacks = info.getOutputs();
-					int size = stacks.size();
+					for(int i = 81; i < 90; ++i) {
+						stacks.set(i, ItemStack.EMPTY);
+					}
+					List<ItemStack> outputs = info.getOutputs();
+					int size = outputs.size();
 					int startIndex = 81;
 					switch(size) {
 					case 1: startIndex += 1;
@@ -95,12 +98,15 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 					case 3: startIndex += 3;
 					}
 					for(int i = 0; i < size; ++i) {
-						this.stacks.set(startIndex+i, stacks.get(i).copy());
+						stacks.set(startIndex+i, outputs.get(i).copy());
 					}
+				}
+				for(int i = 90; i < 99; ++i) {
+					stacks.set(i, ItemStack.EMPTY);
 				}
 				List<IPackagePattern> patterns = info.getPatterns();
 				for(int i = 0; i < patterns.size() && i < 9; ++i) {
-					this.stacks.set(90+i, patterns.get(i).getOutput().copy());
+					stacks.set(90+i, patterns.get(i).getOutput().copy());
 				}
 				syncTile(false);
 				markDirty();
@@ -135,7 +141,14 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 	}
 
 	public void setRecipe(Int2ObjectMap<ItemStack> map) {
-		stacks.clear();
+		if(recipeType.canSetOutput()) {
+			stacks.clear();
+		}
+		else {
+			for(int i = 0; i < 81; ++i) {
+				stacks.set(i, ItemStack.EMPTY);
+			}
+		}
 		if(map != null) {
 			for(Int2ObjectMap.Entry<ItemStack> entry : map.int2ObjectEntrySet()) {
 				stacks.set(entry.getIntKey(), entry.getValue());

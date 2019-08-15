@@ -62,8 +62,8 @@ public class TileEncoder extends TileBase {
 
 	public void setPatternIndex(int patternIndex) {
 		this.patternIndex = patternIndex;
-		markDirty();
 		syncTile(false);
+		markDirty();
 	}
 
 	public void saveRecipeList() {

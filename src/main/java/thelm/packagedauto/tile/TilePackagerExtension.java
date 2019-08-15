@@ -252,13 +252,13 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 
 	protected void startProcess() {
 		remainingProgress = energyReq;
+		markDirty();
 	}
 
 	public void endProcess() {
 		remainingProgress = 0;
 		isWorking = false;
 		lockPattern = false;
-		syncTile(false);
 		markDirty();
 	}
 
@@ -367,25 +367,8 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		updatePatternList();
-		if(hostHelper != null) {
-			hostHelper.readFromNBT(nbt);
-		}
-	}
-
-	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		super.writeToNBT(nbt);
-		if(hostHelper != null) {
-			hostHelper.writeToNBT(nbt);
-		}
-		return nbt;
-	}
-
-	@Override
-	public void readSyncNBT(NBTTagCompound nbt) {
-		super.readSyncNBT(nbt);
-		isWorking = nbt.getBoolean("Working");
-		remainingProgress = nbt.getInteger("Progress");
+		lockPattern = false;
+		currentPattern = null;
 		if(nbt.hasKey("Pattern")) {
 			NBTTagCompound tag = nbt.getCompoundTag("Pattern");
 			IRecipeType recipeType = RecipeTypeRegistry.getRecipeType(new ResourceLocation(tag.getString("RecipeType")));
@@ -398,6 +381,31 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 				}
 			}
 		}
+		if(hostHelper != null) {
+			hostHelper.readFromNBT(nbt);
+		}
+	}
+
+	@Override
+	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+		super.writeToNBT(nbt);
+		if(lockPattern) {
+			NBTTagCompound tag = currentPattern.getRecipeInfo().writeToNBT(new NBTTagCompound());
+			tag.setString("RecipeType", currentPattern.getRecipeInfo().getRecipeType().getName().toString());
+			tag.setByte("Index", (byte)currentPattern.getIndex());
+			nbt.setTag("Pattern", tag);
+		}
+		if(hostHelper != null) {
+			hostHelper.writeToNBT(nbt);
+		}
+		return nbt;
+	}
+
+	@Override
+	public void readSyncNBT(NBTTagCompound nbt) {
+		super.readSyncNBT(nbt);
+		isWorking = nbt.getBoolean("Working");
+		remainingProgress = nbt.getInteger("Progress");
 	}
 
 	@Override
@@ -405,12 +413,6 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		super.writeSyncNBT(nbt);
 		nbt.setBoolean("Working", isWorking);
 		nbt.setInteger("Progress", remainingProgress);
-		if(lockPattern) {
-			NBTTagCompound tag = currentPattern.getRecipeInfo().writeToNBT(new NBTTagCompound());
-			tag.setString("RecipeType", currentPattern.getRecipeInfo().getRecipeType().getName().toString());
-			tag.setByte("Index", (byte)currentPattern.getIndex());
-			nbt.setTag("Pattern", tag);
-		}
 		return nbt;
 	}
 

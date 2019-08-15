@@ -26,6 +26,22 @@ public class MiscUtil {
 
 	private MiscUtil() {}
 
+	public static List<ItemStack> condenseStacks(IInventory inventory) {
+		List<ItemStack> stacks = new ArrayList<>(inventory.getSizeInventory());
+		for(int i = 0; i < inventory.getSizeInventory(); ++i) {
+			stacks.add(inventory.getStackInSlot(i));
+		}
+		return condenseStacks(stacks);
+	}
+
+	public static List<ItemStack> condenseStacks(IItemHandler itemHandler) {
+		List<ItemStack> stacks = new ArrayList<>(itemHandler.getSlots());
+		for(int i = 0; i < itemHandler.getSlots(); ++i) {
+			stacks.add(itemHandler.getStackInSlot(i));
+		}
+		return condenseStacks(stacks);
+	}
+
 	public static List<ItemStack> condenseStacks(ItemStack... stacks) {
 		return condenseStacks(Arrays.asList(stacks));
 	}

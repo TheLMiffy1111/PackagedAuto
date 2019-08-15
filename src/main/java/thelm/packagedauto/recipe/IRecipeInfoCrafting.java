@@ -16,6 +16,8 @@ public interface IRecipeInfoCrafting extends IRecipeInfo {
 
 	InventoryCrafting getMatrix();
 
+	List<ItemStack> getRemainingItems();
+
 	@Override
 	default List<ItemStack> getOutputs() {
 		return Collections.singletonList(getOutput());

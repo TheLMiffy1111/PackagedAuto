@@ -41,7 +41,7 @@ public class RecipeInfoCrafting implements IRecipeInfoCrafting {
 			matrix.setInventorySlotContents(i, matrixList.get(i));
 		}
 		if(recipe != null) {
-			MiscUtil.loadAllItems(nbt.getTagList("Input", 10), input);
+			input.addAll(MiscUtil.condenseStacks(matrix));
 			output = recipe.getCraftingResult(matrix).copy();
 			for(int i = 0; i*9 < input.size(); ++i) {
 				patterns.add(new PatternHelper(this, i));
@@ -54,8 +54,6 @@ public class RecipeInfoCrafting implements IRecipeInfoCrafting {
 		if(recipe != null) {
 			nbt.setString("Recipe", recipe.getRegistryName().toString());
 		}
-		NBTTagList inputTag = MiscUtil.saveAllItems(new NBTTagList(), input);
-		nbt.setTag("Input", inputTag);
 		List<ItemStack> matrixList = new ArrayList<>();
 		for(int i = 0; i < 9; ++i) {
 			matrixList.add(matrix.getStackInSlot(i));
@@ -101,6 +99,11 @@ public class RecipeInfoCrafting implements IRecipeInfoCrafting {
 	}
 
 	@Override
+	public List<ItemStack> getRemainingItems() {
+		return recipe.getRemainingItems(matrix);
+	}
+
+	@Override
 	public void generateFromStacks(List<ItemStack> input, List<ItemStack> output, World world) {
 		recipe = null;
 		this.input.clear();
@@ -114,7 +117,7 @@ public class RecipeInfoCrafting implements IRecipeInfoCrafting {
 		IRecipe recipe = CraftingManager.findMatchingRecipe(matrix, world);
 		if(recipe != null) {
 			this.recipe = recipe;
-			this.input.addAll(MiscUtil.condenseStacks(Arrays.stream(slotArray).mapToObj(input::get)));
+			this.input.addAll(MiscUtil.condenseStacks(matrix));
 			this.output = recipe.getCraftingResult(matrix).copy();
 			for(int i = 0; i*9 < this.input.size(); ++i) {
 				patterns.add(new PatternHelper(this, i));

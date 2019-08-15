@@ -169,11 +169,18 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 			case 1:
 				if(!player.inventory.getItemStack().isEmpty()) {
 					ItemStack toPut = player.inventory.getItemStack().copy();
-					toPut.setCount(1);
-					slot.putStack(toPut);
+					if(stack.getItem() == toPut.getItem() && stack.getItemDamage() == toPut.getItemDamage() && ItemStack.areItemStackShareTagsEqual(stack, toPut)) {
+						stack.grow(1);
+						slot.onSlotChanged();
+					}
+					else {
+						toPut.setCount(1);
+						slot.putStack(toPut);
+					}
 				}
 				else if(!stack.isEmpty()) {
 					stack.shrink(1);
+					slot.onSlotChanged();
 				}
 				break;
 			case 2:
@@ -182,6 +189,7 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 				}
 				if(!stack.isEmpty() && stack.getCount() < stack.getMaxStackSize()) {
 					stack.grow(1);
+					slot.onSlotChanged();
 				}
 				break;
 			}
