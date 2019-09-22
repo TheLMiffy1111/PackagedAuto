@@ -159,9 +159,9 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 
 	@Override
 	public ItemStack slotClick(int slotId, int mouseButton, ClickType clickType, EntityPlayer player) {
-		Slot slot = slotId < 0 ? null : this.inventorySlots.get(slotId);
+		Slot slot = slotId < 0 ? null : inventorySlots.get(slotId);
 		Out:if(slot instanceof SlotFalseCopy) {
-			ItemStack stack = slot.getStack();
+			ItemStack stack = slot.getStack().copy();
 			switch(mouseButton) {
 			case 0:
 				slot.putStack(player.inventory.getItemStack().isEmpty() ? ItemStack.EMPTY : player.inventory.getItemStack().copy());
@@ -169,9 +169,10 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 			case 1:
 				if(!player.inventory.getItemStack().isEmpty()) {
 					ItemStack toPut = player.inventory.getItemStack().copy();
-					if(stack.getItem() == toPut.getItem() && stack.getItemDamage() == toPut.getItemDamage() && ItemStack.areItemStackShareTagsEqual(stack, toPut)) {
+					if(stack.getItem() == toPut.getItem() && stack.getItemDamage() == toPut.getItemDamage() &&
+							ItemStack.areItemStackShareTagsEqual(stack, toPut) && stack.getCount() < stack.getMaxStackSize()) {
 						stack.grow(1);
-						slot.onSlotChanged();
+						slot.putStack(stack);
 					}
 					else {
 						toPut.setCount(1);
@@ -180,7 +181,7 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 				}
 				else if(!stack.isEmpty()) {
 					stack.shrink(1);
-					slot.onSlotChanged();
+					slot.putStack(stack);
 				}
 				break;
 			case 2:
@@ -189,7 +190,7 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 				}
 				if(!stack.isEmpty() && stack.getCount() < stack.getMaxStackSize()) {
 					stack.grow(1);
-					slot.onSlotChanged();
+					slot.putStack(stack);
 				}
 				break;
 			}

@@ -30,7 +30,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.common.Loader;
@@ -42,9 +41,7 @@ import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IRecipeInfo;
-import thelm.packagedauto.api.IRecipeType;
 import thelm.packagedauto.api.MiscUtil;
-import thelm.packagedauto.api.RecipeTypeRegistry;
 import thelm.packagedauto.client.gui.GuiUnpackager;
 import thelm.packagedauto.container.ContainerUnpackager;
 import thelm.packagedauto.energy.EnergyStorage;
@@ -106,9 +103,8 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	}
 
 	protected void fillTrackers() {
-		List<PackageTracker> emptyTrackers = Arrays.stream(trackers).filter(PackageTracker::isEmpty).collect(Collectors.toList());
-		List<PackageTracker> nonEmptyTrackers = Lists.newArrayList(trackers);
-		nonEmptyTrackers.removeAll(emptyTrackers);
+		List<PackageTracker> emptyTrackers = Arrays.stream(trackers).filter(t->t.isEmpty()).collect(Collectors.toList());
+		List<PackageTracker> nonEmptyTrackers = Arrays.stream(trackers).filter(t->!t.isEmpty()).filter(t->!t.isFilled()).collect(Collectors.toList());
 		for(int i = 0; i < 9; ++i) {
 			if(energyStorage.getEnergyStored() >= energyUsage) {
 				ItemStack stack = inventory.getStackInSlot(i);
@@ -116,25 +112,37 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 					IPackageItem packageItem = (IPackageItem)stack.getItem();
 					boolean flag = false;
 					for(PackageTracker tracker : nonEmptyTrackers) {
-						if(tracker.tryAcceptPackage(packageItem, stack)) {
+						if(tracker.tryAcceptPackage(packageItem, stack, i)) {
 							flag = true;
 							stack.shrink(1);
 							if(stack.isEmpty()) {
 								inventory.setInventorySlotContents(i, ItemStack.EMPTY);
 							}
+							else {
+								tracker.setRejectedIndex(i, true);
+							}
 							energyStorage.extractEnergy(energyUsage, false);
 							break;
+						}
+						else {
+							tracker.setRejectedIndex(i, true);
 						}
 					}
 					if(!flag) {
 						for(PackageTracker tracker : emptyTrackers) {
-							if(tracker.tryAcceptPackage(packageItem, stack)) {
+							if(tracker.tryAcceptPackage(packageItem, stack, i)) {
 								stack.shrink(1);
 								if(stack.isEmpty()) {
 									inventory.setInventorySlotContents(i, ItemStack.EMPTY);
 								}
+								else {
+									tracker.setRejectedIndex(i, true);
+								}
 								energyStorage.extractEnergy(energyUsage, false);
 								break;
+							}
+							else {
+								tracker.setRejectedIndex(i, true);
 							}
 						}
 					}
@@ -417,6 +425,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 
 	public class PackageTracker {
 
+		public boolean[] rejectedIndexes = new boolean[9];
 		public IRecipeInfo recipe;
 		public int amount;
 		public BooleanList received = new BooleanArrayList();
@@ -428,6 +437,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 		}
 
 		public void clearRecipe() {
+			clearRejectedIndexes();
 			recipe = null;
 			amount = 0;
 			received.clear();
@@ -438,7 +448,10 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			}
 		}
 
-		public boolean tryAcceptPackage(IPackageItem packageItem, ItemStack stack) {
+		public boolean tryAcceptPackage(IPackageItem packageItem, ItemStack stack, int invIndex) {
+			if(rejectedIndexes[invIndex]) {
+				return false;
+			}
 			IRecipeInfo recipe = packageItem.getRecipeInfo(stack);
 			if(recipe != null) {
 				if(this.recipe == null) {
@@ -461,6 +474,14 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 				}
 			}
 			return false;
+		}
+
+		public void setRejectedIndex(int index, boolean rejected) {
+			rejectedIndexes[index] = rejected;
+		}
+
+		public void clearRejectedIndexes() {
+			Arrays.fill(rejectedIndexes, false);
 		}
 
 		public boolean isFilled() {
@@ -492,18 +513,14 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 		public void readFromNBT(NBTTagCompound nbt) {
 			clearRecipe();
 			NBTTagCompound tag = nbt.getCompoundTag("Recipe");
-			IRecipeType recipeType = RecipeTypeRegistry.getRecipeType(new ResourceLocation(tag.getString("RecipeType")));
-			if(recipeType != null) {
-				IRecipeInfo recipe = recipeType.getNewRecipeInfo();
-				recipe.readFromNBT(tag);
-				if(recipe.isValid()) {
-					this.recipe = recipe;
-					amount = nbt.getByte("Amount");
-					received.size(amount);
-					byte[] receivedArray = nbt.getByteArray("Received");
-					for(int i = 0; i < received.size(); ++i) {
-						received.set(i, receivedArray[i] != 0);
-					}
+			IRecipeInfo recipe = MiscUtil.readRecipeFromNBT(tag);
+			if(recipe != null) {
+				this.recipe = recipe;
+				amount = nbt.getByte("Amount");
+				received.size(amount);
+				byte[] receivedArray = nbt.getByteArray("Received");
+				for(int i = 0; i < received.size(); ++i) {
+					received.set(i, receivedArray[i] != 0);
 				}
 			}
 			MiscUtil.loadAllItems(nbt.getTagList("ToSend", 10), toSend);
@@ -514,9 +531,8 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 
 		public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 			if(recipe != null) {
-				NBTTagCompound tag = new NBTTagCompound();
-				tag.setString("RecipeType", recipe.getRecipeType().getName().toString());
-				nbt.setTag("Recipe", recipe.writeToNBT(tag));
+				NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), recipe);
+				nbt.setTag("Recipe", tag);
 				nbt.setByte("Amount", (byte)amount);
 				byte[] receivedArray = new byte[received.size()];
 				for(int i = 0; i < received.size(); ++i) {

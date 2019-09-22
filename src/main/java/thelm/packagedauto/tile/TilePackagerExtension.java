@@ -42,6 +42,7 @@ import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeListItem;
 import thelm.packagedauto.api.IRecipeType;
+import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.api.RecipeTypeRegistry;
 import thelm.packagedauto.client.gui.GuiPackagerExtension;
 import thelm.packagedauto.container.ContainerPackagerExtension;
@@ -371,14 +372,10 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		currentPattern = null;
 		if(nbt.hasKey("Pattern")) {
 			NBTTagCompound tag = nbt.getCompoundTag("Pattern");
-			IRecipeType recipeType = RecipeTypeRegistry.getRecipeType(new ResourceLocation(tag.getString("RecipeType")));
-			if(recipeType != null) {
-				IRecipeInfo recipe = recipeType.getNewRecipeInfo();
-				recipe.readFromNBT(tag);
-				if(recipe.isValid()) {
-					currentPattern = recipe.getPatterns().get(tag.getByte("Index"));
-					lockPattern = true;
-				}
+			IRecipeInfo recipe = MiscUtil.readRecipeFromNBT(tag);
+			if(recipe != null) {
+				currentPattern = recipe.getPatterns().get(tag.getByte("Index"));
+				lockPattern = true;
 			}
 		}
 		if(hostHelper != null) {
@@ -390,8 +387,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
 		if(lockPattern) {
-			NBTTagCompound tag = currentPattern.getRecipeInfo().writeToNBT(new NBTTagCompound());
-			tag.setString("RecipeType", currentPattern.getRecipeInfo().getRecipeType().getName().toString());
+			NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), currentPattern.getRecipeInfo());
 			tag.setByte("Index", (byte)currentPattern.getIndex());
 			nbt.setTag("Pattern", tag);
 		}

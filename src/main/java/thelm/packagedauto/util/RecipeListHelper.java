@@ -10,6 +10,7 @@ import net.minecraft.util.ResourceLocation;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeList;
 import thelm.packagedauto.api.IRecipeType;
+import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.api.RecipeTypeRegistry;
 
 public class RecipeListHelper implements IRecipeList {
@@ -42,12 +43,7 @@ public class RecipeListHelper implements IRecipeList {
 			NBTTagList tagList = nbt.getTagList("Recipes", 10);
 			for(int i = 0; i < tagList.tagCount(); ++i) {
 				NBTTagCompound tag = tagList.getCompoundTagAt(i);
-				IRecipeType recipeType = RecipeTypeRegistry.getRecipeType(new ResourceLocation(tag.getString("RecipeType")));
-				if(recipeType == null) {
-					continue;
-				}
-				IRecipeInfo recipe = recipeType.getNewRecipeInfo();
-				recipe.readFromNBT(tag);
+				IRecipeInfo recipe = MiscUtil.readRecipeFromNBT(tag);
 				if(recipe.isValid()) {
 					recipeList.add(recipe);
 				}
@@ -59,8 +55,7 @@ public class RecipeListHelper implements IRecipeList {
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		NBTTagList tagList = new NBTTagList();
 		for(IRecipeInfo recipe : recipeList) {
-			NBTTagCompound tag = recipe.writeToNBT(new NBTTagCompound());
-			tag.setString("RecipeType", recipe.getRecipeType().getName().toString());
+			NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), recipe);
 			tagList.appendTag(tag);
 		}
 		nbt.setTag("Recipes", tagList);

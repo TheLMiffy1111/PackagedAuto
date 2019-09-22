@@ -34,10 +34,13 @@ import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeType;
+import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.api.RecipeTypeRegistry;
 import thelm.packagedauto.client.gui.GuiPackager;
 import thelm.packagedauto.container.ContainerPackager;
@@ -241,12 +244,19 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 			TileEntity te = world.getTileEntity(pos.offset(facing));
 			if(te instanceof TileUnpackager) {
 				TileUnpackager tile = (TileUnpackager)te;
-				for(int i = 0; i < 9; ++i) {
-					if(tile.inventory.getStackInSlot(i).isEmpty()) {
-						tile.inventory.setInventorySlotContents(i, inventory.getStackInSlot(9));
-						inventory.setInventorySlotContents(9, ItemStack.EMPTY);
-						return;
+				ItemStack stack = inventory.getStackInSlot(9);
+				if(!stack.isEmpty()) {
+					IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
+					for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
+						ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
+						if(stackRem.getCount() < stack.getCount()) {
+							stack = stackRem;
+						}
+						if(stack.isEmpty()) {
+							break;
+						}
 					}
+					inventory.setInventorySlotContents(9, stack);
 				}
 			}
 		}
@@ -344,14 +354,10 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		currentPattern = null;
 		if(nbt.hasKey("Pattern")) {
 			NBTTagCompound tag = nbt.getCompoundTag("Pattern");
-			IRecipeType recipeType = RecipeTypeRegistry.getRecipeType(new ResourceLocation(tag.getString("RecipeType")));
-			if(recipeType != null) {
-				IRecipeInfo recipe = recipeType.getNewRecipeInfo();
-				recipe.readFromNBT(tag);
-				if(recipe.isValid()) {
-					currentPattern = recipe.getPatterns().get(tag.getByte("Index"));
-					lockPattern = true;
-				}
+			IRecipeInfo recipe = MiscUtil.readRecipeFromNBT(tag);
+			if(recipe != null) {
+				currentPattern = recipe.getPatterns().get(tag.getByte("Index"));
+				lockPattern = true;
 			}
 		}
 		if(hostHelper != null) {
@@ -363,8 +369,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
 		if(lockPattern) {
-			NBTTagCompound tag = currentPattern.getRecipeInfo().writeToNBT(new NBTTagCompound());
-			tag.setString("RecipeType", currentPattern.getRecipeInfo().getRecipeType().getName().toString());
+			NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), currentPattern.getRecipeInfo());
 			tag.setByte("Index", (byte)currentPattern.getIndex());
 			nbt.setTag("Pattern", tag);
 		}

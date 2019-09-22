@@ -10,6 +10,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Triple;
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -20,9 +22,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.IItemHandler;
 
 public class MiscUtil {
+
+	private static final Cache<NBTTagCompound, IRecipeInfo> RECIPE_CACHE = CacheBuilder.newBuilder().maximumSize(500).build();
 
 	private MiscUtil() {}
 
@@ -184,5 +189,28 @@ public class MiscUtil {
 			}
 		}
 		return true;
+	}
+
+	public static NBTTagCompound writeRecipeToNBT(NBTTagCompound nbt, IRecipeInfo recipe) {
+		nbt.setString("RecipeType", recipe.getRecipeType().getName().toString());
+		recipe.writeToNBT(nbt);
+		return nbt;
+	}
+
+	public static IRecipeInfo readRecipeFromNBT(NBTTagCompound nbt) {
+		IRecipeInfo recipe = RECIPE_CACHE.getIfPresent(nbt);
+		if(recipe != null && recipe.isValid()) {
+			return recipe;
+		}
+		IRecipeType recipeType = RecipeTypeRegistry.getRecipeType(new ResourceLocation(nbt.getString("RecipeType")));
+		if(recipeType != null) {
+			recipe = recipeType.getNewRecipeInfo();
+			recipe.readFromNBT(nbt);
+			RECIPE_CACHE.put(nbt, recipe);
+			if(recipe.isValid()) {
+				return recipe;
+			}
+		}
+		return null;
 	}
 }

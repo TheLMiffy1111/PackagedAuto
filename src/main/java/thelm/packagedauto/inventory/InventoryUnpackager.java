@@ -7,6 +7,7 @@ import net.minecraftforge.energy.CapabilityEnergy;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IRecipeListItem;
 import thelm.packagedauto.tile.TileUnpackager;
+import thelm.packagedauto.tile.TileUnpackager.PackageTracker;
 
 public class InventoryUnpackager extends InventoryTileBase {
 
@@ -23,6 +24,9 @@ public class InventoryUnpackager extends InventoryTileBase {
 		if(index == 9) {
 			updateRecipeList();
 		}
+		else if(index != 10) {
+			clearRejectedIndexes();
+		}
 	}
 
 	@Override
@@ -30,6 +34,9 @@ public class InventoryUnpackager extends InventoryTileBase {
 		ItemStack stack = super.decrStackSize(index, count);
 		if(index == 9) {
 			updateRecipeList();
+		}
+		else if(index != 10) {
+			clearRejectedIndexes();
 		}
 		return stack;
 	}
@@ -67,6 +74,12 @@ public class InventoryUnpackager extends InventoryTileBase {
 		}
 		if(tile.getWorld() != null && !tile.getWorld().isRemote && tile.hostHelper != null) {
 			tile.hostHelper.postPatternChange();
+		}
+	}
+
+	public void clearRejectedIndexes() {
+		for(PackageTracker tracker : tile.trackers) {
+			tracker.clearRejectedIndexes();
 		}
 	}
 }
