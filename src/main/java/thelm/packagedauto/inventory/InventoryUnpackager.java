@@ -1,5 +1,9 @@
 package thelm.packagedauto.inventory;
 
+import java.util.Arrays;
+
+import org.apache.commons.lang3.ArrayUtils;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
@@ -63,7 +67,7 @@ public class InventoryUnpackager extends InventoryTileBase {
 
 	@Override
 	public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-		return index != 9 && index != 10;
+		return index != 9 && index != 10 && direction == EnumFacing.UP && !Arrays.stream(tile.trackers).anyMatch(t->t.isEmpty());
 	}
 
 	public void updateRecipeList() {
