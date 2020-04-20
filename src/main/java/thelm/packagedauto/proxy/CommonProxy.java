@@ -22,6 +22,7 @@ import thelm.packagedauto.network.GuiHandler;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.recipe.RecipeTypeCrafting;
 import thelm.packagedauto.recipe.RecipeTypeProcessing;
+import thelm.packagedauto.recipe.RecipeTypeSorted;
 import thelm.packagedauto.tile.TileCrafter;
 import thelm.packagedauto.tile.TileEncoder;
 import thelm.packagedauto.tile.TilePackager;
@@ -91,6 +92,7 @@ public class CommonProxy {
 
 	protected void registerRecipeTypes() {
 		RecipeTypeRegistry.registerRecipeType(RecipeTypeProcessing.INSTANCE);
+		RecipeTypeRegistry.registerRecipeType(RecipeTypeSorted.INSTANCE);
 		if(TileCrafter.enabled) {
 			RecipeTypeRegistry.registerRecipeType(RecipeTypeCrafting.INSTANCE);
 		}
