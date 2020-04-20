@@ -3,6 +3,7 @@ itemGroup.packagedauto=PackagedAuto
 tile.packagedauto.packager.name=Packager
 tile.packagedauto.encoder.name=Package Recipe Encoder
 tile.packagedauto.encoder.save=Save
+tile.packagedauto.encoder.save_single=Save Single
 tile.packagedauto.encoder.load=Load
 tile.packagedauto.encoder.pattern_slot=Recipe Slot %s
 tile.packagedauto.encoder.change_recipe_type=Change Recipe Type

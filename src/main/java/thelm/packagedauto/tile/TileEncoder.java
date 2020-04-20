@@ -66,11 +66,19 @@ public class TileEncoder extends TileBase {
 		markDirty();
 	}
 
-	public void saveRecipeList() {
+	public void saveRecipeList(boolean single) {
 		ItemStack stack = inventory.getStackInSlot(0);
 		if(stack.getItem() instanceof IRecipeListItem) {
 			List<IRecipeInfo> recipeList = new ArrayList<>();
-			for(InventoryEncoderPattern inv : patternInventories) {
+			if(!single) {
+				for(InventoryEncoderPattern inv : patternInventories) {
+					if(inv.recipeInfo != null) {
+						recipeList.add(inv.recipeInfo);
+					}
+				}
+			}
+			else {
+				InventoryEncoderPattern inv = patternInventories[patternIndex];
 				if(inv.recipeInfo != null) {
 					recipeList.add(inv.recipeInfo);
 				}

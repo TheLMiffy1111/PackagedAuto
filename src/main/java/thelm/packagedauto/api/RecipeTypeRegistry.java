@@ -42,11 +42,11 @@ public class RecipeTypeRegistry {
 		return ImmutableSortedMap.copyOf(REGISTRY);
 	}
 
-	public static IRecipeType getNextRecipeType(IRecipeType type) {
-		int toGet = ID_MAP.getId(type)+1;
+	public static IRecipeType getNextRecipeType(IRecipeType type, boolean reverse) {
+		int toGet = ID_MAP.getId(type) + (!reverse ? 1 : -1);
 		IRecipeType ret = ID_MAP.get(toGet);
 		if(ret == null) {
-			ret = ID_MAP.get(0);
+			ret = ID_MAP.get(!reverse ? 0 : ID_MAP.size()-1);
 		}
 		return ret;
 	}

@@ -27,7 +27,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.crafting.IngredientNBT;
@@ -41,9 +40,7 @@ import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeListItem;
-import thelm.packagedauto.api.IRecipeType;
 import thelm.packagedauto.api.MiscUtil;
-import thelm.packagedauto.api.RecipeTypeRegistry;
 import thelm.packagedauto.client.gui.GuiPackagerExtension;
 import thelm.packagedauto.container.ContainerPackagerExtension;
 import thelm.packagedauto.energy.EnergyStorage;
@@ -51,6 +48,11 @@ import thelm.packagedauto.integration.appeng.networking.HostHelperTilePackagerEx
 import thelm.packagedauto.integration.appeng.recipe.PackageCraftingPatternHelper;
 import thelm.packagedauto.inventory.InventoryPackagerExtension;
 
+@Optional.InterfaceList({
+	@Optional.Interface(iface="appeng.api.networking.IGridHost", modid="appliedenergistics2"),
+	@Optional.Interface(iface="appeng.api.networking.security.IActionHost", modid="appliedenergistics2"),
+	@Optional.Interface(iface="appeng.api.networking.crafting.ICraftingProvider", modid="appliedenergistics2")
+})
 public class TilePackagerExtension extends TileBase implements ITickable, IGridHost, IActionHost, ICraftingProvider {
 
 	public static int energyCapacity = 5000;
@@ -156,9 +158,6 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	}
 
 	protected boolean canStart() {
-		if(energyStorage.getEnergyStored() <= 0) {
-			return false;
-		}
 		getPattern();
 		if(currentPattern == null) {
 			return false;

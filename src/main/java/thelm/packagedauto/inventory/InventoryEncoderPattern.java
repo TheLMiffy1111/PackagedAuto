@@ -127,9 +127,9 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 		}
 	}
 
-	public void cycleRecipeType() {
+	public void cycleRecipeType(boolean reverse) {
 		validateRecipeType();
-		recipeType = RecipeTypeRegistry.getNextRecipeType(recipeType);
+		recipeType = RecipeTypeRegistry.getNextRecipeType(recipeType, reverse);
 		validateRecipeType();
 		IntSet enabledSlots = recipeType.getEnabledSlots();
 		for(int i = 0; i < 90; ++i) {

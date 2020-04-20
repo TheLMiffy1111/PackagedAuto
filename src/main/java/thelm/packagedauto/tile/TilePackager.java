@@ -153,9 +153,6 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	}
 
 	protected boolean canStart() {
-		if(energyStorage.getEnergyStored() <= 0) {
-			return false;
-		}
 		getPattern();
 		if(currentPattern == null) {
 			return false;
