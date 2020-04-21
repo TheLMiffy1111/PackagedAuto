@@ -21,9 +21,9 @@ item.packagedauto.package.items=Items:
 item.packagedauto.package_component.name=Packaging Component
 item.packagedauto.me_package_component.name=ME Packaging Component
 
-recipe.packagedauto.processing=Shapeless Processing
-recipe.packagedauto.processing.short=Shapeless
-recipe.packagedauto.sorted=Shaped Processing
-recipe.packagedauto.sorted.short=Shaped
+recipe.packagedauto.processing=Processing
+recipe.packagedauto.processing.short=Processing
+recipe.packagedauto.processing_ordered=Ordered Processing
+recipe.packagedauto.processing_ordered.short=Ordered
 recipe.packagedauto.crafting=Crafting
 recipe.packagedauto.crafting.short=Crafting
