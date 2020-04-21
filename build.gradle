@@ -17,7 +17,9 @@ buildscript {
 		//classpath "com.github.Wyn-Price:CurseMaven:f0d58155e6"
     }
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
+
+apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "com.wynprice.cursemaven"
 
 repositories {
     jcenter()
@@ -38,7 +40,7 @@ repositories {
     }
 }
 
-version = "1.12.2-1.0.2.10"
+version = "1.12.2-1.0.2.11"
 group= "thelm.packagedauto"
 archivesBaseName = "PackagedAuto"
 

@@ -44,7 +44,7 @@ public class RecipeListHelper implements IRecipeList {
 			for(int i = 0; i < tagList.tagCount(); ++i) {
 				NBTTagCompound tag = tagList.getCompoundTagAt(i);
 				IRecipeInfo recipe = MiscUtil.readRecipeFromNBT(tag);
-				if(recipe.isValid()) {
+				if(recipe != null) {
 					recipeList.add(recipe);
 				}
 			}
