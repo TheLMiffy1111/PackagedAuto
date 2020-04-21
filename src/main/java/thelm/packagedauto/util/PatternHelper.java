@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
+import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.item.ItemPackage;
 
 public class PatternHelper implements IPackagePattern {
@@ -17,10 +18,20 @@ public class PatternHelper implements IPackagePattern {
 	public final ItemStack output;
 
 	public PatternHelper(IRecipeInfo recipeInfo, int index) {
+		this(recipeInfo, index, false);
+	}
+
+	public PatternHelper(IRecipeInfo recipeInfo, int index, boolean condense) {
 		this.recipeInfo = recipeInfo;
 		this.index = index;
 		List<ItemStack> recipeInputs = recipeInfo.getInputs();
-		this.inputs = ImmutableList.copyOf(recipeInputs.subList(9*index, Math.min(9*index+9, recipeInputs.size())));
+		recipeInputs = recipeInputs.subList(9*index, Math.min(9*index+9, recipeInputs.size()));
+		if(condense) {
+			this.inputs = ImmutableList.copyOf(MiscUtil.condenseStacks(recipeInputs));
+		}
+		else {
+			this.inputs = ImmutableList.copyOf(recipeInputs);
+		}
 		this.output = ItemPackage.makePackage(recipeInfo, index);
 	}
 
