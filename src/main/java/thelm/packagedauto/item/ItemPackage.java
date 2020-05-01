@@ -4,15 +4,21 @@ import java.util.List;
 
 import net.minecraft.client.renderer.block.model.ModelResourceLocation;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraft.world.World;
 import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import thelm.packagedauto.api.IPackageItem;
+import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.client.IModelRegister;
@@ -34,6 +40,33 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister {
 		tag.setByte("Index", (byte)index);
 		stack.setTagCompound(tag);
 		return stack;
+	}
+
+	@Override
+	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
+		if(!worldIn.isRemote && playerIn.isSneaking()) {
+			ItemStack stack = playerIn.getHeldItem(handIn).copy();
+			ItemStack stack1 = stack.splitStack(1);
+			IRecipeInfo recipeInfo = getRecipeInfo(stack1);
+			if(recipeInfo != null) {
+				List<IPackagePattern> patterns = recipeInfo.getPatterns();
+				int index = getIndex(stack1);
+				if(index >= 0 && index < patterns.size()) {
+					IPackagePattern pattern = patterns.get(index);
+					List<ItemStack> inputs = pattern.getInputs();
+					for(int i = 0; i < inputs.size(); ++i) {
+						ItemStack input = inputs.get(i).copy();
+						if(!playerIn.inventory.addItemStackToInventory(input)) {
+							EntityItem item = new EntityItem(worldIn, playerIn.posX, playerIn.posY, playerIn.posZ, input);
+							item.setThrower(playerIn.getName());
+							worldIn.spawnEntity(item);
+						}
+					}
+				}
+			}
+			return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+		}
+		return new ActionResult<>(EnumActionResult.PASS, playerIn.getHeldItem(handIn));
 	}
 
 	@Override

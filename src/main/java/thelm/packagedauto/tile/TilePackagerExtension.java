@@ -179,6 +179,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 			return;
 		}
 		lockPattern = false;
+		currentPattern = null;
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
 		for(IPackagePattern pattern : patternList) {
 			List<Ingredient> matchers = Lists.transform(pattern.getInputs(), TilePackager::getIngredient);
@@ -373,8 +374,12 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 			NBTTagCompound tag = nbt.getCompoundTag("Pattern");
 			IRecipeInfo recipe = MiscUtil.readRecipeFromNBT(tag);
 			if(recipe != null) {
-				currentPattern = recipe.getPatterns().get(tag.getByte("Index"));
-				lockPattern = true;
+				List<IPackagePattern> patterns = recipe.getPatterns();
+				byte index = tag.getByte("Index");
+				if(index >= 0 && index < patterns.size()) {
+					currentPattern = patterns.get(index);
+					lockPattern = true;
+				}
 			}
 		}
 		if(hostHelper != null) {

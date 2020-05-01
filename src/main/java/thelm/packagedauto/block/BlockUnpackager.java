@@ -60,7 +60,7 @@ public class BlockUnpackager extends BlockBase {
 					}
 					else {
 						List<IPackagePattern> patterns = tracker.recipe.getPatterns();
-						for(int i = 0; i < tracker.received.size(); ++i) {
+						for(int i = 0; i < tracker.received.size() && i < patterns.size(); ++i) {
 							if(tracker.received.getBoolean(i)) {
 								InventoryHelper.spawnItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), patterns.get(i).getOutput());
 							}
