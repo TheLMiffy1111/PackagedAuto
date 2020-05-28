@@ -95,7 +95,11 @@ public class MiscUtil {
 	public static NBTTagList saveAllItems(NBTTagList tagList, List<ItemStack> list) {
 		for(int i = 0; i < list.size(); ++i) {
 			ItemStack stack = list.get(i);
-			if(!stack.isEmpty() || i == list.size()-1) {
+			boolean empty = stack.isEmpty();
+			if(!empty || i == list.size()-1) {
+				if(empty) {
+					stack = ItemStack.EMPTY;
+				}
 				NBTTagCompound nbt = new NBTTagCompound();
 				nbt.setByte("Index", (byte)i);
 				stack.writeToNBT(nbt);
