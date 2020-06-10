@@ -9,6 +9,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Triple;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -16,6 +18,7 @@ import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -28,6 +31,7 @@ import net.minecraftforge.items.IItemHandler;
 public class MiscUtil {
 
 	private static final Cache<NBTTagCompound, IRecipeInfo> RECIPE_CACHE = CacheBuilder.newBuilder().maximumSize(500).build();
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private MiscUtil() {}
 
@@ -67,7 +71,7 @@ public class MiscUtil {
 			if(stack.isEmpty()) {
 				continue;
 			}
-			Triple<Item, Integer, NBTTagCompound> triple = Triple.of(stack.getItem(), stack.getItemDamage(), stack.getTagCompound());
+			Triple<Item, Integer, NBTTagCompound> triple = Triple.of(stack.getItem(), stack.getMetadata(), stack.getTagCompound());
 			if(!map.containsKey(triple)) {
 				map.put(triple, 0);
 			}
