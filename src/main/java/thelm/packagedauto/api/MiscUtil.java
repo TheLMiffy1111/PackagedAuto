@@ -18,7 +18,7 @@ import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
-import net.minecraft.init.Items;
+import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -64,6 +64,10 @@ public class MiscUtil {
 	}
 
 	public static List<ItemStack> condenseStacks(List<ItemStack> stacks) {
+		return condenseStacks(stacks, false);
+	}
+
+	public static List<ItemStack> condenseStacks(List<ItemStack> stacks, boolean ignoreStackSize) {
 		Object2IntRBTreeMap<Triple<Item, Integer, NBTTagCompound>> map = new Object2IntRBTreeMap<>((triple1, triple2)->
 		Triple.of(triple1.getLeft().getRegistryName(), triple1.getMiddle(), ""+triple1.getRight()).compareTo(
 				Triple.of(triple2.getLeft().getRegistryName(), triple2.getMiddle(), ""+triple2.getRight())));
@@ -84,15 +88,21 @@ public class MiscUtil {
 			Item item = triple.getLeft();
 			int meta = triple.getMiddle();
 			NBTTagCompound nbt = triple.getRight();
-			while(count > 0) {
-				ItemStack toAdd = new ItemStack(item, 1, meta);
-				toAdd.setTagCompound(nbt);
-				int limit = item.getItemStackLimit(toAdd);
-				toAdd.setCount(Math.min(count, limit));
-				list.add(toAdd);
-				count -= limit;
+			if(ignoreStackSize) {
+				list.add(new ItemStack(item, count, meta));
+			}
+			else {
+				while(count > 0) {
+					ItemStack toAdd = new ItemStack(item, 1, meta);
+					toAdd.setTagCompound(nbt);
+					int limit = item.getItemStackLimit(toAdd);
+					toAdd.setCount(Math.min(count, limit));
+					list.add(toAdd);
+					count -= limit;
+				}
 			}
 		}
+		map.clear();
 		return list;
 	}
 
@@ -220,5 +230,59 @@ public class MiscUtil {
 			}
 		}
 		return null;
+	}
+
+	//Modified from Forestry
+	public static boolean removeExactSet(List<ItemStack> offered, List<ItemStack> required, boolean simulate) {
+		List<ItemStack> condensedRequired = condenseStacks(required, true);
+		List<ItemStack> condensedOffered = condenseStacks(offered, true);
+		f:for(ItemStack req : condensedRequired) {
+			for(ItemStack offer : condensedOffered) {
+				if(req.getCount() <= offer.getCount() && req.getItem() == offer.getItem() &&
+						offer.getItemDamage() == req.getItemDamage() &&
+						(!req.hasTagCompound() || ItemStack.areItemStackShareTagsEqual(req, offer))) {
+					continue f;
+				}
+			}
+			return false;
+		}
+		if(simulate) {
+			return true;
+		}
+		for(ItemStack req : condensedRequired) {
+			int count = req.getCount();
+			for(ItemStack offer : offered) {
+				if(!req.isEmpty()) {
+					if(req.getItem() == offer.getItem() && offer.getItemDamage() == req.getItemDamage() &&
+							(!req.hasTagCompound() || ItemStack.areItemStackShareTagsEqual(req, offer))) {
+						int toRemove = Math.min(count, offer.getCount());
+						offer.shrink(toRemove);
+						count -= toRemove;
+						if(count == 0) {
+							continue;
+						}
+					}
+				}
+			}
+		}
+		return true;
+	}
+
+	public static boolean arePatternsDisjoint(List<IPackagePattern> patternList) {
+		ObjectRBTreeSet<Triple<Item, Integer, NBTTagCompound>> set = new ObjectRBTreeSet<>((triple1, triple2)->
+		Triple.of(triple1.getLeft().getRegistryName(), triple1.getMiddle(), ""+triple1.getRight()).compareTo(
+				Triple.of(triple2.getLeft().getRegistryName(), triple2.getMiddle(), ""+triple2.getRight())));
+		for(IPackagePattern pattern : patternList) {
+			List<ItemStack> condensedInputs = condenseStacks(pattern.getInputs(), true);
+			for(ItemStack stack : condensedInputs) {
+				Triple<Item, Integer, NBTTagCompound> toAdd = Triple.of(stack.getItem(), stack.getItemDamage(), stack.getTagCompound());
+				if(set.contains(toAdd)) {
+					return false;
+				}
+				set.add(toAdd);
+			}
+		}
+		set.clear();
+		return true;
 	}
 }

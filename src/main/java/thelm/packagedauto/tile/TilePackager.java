@@ -25,7 +25,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.crafting.IngredientNBT;
 import net.minecraftforge.common.util.RecipeMatcher;
@@ -39,9 +38,7 @@ import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
-import thelm.packagedauto.api.IRecipeType;
 import thelm.packagedauto.api.MiscUtil;
-import thelm.packagedauto.api.RecipeTypeRegistry;
 import thelm.packagedauto.client.gui.GuiPackager;
 import thelm.packagedauto.container.ContainerPackager;
 import thelm.packagedauto.energy.EnergyStorage;
@@ -60,12 +57,14 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
+	public static boolean checkDisjoint = true;
 
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
+	public boolean disjoint = false;
 
 	public TilePackager() {
 		setInventory(new InventoryPackager(this));
@@ -139,6 +138,12 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 			return false;
 		}
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
+		if(input.isEmpty()) {
+			return false;
+		}
+		if(!lockPattern && disjoint) {
+			return MiscUtil.removeExactSet(input, currentPattern.getInputs(), true);
+		}
 		List<Ingredient> matchers = Lists.transform(currentPattern.getInputs(), TilePackager::getIngredient);
 		int[] matches = RecipeMatcher.findMatches(input, matchers);
 		if(matches == null) {
@@ -176,11 +181,23 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		lockPattern = false;
 		currentPattern = null;
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
+		if(input.isEmpty()) {
+			return;
+		}
 		for(IPackagePattern pattern : patternList) {
-			List<Ingredient> matchers = Lists.transform(pattern.getInputs(), TilePackager::getIngredient);
-			int[] matches = RecipeMatcher.findMatches(input, matchers);
-			if(matches != null) {
-				currentPattern = pattern;
+			if(disjoint) {
+				if(MiscUtil.removeExactSet(input, pattern.getInputs(), true)) {
+					currentPattern = pattern;
+					return;
+				}
+			}
+			else {
+				List<Ingredient> matchers = Lists.transform(pattern.getInputs(), TilePackager::getIngredient);
+				int[] matches = RecipeMatcher.findMatches(input, matchers);
+				if(matches != null) {
+					currentPattern = pattern;
+					return;
+				}
 			}
 		}
 	}
@@ -199,24 +216,47 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 			return;
 		}
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
-		List<Ingredient> matchers = Lists.transform(currentPattern.getInputs(), TilePackager::getIngredient);
-		int[] matches = RecipeMatcher.findMatches(input, matchers);
-		if(matches == null) {
+		if(input.isEmpty()) {
 			endProcess();
 			return;
 		}
-		if(inventory.getStackInSlot(9).isEmpty()) {
-			inventory.setInventorySlotContents(9, currentPattern.getOutput());
-		}
-		else if(inventory.getStackInSlot(9).getItem() instanceof IPackageItem) {
-			inventory.getStackInSlot(9).grow(1);
+		if(!lockPattern && disjoint) {
+			if(!MiscUtil.removeExactSet(input, currentPattern.getInputs(), true)) {
+				endProcess();
+				return;
+			}
+			if(inventory.getStackInSlot(9).isEmpty()) {
+				inventory.setInventorySlotContents(9, currentPattern.getOutput());
+			}
+			else if(inventory.getStackInSlot(9).getItem() instanceof IPackageItem) {
+				inventory.getStackInSlot(9).grow(1);
+			}
+			else {
+				endProcess();
+				return;
+			}
+			MiscUtil.removeExactSet(input, currentPattern.getInputs(), false);
 		}
 		else {
-			endProcess();
-			return;
-		}
-		for(int i = 0; i < matches.length; ++i) {
-			input.get(i).shrink(currentPattern.getInputs().get(matches[i]).getCount());
+			List<Ingredient> matchers = Lists.transform(currentPattern.getInputs(), TilePackager::getIngredient);
+			int[] matches = RecipeMatcher.findMatches(input, matchers);
+			if(matches == null) {
+				endProcess();
+				return;
+			}
+			if(inventory.getStackInSlot(9).isEmpty()) {
+				inventory.setInventorySlotContents(9, currentPattern.getOutput());
+			}
+			else if(inventory.getStackInSlot(9).getItem() instanceof IPackageItem) {
+				inventory.getStackInSlot(9).grow(1);
+			}
+			else {
+				endProcess();
+				return;
+			}
+			for(int i = 0; i < matches.length; ++i) {
+				input.get(i).shrink(currentPattern.getInputs().get(matches[i]).getCount());
+			}
 		}
 		for(int i = 0; i < 9; ++i) {
 			if(inventory.getStackInSlot(i).isEmpty()) {

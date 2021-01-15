@@ -12,7 +12,6 @@ import appeng.api.storage.IMEMonitor;
 import appeng.api.storage.channels.IItemStorageChannel;
 import appeng.api.storage.data.IAEItemStack;
 import net.minecraft.item.ItemStack;
-import thelm.packagedauto.tile.TilePackager;
 import thelm.packagedauto.tile.TilePackagerExtension;
 
 public class HostHelperTilePackagerExtension extends HostHelperTile<TilePackagerExtension> {

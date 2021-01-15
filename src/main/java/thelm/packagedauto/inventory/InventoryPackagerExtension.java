@@ -1,10 +1,8 @@
 package thelm.packagedauto.inventory;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.energy.CapabilityEnergy;
-import thelm.packagedauto.api.IRecipeListItem;
 import thelm.packagedauto.tile.TilePackagerExtension;
 
 public class InventoryPackagerExtension extends InventoryTileBase {

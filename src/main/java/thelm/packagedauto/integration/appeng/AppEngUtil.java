@@ -6,7 +6,6 @@ import java.util.Map;
 import appeng.api.parts.IPartHost;
 import appeng.api.storage.data.IAEItemStack;
 import appeng.helpers.IInterfaceHost;
-import appeng.tile.misc.TileInterface;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 

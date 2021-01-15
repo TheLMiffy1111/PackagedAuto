@@ -7,7 +7,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.energy.CapabilityEnergy;
+import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IRecipeListItem;
+import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.tile.TilePackager;
 import thelm.packagedauto.tile.TilePackagerExtension;
 
@@ -56,7 +58,7 @@ public class InventoryPackager extends InventoryTileBase {
 	public boolean isItemValidForSlot(int index, ItemStack stack) {
 		switch(index) {
 		case 9: return false;
-		case 10: return stack.getItem() instanceof IRecipeListItem;
+		case 10: return stack.getItem() instanceof IRecipeListItem || stack.getItem() instanceof IPackageItem;
 		case 11: return stack.hasCapability(CapabilityEnergy.ENERGY, null);
 		default: return tile.isWorking ? !getStackInSlot(index).isEmpty() : true;
 		}
@@ -114,6 +116,13 @@ public class InventoryPackager extends InventoryTileBase {
 		ItemStack listStack = getStackInSlot(10);
 		if(listStack.getItem() instanceof IRecipeListItem) {
 			((IRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(tile.patternList::add));
+		}
+		else if(listStack.getItem() instanceof IPackageItem) {
+			IPackageItem packageItem = (IPackageItem)listStack.getItem();
+			tile.patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+		}
+		if(TilePackager.checkDisjoint) {
+			tile.disjoint = MiscUtil.arePatternsDisjoint(tile.patternList);
 		}
 		if(tile.getWorld() != null && !tile.getWorld().isRemote && tile.hostHelper != null) {
 			tile.hostHelper.postPatternChange();

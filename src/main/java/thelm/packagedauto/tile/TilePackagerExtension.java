@@ -29,7 +29,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.common.crafting.IngredientNBT;
 import net.minecraftforge.common.util.RecipeMatcher;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.common.Loader;
@@ -59,6 +58,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
+	public static boolean checkDisjoint = true;
 
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
@@ -66,6 +66,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
+	public boolean disjoint = false;
 
 	public TilePackagerExtension() {
 		setInventory(new InventoryPackagerExtension(this));
@@ -132,10 +133,6 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		}
 	}
 
-	protected static Ingredient getIngredient(ItemStack stack) {
-		return stack.hasTagCompound() ? new IngredientNBT(stack) {} : Ingredient.fromStacks(stack);
-	}
-
 	public boolean isInputValid() {
 		if(currentPattern == null) {
 			getPattern();
@@ -144,6 +141,12 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 			return false;
 		}
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
+		if(input.isEmpty()) {
+			return false;
+		}
+		if(!lockPattern && disjoint) {
+			return MiscUtil.removeExactSet(input, currentPattern.getInputs(), true);
+		}
 		List<Ingredient> matchers = Lists.transform(currentPattern.getInputs(), TilePackager::getIngredient);
 		int[] matches = RecipeMatcher.findMatches(input, matchers);
 		if(matches == null) {
@@ -181,11 +184,23 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		lockPattern = false;
 		currentPattern = null;
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
+		if(input.isEmpty()) {
+			return;
+		}
 		for(IPackagePattern pattern : patternList) {
-			List<Ingredient> matchers = Lists.transform(pattern.getInputs(), TilePackager::getIngredient);
-			int[] matches = RecipeMatcher.findMatches(input, matchers);
-			if(matches != null) {
-				currentPattern = pattern;
+			if(disjoint) {
+				if(MiscUtil.removeExactSet(input, pattern.getInputs(), true)) {
+					currentPattern = pattern;
+					return;
+				}
+			}
+			else {
+				List<Ingredient> matchers = Lists.transform(pattern.getInputs(), TilePackager::getIngredient);
+				int[] matches = RecipeMatcher.findMatches(input, matchers);
+				if(matches != null) {
+					currentPattern = pattern;
+					return;
+				}
 			}
 		}
 	}
@@ -201,6 +216,13 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 					listStackInventory.setInventorySlotContents(0, listStack);
 					if(listStack.getItem() instanceof IRecipeListItem) {
 						((IRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(patternList::add));
+					}
+					else if(listStack.getItem() instanceof IPackageItem) {
+						IPackageItem packageItem = (IPackageItem)listStack.getItem();
+						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+					}
+					if(checkDisjoint) {
+						disjoint = MiscUtil.arePatternsDisjoint(patternList);
 					}
 					break;
 				}
@@ -225,24 +247,47 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 			return;
 		}
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
-		List<Ingredient> matchers = Lists.transform(currentPattern.getInputs(), TilePackager::getIngredient);
-		int[] matches = RecipeMatcher.findMatches(input, matchers);
-		if(matches == null) {
+		if(input.isEmpty()) {
 			endProcess();
 			return;
 		}
-		if(inventory.getStackInSlot(9).isEmpty()) {
-			inventory.setInventorySlotContents(9, currentPattern.getOutput());
-		}
-		else if(inventory.getStackInSlot(9).getItem() instanceof IPackageItem) {
-			inventory.getStackInSlot(9).grow(1);
+		if(!lockPattern && disjoint) {
+			if(!MiscUtil.removeExactSet(input, currentPattern.getInputs(), true)) {
+				endProcess();
+				return;
+			}
+			if(inventory.getStackInSlot(9).isEmpty()) {
+				inventory.setInventorySlotContents(9, currentPattern.getOutput());
+			}
+			else if(inventory.getStackInSlot(9).getItem() instanceof IPackageItem) {
+				inventory.getStackInSlot(9).grow(1);
+			}
+			else {
+				endProcess();
+				return;
+			}
+			MiscUtil.removeExactSet(input, currentPattern.getInputs(), false);
 		}
 		else {
-			endProcess();
-			return;
-		}
-		for(int i = 0; i < matches.length; ++i) {
-			input.get(i).shrink(currentPattern.getInputs().get(matches[i]).getCount());
+			List<Ingredient> matchers = Lists.transform(currentPattern.getInputs(), TilePackager::getIngredient);
+			int[] matches = RecipeMatcher.findMatches(input, matchers);
+			if(matches == null) {
+				endProcess();
+				return;
+			}
+			if(inventory.getStackInSlot(9).isEmpty()) {
+				inventory.setInventorySlotContents(9, currentPattern.getOutput());
+			}
+			else if(inventory.getStackInSlot(9).getItem() instanceof IPackageItem) {
+				inventory.getStackInSlot(9).grow(1);
+			}
+			else {
+				endProcess();
+				return;
+			}
+			for(int i = 0; i < matches.length; ++i) {
+				input.get(i).shrink(currentPattern.getInputs().get(matches[i]).getCount());
+			}
 		}
 		for(int i = 0; i < 9; ++i) {
 			if(inventory.getStackInSlot(i).isEmpty()) {

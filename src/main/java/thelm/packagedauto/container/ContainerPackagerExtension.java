@@ -1,9 +1,6 @@
 package thelm.packagedauto.container;
 
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.inventory.InventoryCraftResult;
-import net.minecraft.inventory.InventoryHelper;
 import thelm.packagedauto.slot.SlotBase;
 import thelm.packagedauto.slot.SlotPreview;
 import thelm.packagedauto.slot.SlotRemoveOnly;
