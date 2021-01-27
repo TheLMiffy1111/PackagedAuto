@@ -59,6 +59,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
 	public static boolean checkDisjoint = true;
+	public static boolean forceDisjoint = false;
 
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
@@ -67,6 +68,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
 	public boolean disjoint = false;
+	public boolean redstone;
 
 	public TilePackagerExtension() {
 		setInventory(new InventoryPackagerExtension(this));
@@ -84,6 +86,19 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	@Override
 	public void onLoad() {
 		updatePatternList();
+	}
+
+	public void checkRedstone(){
+		boolean isIndirectlyPowered = (getWorld().getRedstonePowerFromNeighbors(pos) != 0);
+		if (isIndirectlyPowered && !redstone) {
+			redstoneChanged(true);
+		} else if (redstone && !isIndirectlyPowered) {
+			redstoneChanged(false);
+		}
+	}
+
+	public void redstoneChanged(boolean value){
+		redstone = value;
 	}
 
 	@Override
@@ -224,6 +239,10 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 					if(checkDisjoint) {
 						disjoint = MiscUtil.arePatternsDisjoint(patternList);
 					}
+					if (redstone || forceDisjoint){
+						disjoint = true;
+					}
+
 					break;
 				}
 			}
@@ -451,6 +470,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		super.readSyncNBT(nbt);
 		isWorking = nbt.getBoolean("Working");
 		remainingProgress = nbt.getInteger("Progress");
+		if (nbt.getBoolean("Redstone")) redstone = nbt.getBoolean("Redstone");
 	}
 
 	@Override
@@ -458,6 +478,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		super.writeSyncNBT(nbt);
 		nbt.setBoolean("Working", isWorking);
 		nbt.setInteger("Progress", remainingProgress);
+		nbt.setBoolean("Redstone", redstone);
 		return nbt;
 	}
 

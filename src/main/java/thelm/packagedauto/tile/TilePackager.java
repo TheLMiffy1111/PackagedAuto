@@ -58,6 +58,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
 	public static boolean checkDisjoint = true;
+	public static boolean forceDisjoint = false;
 
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
@@ -65,6 +66,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
 	public boolean disjoint = false;
+	public boolean redstone;
 
 	public TilePackager() {
 		setInventory(new InventoryPackager(this));
@@ -77,6 +79,19 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	@Override
 	protected String getLocalizedName() {
 		return I18n.translateToLocal("tile.packagedauto.packager.name");
+	}
+
+	public void checkRedstone(){
+		boolean isIndirectlyPowered = (getWorld().getRedstonePowerFromNeighbors(pos) != 0);
+		if (isIndirectlyPowered && !redstone) {
+			redstoneChanged(true);
+		} else if (redstone && !isIndirectlyPowered) {
+			redstoneChanged(false);
+		}
+	}
+
+	public void redstoneChanged(boolean value){
+		redstone = value;
 	}
 
 	@Override
@@ -415,6 +430,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 			tag.setByte("Index", (byte)currentPattern.getIndex());
 			nbt.setTag("Pattern", tag);
 		}
+
 		if(hostHelper != null) {
 			hostHelper.writeToNBT(nbt);
 		}
@@ -426,6 +442,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		super.readSyncNBT(nbt);
 		isWorking = nbt.getBoolean("Working");
 		remainingProgress = nbt.getInteger("Progress");
+		if (nbt.getBoolean("Redstone")) redstone = nbt.getBoolean("Redstone");
 	}
 
 	@Override
@@ -433,6 +450,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		super.writeSyncNBT(nbt);
 		nbt.setBoolean("Working", isWorking);
 		nbt.setInteger("Progress", remainingProgress);
+		nbt.setBoolean("Redstone", redstone);
 		return nbt;
 	}
 

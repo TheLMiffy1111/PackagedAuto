@@ -124,6 +124,9 @@ public class InventoryPackager extends InventoryTileBase {
 		if(TilePackager.checkDisjoint) {
 			tile.disjoint = MiscUtil.arePatternsDisjoint(tile.patternList);
 		}
+		if (tile.getWorld() != null && !tile.getWorld().isRemote && (TilePackager.forceDisjoint || tile.redstone)){
+			tile.disjoint = true;
+		}
 		if(tile.getWorld() != null && !tile.getWorld().isRemote && tile.hostHelper != null) {
 			tile.hostHelper.postPatternChange();
 		}
