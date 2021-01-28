@@ -58,6 +58,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
 	public static boolean checkDisjoint = true;
+	public static boolean forceDisjoint = false;
 
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
@@ -65,6 +66,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
 	public boolean disjoint = false;
+	public boolean powered = false;
 
 	public TilePackager() {
 		setInventory(new InventoryPackager(this));
@@ -180,6 +182,9 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		}
 		lockPattern = false;
 		currentPattern = null;
+		if(powered) {
+			return;
+		}
 		List<ItemStack> input = inventory.stacks.subList(0, 9).stream().filter(stack->!stack.isEmpty()).collect(Collectors.toList());
 		if(input.isEmpty()) {
 			return;
@@ -312,6 +317,14 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		}
 	}
 
+	public void updatePowered() {
+		if(world.getRedstonePowerFromNeighbors(pos) > 0 != powered) {
+			powered = !powered;
+			syncTile(false);
+			markDirty();
+		}
+	}
+
 	public HostHelperTilePackager hostHelper;
 
 	@Override
@@ -426,6 +439,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		super.readSyncNBT(nbt);
 		isWorking = nbt.getBoolean("Working");
 		remainingProgress = nbt.getInteger("Progress");
+		powered = nbt.getBoolean("Powered");
 	}
 
 	@Override
@@ -433,6 +447,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		super.writeSyncNBT(nbt);
 		nbt.setBoolean("Working", isWorking);
 		nbt.setInteger("Progress", remainingProgress);
+		nbt.setBoolean("Powered", powered);
 		return nbt;
 	}
 

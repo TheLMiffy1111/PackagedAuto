@@ -24,23 +24,23 @@ apply plugin: "com.wynprice.cursemaven"
 repositories {
     jcenter()
     maven {
-        url = "http://maven.blamejared.com"
+        url = "https://maven.blamejared.com/"
     }
     maven {
-        url = "http://dvs1.progwml6.com/files/maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
     }
     maven {
-        url = "http://tehnut.info/maven"
+        url = "https://maven.tehnut.info/"
     }
     maven {
-        url = "http://maven.covers1624.net/"
+        url = "https://maven.covers1624.net/"
     }
     maven {
         url = "https://modmaven.k-4u.nl/" 
     }
 }
 
-version = "1.12.2-1.0.4.15"
+version = "1.12.2-1.0.4.16"
 group= "thelm.packagedauto"
 archivesBaseName = "PackagedAuto"
 

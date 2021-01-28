@@ -3,6 +3,7 @@ package thelm.packagedauto.api;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -68,9 +69,8 @@ public class MiscUtil {
 	}
 
 	public static List<ItemStack> condenseStacks(List<ItemStack> stacks, boolean ignoreStackSize) {
-		Object2IntRBTreeMap<Triple<Item, Integer, NBTTagCompound>> map = new Object2IntRBTreeMap<>((triple1, triple2)->
-		Triple.of(triple1.getLeft().getRegistryName(), triple1.getMiddle(), ""+triple1.getRight()).compareTo(
-				Triple.of(triple2.getLeft().getRegistryName(), triple2.getMiddle(), ""+triple2.getRight())));
+;		Object2IntRBTreeMap<Triple<Item, Integer, NBTTagCompound>> map = new Object2IntRBTreeMap<>(
+				Comparator.comparing(triple->Triple.of(triple.getLeft().getRegistryName(), triple.getMiddle(), ""+triple.getRight())));
 		for(ItemStack stack : stacks) {
 			if(stack.isEmpty()) {
 				continue;
@@ -269,9 +269,8 @@ public class MiscUtil {
 	}
 
 	public static boolean arePatternsDisjoint(List<IPackagePattern> patternList) {
-		ObjectRBTreeSet<Triple<Item, Integer, NBTTagCompound>> set = new ObjectRBTreeSet<>((triple1, triple2)->
-		Triple.of(triple1.getLeft().getRegistryName(), triple1.getMiddle(), ""+triple1.getRight()).compareTo(
-				Triple.of(triple2.getLeft().getRegistryName(), triple2.getMiddle(), ""+triple2.getRight())));
+		ObjectRBTreeSet<Triple<Item, Integer, NBTTagCompound>> set = new ObjectRBTreeSet<>(
+				Comparator.comparing(triple->Triple.of(triple.getLeft().getRegistryName(), triple.getMiddle(), ""+triple.getRight())));
 		for(IPackagePattern pattern : patternList) {
 			List<ItemStack> condensedInputs = condenseStacks(pattern.getInputs(), true);
 			for(ItemStack stack : condensedInputs) {
