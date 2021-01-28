@@ -30,9 +30,6 @@ repositories {
         url = "https://dvs1.progwml6.com/files/maven/"
     }
     maven {
-        url = "https://maven.tehnut.info/"
-    }
-    maven {
         url = "https://maven.covers1624.net/"
     }
     maven {
@@ -76,7 +73,6 @@ dependencies {
         transitive = false
     }
 	deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.0.9.285"
-    deobfCompile "mcp.mobius.waila:Hwyla:1.8.25-B40_1.12"
     deobfCompile("appeng:appliedenergistics2:rv6-stable-7") {
         transitive = false
     }
