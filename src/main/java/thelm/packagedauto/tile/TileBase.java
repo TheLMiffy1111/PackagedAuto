@@ -28,6 +28,7 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 	protected InventoryTileBase inventory = new InventoryTileBase(this, 0);
 	protected EnergyStorage energyStorage = new EnergyStorage(this, 0);
 	public String customName = "";
+	protected int placerID = -1;
 
 	public InventoryTileBase getInventory() {
 		return inventory;
@@ -46,6 +47,10 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 	}
 	
 	public void setPlacer(EntityPlayer placer) {}
+
+	public int getPlacerID(){
+		return this.placerID;
+	}
 
 	protected abstract String getLocalizedName();
 
