@@ -45,11 +45,11 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 	public void setEnergyStorage(EnergyStorage energyStorage) {
 		this.energyStorage = energyStorage;
 	}
-	
+
 	public void setPlacer(EntityPlayer placer) {}
 
-	public int getPlacerID(){
-		return this.placerID;
+	public int getPlacerID() {
+		return placerID;
 	}
 
 	protected abstract String getLocalizedName();

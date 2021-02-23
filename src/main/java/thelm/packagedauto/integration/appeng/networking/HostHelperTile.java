@@ -24,7 +24,7 @@ public class HostHelperTile<TILE extends TileBase & IGridHost & IActionHost> {
 	public IGridNode getNode() {
 		if(gridNode == null && tile.hasWorld() && !tile.getWorld().isRemote) {
 			gridNode = AEApi.instance().grid().createGridNode(gridBlock);
-			gridNode.setPlayerID((tile.getPlacerID()));
+			gridNode.setPlayerID(tile.getPlacerID());
 			gridNode.updateState();
 		}
 		return gridNode;

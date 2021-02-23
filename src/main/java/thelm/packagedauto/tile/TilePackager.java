@@ -338,7 +338,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public void setPlacer(EntityPlayer placer) {
-		this.placerID = AEApi.instance().registries().players().getID(placer);
+		placerID = AEApi.instance().registries().players().getID(placer);
 	}
 
 	@Optional.Method(modid="appliedenergistics2")
@@ -356,7 +356,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public void securityBreak() {
-		this.world.destroyBlock(this.pos, true);
+		world.destroyBlock(pos, true);
 	}
 
 	@Optional.Method(modid="appliedenergistics2")

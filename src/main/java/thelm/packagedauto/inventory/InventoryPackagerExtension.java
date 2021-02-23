@@ -87,6 +87,6 @@ public class InventoryPackagerExtension extends InventoryTileBase {
 
 	@Override
 	public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-		return index == 9;
+		return index == 9 || direction == EnumFacing.UP && index != 10;
 	}
 }

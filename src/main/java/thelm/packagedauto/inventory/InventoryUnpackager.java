@@ -13,6 +13,7 @@ import thelm.packagedauto.tile.TileUnpackager.PackageTracker;
 
 public class InventoryUnpackager extends InventoryTileBase {
 
+	public static final int[] SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 	public final TileUnpackager tile;
 
 	public InventoryUnpackager(TileUnpackager tile) {
@@ -56,6 +57,11 @@ public class InventoryUnpackager extends InventoryTileBase {
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		updateRecipeList();
+	}
+
+	@Override
+	public int[] getSlotsForFace(EnumFacing side) {
+		return SLOTS;
 	}
 
 	@Override
