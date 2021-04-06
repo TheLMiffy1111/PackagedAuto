@@ -4,37 +4,43 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
-import net.minecraft.entity.player.EntityPlayer;
+import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import thelm.packagedauto.api.IRecipeType;
-import thelm.packagedauto.container.ContainerEncoder;
+import net.minecraft.util.ResourceLocation;
+import thelm.packagedauto.api.IPackageRecipeType;
+import thelm.packagedauto.container.EncoderContainer;
 import thelm.packagedauto.network.PacketHandler;
-import thelm.packagedauto.network.packet.PacketSetRecipe;
+import thelm.packagedauto.network.packet.SetRecipePacket;
 
-public class EncoderTransferHandler implements IRecipeTransferHandler<ContainerEncoder> {
+public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderContainer> {
 
-	public static final EncoderTransferHandler INSTANCE = new EncoderTransferHandler();
+	private final IRecipeTransferHandlerHelper transferHelper;
 
-	@Override
-	public Class<ContainerEncoder> getContainerClass() {
-		return ContainerEncoder.class;
+	public EncoderTransferHandler(IRecipeTransferHandlerHelper transferHelper) {
+		this.transferHelper = transferHelper;
 	}
 
 	@Override
-	public IRecipeTransferError transferRecipe(ContainerEncoder container, IRecipeLayout recipeLayout, EntityPlayer player, boolean maxTransfer, boolean doTransfer) {
-		String category = recipeLayout.getRecipeCategory().getUid();
-		IRecipeType recipeType = container.patternInventory.recipeType;
+	public Class<EncoderContainer> getContainerClass() {
+		return EncoderContainer.class;
+	}
+
+	@Override
+	public IRecipeTransferError transferRecipe(EncoderContainer container, Object recipe, IRecipeLayout recipeLayout, PlayerEntity player, boolean maxTransfer, boolean doTransfer) {
+		ResourceLocation category = recipeLayout.getRecipeCategory().getUid();
+		IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
 		if(!(recipeType.getJEICategories().contains(category))) {
-			return PackagedAutoJEIPlugin.registry.getJeiHelpers().recipeTransferHandlerHelper().createInternalError();
+			return transferHelper.createInternalError();
 		}
-		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(recipeLayout, category);
+		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(new RecipeLayoutWrapper(recipeLayout));
 		if(map == null || map.isEmpty()) {
-			return PackagedAutoJEIPlugin.registry.getJeiHelpers().recipeTransferHandlerHelper().createInternalError();
+			return transferHelper.createInternalError();
 		}
 		if(!doTransfer) {
 			return null;
 		}
-		PacketHandler.INSTANCE.sendToServer(new PacketSetRecipe(map));
+		PacketHandler.INSTANCE.sendToServer(new SetRecipePacket(map));
 		return null;
 	}
 }

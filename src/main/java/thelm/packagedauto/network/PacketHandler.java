@@ -1,41 +1,48 @@
 package thelm.packagedauto.network;
 
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.relauncher.Side;
-import thelm.packagedauto.PackagedAuto;
-import thelm.packagedauto.network.packet.PacketChangeBlocking;
-import thelm.packagedauto.network.packet.PacketCycleRecipeType;
-import thelm.packagedauto.network.packet.PacketLoadRecipeList;
-import thelm.packagedauto.network.packet.PacketSaveRecipeList;
-import thelm.packagedauto.network.packet.PacketSetPatternIndex;
-import thelm.packagedauto.network.packet.PacketSetRecipe;
-import thelm.packagedauto.network.packet.PacketSyncEnergy;
+import java.util.Optional;
 
-public class PacketHandler<REQ extends ISelfHandleMessage<? extends IMessage>> implements IMessageHandler<REQ, IMessage> {
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.network.NetworkDirection;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
+import thelm.packagedauto.network.packet.ChangeBlockingPacket;
+import thelm.packagedauto.network.packet.CycleRecipeTypePacket;
+import thelm.packagedauto.network.packet.LoadRecipeListPacket;
+import thelm.packagedauto.network.packet.SaveRecipeListPacket;
+import thelm.packagedauto.network.packet.SetPatternIndexPacket;
+import thelm.packagedauto.network.packet.SetRecipePacket;
+import thelm.packagedauto.network.packet.SyncEnergyPacket;
 
-	public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(PackagedAuto.MOD_ID);
+public class PacketHandler {
+
+	public static final String PROTOCOL_VERSION = "1";
+	public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
+			new ResourceLocation("packagedauto", PROTOCOL_VERSION),
+			()->PROTOCOL_VERSION, PROTOCOL_VERSION::equals, PROTOCOL_VERSION::equals);
 
 	public static void registerPackets() {
 		int id = 0;
-		INSTANCE.registerMessage(get(), PacketSyncEnergy.class, id++, Side.CLIENT);
-		INSTANCE.registerMessage(get(), PacketSetPatternIndex.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketCycleRecipeType.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketSaveRecipeList.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketSetRecipe.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketLoadRecipeList.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketChangeBlocking.class, id++, Side.SERVER);
-	}
-
-	public static <REQ extends ISelfHandleMessage<? extends IMessage>> PacketHandler<REQ> get() {
-		return new PacketHandler<>();
-	}
-
-	@Override
-	public IMessage onMessage(REQ message, MessageContext ctx) {
-		return message.onMessage(ctx);
+		INSTANCE.registerMessage(id++, SyncEnergyPacket.class,
+				SyncEnergyPacket::encode, SyncEnergyPacket::decode,
+				SyncEnergyPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+		INSTANCE.registerMessage(id++, SetPatternIndexPacket.class,
+				SetPatternIndexPacket::encode, SetPatternIndexPacket::decode,
+				SetPatternIndexPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+		INSTANCE.registerMessage(id++, CycleRecipeTypePacket.class,
+				CycleRecipeTypePacket::encode, CycleRecipeTypePacket::decode,
+				CycleRecipeTypePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+		INSTANCE.registerMessage(id++, SaveRecipeListPacket.class,
+				SaveRecipeListPacket::encode, SaveRecipeListPacket::decode,
+				SaveRecipeListPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+		INSTANCE.registerMessage(id++, SetRecipePacket.class,
+				SetRecipePacket::encode, SetRecipePacket::decode,
+				SetRecipePacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+		INSTANCE.registerMessage(id++, LoadRecipeListPacket.class,
+				LoadRecipeListPacket::encode, LoadRecipeListPacket::decode,
+				LoadRecipeListPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+		INSTANCE.registerMessage(id++, ChangeBlockingPacket.class,
+				ChangeBlockingPacket::encode, ChangeBlockingPacket::decode,
+				ChangeBlockingPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 	}
 }

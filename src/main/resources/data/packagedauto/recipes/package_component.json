@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "result": {
+        "item": "packagedauto:package_component",
+        "count": 1
+    },
+    "pattern": [
+        "GWG",
+        "WEW",
+        "GWG"
+    ],
+    "key": {
+        "E": {
+            "item": "minecraft:ender_eye"
+        },
+        "W": {
+            "tag": "minecraft:planks"
+        },
+        "G": {
+            "tag": "forge:ingots/gold"
+        }
+    }
+}

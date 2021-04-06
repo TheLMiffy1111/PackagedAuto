@@ -1,96 +1,123 @@
 buildscript {
     repositories {
-        jcenter()
         maven {
-            url = "http://files.minecraftforge.net/maven"
+            url = "https://files.minecraftforge.net/maven/"
         }
         maven {
             url = "https://plugins.gradle.org/m2/"
         }
         maven {
+            url = "https://repo.spongepowered.org/maven/"
+        }
+        jcenter()
+        mavenCentral()
+        maven {
             url = "https://jitpack.io/"
         }
     }
     dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
-		classpath "com.wynprice.cursemaven:CurseMaven:2.1.0"
+        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "3.+", changing: true
+		classpath "com.wynprice.cursemaven:CurseMaven:2.1.5"
 		//classpath "com.github.Wyn-Price:CurseMaven:f0d58155e6"
+		classpath "org.spongepowered:mixingradle:0.7-SNAPSHOT"
     }
 }
 
-apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "net.minecraftforge.gradle"
+apply plugin: "eclipse"
+apply plugin: "maven"
 apply plugin: "com.wynprice.cursemaven"
+apply plugin: "org.spongepowered.mixin"
 
 repositories {
     jcenter()
+    flatDir {
+        dirs "libs"
+	}
     maven {
-        url = "https://maven.blamejared.com/"
+	    url = "https://repo.spongepowered.org/maven"
     }
     maven {
         url = "https://dvs1.progwml6.com/files/maven/"
     }
     maven {
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
         url = "https://maven.covers1624.net/"
     }
     maven {
-        url = "https://modmaven.k-4u.nl/" 
+        url = "https://jitpack.io/"
+    }
+    maven {
+        url = "https://modmaven.dev/"
     }
 }
 
-version = "1.12.2-1.0.5.17"
-group= "thelm.packagedauto"
-archivesBaseName = "PackagedAuto"
-
-sourceCompatibility = targetCompatibility = "1.8"
-compileJava {
-    sourceCompatibility = targetCompatibility = "1.8"
+sourceSets {
+    main
 }
 
+version = "2.0.0.0"
+group = "thelm.packagedauto"
+archivesBaseName = "PackagedAuto-1.16.5"
+
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = "1.8"
+
 minecraft {
-    version = "1.12.2-14.23.5.2824"
-    runDir = "run"
-    mappings = "stable_39"
-    makeObfSourceJar = false
+    mappings channel: "snapshot", version: "20201028-1.16.3"
+    accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
+    runs {
+        client = {
+            properties "forge.logging.markers": "SCAN,REGISTRIES,REGISTRYDUMP"
+            properties "forge.logging.console.level": "debug"
+            properties "mixin.env.remapRefMap": "true"
+            properties "mixin.env.refMapRemappingFile": "${projectDir}/build/createSrgToMcp/output.srg".toString()
+            workingDirectory project.file("run").canonicalPath
+            source sourceSets.main
+        }
+        server = {
+            properties "forge.logging.markers": "SCAN,REGISTRIES,REGISTRYDUMP"
+            properties "forge.logging.console.level": "debug"
+            properties "mixin.env.remapRefMap": "true"
+            properties "mixin.env.refMapRemappingFile": "${projectDir}/build/createSrgToMcp/output.srg".toString()
+            workingDirectory project.file("run").canonicalPath
+            source sourceSets.main
+        }
+    }
 }
 
 dependencies {
-    deobfCompile "mezz.jei:jei_1.12.2:4.15.0.273"
-    deobfCompile "codechicken:CodeChickenLib:1.12.2-3.2.3.357:universal"
-    deobfCompile "cofh:RedstoneFlux:1.12-2.1.0.6:universal"
-    deobfCompile("cofh:CoFHCore:1.12.2-4.6.3.27:universal") {
-        transitive = false
-    }
-    deobfCompile("cofh:CoFHWorld:1.12.2-1.3.1.7:universal") {
-        transitive = false
-    }
-    deobfCompile("cofh:ThermalFoundation:1.12.2-2.6.3.27:universal") {
-        transitive = false
-    }
-    deobfCompile("cofh:ThermalExpansion:1.12.2-5.5.4.43:universal") {
-        transitive = false
-    }
-    deobfCompile("cofh:ThermalDynamics:1.12.2-2.5.5.21:universal") {
-        transitive = false
-    }
-	deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.0.9.285"
-    deobfCompile("appeng:appliedenergistics2:rv6-stable-7") {
-        transitive = false
-    }
-    deobfCompile("morph.avaritia:Avaritia:1.12.2-3.3.0.33:universal") {
-        transitive = false
-    }
+    minecraft "net.minecraftforge:forge:1.16.5-36.0.46"
+
+    implementation fg.deobf("mezz.jei:jei-1.16.4:7.6.1.71")
+    implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-1.16.5:7.1.0.132")
+	implementation fg.deobf("mekanism:Mekanism:1.16.5-10.0.21.448")
+	implementation fg.deobf("mekanism:Mekanism:1.16.5-10.0.21.448:generators")
+    implementation fg.deobf("vazkii.patchouli:Patchouli:1.16.4-50")
+    implementation fg.deobf("slimeknights.mantle:Mantle:1.16.5-1.6.79")
+
+    //JitPack
+
+    //CurseMaven
+    implementation fg.deobf("curse.maven:applied-energistics-2:3185882")
+    implementation fg.deobf("curse.maven:cofh-core:3247581")
+    implementation fg.deobf("curse.maven:thermal-foundation:3247564")
+    implementation fg.deobf("curse.maven:thermal-expansion:3247000")
+    implementation fg.deobf("curse.maven:cucumber:3249370")
+    implementation fg.deobf("curse.maven:extended-crafting:3215203")
 }
 
-processResources
-{
+jar {
+    manifest {
+        attributes([
+                "Specification-Title": "PackagedAuto",
+                "Specification-Vendor": "thelm",
+                "Specification-Version": "2",
+                "Implementation-Title": "${archivesBaseName}",
+                "Implementation-Version": "${version}",
+                "Implementation-Vendor": "thelm"
+                //"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ],)
+    }
 }
-
-task deobfJar(type: Jar) {
-    from sourceSets.main.output
-    classifier = 'deobf'
-}
-
-artifacts {
-    archives deobfJar
-}
-

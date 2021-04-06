@@ -1,44 +1,44 @@
 package thelm.packagedauto.energy;
 
-import net.minecraft.nbt.NBTTagCompound;
-import thelm.packagedauto.network.packet.PacketSyncEnergy;
-import thelm.packagedauto.tile.TileBase;
+import net.minecraft.nbt.CompoundNBT;
+import thelm.packagedauto.network.packet.SyncEnergyPacket;
+import thelm.packagedauto.tile.BaseTile;
 
 public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 
-	public final TileBase tile;
+	public final BaseTile tile;
 	public int prevEnergy;
 
-	public EnergyStorage(TileBase tile, int capacity) {
+	public EnergyStorage(BaseTile tile, int capacity) {
 		this(tile, capacity, capacity, capacity, 0);
 	}
 
-	public EnergyStorage(TileBase tile, int capacity, int maxTransfer) {
+	public EnergyStorage(BaseTile tile, int capacity, int maxTransfer) {
 		this(tile, capacity, maxTransfer, maxTransfer, 0);
 	}
 
-	public EnergyStorage(TileBase tile, int capacity, int maxReceive, int maxExtract) {
+	public EnergyStorage(BaseTile tile, int capacity, int maxReceive, int maxExtract) {
 		this(tile, capacity, maxReceive, maxExtract, 0);
 	}
 
-	public EnergyStorage(TileBase tile, int capacity, int maxReceive, int maxExtract, int energy) {
+	public EnergyStorage(BaseTile tile, int capacity, int maxReceive, int maxExtract, int energy) {
 		super(capacity, maxReceive, maxExtract, energy);
 		this.tile = tile;
 	}
 
-	public EnergyStorage readFromNBT(NBTTagCompound nbt) {
-		this.energy = nbt.getInteger("Energy");
+	public EnergyStorage read(CompoundNBT nbt) {
+		this.energy = nbt.getInt("Energy");
 		if(energy > capacity) {
 			energy = capacity;
 		}
 		return this;
 	}
 
-	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+	public CompoundNBT write(CompoundNBT nbt) {
 		if(energy < 0) {
 			energy = 0;
 		}
-		nbt.setInteger("Energy", energy);
+		nbt.putInt("Energy", energy);
 		return nbt;
 	}
 
@@ -98,7 +98,7 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 	public void updateIfChanged() {
 		int currentEnergy = getEnergyStored();
 		if(!tile.getWorld().isRemote && prevEnergy != currentEnergy) {
-			PacketSyncEnergy.syncEnergy(tile.getPos(), currentEnergy, tile.getWorld().provider.getDimension(), 8);
+			SyncEnergyPacket.syncEnergy(tile.getPos(), currentEnergy, tile.getWorld().getDimensionKey(), 8);
 			tile.markDirty();
 		}
 		prevEnergy = currentEnergy;

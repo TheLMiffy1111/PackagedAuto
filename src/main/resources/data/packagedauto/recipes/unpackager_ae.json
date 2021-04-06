@@ -1,0 +1,35 @@
+{
+    "conditions": [
+        {
+            "type": "forge:mod_loaded",
+            "modid": "appliedenergistics2"
+        }
+    ],
+    "type": "minecraft:crafting_shaped",
+    "result": {
+        "item": "packagedauto:unpackager",
+        "count": 1
+    },
+    "pattern": [
+        "ICI",
+        "RSR",
+        "IHI"
+    ],
+    "key": {
+        "C": {
+            "item": "packagedauto:me_package_component"
+        },
+        "S": {
+            "tag": "forge:chests/wooden"
+        },
+        "H": {
+            "item": "minecraft:hopper"
+        },
+        "I": {
+            "tag": "forge:ingots/iron"
+        },
+        "R": {
+            "tag": "forge:dusts/redstone"
+        }
+    }
+}

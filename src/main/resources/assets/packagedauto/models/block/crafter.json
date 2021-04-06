@@ -1,0 +1,8 @@
+{
+    "parent": "block/cube_bottom_top",
+    "textures": {
+        "side": "packagedauto:blocks/crafter_side",
+        "top": "packagedauto:blocks/crafter_top",
+        "bottom": "packagedauto:blocks/machine_bottom"
+    }
+}
