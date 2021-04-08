@@ -4,16 +4,20 @@ import net.minecraft.block.Block;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import thelm.packagedauto.block.CrafterBlock;
 import thelm.packagedauto.block.EncoderBlock;
 import thelm.packagedauto.block.PackagerBlock;
 import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.block.UnpackagerBlock;
+import thelm.packagedauto.config.PackagedAutoConfig;
 import thelm.packagedauto.container.CrafterContainer;
 import thelm.packagedauto.container.EncoderContainer;
 import thelm.packagedauto.container.PackagerContainer;
@@ -40,6 +44,12 @@ public class CommonEventHandler {
 
 	public static CommonEventHandler getInstance() {
 		return INSTANCE;
+	}
+
+	public void onConstruct() {
+		FMLJavaModLoadingContext.get().getModEventBus().register(this);
+		MinecraftForge.EVENT_BUS.addListener(this::onServerAboutToStart);
+		PackagedAutoConfig.registerConfig();
 	}
 
 	@SubscribeEvent
@@ -93,6 +103,17 @@ public class CommonEventHandler {
 		ApiImpl.INSTANCE.registerRecipeType(CraftingPackageRecipeType.INSTANCE);
 
 		PacketHandler.registerPackets();
+	}
+
+	@SubscribeEvent
+	public void onModConfig(ModConfig.ModConfigEvent event) {
+		switch(event.getConfig().getType()) {
+		case SERVER:
+			PackagedAutoConfig.reloadServerConfig();
+			break;
+		default:
+			break;
+		}
 	}
 
 	public void onServerAboutToStart(FMLServerAboutToStartEvent event) {

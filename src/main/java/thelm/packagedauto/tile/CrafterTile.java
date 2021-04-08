@@ -35,8 +35,6 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 					()->AECrafterTile::new, ()->CrafterTile::new), CrafterBlock.INSTANCE).
 			build(null).setRegistryName("packagedauto:crafter");
 
-	public static boolean enabled = false;
-
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
@@ -216,7 +214,7 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 		if(energyStorage.getMaxEnergyStored() <= 0) {
 			return 0;
 		}
-		return scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored();
+		return Math.min(scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored(), scale);
 	}
 
 	public int getScaledProgress(int scale) {

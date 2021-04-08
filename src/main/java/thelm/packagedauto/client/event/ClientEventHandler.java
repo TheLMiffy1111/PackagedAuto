@@ -5,6 +5,7 @@ import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import thelm.packagedauto.client.screen.CrafterScreen;
 import thelm.packagedauto.client.screen.EncoderScreen;
 import thelm.packagedauto.client.screen.PackagerExtensionScreen;
@@ -23,6 +24,10 @@ public class ClientEventHandler {
 
 	public static ClientEventHandler getInstance() {
 		return INSTANCE;
+	}
+	
+	public void onConstruct() {
+		FMLJavaModLoadingContext.get().getModEventBus().register(this);
 	}
 
 	@SubscribeEvent

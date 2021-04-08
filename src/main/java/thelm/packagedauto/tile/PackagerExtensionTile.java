@@ -43,12 +43,12 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 					()->AEPackagerExtensionTile::new, ()->PackagerExtensionTile::new), PackagerExtensionBlock.INSTANCE).
 			build(null).setRegistryName("packagedauto:packager_extension");
 
-	public int energyCapacity = 5000;
-	public int energyReq = 500;
-	public int energyUsage = 100;
-	public boolean drawMEEnergy = true;
-	public boolean checkDisjoint = true;
-	public boolean forceDisjoint = false;
+	public static int energyCapacity = 5000;
+	public static int energyReq = 500;
+	public static int energyUsage = 100;
+	public static boolean drawMEEnergy = true;
+	public static boolean checkDisjoint = true;
+	public static boolean forceDisjoint = false;
 
 	public boolean firstTick = true;
 	public boolean isWorking = false;
@@ -397,7 +397,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 		if(energyStorage.getMaxEnergyStored() <= 0) {
 			return 0;
 		}
-		return scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored();
+		return Math.min(scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored(), scale);
 	}
 
 	public int getScaledProgress(int scale) {

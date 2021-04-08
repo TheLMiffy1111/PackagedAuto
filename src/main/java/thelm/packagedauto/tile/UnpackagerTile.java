@@ -263,7 +263,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 		if(energyStorage.getMaxEnergyStored() <= 0) {
 			return 0;
 		}
-		return scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored();
+		return Math.min(scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored(), scale);
 	}
 
 	@Override
