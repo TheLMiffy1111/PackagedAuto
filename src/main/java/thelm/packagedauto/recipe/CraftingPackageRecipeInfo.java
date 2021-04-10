@@ -142,6 +142,9 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 	public boolean equals(Object obj) {
 		if(obj instanceof CraftingPackageRecipeInfo) {
 			CraftingPackageRecipeInfo other = (CraftingPackageRecipeInfo)obj;
+			if(input.size() != other.input.size()) {
+				return false;
+			}
 			for(int i = 0; i < input.size(); ++i) {
 				if(!ItemStack.areItemStackTagsEqual(input.get(i), other.input.get(i))) {
 					return false;

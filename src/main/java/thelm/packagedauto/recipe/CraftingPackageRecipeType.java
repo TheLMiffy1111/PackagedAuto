@@ -8,7 +8,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import mezz.jei.api.constants.VanillaRecipeCategoryUid;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -25,7 +24,7 @@ public class CraftingPackageRecipeType implements IPackageRecipeType {
 	public static final CraftingPackageRecipeType INSTANCE = new CraftingPackageRecipeType();
 	public static final ResourceLocation NAME = new ResourceLocation("packagedauto:crafting");
 	public static final IntSet SLOTS;
-	public static final List<ResourceLocation> CATEGORIES = Collections.singletonList(VanillaRecipeCategoryUid.CRAFTING);
+	public static final List<ResourceLocation> CATEGORIES = Collections.singletonList(new ResourceLocation("minecraft:crafting"));
 	public static final Vector3i COLOR = new Vector3i(139, 139, 139);
 	public static final Vector3i COLOR_DISABLED = new Vector3i(64, 64, 64);
 

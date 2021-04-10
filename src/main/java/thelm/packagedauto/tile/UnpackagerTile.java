@@ -195,15 +195,12 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			if(powered || blocking && !MiscHelper.INSTANCE.isEmpty(itemHandler)) {
 				continue;
 			}
-			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.isFilled()).filter(t->t.direction == null).findFirst().orElse(null);
+			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.isFilled() && t.direction == null && t.recipe != null && !t.recipe.getRecipeType().hasMachine()).findFirst().orElse(null);
 			if(trackerToEmpty == null) {
 				continue;
 			}
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.setupToSend();
-			}
-			if(trackerToEmpty.recipe != null && trackerToEmpty.recipe.getRecipeType().hasMachine()) {
-				continue;
 			}
 			boolean inserted = false;
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {

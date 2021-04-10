@@ -7,12 +7,17 @@ import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.energy.IEnergyGrid;
 import appeng.api.networking.security.IActionHost;
+import appeng.api.networking.storage.IStorageGrid;
+import appeng.api.storage.IMEMonitor;
+import appeng.api.storage.channels.IItemStorageChannel;
+import appeng.api.storage.data.IAEItemStack;
 import appeng.api.util.AECableType;
 import appeng.api.util.AEPartLocation;
 import appeng.core.Api;
 import appeng.me.helpers.MachineSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import thelm.packagedauto.integration.appeng.networking.BaseGridBlock;
 import thelm.packagedauto.tile.CrafterTile;
@@ -22,6 +27,12 @@ public class AECrafterTile extends CrafterTile implements IGridHost, IActionHost
 	public BaseGridBlock<AECrafterTile> gridBlock;
 	public MachineSource source;
 	public IGridNode gridNode;
+
+	public AECrafterTile() {
+		super();
+		gridBlock = new BaseGridBlock<>(this);
+		source = new MachineSource(this);
+	}
 
 	@Override
 	public void tick() {
@@ -82,6 +93,42 @@ public class AECrafterTile extends CrafterTile implements IGridHost, IActionHost
 		double canExtract = energyGrid.extractAEPower(energyRequest, Actionable.SIMULATE, PowerMultiplier.CONFIG);
 		double extract = Math.round(canExtract*2)/2D;
 		energyStorage.receiveEnergy((int)Math.round(energyGrid.extractAEPower(extract, Actionable.MODULATE, PowerMultiplier.CONFIG)*2), false);
+	}
+
+	@Override
+	protected void ejectItems() {
+		if(getActionableNode().isActive()) {
+			IGrid grid = getActionableNode().getGrid();
+			if(grid == null) {
+				return;
+			}
+			IStorageGrid storageGrid = grid.getCache(IStorageGrid.class);
+			if(storageGrid == null) {
+				return;
+			}
+			IEnergyGrid energyGrid = grid.getCache(IEnergyGrid.class);
+			if(energyGrid == null) {
+				return;
+			}
+			IItemStorageChannel storageChannel = Api.instance().storage().getStorageChannel(IItemStorageChannel.class);
+			IMEMonitor<IAEItemStack> inventory = storageGrid.getInventory(storageChannel);
+			int endIndex = isWorking ? 9 : 0;
+			for(int i = 9; i >= endIndex; --i) {
+				ItemStack is = itemHandler.getStackInSlot(i);
+				if(is.isEmpty()) {
+					continue;
+				}
+				IAEItemStack stack = storageChannel.createStack(is);
+				IAEItemStack rem = Api.instance().storage().poweredInsert(energyGrid, inventory, stack, source, Actionable.MODULATE);
+				if(rem == null || rem.getStackSize() == 0) {
+					itemHandler.setStackInSlot(i, ItemStack.EMPTY);
+				}
+				else if(rem.getStackSize() < stack.getStackSize()) {
+					itemHandler.setStackInSlot(i, rem.createItemStack());
+				}
+			}
+		}
+		super.ejectItems();
 	}
 
 	@Override

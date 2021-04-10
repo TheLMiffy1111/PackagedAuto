@@ -22,6 +22,6 @@ public class CrafterBlock extends BaseBlock {
 
 	@Override
 	public CrafterTile createTileEntity(BlockState state, IBlockReader worldIn) {
-		return new CrafterTile();
+		return CrafterTile.TYPE_INSTANCE.create();
 	}
 }
