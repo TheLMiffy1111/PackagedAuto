@@ -93,13 +93,13 @@ public class PackagedAutoConfig {
 		builder.pop();
 
 		builder.push("crafter");
-		builder.comment("How much FE the Crafter should hold.");
+		builder.comment("How much FE the Package Crafter should hold.");
 		crafterEnergyCapacity = builder.defineInRange("energy_capacity", 5000, 0, Integer.MAX_VALUE);
-		builder.comment("How much total FE the Crafter should use per operation.");
+		builder.comment("How much total FE the Package Crafter should use per operation.");
 		crafterEnergyReq = builder.defineInRange("energy_req", 500, 0, Integer.MAX_VALUE);
-		builder.comment("How much FE/t maximum the Crafter can use.");
+		builder.comment("How much FE/t maximum the Package Crafter can use.");
 		crafterEnergyUsage = builder.defineInRange("energy_usage", 100, 0, Integer.MAX_VALUE);
-		builder.comment("Should the Crafter draw energy from ME systems.");
+		builder.comment("Should the Package Crafter draw energy from ME systems.");
 		crafterDrawMEEnergy = builder.define("draw_me_energy", true);
 		builder.pop();
 

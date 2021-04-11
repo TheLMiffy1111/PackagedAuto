@@ -2,6 +2,7 @@ package thelm.packagedauto.integration.appeng.tile;
 
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
+import appeng.api.networking.GridFlags;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
@@ -32,6 +33,7 @@ public class AECrafterTile extends CrafterTile implements IGridHost, IActionHost
 		super();
 		gridBlock = new BaseGridBlock<>(this);
 		source = new MachineSource(this);
+		gridBlock.flags.remove(GridFlags.REQUIRE_CHANNEL);
 	}
 
 	@Override
