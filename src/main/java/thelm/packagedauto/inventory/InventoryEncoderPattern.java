@@ -23,7 +23,7 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 	public IRecipeInfo recipeInfo;
 
 	public InventoryEncoderPattern(TileEncoder tile) {
-		super(tile, 99);
+		super(tile, 108);
 		this.tile = tile;
 		validateRecipeType();
 	}
@@ -54,7 +54,7 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 	@Override
 	public boolean isItemValidForSlot(int index, ItemStack stack) {
 		validateRecipeType();
-		if(index < 81 || recipeType.canSetOutput() && index < 90) {
+		if(index < 81 || recipeType.canSetOutput() && index < 99) {
 			return recipeType.getEnabledSlots().contains(index);
 		}
 		return false;
@@ -70,12 +70,12 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 		validateRecipeType();
 		IRecipeInfo info = recipeType.getNewRecipeInfo();
 		try {
-			info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), tile.getWorld());
+			info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 99) : Collections.emptyList(), tile.getWorld());
 		}
 		catch(AbstractMethodError error) {
 			try {
 				Method oldGenerateFromStacksMethod = info.getClass().getMethod("generateFromStacks", List.class, List.class);
-				oldGenerateFromStacksMethod.invoke(info, stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList());
+				oldGenerateFromStacksMethod.invoke(info, stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 99) : Collections.emptyList());
 			}
 			catch(Exception exception) {
 				exception.addSuppressed(error);
@@ -86,7 +86,7 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 			if(recipeInfo == null || !recipeInfo.equals(info)) {
 				recipeInfo = info;
 				if(!recipeType.canSetOutput()) {
-					for(int i = 81; i < 90; ++i) {
+					for(int i = 81; i < 99; ++i) {
 						stacks.set(i, ItemStack.EMPTY);
 					}
 					List<ItemStack> outputs = info.getOutputs();
@@ -101,12 +101,12 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 						stacks.set(startIndex+i, outputs.get(i).copy());
 					}
 				}
-				for(int i = 90; i < 99; ++i) {
+				for(int i = 99; i < 108; ++i) {
 					stacks.set(i, ItemStack.EMPTY);
 				}
 				List<IPackagePattern> patterns = info.getPatterns();
 				for(int i = 0; i < patterns.size() && i < 9; ++i) {
-					stacks.set(90+i, patterns.get(i).getOutput().copy());
+					stacks.set(99+i, patterns.get(i).getOutput().copy());
 				}
 				syncTile(false);
 				markDirty();
@@ -115,11 +115,11 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 		else if(recipeInfo != null) {
 			recipeInfo = null;
 			if(!recipeType.canSetOutput()) {
-				for(int i = 81; i < 90; ++i) {
+				for(int i = 81; i < 99; ++i) {
 					stacks.set(i, ItemStack.EMPTY);
 				}
 			}
-			for(int i = 90; i < 99; ++i) {
+			for(int i = 99; i < 108; ++i) {
 				stacks.set(i, ItemStack.EMPTY);
 			}
 			syncTile(false);
@@ -132,7 +132,7 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 		recipeType = RecipeTypeRegistry.getNextRecipeType(recipeType, reverse);
 		validateRecipeType();
 		IntSet enabledSlots = recipeType.getEnabledSlots();
-		for(int i = 0; i < 90; ++i) {
+		for(int i = 0; i < 99; ++i) {
 			if(!enabledSlots.contains(i)) {
 				stacks.set(i, ItemStack.EMPTY);
 			}
