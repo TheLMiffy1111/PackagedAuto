@@ -85,7 +85,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 
 	@Override
 	public void onLoad() {
-		updatePatternList();
+		updatePowered();
 	}
 
 	@Override
