@@ -69,6 +69,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	public boolean lockPattern = false;
 	public boolean disjoint = false;
 	public boolean powered = false;
+	public boolean firstTick = true;
 
 	public TilePackagerExtension() {
 		setInventory(new InventoryPackagerExtension(this));
@@ -90,6 +91,10 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 
 	@Override
 	public void update() {
+		if(firstTick) {
+			firstTick = false;
+			updatePatternList();
+		}
 		if(!world.isRemote) {
 			if(isWorking) {
 				tickProcess();
