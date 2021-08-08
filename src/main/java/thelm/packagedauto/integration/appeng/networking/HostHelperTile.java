@@ -25,7 +25,7 @@ public class HostHelperTile<TILE extends TileBase & IGridHost & IActionHost> {
 	public IGridNode getNode() {
 		if(gridNode == null && tile.hasWorld() && !tile.getWorld().isRemote) {
 			gridNode = AEApi.instance().grid().createGridNode(gridBlock);
-			this.readFromNBT( this.data );
+			readFromNBT(data);
 			gridNode.updateState();
 		}
 		return gridNode;
@@ -42,12 +42,13 @@ public class HostHelperTile<TILE extends TileBase & IGridHost & IActionHost> {
 	}
 
 	public void readFromNBT(NBTTagCompound nbt) {
-		this.data = nbt;
-		if (tile.hasWorld() && data != null && data.hasKey("Node")) {
+		data = nbt;
+		if(tile.hasWorld() && data != null && data.hasKey("Node")) {
 			getNode().loadFromNBT("Node", data);
 			data = null;
-		} else if (this.gridNode != null && this.tile.getPlacerID() != -1) {
-			this.gridNode.setPlayerID(this.tile.getPlacerID());
+		}
+		else if(gridNode != null && tile.getPlacerID() != -1) {
+			gridNode.setPlayerID(tile.getPlacerID());
 		}
 	}
 

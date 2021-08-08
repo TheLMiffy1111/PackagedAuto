@@ -2,7 +2,7 @@ buildscript {
     repositories {
         jcenter()
         maven {
-            url = "http://files.minecraftforge.net/maven"
+            url = "https://maven.minecraftforge.net/"
         }
         maven {
             url = "https://plugins.gradle.org/m2/"
@@ -13,8 +13,8 @@ buildscript {
     }
     dependencies {
         classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
-		classpath "com.wynprice.cursemaven:CurseMaven:2.1.0"
-		//classpath "com.github.Wyn-Price:CurseMaven:f0d58155e6"
+        classpath "com.wynprice.cursemaven:CurseMaven:2.1.5"
+        //classpath "com.github.Wyn-Price:CurseMaven:f0d58155e6"
     }
 }
 
@@ -33,11 +33,14 @@ repositories {
         url = "https://maven.covers1624.net/"
     }
     maven {
+        url = "https://jitpack.io/"
+    }
+    maven {
         url = "https://modmaven.k-4u.nl/" 
     }
 }
 
-version = "1.12.2-1.0.5.17"
+version = "1.12.2-1.0.5.18"
 group= "thelm.packagedauto"
 archivesBaseName = "PackagedAuto"
 
@@ -47,7 +50,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2824"
+    version = "1.12.2-14.23.5.2847"
     runDir = "run"
     mappings = "stable_39"
     makeObfSourceJar = false
@@ -73,12 +76,11 @@ dependencies {
         transitive = false
     }
 	deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.0.9.285"
-    deobfCompile("appeng:appliedenergistics2:rv6-stable-7") {
-        transitive = false
-    }
     deobfCompile("morph.avaritia:Avaritia:1.12.2-3.3.0.33:universal") {
         transitive = false
     }
+
+    deobfCompile "curse.maven:applied-energistics-2:2747063"
 }
 
 processResources

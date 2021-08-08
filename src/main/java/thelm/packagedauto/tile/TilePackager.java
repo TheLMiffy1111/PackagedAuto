@@ -80,12 +80,12 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	protected String getLocalizedName() {
 		return I18n.translateToLocal("tile.packagedauto.packager.name");
 	}
-	
+
 	@Override
 	public void onLoad() {
 		updatePowered();
 	}
-	
+
 	@Override
 	public void update() {
 		if(!world.isRemote) {
