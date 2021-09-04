@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
+import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -31,6 +32,8 @@ import net.minecraft.nbt.ListNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IMiscHelper;
 import thelm.packagedauto.api.IPackagePattern;
@@ -326,7 +329,9 @@ public class MiscHelper implements IMiscHelper {
 		MiscHelper.server = server;
 	}
 
+	@Override
 	public RecipeManager getRecipeManager() {
-		return server.getRecipeManager();
+		return server != null ? server.getRecipeManager() :
+			DistExecutor.callWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().world.getRecipeManager());
 	}
 }
