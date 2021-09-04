@@ -22,6 +22,7 @@ import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
+import net.minecraft.client.Minecraft;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -44,8 +45,6 @@ public class MiscHelper implements IMiscHelper {
 
 	private static final Cache<CompoundNBT, IPackageRecipeInfo> RECIPE_CACHE = CacheBuilder.newBuilder().maximumSize(500).build();
 	private static final Logger LOGGER = LogManager.getLogger();
-
-	private static MinecraftServer server;
 
 	private MiscHelper() {}
 
@@ -322,11 +321,7 @@ public class MiscHelper implements IMiscHelper {
 		return ()->conditionSupplier.getAsBoolean() ? trueSupplier.get().get() : falseSupplier.get().get();
 	}
 
-	public void setServer(MinecraftServer server) {
-		MiscHelper.server = server;
-	}
-
 	public RecipeManager getRecipeManager() {
-		return server.getRecipeManager();
+		return Minecraft.getInstance().world.getRecipeManager();
 	}
 }

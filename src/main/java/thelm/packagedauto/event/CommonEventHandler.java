@@ -48,7 +48,6 @@ public class CommonEventHandler {
 
 	public void onConstruct() {
 		FMLJavaModLoadingContext.get().getModEventBus().register(this);
-		MinecraftForge.EVENT_BUS.addListener(this::onServerAboutToStart);
 		PackagedAutoConfig.registerConfig();
 	}
 
@@ -114,9 +113,5 @@ public class CommonEventHandler {
 		default:
 			break;
 		}
-	}
-
-	public void onServerAboutToStart(FMLServerAboutToStartEvent event) {
-		MiscHelper.INSTANCE.setServer(event.getServer());
 	}
 }
