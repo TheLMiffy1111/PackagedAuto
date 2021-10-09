@@ -14,6 +14,7 @@ public class HostHelperTile<TILE extends TileBase & IGridHost & IActionHost> {
 	public GridBlockTileBase<TILE> gridBlock;
 	public MachineSource source;
 	public IGridNode gridNode;
+	private NBTTagCompound data = null;
 
 	public HostHelperTile(TILE tile) {
 		this.tile = tile;

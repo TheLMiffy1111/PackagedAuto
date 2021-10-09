@@ -82,6 +82,11 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	}
 
 	@Override
+	public void onLoad() {
+		updatePowered();
+	}
+
+	@Override
 	public void update() {
 		if(!world.isRemote) {
 			if(isWorking) {
