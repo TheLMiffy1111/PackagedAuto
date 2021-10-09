@@ -85,7 +85,7 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		addButton(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+16, I18n.translateToLocal("tile.packagedauto.encoder.save")));
 		addButton(new GuiButtonLoadPatterns(0, guiLeft+213, guiTop+34, I18n.translateToLocal("tile.packagedauto.encoder.load")));
 		if(Loader.isModLoaded("jei")) {
-			addButton(new GuiButtonShowRecipesJEI(0, guiLeft+172, guiTop+129));
+			addButton(new GuiButtonShowRecipesJEI(0, guiLeft+172, guiTop+71));
 		}
 	}
 
@@ -134,7 +134,7 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		@Override
 		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
 			super.drawButton(mc, mouseX, mouseY, partialTicks);
-			for(int i = 81; i < 90; ++i) {
+			for(int i = 81; i < 99; ++i) {
 				ItemStack stack = container.tile.patternInventories[id].stacks.get(i);
 				if(!stack.isEmpty()) {
 					RenderHelper.enableGUIStandardItemLighting();
