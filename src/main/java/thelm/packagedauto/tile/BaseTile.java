@@ -13,6 +13,7 @@ import net.minecraft.util.INameable;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.CapabilityItemHandler;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.BaseItemHandler;
@@ -133,6 +134,9 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 	public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction direction) {
 		if(capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
 			return LazyOptional.of(()->(T)itemHandler.getWrapperForDirection(direction));
+		}
+		else if(capability == CapabilityEnergy.ENERGY && energyStorage.getMaxEnergyStored() > 0) {
+			return LazyOptional.of(()->(T)energyStorage);
 		}
 		return super.getCapability(capability, direction);
 	}
