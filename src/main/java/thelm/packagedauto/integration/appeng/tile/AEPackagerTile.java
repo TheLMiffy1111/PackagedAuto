@@ -193,6 +193,8 @@ public class AEPackagerTile extends PackagerTile implements IGridHost, IActionHo
 		if(world != null && nbt.contains("Node")) {
 			getActionableNode().loadFromNBT("Node", nbt);
 		}
+		// tell the AE system about any installed recipes
+		postPatternChange();
 	}
 
 	@Override
