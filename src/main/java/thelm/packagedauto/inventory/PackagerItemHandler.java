@@ -76,9 +76,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 	@Override
 	public void read(CompoundNBT nbt) {
 		super.read(nbt);
-		if(tile.hasWorld()) {
-			updatePatternList();
-		}
+		updatePatternList();
 	}
 
 	public void updatePatternList() {
