@@ -135,7 +135,8 @@ public class MiscHelper implements IMiscHelper {
 			boolean empty = stack.isEmpty();
 			if(!empty || i == list.size()-1) {
 				if(empty) {
-					stack = ItemStack.EMPTY;
+					// Ensure that the end-of-list stack if empty is always the default empty stack
+					stack = new ItemStack((Item)null);
 				}
 				CompoundNBT nbt = new CompoundNBT();
 				nbt.putByte("Index", (byte)i);

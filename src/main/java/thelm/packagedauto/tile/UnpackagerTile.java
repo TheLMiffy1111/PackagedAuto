@@ -70,6 +70,9 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 	public void tick() {
 		if(firstTick) {
 			firstTick = false;
+			if(!world.isRemote) {
+				postPatternChange();
+			}
 			updatePowered();
 		}
 		if(!world.isRemote) {

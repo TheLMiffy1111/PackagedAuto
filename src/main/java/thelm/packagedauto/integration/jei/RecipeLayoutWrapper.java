@@ -1,12 +1,10 @@
 package thelm.packagedauto.integration.jei;
 
-import java.util.Collections;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
 
 import mezz.jei.api.gui.IRecipeLayout;
-import mezz.jei.api.ingredients.IIngredientType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fluids.FluidStack;

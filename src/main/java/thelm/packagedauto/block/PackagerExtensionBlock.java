@@ -5,17 +5,13 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.PackagedAuto;
-import thelm.packagedauto.tile.BaseTile;
 import thelm.packagedauto.tile.PackagerExtensionTile;
 
 public class PackagerExtensionBlock extends BaseBlock {

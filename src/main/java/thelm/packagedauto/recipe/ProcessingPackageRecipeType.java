@@ -1,5 +1,6 @@
 package thelm.packagedauto.recipe;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -8,19 +9,19 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import mezz.jei.api.gui.IRecipeLayout;
-import mezz.jei.api.gui.ingredient.IGuiIngredient;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.fml.ModList;
 import thelm.packagedauto.api.IGuiIngredientWrapper;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.api.IRecipeLayoutWrapper;
 import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
+import thelm.packagedauto.util.MiscHelper;
 
 public class ProcessingPackageRecipeType implements IPackageRecipeType {
 
@@ -75,6 +76,12 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 	@Override
 	public boolean hasMachine() {
 		return false;
+	}
+
+	@Override
+	public List<ResourceLocation> getJEICategories() {
+		return MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("jei"),
+				()->PackagedAutoJEIPlugin::getAllRecipeCategories, ()->ArrayList<ResourceLocation>::new).get();
 	}
 
 	@Override

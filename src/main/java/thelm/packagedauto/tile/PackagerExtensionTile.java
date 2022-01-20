@@ -212,7 +212,9 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 					break;
 				}
 			}
-			postPatternChange();
+			if(!world.isRemote) {
+				postPatternChange();
+			}
 		}
 	}
 
