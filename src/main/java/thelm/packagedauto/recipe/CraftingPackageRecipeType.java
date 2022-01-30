@@ -8,12 +8,12 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
 import thelm.packagedauto.api.IGuiIngredientWrapper;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
@@ -25,8 +25,8 @@ public class CraftingPackageRecipeType implements IPackageRecipeType {
 	public static final ResourceLocation NAME = new ResourceLocation("packagedauto:crafting");
 	public static final IntSet SLOTS;
 	public static final List<ResourceLocation> CATEGORIES = Collections.singletonList(new ResourceLocation("minecraft:crafting"));
-	public static final Vector3i COLOR = new Vector3i(139, 139, 139);
-	public static final Vector3i COLOR_DISABLED = new Vector3i(64, 64, 64);
+	public static final Vec3i COLOR = new Vec3i(139, 139, 139);
+	public static final Vec3i COLOR_DISABLED = new Vec3i(64, 64, 64);
 
 	static {
 		SLOTS = new IntRBTreeSet();
@@ -45,13 +45,13 @@ public class CraftingPackageRecipeType implements IPackageRecipeType {
 	}
 
 	@Override
-	public IFormattableTextComponent getDisplayName() {
-		return new TranslationTextComponent("recipe.packagedauto.crafting");
+	public MutableComponent getDisplayName() {
+		return new TranslatableComponent("recipe.packagedauto.crafting");
 	}
 
 	@Override
-	public IFormattableTextComponent getShortDisplayName() {
-		return new TranslationTextComponent("recipe.packagedauto.crafting.short");
+	public MutableComponent getShortDisplayName() {
+		return new TranslatableComponent("recipe.packagedauto.crafting.short");
 	}
 
 	@Override
@@ -71,6 +71,11 @@ public class CraftingPackageRecipeType implements IPackageRecipeType {
 
 	@Override
 	public boolean hasMachine() {
+		return true;
+	}
+
+	@Override
+	public boolean hasContainerItem() {
 		return true;
 	}
 
@@ -107,8 +112,8 @@ public class CraftingPackageRecipeType implements IPackageRecipeType {
 	}
 
 	@Override
-	public Vector3i getSlotColor(int slot) {
-		if(!SLOTS.contains(slot) && slot != 85) {
+	public Vec3i getSlotColor(int slot) {
+		if(!SLOTS.contains(slot) && slot != 81) {
 			return COLOR_DISABLED;
 		}
 		return COLOR;

@@ -1,96 +1,92 @@
 package thelm.packagedauto.block;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.InventoryHelper;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
-import thelm.packagedauto.tile.BaseTile;
+import net.minecraftforge.network.NetworkHooks;
+import thelm.packagedauto.block.entity.BaseBlockEntity;
 
-public abstract class BaseBlock extends Block {
+public abstract class BaseBlock extends Block implements EntityBlock {
 
 	protected BaseBlock(Block.Properties properties) {
 		super(properties);
 	}
 
 	@Override
-	public boolean hasTileEntity(BlockState state) {
-		return true;
+	public boolean triggerEvent(BlockState state, Level level, BlockPos pos, int id, int param) {
+		super.triggerEvent(state, level, pos, id, param);
+		BlockEntity blockentity = level.getBlockEntity(pos);
+		return blockentity == null ? false : blockentity.triggerEvent(id, param);
 	}
 
 	@Override
-	public boolean eventReceived(BlockState state, World worldIn, BlockPos pos, int id, int param) {
-		super.eventReceived(state, worldIn, pos, id, param);
-		TileEntity tileentity = worldIn.getTileEntity(pos);
-		return tileentity == null ? false : tileentity.receiveClientEvent(id, param);
-	}
-
-	@Override
-	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity playerIn, Hand hand, BlockRayTraceResult rayTraceResult) {
-		if(playerIn.isSneaking()) {
-			return ActionResultType.PASS;
+	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+		if(player.isShiftKeyDown()) {
+			return InteractionResult.PASS;
 		}
-		if(!worldIn.isRemote) {
-			TileEntity tile = worldIn.getTileEntity(pos);
-			if(tile instanceof INamedContainerProvider) {
-				NetworkHooks.openGui((ServerPlayerEntity)playerIn, (INamedContainerProvider)tile, pos);
+		if(!level.isClientSide) {
+			BlockEntity blockEntity = level.getBlockEntity(pos);
+			if(blockEntity instanceof MenuProvider menuProvider) {
+				NetworkHooks.openGui((ServerPlayer)player, menuProvider, pos);
 			}
 		}
-		return ActionResultType.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 
 	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-		if(!worldIn.isRemote) {
-			TileEntity tileentity = worldIn.getTileEntity(pos);
-			if(tileentity instanceof BaseTile) {
-				if(stack.hasDisplayName()) {
-					((BaseTile)tileentity).setCustomName(stack.getDisplayName());
+	public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+		if(!level.isClientSide) {
+			BlockEntity blockEntity = level.getBlockEntity(pos);
+			if(blockEntity instanceof BaseBlockEntity baseBlockEntity) {
+				if(stack.hasCustomHoverName()) {
+					baseBlockEntity.setCustomName(stack.getDisplayName());
 				}
-				if(placer instanceof PlayerEntity) {
-					((BaseTile)tileentity).setPlacer((PlayerEntity)placer);
+				if(placer instanceof Player player) {
+					baseBlockEntity.setPlacer(player);
 				}
 			}
 		}
 	}
 
 	@Override
-	public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-		TileEntity tileentity = worldIn.getTileEntity(pos);
-		if(tileentity instanceof BaseTile) {
-			IItemHandler handler = ((BaseTile)tileentity).getItemHandler();
+	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+		BlockEntity blockEntity = level.getBlockEntity(pos);
+		if(blockEntity instanceof BaseBlockEntity baseBlockEntity) {
+			IItemHandler handler = baseBlockEntity.getItemHandler();
 			for(int i = 0; i < handler.getSlots(); ++i) {
 				ItemStack stack = handler.getStackInSlot(i);
 				if(!stack.isEmpty()) {
-					InventoryHelper.spawnItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), stack);
+					Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
 				}
 			}
 		}
-		super.onReplaced(state, worldIn, pos, newState, isMoving);
+		super.onRemove(state, level, pos, newState, isMoving);
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(BlockState state) {
+	public boolean hasAnalogOutputSignal(BlockState state) {
 		return true;
 	}
 
 	@Override
-	public int getComparatorInputOverride(BlockState blockState, World worldIn, BlockPos pos) {
-		TileEntity tileentity = worldIn.getTileEntity(pos);
-		if(tileentity instanceof BaseTile) {
-			return ItemHandlerHelper.calcRedstoneFromInventory(((BaseTile)tileentity).getItemHandler());
+	public int getAnalogOutputSignal(BlockState pState, Level level, BlockPos pos) {
+		BlockEntity blockEntity = level.getBlockEntity(pos);
+		if(blockEntity instanceof BaseBlockEntity baseBlockEntity) {
+			return ItemHandlerHelper.calcRedstoneFromInventory(baseBlockEntity.getItemHandler());
 		}
 		return 0;
 	}

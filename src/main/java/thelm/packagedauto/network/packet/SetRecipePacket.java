@@ -4,11 +4,11 @@ import java.util.function.Supplier;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
-import thelm.packagedauto.container.EncoderContainer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.network.NetworkEvent;
+import thelm.packagedauto.menu.EncoderMenu;
 
 public class SetRecipePacket {
 
@@ -23,33 +23,30 @@ public class SetRecipePacket {
 		return this;
 	}
 
-	public static void encode(SetRecipePacket pkt, PacketBuffer buf) {
+	public static void encode(SetRecipePacket pkt, FriendlyByteBuf buf) {
 		buf.writeByte(pkt.map.size());
 		for(Int2ObjectMap.Entry<ItemStack> entry : pkt.map.int2ObjectEntrySet()) {
 			buf.writeByte(entry.getIntKey());
-			buf.writeItemStack(entry.getValue());
+			buf.writeItem(entry.getValue());
 		}
 	}
 
-	public static SetRecipePacket decode(PacketBuffer buf) {
+	public static SetRecipePacket decode(FriendlyByteBuf buf) {
 		Int2ObjectMap<ItemStack> map = new Int2ObjectOpenHashMap<>();
 		int size = buf.readByte();
 		for(int i = 0; i < size; ++i) {
 			int index = buf.readByte();
-			ItemStack stack = buf.readItemStack();
+			ItemStack stack = buf.readItem();
 			map.put(index, stack);
 		}
 		return new SetRecipePacket(map);
 	}
 
 	public static void handle(SetRecipePacket pkt, Supplier<NetworkEvent.Context> ctx) {
-		ServerPlayerEntity player = ctx.get().getSender();
+		ServerPlayer player = ctx.get().getSender();
 		ctx.get().enqueueWork(()->{
-			if(player.openContainer instanceof EncoderContainer) {
-				if(player.openContainer instanceof EncoderContainer) {
-					EncoderContainer container = (EncoderContainer)player.openContainer;
-					container.patternItemHandler.setRecipe(pkt.map);
-				}
+			if(player.containerMenu instanceof EncoderMenu menu) {
+				menu.patternItemHandler.setRecipe(pkt.map);
 			}
 		});
 		ctx.get().setPacketHandled(true);

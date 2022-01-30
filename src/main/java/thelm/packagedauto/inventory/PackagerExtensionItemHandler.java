@@ -1,23 +1,23 @@
 package thelm.packagedauto.inventory;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.IItemHandlerModifiable;
-import thelm.packagedauto.tile.PackagerExtensionTile;
+import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 
-public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtensionTile> {
+public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtensionBlockEntity> {
 
-	public PackagerExtensionItemHandler(PackagerExtensionTile tile) {
-		super(tile, 11);
+	public PackagerExtensionItemHandler(PackagerExtensionBlockEntity blockEntity) {
+		super(blockEntity, 11);
 	}
 
 	@Override
 	protected void onContentsChanged(int slot) {
-		if(slot < 9 && !tile.getWorld().isRemote) {
-			if(tile.isWorking && !getStackInSlot(slot).isEmpty()) {
-				if(tile.isWorking && (getStackInSlot(slot).isEmpty() || !tile.isInputValid())) {
-					tile.endProcess();
+		if(slot < 9 && !blockEntity.getLevel().isClientSide) {
+			if(blockEntity.isWorking && !getStackInSlot(slot).isEmpty()) {
+				if(blockEntity.isWorking && (getStackInSlot(slot).isEmpty() || !blockEntity.isInputValid())) {
+					blockEntity.endProcess();
 				}
 			}
 		}
@@ -28,7 +28,7 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 		switch(index) {
 		case 9: return false;
 		case 10: return stack.getCapability(CapabilityEnergy.ENERGY, null).isPresent();
-		default: return tile.isWorking ? !getStackInSlot(index).isEmpty() : true;
+		default: return blockEntity.isWorking ? !getStackInSlot(index).isEmpty() : true;
 		}
 	}
 
@@ -40,8 +40,8 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 	@Override
 	public int get(int id) {
 		switch(id) {
-		case 0: return tile.remainingProgress;
-		case 1: return tile.isWorking ? 1 : 0;
+		case 0: return blockEntity.remainingProgress;
+		case 1: return blockEntity.isWorking ? 1 : 0;
 		default: return 0;
 		}
 	}
@@ -50,16 +50,16 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 	public void set(int id, int value) {
 		switch(id) {
 		case 0:
-			tile.remainingProgress = value;
+			blockEntity.remainingProgress = value;
 			break;
 		case 1:
-			tile.isWorking = value != 0;
+			blockEntity.isWorking = value != 0;
 			break;
 		}
 	}
 
 	@Override
-	public int size() {
+	public int getCount() {
 		return 2;
 	}
 }

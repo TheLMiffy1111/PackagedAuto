@@ -1,29 +1,31 @@
-package thelm.packagedauto.tile;
+package thelm.packagedauto.block.entity;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeList;
 import thelm.packagedauto.api.IPackageRecipeListItem;
 import thelm.packagedauto.block.EncoderBlock;
-import thelm.packagedauto.container.EncoderContainer;
 import thelm.packagedauto.inventory.EncoderItemHandler;
 import thelm.packagedauto.inventory.EncoderPatternItemHandler;
+import thelm.packagedauto.menu.EncoderMenu;
 import thelm.packagedauto.recipe.ProcessingPackageRecipeType;
 
-public class EncoderTile extends BaseTile {
+public class EncoderBlockEntity extends BaseBlockEntity {
 
-	public static final TileEntityType<EncoderTile> TYPE_INSTANCE = (TileEntityType<EncoderTile>)TileEntityType.Builder.
-			create(EncoderTile::new, EncoderBlock.INSTANCE).
+	public static final BlockEntityType<EncoderBlockEntity> TYPE_INSTANCE = (BlockEntityType<EncoderBlockEntity>)BlockEntityType.Builder.
+			of(EncoderBlockEntity::new, EncoderBlock.INSTANCE).
 			build(null).setRegistryName("packagedauto:encoder");
 
 	public static int patternSlots = 20;
@@ -31,8 +33,8 @@ public class EncoderTile extends BaseTile {
 	public final EncoderPatternItemHandler[] patternItemHandlers = new EncoderPatternItemHandler[patternSlots];
 	public int patternIndex;
 
-	public EncoderTile() {
-		super(TYPE_INSTANCE);
+	public EncoderBlockEntity(BlockPos pos, BlockState state) {
+		super(TYPE_INSTANCE, pos, state);
 		setItemHandler(new EncoderItemHandler(this));
 		for(int i = 0; i < patternItemHandlers.length; ++i) {
 			patternItemHandlers[i] = new EncoderPatternItemHandler(this);
@@ -40,26 +42,26 @@ public class EncoderTile extends BaseTile {
 	}
 
 	@Override
-	protected ITextComponent getDefaultName() {
-		return new TranslationTextComponent("block.packagedauto.encoder");
+	protected Component getDefaultName() {
+		return new TranslatableComponent("block.packagedauto.encoder");
 	}
 
 	@Override
-	public void readSync(CompoundNBT nbt) {
-		super.readSync(nbt);
+	public void loadSync(CompoundTag nbt) {
+		super.loadSync(nbt);
 		patternIndex = nbt.getByte("PatternIndex");
 		for(int i = 0; i < patternItemHandlers.length; ++i) {
-			patternItemHandlers[i].read(nbt.getCompound(String.format("Pattern%02d", i)));
+			patternItemHandlers[i].load(nbt.getCompound(String.format("Pattern%02d", i)));
 		}
 	}
 
 	@Override
-	public CompoundNBT writeSync(CompoundNBT nbt) {
-		super.writeSync(nbt);
+	public CompoundTag saveSync(CompoundTag nbt) {
+		super.saveSync(nbt);
 		nbt.putByte("PatternIndex", (byte)patternIndex);
 		for(int i = 0; i < patternItemHandlers.length; ++i) {
-			CompoundNBT subNBT = new CompoundNBT();
-			patternItemHandlers[i].write(subNBT);
+			CompoundTag subNBT = new CompoundTag();
+			patternItemHandlers[i].save(subNBT);
 			nbt.put(String.format("Pattern%02d", i), subNBT);
 		}
 		return nbt;
@@ -67,8 +69,8 @@ public class EncoderTile extends BaseTile {
 
 	public void setPatternIndex(int patternIndex) {
 		this.patternIndex = patternIndex;
-		syncTile(false);
-		markDirty();
+		sync(false);
+		setChanged();
 	}
 
 	public void saveRecipeList(boolean single) {
@@ -88,9 +90,10 @@ public class EncoderTile extends BaseTile {
 					recipeList.add(inv.recipeInfo);
 				}
 			}
-			IPackageRecipeList recipeListItem = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(world, stack);
+			IPackageRecipeList recipeListItem = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(level, stack);
 			recipeListItem.setRecipeList(recipeList);
-			CompoundNBT nbt = recipeListItem.write(new CompoundNBT());
+			CompoundTag nbt = new CompoundTag();
+			recipeListItem.save(nbt);
 			itemHandler.getStackInSlot(0).setTag(nbt);
 		}
 	}
@@ -98,7 +101,7 @@ public class EncoderTile extends BaseTile {
 	public void loadRecipeList() {
 		ItemStack stack = itemHandler.getStackInSlot(0);
 		if(stack.getItem() instanceof IPackageRecipeListItem) {
-			IPackageRecipeList recipeListItem = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(world, stack);
+			IPackageRecipeList recipeListItem = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(level, stack);
 			List<IPackageRecipeInfo> recipeList = recipeListItem.getRecipeList();
 			for(int i = 0; i < patternItemHandlers.length; ++i) {
 				EncoderPatternItemHandler inv = patternItemHandlers[i];
@@ -122,8 +125,8 @@ public class EncoderTile extends BaseTile {
 	}
 
 	@Override
-	public Container createMenu(int windowId, PlayerInventory playerInventory, PlayerEntity player) {
-		syncTile(false);
-		return new EncoderContainer(windowId, playerInventory, this);
+	public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player player) {
+		sync(false);
+		return new EncoderMenu(windowId, inventory, this);
 	}
 }

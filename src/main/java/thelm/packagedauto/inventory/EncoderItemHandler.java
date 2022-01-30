@@ -1,13 +1,13 @@
 package thelm.packagedauto.inventory;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import thelm.packagedauto.api.IPackageRecipeListItem;
-import thelm.packagedauto.tile.EncoderTile;
+import thelm.packagedauto.block.entity.EncoderBlockEntity;
 
-public class EncoderItemHandler extends BaseItemHandler<EncoderTile> {
+public class EncoderItemHandler extends BaseItemHandler<EncoderBlockEntity> {
 
-	public EncoderItemHandler(EncoderTile tile) {
-		super(tile, 1);
+	public EncoderItemHandler(EncoderBlockEntity blockEntity) {
+		super(blockEntity, 1);
 	}
 
 	@Override

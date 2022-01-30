@@ -11,7 +11,7 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.runtime.IJeiRuntime;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import thelm.packagedauto.client.screen.EncoderScreen;
 
 @JeiPlugin
@@ -40,7 +40,7 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 	@Override
 	public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
 		PackagedAutoJEIPlugin.jeiRuntime = jeiRuntime;
-		allCategories = Lists.transform(jeiRuntime.getRecipeManager().getRecipeCategories(), IRecipeCategory::getUid);
+		allCategories = Lists.transform(jeiRuntime.getRecipeManager().getRecipeCategories(null, false), IRecipeCategory::getUid);
 	}
 
 	public static List<ResourceLocation> getAllRecipeCategories() {

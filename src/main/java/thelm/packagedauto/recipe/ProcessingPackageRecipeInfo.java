@@ -7,10 +7,10 @@ import java.util.List;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
@@ -24,7 +24,7 @@ public class ProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 	List<IPackagePattern> patterns = new ArrayList<>();
 
 	@Override
-	public void read(CompoundNBT nbt) {
+	public void load(CompoundTag nbt) {
 		MiscHelper.INSTANCE.loadAllItems(nbt.getList("Input", 10), input);
 		MiscHelper.INSTANCE.loadAllItems(nbt.getList("Output", 10), output);
 		patterns.clear();
@@ -34,12 +34,11 @@ public class ProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT nbt) {
-		ListNBT inputTag = MiscHelper.INSTANCE.saveAllItems(new ListNBT(), input);
+	public void save(CompoundTag nbt) {
+		ListTag inputTag = MiscHelper.INSTANCE.saveAllItems(new ListTag(), input);
 		nbt.put("Input", inputTag);
-		ListNBT outputTag = MiscHelper.INSTANCE.saveAllItems(new ListNBT(), output);
+		ListTag outputTag = MiscHelper.INSTANCE.saveAllItems(new ListTag(), output);
 		nbt.put("Output", outputTag);
-		return nbt;
 	}
 
 	@Override
@@ -68,7 +67,7 @@ public class ProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 	}
 
 	@Override
-	public void generateFromStacks(List<ItemStack> input, List<ItemStack> output, World world) {
+	public void generateFromStacks(List<ItemStack> input, List<ItemStack> output, Level level) {
 		this.input.clear();
 		this.input.addAll(MiscHelper.INSTANCE.condenseStacks(input));
 		this.output.clear();
@@ -85,10 +84,9 @@ public class ProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 		for(int i = 0; i < input.size(); ++i) {
 			map.put(i, input.get(i));
 		}
-		//TODO uncomment when AE2 support custom details again
-		//for(int i = 0; i < output.size(); ++i) {
-		//	map.put(i+81, output.get(i));
-		//}
+		for(int i = 0; i < output.size(); ++i) {
+			map.put(i+81, output.get(i));
+		}
 		for(int i = 0; i < output.size() && i < 3; ++i) {
 			map.put(i*3+81+1, output.get(i));
 		}
@@ -103,12 +101,12 @@ public class ProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 				return false;
 			}
 			for(int i = 0; i < input.size(); ++i) {
-				if(!ItemStack.areItemStackTagsEqual(input.get(i), other.input.get(i))) {
+				if(!ItemStack.isSameItemSameTags(input.get(i), other.input.get(i))) {
 					return false;
 				}
 			}
 			for(int i = 0; i < output.size(); ++i) {
-				if(!ItemStack.areItemStackTagsEqual(output.get(i), other.output.get(i))) {
+				if(!ItemStack.isSameItemSameTags(output.get(i), other.output.get(i))) {
 					return false;
 				}
 			}

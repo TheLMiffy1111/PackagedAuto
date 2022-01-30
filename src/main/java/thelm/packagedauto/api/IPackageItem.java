@@ -1,6 +1,6 @@
 package thelm.packagedauto.api;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public interface IPackageItem {
 

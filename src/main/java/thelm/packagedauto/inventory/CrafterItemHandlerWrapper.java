@@ -1,7 +1,7 @@
 package thelm.packagedauto.inventory;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 
 public class CrafterItemHandlerWrapper extends SidedItemHandlerWrapper<CrafterItemHandler> {
 
@@ -23,6 +23,6 @@ public class CrafterItemHandlerWrapper extends SidedItemHandlerWrapper<CrafterIt
 
 	@Override
 	public boolean canExtractItem(int index, Direction direction) {
-		return itemHandler.tile.isWorking ? index == 9 : true;
+		return itemHandler.blockEntity.isWorking ? index == 9 : true;
 	}
 }

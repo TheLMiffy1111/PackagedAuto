@@ -2,10 +2,10 @@ package thelm.packagedauto.network.packet;
 
 import java.util.function.Supplier;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
-import thelm.packagedauto.container.EncoderContainer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
+import thelm.packagedauto.menu.EncoderMenu;
 
 public class SaveRecipeListPacket {
 
@@ -15,20 +15,19 @@ public class SaveRecipeListPacket {
 		this.single = single;
 	}
 
-	public static void encode(SaveRecipeListPacket pkt, PacketBuffer buf) {
+	public static void encode(SaveRecipeListPacket pkt, FriendlyByteBuf buf) {
 		buf.writeBoolean(pkt.single);
 	}
 
-	public static SaveRecipeListPacket decode(PacketBuffer buf) {
+	public static SaveRecipeListPacket decode(FriendlyByteBuf buf) {
 		return new SaveRecipeListPacket(buf.readBoolean());
 	}
 
 	public static void handle(SaveRecipeListPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-		ServerPlayerEntity player = ctx.get().getSender();
+		ServerPlayer player = ctx.get().getSender();
 		ctx.get().enqueueWork(()->{
-			if(player.openContainer instanceof EncoderContainer) {
-				EncoderContainer container = (EncoderContainer)player.openContainer;
-				container.tile.saveRecipeList(pkt.single);
+			if(player.containerMenu instanceof EncoderMenu menu) {
+				menu.blockEntity.saveRecipeList(pkt.single);
 			}
 		});
 		ctx.get().setPacketHandled(true);

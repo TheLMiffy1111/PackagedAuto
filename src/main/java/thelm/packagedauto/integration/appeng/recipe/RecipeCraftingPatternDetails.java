@@ -1,128 +1,55 @@
 package thelm.packagedauto.integration.appeng.recipe;
 
-import java.util.List;
-
-import appeng.api.networking.crafting.ICraftingPatternDetails;
-import appeng.api.storage.channels.IItemStorageChannel;
-import appeng.api.storage.data.IAEItemStack;
-import appeng.core.Api;
-import appeng.helpers.CraftingPatternDetails;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.world.World;
+import appeng.api.crafting.IPatternDetails;
+import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.GenericStack;
+import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.fluids.FluidStack;
+import thelm.packagedauto.api.IFluidPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.integration.appeng.AppEngUtil;
 
-public class RecipeCraftingPatternDetails implements ICraftingPatternDetails {
+public class RecipeCraftingPatternDetails implements IPatternDetails {
 
-	public final ItemStack recipeHolder;
+	public final AEItemKey recipeHolder;
 	public final IPackageRecipeInfo recipe;
-	public final IAEItemStack[] sparseInputs;
-	public final IAEItemStack[] sparseOutputs;
-	public final List<IAEItemStack> inputs;
-	public final List<IAEItemStack> outputs;
+	public final GenericStack[] sparseInputs;
+	public final GenericStack[] sparseOutputs;
+	public final IInput[] inputs;
+	public final GenericStack[] outputs;
 	private int priority = 0;
 
 	public RecipeCraftingPatternDetails(ItemStack recipeHolder, IPackageRecipeInfo recipe) {
-		this.recipeHolder = recipeHolder;
+		this.recipeHolder = AEItemKey.of(recipeHolder);
 		this.recipe = recipe;
-		IItemStorageChannel storageChannel = Api.instance().storage().getStorageChannel(IItemStorageChannel.class);
-		sparseInputs = recipe.getPatterns().stream().map(IPackagePattern::getOutput).map(storageChannel::createStack).toArray(i->new IAEItemStack[i]);
-		sparseOutputs = recipe.getOutputs().stream().map(storageChannel::createStack).toArray(i->new IAEItemStack[i]);
-		inputs = AppEngUtil.condenseStacks(sparseInputs);
+		sparseInputs = recipe.getPatterns().stream().map(IPackagePattern::getOutput).map(GenericStack::fromItemStack).toArray(GenericStack[]::new);
+		sparseOutputs = recipe.getOutputs().stream().map(this::getItemOrFluidOutput).toArray(GenericStack[]::new);
+		inputs = AppEngUtil.toInputs(sparseInputs);
 		outputs = AppEngUtil.condenseStacks(sparseOutputs);
 	}
 
 	@Override
-	public ItemStack getPattern() {
+	public AEItemKey getDefinition() {
 		return recipeHolder;
 	}
 
-	@Override
-	public boolean isValidItemForSlot(int slotIndex, ItemStack itemStack, World world) {
-		throw new IllegalStateException("Not supported.");
-	}
-
-	@Override
-	public boolean isCraftable() {
-		return false;
-	}
-
-	@Override
-	public List<IAEItemStack> getInputs() {
-		return inputs;
-	}
-
-	@Override
-	public List<IAEItemStack> getOutputs() {
-		return outputs;
-	}
-
-	@Override
-	public IAEItemStack[] getSparseInputs() {
+	public GenericStack[] getSparseInputs() {
 		return sparseInputs;
 	}
 
-	@Override
-	public IAEItemStack[] getSparseOutputs() {
+	public GenericStack[] getSparseOutputs() {
 		return sparseOutputs;
 	}
 
 	@Override
-	public boolean canSubstitute() {
-		return false;
+	public IInput[] getInputs() {
+		return inputs;
 	}
 
 	@Override
-	public List<IAEItemStack> getSubstituteInputs(int index) {
-		throw new IllegalStateException("Not supported.");
-	}
-
-	@Override
-	public ItemStack getOutput(CraftingInventory craftingInv, World world) {
-		throw new IllegalStateException("Not supported.");
-	}
-
-	@Override
-	public int getPriority() {
-		return priority;
-	}
-
-	@Override
-	public void setPriority(int priority) {
-		this.priority = priority;
-	}
-
-	public CraftingPatternDetails toAEInternal(World world) {
-		ItemStack patternStack = new ItemStack(Api.instance().definitions().items().encodedPattern());
-		CompoundNBT encodedValue = new CompoundNBT();
-		ListNBT tagIn = new ListNBT();
-		ListNBT tagOut = new ListNBT();
-		for(int i = 0; i < 9; ++i) {
-			ItemStack is = i < recipe.getPatterns().size() ? recipe.getPatterns().get(i).getOutput() : ItemStack.EMPTY;
-			tagIn.add(createItemTag(is));
-		}
-		for(int i = 0; i < 3; ++i) {
-			ItemStack is = i < recipe.getOutputs().size() ? recipe.getOutputs().get(i) : ItemStack.EMPTY;
-			tagOut.add(createItemTag(is));
-		}
-		encodedValue.put("in", tagIn);
-		encodedValue.put("out", tagOut);
-		patternStack.setTag(encodedValue);
-		IAEItemStack patternAEStack = Api.instance().storage().getStorageChannel(IItemStorageChannel.class).createStack(patternStack);
-		return new CraftingPatternDetails(patternAEStack, world);
-	}
-
-	private static INBT createItemTag(ItemStack i) {
-		CompoundNBT c = new CompoundNBT();
-		if(!i.isEmpty()) {
-			i.write(c);
-		}
-		return c;
+	public GenericStack[] getOutputs() {
+		return outputs;
 	}
 
 	@Override
@@ -137,5 +64,13 @@ public class RecipeCraftingPatternDetails implements ICraftingPatternDetails {
 	@Override
 	public int hashCode() {
 		return recipe.hashCode();
+	}
+
+	private GenericStack getItemOrFluidOutput(ItemStack stack) {
+		if(stack.getItem() instanceof IFluidPackageItem fluidPackage) {
+			FluidStack fluidStack = fluidPackage.getFluidStack(stack);
+			return GenericStack.fromFluidStack(new FluidStack(fluidStack.getFluid(), fluidStack.getAmount()*stack.getCount()));
+		}
+		return GenericStack.fromItemStack(stack);
 	}
 }

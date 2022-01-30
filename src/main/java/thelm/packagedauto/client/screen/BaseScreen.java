@@ -1,41 +1,41 @@
 package thelm.packagedauto.client.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.screen.inventory.ContainerScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import thelm.packagedauto.container.BaseContainer;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import thelm.packagedauto.menu.BaseMenu;
 
-public abstract class BaseScreen<C extends BaseContainer<?>> extends ContainerScreen<C> {
+public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContainerScreen<C> {
 
-	public final C container;
+	public final C menu;
 
-	public BaseScreen(C container, PlayerInventory inventory, ITextComponent title) {
-		super(container, inventory, title);
-		this.container = container;
+	public BaseScreen(C menu, Inventory inventory, Component title) {
+		super(menu, inventory, title);
+		this.menu = menu;
 	}
 
 	@Override
-	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(matrixStack);
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
-		renderHoveredTooltip(matrixStack, mouseX, mouseY);
+	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+		renderBackground(poseStack);
+		super.render(poseStack, mouseX, mouseY, partialTicks);
+		renderTooltip(poseStack, mouseX, mouseY);
 	}
 
 	protected abstract ResourceLocation getBackgroundTexture();
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
-		RenderSystem.color4f(1F, 1F, 1F, 1F);
-		minecraft.getTextureManager().bindTexture(getBackgroundTexture());
-		if(xSize > 256 || ySize > 256) {
-			blit(matrixStack, guiLeft, guiTop, 0, 0, xSize, ySize, 512, 512);
+	protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
+		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+		RenderSystem.setShaderTexture(0, getBackgroundTexture());
+		if(imageWidth > 256 || imageHeight > 256) {
+			blit(poseStack, leftPos, topPos, 0, 0, imageWidth, imageHeight, 512, 512);
 		}
 		else {
-			blit(matrixStack, guiLeft, guiTop, 0, 0, xSize, ySize);
+			blit(poseStack, leftPos, topPos, 0, 0, imageWidth, imageHeight);
 		}
 	}
 }

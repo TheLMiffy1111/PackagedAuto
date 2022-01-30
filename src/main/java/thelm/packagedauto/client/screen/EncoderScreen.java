@@ -1,35 +1,36 @@
 package thelm.packagedauto.client.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.client.renderer.RenderHelper;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.PlayerContainer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemStack;
 import thelm.packagedauto.api.IPackageRecipeType;
-import thelm.packagedauto.container.EncoderContainer;
+import thelm.packagedauto.menu.EncoderMenu;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.CycleRecipeTypePacket;
 import thelm.packagedauto.network.packet.LoadRecipeListPacket;
 import thelm.packagedauto.network.packet.SaveRecipeListPacket;
 import thelm.packagedauto.network.packet.SetPatternIndexPacket;
 
-public class EncoderScreen extends BaseScreen<EncoderContainer> {
+public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
 	public static final ResourceLocation BACKGROUND = new ResourceLocation("packagedauto:textures/gui/encoder.png");
 
-	public EncoderScreen(EncoderContainer container, PlayerInventory playerInventory, ITextComponent title) {
-		super(container, playerInventory, title);
-		xSize = 258;
-		ySize = 314;
+	public EncoderScreen(EncoderMenu menu, Inventory inventory, Component title) {
+		super(menu, inventory, title);
+		imageWidth = 258;
+		imageHeight = 314;
 	}
 
 	@Override
@@ -38,36 +39,37 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
-		super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
-		IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
+	protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
+		super.renderBg(poseStack, partialTicks, mouseX, mouseY);
+		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
 		for(int i = 0; i < 9; ++i) {
 			for(int j = 0; j < 9; ++j) {
-				Vector3i color = recipeType.getSlotColor(i*9+j);
-				RenderSystem.color4f(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
-				blit(matrixStack, guiLeft+8+j*18, guiTop+56+i*18, 258, 0, 16, 16, 512, 512);
+				Vec3i color = recipeType.getSlotColor(i*9+j);
+				RenderSystem.setShaderColor(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
+				blit(poseStack, leftPos+8+j*18, topPos+56+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
-				Vector3i color = recipeType.getSlotColor(81+i*3+j);
-				RenderSystem.color4f(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
-				blit(matrixStack, guiLeft+198+j*18, guiTop+110+i*18, 258, 0, 16, 16, 512, 512);
+				int slotIndex = 81+(i*3+j == 4 ? 0 : i*3+j < 4 ? i*3+j+1 : i*3+j);
+				Vec3i color = recipeType.getSlotColor(slotIndex);
+				RenderSystem.setShaderColor(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
+				blit(poseStack, leftPos+198+j*18, topPos+110+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
-		RenderSystem.color4f(1F, 1F, 1F, 1F);
+		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 	}
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
-		String s = container.tile.getDisplayName().getString();
-		font.drawString(matrixStack, s, xSize/2 - font.getStringWidth(s)/2, 6, 0x404040);
-		font.drawString(matrixStack, container.playerInventory.getDisplayName().getString(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
-		String str = container.patternItemHandler.recipeType.getShortDisplayName().getString();
-		font.drawString(matrixStack, str, 212 - font.getStringWidth(str)/2, 64, 0x404040);
-		for(Widget button : buttons) {
-			if(button.isMouseOver(mouseX, mouseY)) {
-				button.renderToolTip(matrixStack, mouseX-guiLeft, mouseY-guiTop);
+	protected void renderLabels(PoseStack poseStack, int mouseX, int mouseY) {
+		String s = menu.blockEntity.getDisplayName().getString();
+		font.draw(poseStack, s, imageWidth/2 - font.width(s)/2, 6, 0x404040);
+		font.draw(poseStack, menu.inventory.getDisplayName().getString(), menu.getPlayerInvX(), menu.getPlayerInvY()-11, 0x404040);
+		String str = menu.patternItemHandler.recipeType.getShortDisplayName().getString();
+		font.draw(poseStack, str, 212 - font.width(str)/2, 64, 0x404040);
+		for(GuiEventListener child : children()) {
+			if(child.isMouseOver(mouseX, mouseY) && child instanceof AbstractWidget button) {
+				button.renderToolTip(poseStack, mouseX-leftPos, mouseY-topPos);
 				break;
 			}
 		}
@@ -75,112 +77,118 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 
 	@Override
 	public void init() {
-		buttons.clear();
+		clearWidgets();
 		super.init();
-		int patternSlots = container.tile.patternItemHandlers.length;
+		int patternSlots = menu.blockEntity.patternItemHandlers.length;
 		for(int i = 0; i < patternSlots; ++i) {
-			addButton(new ButtonPatternSlot(i, guiLeft+29+(i%10)*18, guiTop+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
+			addRenderableWidget(new ButtonPatternSlot(i, leftPos+29+(i%10)*18, topPos+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
 		}
-		addButton(new ButtonRecipeType(guiLeft+204, guiTop+74));
-		addButton(new ButtonSavePatterns(guiLeft+213, guiTop+16, new TranslationTextComponent("block.packagedauto.encoder.save")));
-		addButton(new ButtonLoadPatterns(guiLeft+213, guiTop+34, new TranslationTextComponent("block.packagedauto.encoder.load")));
+		addRenderableWidget(new ButtonRecipeType(leftPos+204, topPos+74));
+		addRenderableWidget(new ButtonSavePatterns(leftPos+213, topPos+16, new TranslatableComponent("block.packagedauto.encoder.save")));
+		addRenderableWidget(new ButtonLoadPatterns(leftPos+213, topPos+34, new TranslatableComponent("block.packagedauto.encoder.load")));
 	}
 
-	class ButtonPatternSlot extends Widget {
+	class ButtonPatternSlot extends AbstractWidget {
 
 		int id;
 
 		ButtonPatternSlot(int id, int x, int y) {
-			super(x, y, 18, 18, StringTextComponent.EMPTY);
+			super(x, y, 18, 18, TextComponent.EMPTY);
 			this.id = id;
 		}
 
 		@Override
 		protected int getYImage(boolean mouseOver) {
-			if(container.tile.patternIndex == id) {
+			if(menu.blockEntity.patternIndex == id) {
 				return 2;
 			}
 			return super.getYImage(mouseOver);
 		}
 
 		@Override
-		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
+		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
 			for(int i = 81; i < 90; ++i) {
-				ItemStack stack = container.tile.patternItemHandlers[id].getStackInSlot(i);
+				ItemStack stack = menu.blockEntity.patternItemHandlers[id].getStackInSlot(i);
 				if(!stack.isEmpty()) {
-					RenderHelper.enableStandardItemLighting();
-					RenderSystem.color4f(1F, 1F, 1F, 1F);
-					minecraft.getItemRenderer().renderItemIntoGUI(stack, x+1, y+1);
-					RenderHelper.disableStandardItemLighting();
+					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+					minecraft.getItemRenderer().renderGuiItem(stack, x+1, y+1);
 					break;
 				}
 			}
 		}
 
 		@Override
-		public void renderToolTip(MatrixStack matrixStack, int mouseX, int mouseY) {
-			renderTooltip(matrixStack, new TranslationTextComponent("block.packagedauto.encoder.pattern_slot", String.format("%02d", id)), mouseX, mouseY);
+		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
+			renderTooltip(poseStack, new TranslatableComponent("block.packagedauto.encoder.pattern_slot", String.format("%02d", id)), mouseX, mouseY);
 		}
 
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new SetPatternIndexPacket(id));
-			container.tile.setPatternIndex(id);
-			container.setupSlots();
-		}
-	}
-
-	class ButtonRecipeType extends Widget {
-
-		ButtonRecipeType(int x, int y) {
-			super(x, y, 18, 18, StringTextComponent.EMPTY);
+			menu.blockEntity.setPatternIndex(id);
+			menu.setupSlots();
 		}
 
 		@Override
-		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
-			IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+
+		}
+	}
+
+	class ButtonRecipeType extends AbstractWidget {
+
+		ButtonRecipeType(int x, int y) {
+			super(x, y, 18, 18, TextComponent.EMPTY);
+		}
+
+		@Override
+		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+			IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
 			if(recipeType != null) {
 				Object rep = recipeType.getRepresentation();
 				if(rep instanceof TextureAtlasSprite) {
-					RenderSystem.color4f(1F, 1F, 1F, 1F);
-					minecraft.getTextureManager().bindTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE);
-					blit(matrixStack, x+1, y+1, 0, 16, 16, (TextureAtlasSprite)rep);
+					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+					RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+					blit(poseStack, x+1, y+1, 0, 16, 16, (TextureAtlasSprite)rep);
 				}
 				if(rep instanceof ItemStack) {
-					RenderHelper.enableStandardItemLighting();
-					RenderSystem.color4f(1F, 1F, 1F, 1F);
-					minecraft.getItemRenderer().renderItemIntoGUI((ItemStack)rep, x+1, y+1);
-					RenderHelper.disableStandardItemLighting();
+					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+					minecraft.getItemRenderer().renderGuiItem((ItemStack)rep, x+1, y+1);
 				}
 			}
 		}
 
 		@Override
-		public void renderToolTip(MatrixStack matrixStack, int mouseX, int mouseY) {
-			renderTooltip(matrixStack, new TranslationTextComponent("block.packagedauto.encoder.change_recipe_type"), mouseX, mouseY);
+		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
+			renderTooltip(poseStack, new TranslatableComponent("block.packagedauto.encoder.change_recipe_type"), mouseX, mouseY);
 		}
 
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			boolean reverse = hasShiftDown();
 			PacketHandler.INSTANCE.sendToServer(new CycleRecipeTypePacket(reverse));
-			container.patternItemHandler.cycleRecipeType(reverse);
-			container.setupSlots();
+			menu.patternItemHandler.cycleRecipeType(reverse);
+			menu.setupSlots();
+		}
+
+		@Override
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+
 		}
 	}
 
-	class ButtonSavePatterns extends Widget {
+	class ButtonSavePatterns extends AbstractWidget {
 
-		ButtonSavePatterns(int x, int y, ITextComponent text) {
+		ButtonSavePatterns(int x, int y, Component text) {
 			super(x, y, 38, 18, text);
 		}
 
 		@Override
-		public void renderToolTip(MatrixStack matrixStack, int mouseX, int mouseY) {
+		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
 			if(hasShiftDown()) {
-				renderTooltip(matrixStack, new TranslationTextComponent("block.packagedauto.encoder.save_single"), mouseX, mouseY);
+				renderTooltip(poseStack, new TranslatableComponent("block.packagedauto.encoder.save_single"), mouseX, mouseY);
 			}
 		}
 
@@ -189,17 +197,27 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 			boolean single = hasShiftDown();
 			PacketHandler.INSTANCE.sendToServer(new SaveRecipeListPacket(single));
 		}
+
+		@Override
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+
+		}
 	}
 
-	class ButtonLoadPatterns extends Widget {
+	class ButtonLoadPatterns extends AbstractWidget {
 
-		ButtonLoadPatterns(int x, int y, ITextComponent text) {
+		ButtonLoadPatterns(int x, int y, Component text) {
 			super(x, y, 38, 18, text);
 		}
 
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new LoadRecipeListPacket());
+		}
+
+		@Override
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+
 		}
 	}
 }

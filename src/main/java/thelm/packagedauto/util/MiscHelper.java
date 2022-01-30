@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -19,19 +20,20 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 
+import it.unimi.dsi.fastutil.Hash;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.client.Minecraft;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.items.IItemHandler;
@@ -45,7 +47,7 @@ public class MiscHelper implements IMiscHelper {
 
 	public static final MiscHelper INSTANCE = new MiscHelper();
 
-	private static final Cache<CompoundNBT, IPackageRecipeInfo> RECIPE_CACHE = CacheBuilder.newBuilder().maximumSize(500).build();
+	private static final Cache<CompoundTag, IPackageRecipeInfo> RECIPE_CACHE = CacheBuilder.newBuilder().maximumSize(500).build();
 	private static final Logger LOGGER = LogManager.getLogger();
 
 	private static MinecraftServer server;
@@ -53,10 +55,10 @@ public class MiscHelper implements IMiscHelper {
 	private MiscHelper() {}
 
 	@Override
-	public List<ItemStack> condenseStacks(IInventory inventory) {
-		List<ItemStack> stacks = new ArrayList<>(inventory.getSizeInventory());
-		for(int i = 0; i < inventory.getSizeInventory(); ++i) {
-			stacks.add(inventory.getStackInSlot(i));
+	public List<ItemStack> condenseStacks(Container container) {
+		List<ItemStack> stacks = new ArrayList<>(container.getContainerSize());
+		for(int i = 0; i < container.getContainerSize(); ++i) {
+			stacks.add(container.getItem(i));
 		}
 		return condenseStacks(stacks);
 	}
@@ -92,24 +94,32 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public List<ItemStack> condenseStacks(List<ItemStack> stacks, boolean ignoreStackSize) {
-		Object2IntRBTreeMap<Pair<Item, CompoundNBT>> map = new Object2IntRBTreeMap<>(
-				Comparator.comparing(pair->Pair.of(pair.getLeft().getRegistryName(), ""+pair.getRight())));
+		Object2IntLinkedOpenCustomHashMap<Pair<Item, CompoundTag>> map = new Object2IntLinkedOpenCustomHashMap<>(new Hash.Strategy<>() {
+			@Override
+			public int hashCode(Pair<Item, CompoundTag> o) {
+				return Objects.hash(Item.getId(o.getLeft()), o.getRight());
+			}
+			@Override
+			public boolean equals(Pair<Item, CompoundTag> a, Pair<Item, CompoundTag> b) {
+				return a.equals(b);
+			}
+		});
 		for(ItemStack stack : stacks) {
 			if(stack.isEmpty()) {
 				continue;
 			}
-			Pair<Item, CompoundNBT> pair = Pair.of(stack.getItem(), stack.getTag());
+			Pair<Item, CompoundTag> pair = Pair.of(stack.getItem(), stack.getTag());
 			if(!map.containsKey(pair)) {
 				map.put(pair, 0);
 			}
 			map.addTo(pair, stack.getCount());
 		}
 		List<ItemStack> list = new ArrayList<>();
-		for(Object2IntMap.Entry<Pair<Item, CompoundNBT>> entry : map.object2IntEntrySet()) {
-			Pair<Item, CompoundNBT> pair = entry.getKey();
+		for(Object2IntMap.Entry<Pair<Item, CompoundTag>> entry : map.object2IntEntrySet()) {
+			Pair<Item, CompoundTag> pair = entry.getKey();
 			int count = entry.getIntValue();
 			Item item = pair.getLeft();
-			CompoundNBT nbt = pair.getRight();
+			CompoundTag nbt = pair.getRight();
 			if(ignoreStackSize) {
 				list.add(new ItemStack(item, count));
 			}
@@ -129,7 +139,7 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
-	public ListNBT saveAllItems(ListNBT tagList, List<ItemStack> list) {
+	public ListTag saveAllItems(ListTag tagList, List<ItemStack> list) {
 		for(int i = 0; i < list.size(); ++i) {
 			ItemStack stack = list.get(i);
 			boolean empty = stack.isEmpty();
@@ -138,9 +148,9 @@ public class MiscHelper implements IMiscHelper {
 					// Ensure that the end-of-list stack if empty is always the default empty stack
 					stack = new ItemStack((Item)null);
 				}
-				CompoundNBT nbt = new CompoundNBT();
+				CompoundTag nbt = new CompoundTag();
 				nbt.putByte("Index", (byte)i);
-				stack.write(nbt);
+				stack.save(nbt);
 				tagList.add(nbt);
 			}
 		}
@@ -148,16 +158,16 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
-	public void loadAllItems(ListNBT tagList, List<ItemStack> list) {
+	public void loadAllItems(ListTag tagList, List<ItemStack> list) {
 		list.clear();
 		for(int i = 0; i < tagList.size(); ++i) {
-			CompoundNBT nbt = tagList.getCompound(i);
+			CompoundTag nbt = tagList.getCompound(i);
 			int j = nbt.getByte("Index") & 255;
 			while(j >= list.size()) {
 				list.add(ItemStack.EMPTY);
 			}
 			if(j >= 0)  {
-				ItemStack stack = ItemStack.read(nbt);
+				ItemStack stack = ItemStack.of(nbt);
 				list.set(j, stack.isEmpty() ? ItemStack.EMPTY : stack);
 			}
 		}
@@ -177,13 +187,13 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
-	public List<ItemStack> getRemainingItems(IInventory inventory) {
-		return getRemainingItems(IntStream.range(0, inventory.getSizeInventory()).mapToObj(inventory::getStackInSlot).collect(Collectors.toList()));
+	public List<ItemStack> getRemainingItems(Container container) {
+		return getRemainingItems(IntStream.range(0, container.getContainerSize()).mapToObj(container::getItem).collect(Collectors.toList()));
 	}
 
 	@Override
-	public List<ItemStack> getRemainingItems(IInventory inventory, int minInclusive, int maxExclusive) {
-		return getRemainingItems(IntStream.range(minInclusive, maxExclusive).mapToObj(inventory::getStackInSlot).collect(Collectors.toList()));
+	public List<ItemStack> getRemainingItems(Container container, int minInclusive, int maxExclusive) {
+		return getRemainingItems(IntStream.range(minInclusive, maxExclusive).mapToObj(container::getItem).collect(Collectors.toList()));
 	}
 
 	@Override
@@ -207,7 +217,7 @@ public class MiscHelper implements IMiscHelper {
 		}
 		if(stack.getItem().hasContainerItem(stack)) {
 			stack = stack.getItem().getContainerItem(stack);
-			if(!stack.isEmpty() && stack.isDamageable() && stack.getDamage() > stack.getMaxDamage()) {
+			if(!stack.isEmpty() && stack.isDamageableItem() && stack.getDamageValue() > stack.getMaxDamage()) {
 				return ItemStack.EMPTY;
 			}
 			return stack;
@@ -243,14 +253,14 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
-	public CompoundNBT writeRecipe(CompoundNBT nbt, IPackageRecipeInfo recipe) {
+	public CompoundTag saveRecipe(CompoundTag nbt, IPackageRecipeInfo recipe) {
 		nbt.putString("RecipeType", recipe.getRecipeType().getName().toString());
-		recipe.write(nbt);
+		recipe.save(nbt);
 		return nbt;
 	}
 
 	@Override
-	public IPackageRecipeInfo readRecipe(CompoundNBT nbt) {
+	public IPackageRecipeInfo loadRecipe(CompoundTag nbt) {
 		IPackageRecipeInfo recipe = RECIPE_CACHE.getIfPresent(nbt);
 		if(recipe != null && recipe.isValid()) {
 			return recipe;
@@ -258,7 +268,7 @@ public class MiscHelper implements IMiscHelper {
 		IPackageRecipeType recipeType = PackagedAutoApi.instance().getRecipeType(new ResourceLocation(nbt.getString("RecipeType")));
 		if(recipeType != null) {
 			recipe = recipeType.getNewRecipeInfo();
-			recipe.read(nbt);
+			recipe.load(nbt);
 			RECIPE_CACHE.put(nbt, recipe);
 			if(recipe.isValid()) {
 				return recipe;
@@ -275,7 +285,7 @@ public class MiscHelper implements IMiscHelper {
 		f:for(ItemStack req : condensedRequired) {
 			for(ItemStack offer : condensedOffered) {
 				if(req.getCount() <= offer.getCount() && req.getItem() == offer.getItem() &&
-						(!req.hasTag() || ItemStack.areItemStackTagsEqual(req, offer))) {
+						(!req.hasTag() || ItemStack.isSameItemSameTags(req, offer))) {
 					continue f;
 				}
 			}
@@ -289,7 +299,7 @@ public class MiscHelper implements IMiscHelper {
 			for(ItemStack offer : offered) {
 				if(!req.isEmpty()) {
 					if(req.getItem() == offer.getItem() &&
-							(!req.hasTag() || ItemStack.areItemStackTagsEqual(req, offer))) {
+							(!req.hasTag() || ItemStack.isSameItemSameTags(req, offer))) {
 						int toRemove = Math.min(count, offer.getCount());
 						offer.shrink(toRemove);
 						count -= toRemove;
@@ -305,12 +315,12 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public boolean arePatternsDisjoint(List<IPackagePattern> patternList) {
-		ObjectRBTreeSet<Pair<Item, CompoundNBT>> set = new ObjectRBTreeSet<>(
+		ObjectRBTreeSet<Pair<Item, CompoundTag>> set = new ObjectRBTreeSet<>(
 				Comparator.comparing(pair->Pair.of(pair.getLeft().getRegistryName(), ""+pair.getRight())));
 		for(IPackagePattern pattern : patternList) {
 			List<ItemStack> condensedInputs = condenseStacks(pattern.getInputs(), true);
 			for(ItemStack stack : condensedInputs) {
-				Pair<Item, CompoundNBT> toAdd = Pair.of(stack.getItem(), stack.getTag());
+				Pair<Item, CompoundTag> toAdd = Pair.of(stack.getItem(), stack.getTag());
 				if(set.contains(toAdd)) {
 					return false;
 				}
@@ -333,6 +343,6 @@ public class MiscHelper implements IMiscHelper {
 	@Override
 	public RecipeManager getRecipeManager() {
 		return server != null ? server.getRecipeManager() :
-			DistExecutor.callWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().world.getRecipeManager());
+			DistExecutor.callWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().level.getRecipeManager());
 	}
 }

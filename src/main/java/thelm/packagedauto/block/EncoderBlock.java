@@ -1,27 +1,27 @@
 package thelm.packagedauto.block;
 
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
 import thelm.packagedauto.PackagedAuto;
-import thelm.packagedauto.tile.EncoderTile;
+import thelm.packagedauto.block.entity.EncoderBlockEntity;
 
 public class EncoderBlock extends BaseBlock {
 
 	public static final EncoderBlock INSTANCE = new EncoderBlock();
-	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().group(PackagedAuto.ITEM_GROUP)).setRegistryName("packagedauto:encoder");
+	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.CREATIVE_TAB)).setRegistryName("packagedauto:encoder");
 
 	protected EncoderBlock() {
-		super(AbstractBlock.Properties.create(Material.IRON).hardnessAndResistance(15F, 25F).sound(SoundType.METAL));
+		super(BlockBehaviour.Properties.of(Material.METAL).strength(15F, 25F).sound(SoundType.METAL));
 		setRegistryName("packagedauto:encoder");
 	}
 
 	@Override
-	public EncoderTile createTileEntity(BlockState state, IBlockReader worldIn) {
-		return EncoderTile.TYPE_INSTANCE.create();
+	public EncoderBlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+		return EncoderBlockEntity.TYPE_INSTANCE.create(pos, state);
 	}
 }

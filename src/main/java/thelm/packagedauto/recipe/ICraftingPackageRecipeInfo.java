@@ -3,18 +3,18 @@ package thelm.packagedauto.recipe;
 import java.util.Collections;
 import java.util.List;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 
 public interface ICraftingPackageRecipeInfo extends IPackageRecipeInfo {
 
 	ItemStack getOutput();
 
-	IRecipe getRecipe();
+	Recipe getRecipe();
 
-	CraftingInventory getMatrix();
+	CraftingContainer getMatrix();
 
 	List<ItemStack> getRemainingItems();
 

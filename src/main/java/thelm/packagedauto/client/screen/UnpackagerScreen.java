@@ -1,25 +1,27 @@
 package thelm.packagedauto.client.screen;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.widget.Widget;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import thelm.packagedauto.container.UnpackagerContainer;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
+import thelm.packagedauto.block.entity.UnpackagerBlockEntity.PackageTracker;
+import thelm.packagedauto.menu.UnpackagerMenu;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.ChangeBlockingPacket;
-import thelm.packagedauto.tile.UnpackagerTile.PackageTracker;
 
-public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
+public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 
 	public static final ResourceLocation BACKGROUND = new ResourceLocation("packagedauto:textures/gui/unpackager.png");
 
-	public UnpackagerScreen(UnpackagerContainer container, PlayerInventory playerInventory, ITextComponent title) {
-		super(container, playerInventory, title);
+	public UnpackagerScreen(UnpackagerMenu menu, Inventory inventory, Component title) {
+		super(menu, inventory, title);
 	}
 
 	@Override
@@ -28,34 +30,34 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
-		super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
-		int scaledEnergy = container.tile.getScaledEnergy(40);
-		blit(matrixStack, guiLeft+10, guiTop+10+40-scaledEnergy, 176, 40-scaledEnergy, 12, scaledEnergy);
-		for(int i = 0; i < container.tile.trackers.length; ++i) {
-			PackageTracker tracker = container.tile.trackers[i];
+	protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
+		super.renderBg(poseStack, partialTicks, mouseX, mouseY);
+		int scaledEnergy = menu.blockEntity.getScaledEnergy(40);
+		blit(poseStack, leftPos+10, topPos+10+40-scaledEnergy, 176, 40-scaledEnergy, 12, scaledEnergy);
+		for(int i = 0; i < menu.blockEntity.trackers.length; ++i) {
+			PackageTracker tracker = menu.blockEntity.trackers[i];
 			for(int j = 0; j < tracker.amount; ++j) {
 				if(tracker.received.getBoolean(j)) {
-					blit(matrixStack, guiLeft+115+6*j, guiTop+16+6*i, 176, 45, 6, 5);
+					blit(poseStack, leftPos+115+6*j, topPos+16+6*i, 176, 45, 6, 5);
 				}
 				else {
-					blit(matrixStack, guiLeft+115+6*j, guiTop+16+6*i, 176, 40, 6, 5);
+					blit(poseStack, leftPos+115+6*j, topPos+16+6*i, 176, 40, 6, 5);
 				}
 			}
 		}
 	}
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
-		String s = container.tile.getDisplayName().getString();
-		font.drawString(matrixStack, s, xSize/2 - font.getStringWidth(s)/2, 6, 0x404040);
-		font.drawString(matrixStack, container.playerInventory.getDisplayName().getString(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
-		if(mouseX-guiLeft >= 10 && mouseY-guiTop >= 10 && mouseX-guiLeft <= 21 && mouseY-guiTop <= 49) {
-			renderTooltip(matrixStack, new StringTextComponent(container.tile.getEnergyStorage().getEnergyStored()+" / "+container.tile.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-guiLeft, mouseY-guiTop);
+	protected void renderLabels(PoseStack poseStack, int mouseX, int mouseY) {
+		String s = menu.blockEntity.getDisplayName().getString();
+		font.draw(poseStack, s, imageWidth/2 - font.width(s)/2, 6, 0x404040);
+		font.draw(poseStack, menu.inventory.getDisplayName().getString(), menu.getPlayerInvX(), menu.getPlayerInvY()-11, 0x404040);
+		if(mouseX-leftPos >= 10 && mouseY-topPos >= 10 && mouseX-leftPos <= 21 && mouseY-topPos <= 49) {
+			renderTooltip(poseStack, new TextComponent(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
 		}
-		for(Widget button : buttons) {
-			if(button.isMouseOver(mouseX, mouseY)) {
-				button.renderToolTip(matrixStack, mouseX-guiLeft, mouseY-guiTop);
+		for(GuiEventListener child : children()) {
+			if(child.isMouseOver(mouseX, mouseY) && child instanceof AbstractWidget button) {
+				button.renderToolTip(poseStack, mouseX-leftPos, mouseY-topPos);
 				break;
 			}
 		}
@@ -63,34 +65,39 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 
 	@Override
 	public void init() {
-		buttons.clear();
+		clearWidgets();
 		super.init();
-		addButton(new ButtonChangeBlocking(guiLeft+98, guiTop+16));
+		addRenderableWidget(new ButtonChangeBlocking(leftPos+98, topPos+16));
 	}
 
-	class ButtonChangeBlocking extends Widget {
+	class ButtonChangeBlocking extends AbstractWidget {
 
 		public ButtonChangeBlocking(int x, int y) {
-			super(x, y, 16, 18, StringTextComponent.EMPTY);
+			super(x, y, 16, 18, TextComponent.EMPTY);
 		}
 
 		@Override
-		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
-			RenderSystem.color4f(1F, 1F, 1F, 1F);
-			minecraft.getTextureManager().bindTexture(BACKGROUND);
-			blit(matrixStack, x+1, y+2, 176, container.tile.blocking ? 64 : 50, 14, 14);
+		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+			RenderSystem.setShaderTexture(0, BACKGROUND);
+			blit(poseStack, x+1, y+2, 176, menu.blockEntity.blocking ? 64 : 50, 14, 14);
 		}
 
 		@Override
-		public void renderToolTip(MatrixStack matrixStack, int mouseX, int mouseY) {
-			renderTooltip(matrixStack, new TranslationTextComponent("block.packagedauto.unpackager.blocking."+container.tile.blocking), mouseX, mouseY);
+		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
+			renderTooltip(poseStack, new TranslatableComponent("block.packagedauto.unpackager.blocking."+menu.blockEntity.blocking), mouseX, mouseY);
 		}
 
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new ChangeBlockingPacket());
-			container.tile.changeBlockingMode();
+			menu.blockEntity.changeBlockingMode();
+		}
+
+		@Override
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+
 		}
 	}
 }

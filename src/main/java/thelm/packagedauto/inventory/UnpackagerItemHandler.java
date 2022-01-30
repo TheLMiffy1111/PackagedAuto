@@ -1,19 +1,19 @@
 package thelm.packagedauto.inventory;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeListItem;
-import thelm.packagedauto.tile.UnpackagerTile;
-import thelm.packagedauto.tile.UnpackagerTile.PackageTracker;
+import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
+import thelm.packagedauto.block.entity.UnpackagerBlockEntity.PackageTracker;
 
-public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerTile> {
+public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerBlockEntity> {
 
-	public UnpackagerItemHandler(UnpackagerTile tile) {
-		super(tile, 11);
+	public UnpackagerItemHandler(UnpackagerBlockEntity blockEntity) {
+		super(blockEntity, 11);
 	}
 
 	@Override
@@ -36,8 +36,8 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerTile> {
 	}
 
 	@Override
-	public void read(CompoundNBT nbt) {
-		super.read(nbt);
+	public void load(CompoundTag nbt) {
+		super.load(nbt);
 		updateRecipeList();
 	}
 
@@ -47,18 +47,18 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerTile> {
 	}
 
 	public void updateRecipeList() {
-		tile.recipeList.clear();
+		blockEntity.recipeList.clear();
 		ItemStack listStack = getStackInSlot(9);
 		if(listStack.getItem() instanceof IPackageRecipeListItem) {
-			tile.recipeList.addAll(((IPackageRecipeListItem)listStack.getItem()).getRecipeList(tile.getWorld(), listStack).getRecipeList());
+			blockEntity.recipeList.addAll(((IPackageRecipeListItem)listStack.getItem()).getRecipeList(blockEntity.getLevel(), listStack).getRecipeList());
 		}
-		if(tile.getWorld() != null && !tile.getWorld().isRemote) {
-			tile.postPatternChange();
+		if(blockEntity.getLevel() != null && !blockEntity.getLevel().isClientSide) {
+			blockEntity.postPatternChange();
 		}
 	}
 
 	public void clearRejectedIndexes() {
-		for(PackageTracker tracker : tile.trackers) {
+		for(PackageTracker tracker : blockEntity.trackers) {
 			tracker.clearRejectedIndexes();
 		}
 	}

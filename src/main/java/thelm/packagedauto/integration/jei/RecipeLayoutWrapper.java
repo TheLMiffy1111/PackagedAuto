@@ -4,18 +4,18 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
-import mezz.jei.api.gui.IRecipeLayout;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import mezz.jei.gui.recipes.RecipeLayout;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.fluids.FluidStack;
 import thelm.packagedauto.api.IGuiIngredientWrapper;
 import thelm.packagedauto.api.IRecipeLayoutWrapper;
 
 public class RecipeLayoutWrapper implements IRecipeLayoutWrapper {
 
-	private final IRecipeLayout recipeLayout;
+	private final RecipeLayout<?> recipeLayout;
 
-	public RecipeLayoutWrapper(IRecipeLayout recipeLayout) {
+	public RecipeLayoutWrapper(RecipeLayout<?> recipeLayout) {
 		this.recipeLayout = recipeLayout;
 	}
 
@@ -41,6 +41,6 @@ public class RecipeLayoutWrapper implements IRecipeLayoutWrapper {
 
 	@Override
 	public <V> Map<Integer, IGuiIngredientWrapper<V>> getIngredients(Class<? extends V> ingredientClass) {
-		return Maps.transformValues(recipeLayout.getIngredientsGroup(PackagedAutoJEIPlugin.jeiRuntime.getIngredientManager().getIngredientType(ingredientClass)).getGuiIngredients(), GuiIngredientWrapper::new);
+		return Maps.transformValues(recipeLayout.getIngredientsGroup(PackagedAutoJEIPlugin.jeiRuntime.getIngredientManager().<V>getIngredientType(ingredientClass)).getGuiIngredients(), GuiIngredientWrapper::new);
 	}
 }

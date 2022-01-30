@@ -5,16 +5,16 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.RecipeManager;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraftforge.items.IItemHandler;
 
 public interface IMiscHelper {
 
-	List<ItemStack> condenseStacks(IInventory inventory);
+	List<ItemStack> condenseStacks(Container container);
 
 	List<ItemStack> condenseStacks(IItemHandler itemHandler);
 
@@ -28,15 +28,15 @@ public interface IMiscHelper {
 
 	List<ItemStack> condenseStacks(List<ItemStack> stacks, boolean ignoreStackSize);
 
-	ListNBT saveAllItems(ListNBT tagList, List<ItemStack> list);
+	ListTag saveAllItems(ListTag tagList, List<ItemStack> list);
 
-	void loadAllItems(ListNBT tagList, List<ItemStack> list);
+	void loadAllItems(ListTag tagList, List<ItemStack> list);
 
 	IPackagePattern getPattern(IPackageRecipeInfo recipeInfo, int index);
 
-	List<ItemStack> getRemainingItems(IInventory inventory);
+	List<ItemStack> getRemainingItems(Container container);
 
-	List<ItemStack> getRemainingItems(IInventory inventory, int minInclusive, int maxExclusive);
+	List<ItemStack> getRemainingItems(Container container, int minInclusive, int maxExclusive);
 
 	List<ItemStack> getRemainingItems(ItemStack... stacks);
 
@@ -48,9 +48,9 @@ public interface IMiscHelper {
 
 	boolean isEmpty(IItemHandler itemHandler);
 
-	CompoundNBT writeRecipe(CompoundNBT nbt, IPackageRecipeInfo recipe);
+	CompoundTag saveRecipe(CompoundTag nbt, IPackageRecipeInfo recipe);
 
-	IPackageRecipeInfo readRecipe(CompoundNBT nbt);
+	IPackageRecipeInfo loadRecipe(CompoundTag nbt);
 
 	boolean removeExactSet(List<ItemStack> offered, List<ItemStack> required, boolean simulate);
 

@@ -1,8 +1,8 @@
 package thelm.packagedauto.client.event;
 
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.item.ItemModelsProperties;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.renderer.item.ItemProperties;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -11,12 +11,12 @@ import thelm.packagedauto.client.screen.EncoderScreen;
 import thelm.packagedauto.client.screen.PackagerExtensionScreen;
 import thelm.packagedauto.client.screen.PackagerScreen;
 import thelm.packagedauto.client.screen.UnpackagerScreen;
-import thelm.packagedauto.container.CrafterContainer;
-import thelm.packagedauto.container.EncoderContainer;
-import thelm.packagedauto.container.PackagerContainer;
-import thelm.packagedauto.container.PackagerExtensionContainer;
-import thelm.packagedauto.container.UnpackagerContainer;
 import thelm.packagedauto.item.RecipeHolderItem;
+import thelm.packagedauto.menu.CrafterMenu;
+import thelm.packagedauto.menu.EncoderMenu;
+import thelm.packagedauto.menu.PackagerExtensionMenu;
+import thelm.packagedauto.menu.PackagerMenu;
+import thelm.packagedauto.menu.UnpackagerMenu;
 
 public class ClientEventHandler {
 
@@ -32,15 +32,15 @@ public class ClientEventHandler {
 
 	@SubscribeEvent
 	public void onClientSetup(FMLClientSetupEvent event) {
-		ScreenManager.registerFactory(EncoderContainer.TYPE_INSTANCE, EncoderScreen::new);
-		ScreenManager.registerFactory(PackagerContainer.TYPE_INSTANCE, PackagerScreen::new);
-		ScreenManager.registerFactory(PackagerExtensionContainer.TYPE_INSTANCE, PackagerExtensionScreen::new);
-		ScreenManager.registerFactory(UnpackagerContainer.TYPE_INSTANCE, UnpackagerScreen::new);
-		ScreenManager.registerFactory(CrafterContainer.TYPE_INSTANCE, CrafterScreen::new);
+		MenuScreens.register(EncoderMenu.TYPE_INSTANCE, EncoderScreen::new);
+		MenuScreens.register(PackagerMenu.TYPE_INSTANCE, PackagerScreen::new);
+		MenuScreens.register(PackagerExtensionMenu.TYPE_INSTANCE, PackagerExtensionScreen::new);
+		MenuScreens.register(UnpackagerMenu.TYPE_INSTANCE, UnpackagerScreen::new);
+		MenuScreens.register(CrafterMenu.TYPE_INSTANCE, CrafterScreen::new);
 
 		event.enqueueWork(()->{
-			ItemModelsProperties.registerProperty(RecipeHolderItem.INSTANCE, 
-					new ResourceLocation("packagedauto", "filled"), (stack, world, living)->{
+			ItemProperties.register(RecipeHolderItem.INSTANCE, 
+					new ResourceLocation("packagedauto", "filled"), (stack, world, living, seed)->{
 						return stack.hasTag() ? 1F : 0F;
 					});
 		});

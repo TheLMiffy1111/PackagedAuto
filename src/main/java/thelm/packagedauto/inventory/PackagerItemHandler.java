@@ -1,29 +1,29 @@
 package thelm.packagedauto.inventory;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeListItem;
-import thelm.packagedauto.tile.PackagerExtensionTile;
-import thelm.packagedauto.tile.PackagerTile;
+import thelm.packagedauto.block.entity.PackagerBlockEntity;
+import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 import thelm.packagedauto.util.MiscHelper;
 
-public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
+public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 
-	public PackagerItemHandler(PackagerTile tile) {
-		super(tile, 12);
+	public PackagerItemHandler(PackagerBlockEntity blockEntity) {
+		super(blockEntity, 12);
 	}
 
 	@Override
 	protected void onContentsChanged(int slot) {
-		if(slot < 9 && !tile.getWorld().isRemote) {
-			if(tile.isWorking && !getStackInSlot(slot).isEmpty()) {
-				if(tile.isWorking && (getStackInSlot(slot).isEmpty() || !tile.isInputValid())) {
-					tile.endProcess();
+		if(slot < 9 && !blockEntity.getLevel().isClientSide) {
+			if(blockEntity.isWorking && !getStackInSlot(slot).isEmpty()) {
+				if(blockEntity.isWorking && (getStackInSlot(slot).isEmpty() || !blockEntity.isInputValid())) {
+					blockEntity.endProcess();
 				}
 			}
 		}
@@ -38,7 +38,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 		case 9: return false;
 		case 10: return stack.getItem() instanceof IPackageRecipeListItem || stack.getItem() instanceof IPackageItem;
 		case 11: return stack.getCapability(CapabilityEnergy.ENERGY, null).isPresent();
-		default: return tile.isWorking ? !getStackInSlot(slot).isEmpty() : true;
+		default: return blockEntity.isWorking ? !getStackInSlot(slot).isEmpty() : true;
 		}
 	}
 
@@ -50,8 +50,8 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 	@Override
 	public int get(int id) {
 		switch(id) {
-		case 0: return tile.remainingProgress;
-		case 1: return tile.isWorking ? 1 : 0;
+		case 0: return blockEntity.remainingProgress;
+		case 1: return blockEntity.isWorking ? 1 : 0;
 		default: return 0;
 		}
 	}
@@ -60,48 +60,48 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 	public void set(int id, int value) {
 		switch(id) {
 		case 0:
-			tile.remainingProgress = value;
+			blockEntity.remainingProgress = value;
 			break;
 		case 1:
-			tile.isWorking = value != 0;
+			blockEntity.isWorking = value != 0;
 			break;
 		}
 	}
 
 	@Override
-	public int size() {
+	public int getCount() {
 		return 2;
 	}
 
 	@Override
-	public void read(CompoundNBT nbt) {
-		super.read(nbt);
+	public void load(CompoundTag nbt) {
+		super.load(nbt);
 		updatePatternList();
 	}
 
 	public void updatePatternList() {
-		tile.patternList.clear();
+		blockEntity.patternList.clear();
 		ItemStack listStack = getStackInSlot(10);
 		if(listStack.getItem() instanceof IPackageRecipeListItem) {
-			((IPackageRecipeListItem)listStack.getItem()).getRecipeList(tile.getWorld(), listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(tile.patternList::add));
+			((IPackageRecipeListItem)listStack.getItem()).getRecipeList(blockEntity.getLevel(), listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(blockEntity.patternList::add));
 		}
 		else if(listStack.getItem() instanceof IPackageItem) {
 			IPackageItem packageItem = (IPackageItem)listStack.getItem();
-			tile.patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+			blockEntity.patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 		}
-		if(tile.forceDisjoint) {
-			tile.disjoint = true;
+		if(blockEntity.forceDisjoint) {
+			blockEntity.disjoint = true;
 		}
-		else if(tile.checkDisjoint) {
-			tile.disjoint = MiscHelper.INSTANCE.arePatternsDisjoint(tile.patternList);
+		else if(blockEntity.checkDisjoint) {
+			blockEntity.disjoint = MiscHelper.INSTANCE.arePatternsDisjoint(blockEntity.patternList);
 		}
-		if(tile.getWorld() != null && !tile.getWorld().isRemote) {
-			tile.postPatternChange();
+		if(blockEntity.getLevel() != null && !blockEntity.getLevel().isClientSide) {
+			blockEntity.postPatternChange();
 		}
-		if(tile.getWorld() != null) {
-			BlockPos.getAllInBox(tile.getPos().add(-1, -1, -1), tile.getPos().add(1, 1, 1)).
-			map(tile.getWorld()::getTileEntity).filter(t->t instanceof PackagerExtensionTile).
-			map(t->(PackagerExtensionTile)t).forEach(t->t.updatePatternList());
+		if(blockEntity.getLevel() != null) {
+			BlockPos.betweenClosedStream(blockEntity.getBlockPos().offset(-1, -1, -1), blockEntity.getBlockPos().offset(1, 1, 1)).
+			map(blockEntity.getLevel()::getBlockEntity).filter(t->t instanceof PackagerExtensionBlockEntity).
+			map(t->(PackagerExtensionBlockEntity)t).forEach(t->t.updatePatternList());
 		}
 	}
 }

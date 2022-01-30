@@ -9,18 +9,20 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.block.Blocks;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.ModList;
 import thelm.packagedauto.api.IGuiIngredientWrapper;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.api.IRecipeLayoutWrapper;
 import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
+import thelm.packagedauto.item.FluidPackageItem;
 import thelm.packagedauto.util.MiscHelper;
 
 public class ProcessingPackageRecipeType implements IPackageRecipeType {
@@ -28,17 +30,12 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 	public static final ProcessingPackageRecipeType INSTANCE = new ProcessingPackageRecipeType();
 	public static final ResourceLocation NAME = new ResourceLocation("packagedauto:processing");
 	public static final IntSet SLOTS;
-	public static final Vector3i COLOR = new Vector3i(139, 139, 139);
-	public static final Vector3i COLOR_DISABLED = new Vector3i(64, 64, 64);
+	public static final Vec3i COLOR = new Vec3i(139, 139, 139);
+	public static final Vec3i COLOR_HIGHLIGHT =new Vec3i(139, 139, 179);
 
 	static {
 		SLOTS = new IntRBTreeSet();
-		//TODO uncomment when AE2 support custom details again
-		//IntStream.range(0, 90).forEachOrdered(SLOTS::add);
-		IntStream.range(0, 81).forEachOrdered(SLOTS::add);
-		SLOTS.add(82);
-		SLOTS.add(85);
-		SLOTS.add(88);
+		IntStream.range(0, 90).forEachOrdered(SLOTS::add);
 	}
 
 	protected ProcessingPackageRecipeType() {};
@@ -49,13 +46,13 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 	}
 
 	@Override
-	public IFormattableTextComponent getDisplayName() {
-		return new TranslationTextComponent("recipe.packagedauto.processing");
+	public MutableComponent getDisplayName() {
+		return new TranslatableComponent("recipe.packagedauto.processing");
 	}
 
 	@Override
-	public IFormattableTextComponent getShortDisplayName() {
-		return new TranslationTextComponent("recipe.packagedauto.processing.short");
+	public MutableComponent getShortDisplayName() {
+		return new TranslatableComponent("recipe.packagedauto.processing.short");
 	}
 
 	@Override
@@ -79,6 +76,11 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 	}
 
 	@Override
+	public boolean hasContainerItem() {
+		return false;
+	}
+
+	@Override
 	public List<ResourceLocation> getJEICategories() {
 		return MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("jei"),
 				()->PackagedAutoJEIPlugin::getAllRecipeCategories, ()->ArrayList<ResourceLocation>::new).get();
@@ -89,9 +91,7 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 		Int2ObjectMap<ItemStack> map = new Int2ObjectOpenHashMap<>();
 		Map<Integer, IGuiIngredientWrapper<ItemStack>> ingredients = recipeLayoutWrapper.getItemStackIngredients();
 		int inputIndex = 0;
-		//TODO uncomment when AE2 support custom details again
-		//int outputIndex = 81;
-		int outputIndex = 82;
+		int outputIndex = 81;
 		for(Map.Entry<Integer, IGuiIngredientWrapper<ItemStack>> entry : ingredients.entrySet()) {
 			IGuiIngredientWrapper<ItemStack> ingredient = entry.getValue();
 			if(ingredient.isInput()) {
@@ -112,8 +112,35 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 				if(displayed != null && !displayed.isEmpty()) {
 					map.put(outputIndex, displayed);
 				}
-				//TODO uncomment when AE2 support custom details again
-				//++outputIndex;
+				++outputIndex;
+				outputIndex += 3;
+			}
+			if(inputIndex >= 81 && outputIndex >= 90) {
+				break;
+			}
+		}
+		Map<Integer, IGuiIngredientWrapper<FluidStack>> fluidIngredients = recipeLayoutWrapper.getFluidStackIngredients();
+		for(Map.Entry<Integer, IGuiIngredientWrapper<FluidStack>> entry : fluidIngredients.entrySet()) {
+			IGuiIngredientWrapper<FluidStack> ingredient = entry.getValue();
+			if(ingredient.isInput()) {
+				if(inputIndex >= 81) {
+					continue;
+				}
+				ItemStack displayed = FluidPackageItem.makeFluidPackage(entry.getValue().getDisplayedIngredient());
+				if(displayed != null && !displayed.isEmpty()) {
+					map.put(inputIndex, displayed);
+				}
+				++inputIndex;
+			}
+			else {
+				if(outputIndex >= 90) {
+					continue;
+				}
+				ItemStack displayed = FluidPackageItem.makeFluidPackage(entry.getValue().getDisplayedIngredient());
+				if(displayed != null && !displayed.isEmpty()) {
+					map.put(outputIndex, displayed);
+				}
+				++outputIndex;
 				outputIndex += 3;
 			}
 			if(inputIndex >= 81 && outputIndex >= 90) {
@@ -129,11 +156,7 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 	}
 
 	@Override
-	public Vector3i getSlotColor(int slot) {
-		//return COLOR;
-		if(!SLOTS.contains(slot)) {
-			return COLOR_DISABLED;
-		}
-		return COLOR;
+	public Vec3i getSlotColor(int slot) {
+		return slot == 81 ? COLOR_HIGHLIGHT : COLOR;
 	}
 }

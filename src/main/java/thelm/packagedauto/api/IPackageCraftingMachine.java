@@ -2,8 +2,8 @@ package thelm.packagedauto.api;
 
 import java.util.List;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 
 public interface IPackageCraftingMachine {
 

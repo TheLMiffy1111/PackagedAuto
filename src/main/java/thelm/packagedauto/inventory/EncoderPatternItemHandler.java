@@ -5,25 +5,25 @@ import java.util.List;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
+import thelm.packagedauto.block.entity.EncoderBlockEntity;
 import thelm.packagedauto.recipe.ProcessingPackageRecipeType;
-import thelm.packagedauto.tile.EncoderTile;
 import thelm.packagedauto.util.ApiImpl;
 
 public class EncoderPatternItemHandler extends BaseItemHandler {
 
-	public final EncoderTile tile;
+	public final EncoderBlockEntity blockEntity;
 	public IPackageRecipeType recipeType;
 	public IPackageRecipeInfo recipeInfo;
 
-	public EncoderPatternItemHandler(EncoderTile tile) {
-		super(tile, 99);
-		this.tile = tile;
+	public EncoderPatternItemHandler(EncoderBlockEntity blockEntity) {
+		super(blockEntity, 99);
+		this.blockEntity = blockEntity;
 		validateRecipeType();
 	}
 
@@ -34,19 +34,18 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 	}
 
 	@Override
-	public void read(CompoundNBT nbt) {
-		super.read(nbt);
+	public void load(CompoundTag nbt) {
+		super.load(nbt);
 		recipeType = ApiImpl.INSTANCE.getRecipeType(new ResourceLocation(nbt.getString("RecipeType")));
 		validateRecipeType();
 		updateRecipeInfo();
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT nbt) {
-		super.write(nbt);
+	public void save(CompoundTag nbt) {
+		super.save(nbt);
 		validateRecipeType();
 		nbt.putString("RecipeType", recipeType.getName().toString());
-		return nbt;
 	}
 
 	@Override
@@ -67,7 +66,7 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 	public void updateRecipeInfo() {
 		validateRecipeType();
 		IPackageRecipeInfo info = recipeType.getNewRecipeInfo();
-		info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), tile.getWorld());
+		info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), blockEntity.getLevel());
 		if(info.isValid()) {
 			if(recipeInfo == null || !recipeInfo.equals(info)) {
 				recipeInfo = info;
@@ -77,14 +76,8 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 					}
 					List<ItemStack> outputs = info.getOutputs();
 					int size = outputs.size();
-					int startIndex = 81;
-					switch(size) {
-					case 1: startIndex += 1;
-					case 2:
-					case 3: startIndex += 3;
-					}
 					for(int i = 0; i < size; ++i) {
-						stacks.set(startIndex+i, outputs.get(i).copy());
+						stacks.set(81+i, outputs.get(i).copy());
 					}
 				}
 				for(int i = 90; i < 99; ++i) {
@@ -94,8 +87,8 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 				for(int i = 0; i < patterns.size() && i < 9; ++i) {
 					stacks.set(90+i, patterns.get(i).getOutput().copy());
 				}
-				syncTile(false);
-				markDirty();
+				sync(false);
+				setChanged();
 			}
 		}
 		else if(recipeInfo != null) {
@@ -108,8 +101,8 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 			for(int i = 90; i < 99; ++i) {
 				stacks.set(i, ItemStack.EMPTY);
 			}
-			syncTile(false);
-			markDirty();
+			sync(false);
+			setChanged();
 		}
 	}
 

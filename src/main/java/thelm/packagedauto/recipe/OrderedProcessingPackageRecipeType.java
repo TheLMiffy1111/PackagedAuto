@@ -1,8 +1,8 @@
 package thelm.packagedauto.recipe;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 
 public class OrderedProcessingPackageRecipeType extends ProcessingPackageRecipeType {
@@ -16,13 +16,13 @@ public class OrderedProcessingPackageRecipeType extends ProcessingPackageRecipeT
 	}
 
 	@Override
-	public IFormattableTextComponent getDisplayName() {
-		return new TranslationTextComponent("recipe.packagedauto.ordered_processing");
+	public MutableComponent getDisplayName() {
+		return new TranslatableComponent("recipe.packagedauto.ordered_processing");
 	}
 
 	@Override
-	public IFormattableTextComponent getShortDisplayName() {
-		return new TranslationTextComponent("recipe.packagedauto.ordered_processing.short");
+	public MutableComponent getShortDisplayName() {
+		return new TranslatableComponent("recipe.packagedauto.ordered_processing.short");
 	}
 
 	@Override

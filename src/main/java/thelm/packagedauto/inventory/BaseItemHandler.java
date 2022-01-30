@@ -5,23 +5,23 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.IIntArray;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
-import thelm.packagedauto.tile.BaseTile;
+import thelm.packagedauto.block.entity.BaseBlockEntity;
 
-public class BaseItemHandler<T extends BaseTile> extends ItemStackHandler implements IIntArray {
+public class BaseItemHandler<T extends BaseBlockEntity> extends ItemStackHandler implements ContainerData {
 
-	public final T tile;
+	public final T blockEntity;
 	protected Map<Direction, IItemHandlerModifiable> wrapperMap = new IdentityHashMap<>();
 
-	public BaseItemHandler(T tile, int size) {
+	public BaseItemHandler(T blockEntity, int size) {
 		super(size);
-		this.tile = tile;
+		this.blockEntity = blockEntity;
 	}
 
 	public List<ItemStack> getStacks() {
@@ -30,24 +30,24 @@ public class BaseItemHandler<T extends BaseTile> extends ItemStackHandler implem
 
 	@Override
 	protected void onContentsChanged(int slot) {
-		tile.markDirty();
+		blockEntity.setChanged();
 	}
 
-	public void read(CompoundNBT nbt) {
+	public void load(CompoundTag nbt) {
 		stacks.clear();
-		ItemStackHelper.loadAllItems(nbt, stacks);
+		ContainerHelper.loadAllItems(nbt, stacks);
 	}
 
-	public CompoundNBT write(CompoundNBT nbt) {
-		return ItemStackHelper.saveAllItems(nbt, stacks);
+	public void save(CompoundTag nbt) {
+		ContainerHelper.saveAllItems(nbt, stacks);
 	}
 
-	public void markDirty() {
-		tile.markDirty();
+	public void setChanged() {
+		blockEntity.setChanged();
 	}
 
-	public void syncTile(boolean rerender) {
-		tile.syncTile(rerender);
+	public void sync(boolean rerender) {
+		blockEntity.sync(rerender);
 	}
 
 	public IItemHandlerModifiable getWrapperForDirection(Direction side) {
@@ -65,7 +65,7 @@ public class BaseItemHandler<T extends BaseTile> extends ItemStackHandler implem
 	}
 
 	@Override
-	public int size() {
+	public int getCount() {
 		return 0;
 	}
 }

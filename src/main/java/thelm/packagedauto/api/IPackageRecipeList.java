@@ -2,14 +2,14 @@ package thelm.packagedauto.api;
 
 import java.util.List;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
 
 public interface IPackageRecipeList {
 
-	void read(World world, CompoundNBT nbt);
+	void load(Level level, CompoundTag nbt);
 
-	CompoundNBT write(CompoundNBT nbt);
+	void save(CompoundTag nbt);
 
 	List<IPackageRecipeInfo> getRecipeList();
 

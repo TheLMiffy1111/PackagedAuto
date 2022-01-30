@@ -9,8 +9,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.ImmutableSortedMap;
 
-import net.minecraft.util.IntIdentityHashBiMap;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import thelm.packagedauto.api.IMiscHelper;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.api.PackagedAutoApi;
@@ -21,7 +21,7 @@ public class ApiImpl extends PackagedAutoApi {
 
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final SortedMap<ResourceLocation, IPackageRecipeType> REGISTRY = new TreeMap<>();
-	private static final IntIdentityHashBiMap<IPackageRecipeType> ID_MAP = new IntIdentityHashBiMap<>(4);
+	private static final CrudeIncrementalIntIdentityHashBiMap<IPackageRecipeType> ID_MAP = CrudeIncrementalIntIdentityHashBiMap.create(4);
 	private static int id = 0;
 
 	private ApiImpl() {}
@@ -32,7 +32,7 @@ public class ApiImpl extends PackagedAutoApi {
 			return false;
 		}
 		REGISTRY.put(type.getName(), type);
-		ID_MAP.put(type, id++);
+		ID_MAP.addMapping(type, id++);
 		return true;
 	}
 
@@ -43,7 +43,7 @@ public class ApiImpl extends PackagedAutoApi {
 
 	@Override
 	public IPackageRecipeType getRecipeType(int id) {
-		return ID_MAP.getByValue(id);
+		return ID_MAP.byId(id);
 	}
 
 	@Override
@@ -59,9 +59,9 @@ public class ApiImpl extends PackagedAutoApi {
 	@Override
 	public IPackageRecipeType getNextRecipeType(IPackageRecipeType type, boolean reverse) {
 		int toGet = ID_MAP.getId(type) + (!reverse ? 1 : -1);
-		IPackageRecipeType ret = ID_MAP.getByValue(toGet);
+		IPackageRecipeType ret = ID_MAP.byId(toGet);
 		if(ret == null) {
-			ret = ID_MAP.getByValue(!reverse ? 0 : ID_MAP.size()-1);
+			ret = ID_MAP.byId(!reverse ? 0 : ID_MAP.size()-1);
 		}
 		return ret;
 	}

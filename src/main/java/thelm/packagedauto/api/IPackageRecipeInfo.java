@@ -3,19 +3,18 @@ package thelm.packagedauto.api;
 import java.util.List;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 /**
  * Please override {@link IPackageRecipeInfo#equals(IPackageRecipeInfo)} when implementing a new recipe type.
  */
 public interface IPackageRecipeInfo {
 
-	void read(CompoundNBT nbt);
+	void load(CompoundTag nbt);
 
-	CompoundNBT write(CompoundNBT nbt);
+	void save(CompoundTag nbt);
 
 	IPackageRecipeType getRecipeType();
 
@@ -27,10 +26,15 @@ public interface IPackageRecipeInfo {
 
 	List<ItemStack> getOutputs();
 
-	void generateFromStacks(List<ItemStack> input, List<ItemStack> output, World world);
+	void generateFromStacks(List<ItemStack> input, List<ItemStack> output, Level level);
 
-	default Int2ObjectMap<ItemStack> getEncoderStacks() {
-		return new Int2ObjectOpenHashMap<>();
+	Int2ObjectMap<ItemStack> getEncoderStacks();
+
+	default ItemStack getContainerItem(ItemStack stack) {
+		if(getRecipeType().hasContainerItem()) {
+			return stack.getContainerItem();
+		}
+		return ItemStack.EMPTY;
 	}
 
 	@Override

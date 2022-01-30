@@ -1,32 +1,32 @@
 package thelm.packagedauto.energy;
 
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import thelm.packagedauto.block.entity.BaseBlockEntity;
 import thelm.packagedauto.network.packet.SyncEnergyPacket;
-import thelm.packagedauto.tile.BaseTile;
 
 public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 
-	public final BaseTile tile;
+	public final BaseBlockEntity blockEntity;
 	public int prevEnergy;
 
-	public EnergyStorage(BaseTile tile, int capacity) {
-		this(tile, capacity, capacity, capacity, 0);
+	public EnergyStorage(BaseBlockEntity blockEntity, int capacity) {
+		this(blockEntity, capacity, capacity, capacity, 0);
 	}
 
-	public EnergyStorage(BaseTile tile, int capacity, int maxTransfer) {
-		this(tile, capacity, maxTransfer, maxTransfer, 0);
+	public EnergyStorage(BaseBlockEntity blockEntity, int capacity, int maxTransfer) {
+		this(blockEntity, capacity, maxTransfer, maxTransfer, 0);
 	}
 
-	public EnergyStorage(BaseTile tile, int capacity, int maxReceive, int maxExtract) {
-		this(tile, capacity, maxReceive, maxExtract, 0);
+	public EnergyStorage(BaseBlockEntity blockEntity, int capacity, int maxReceive, int maxExtract) {
+		this(blockEntity, capacity, maxReceive, maxExtract, 0);
 	}
 
-	public EnergyStorage(BaseTile tile, int capacity, int maxReceive, int maxExtract, int energy) {
+	public EnergyStorage(BaseBlockEntity blockEntity, int capacity, int maxReceive, int maxExtract, int energy) {
 		super(capacity, maxReceive, maxExtract, energy);
-		this.tile = tile;
+		this.blockEntity = blockEntity;
 	}
 
-	public EnergyStorage read(CompoundNBT nbt) {
+	public EnergyStorage read(CompoundTag nbt) {
 		this.energy = nbt.getInt("Energy");
 		if(energy > capacity) {
 			energy = capacity;
@@ -34,12 +34,11 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 		return this;
 	}
 
-	public CompoundNBT write(CompoundNBT nbt) {
+	public void save(CompoundTag nbt) {
 		if(energy < 0) {
 			energy = 0;
 		}
 		nbt.putInt("Energy", energy);
-		return nbt;
 	}
 
 	public EnergyStorage setCapacity(int capacity) {
@@ -75,7 +74,7 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 	}
 
 	public void setEnergyStored(int energy) {
-		boolean flag = !tile.getWorld().isRemote && this.energy != energy;
+		boolean flag = !blockEntity.getLevel().isClientSide && this.energy != energy;
 		this.energy = energy;
 		if(this.energy > capacity) {
 			this.energy = capacity;
@@ -97,9 +96,9 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 
 	public void updateIfChanged() {
 		int currentEnergy = getEnergyStored();
-		if(!tile.getWorld().isRemote && prevEnergy != currentEnergy) {
-			SyncEnergyPacket.syncEnergy(tile.getPos(), currentEnergy, tile.getWorld().getDimensionKey(), 8);
-			tile.markDirty();
+		if(!blockEntity.getLevel().isClientSide && prevEnergy != currentEnergy) {
+			SyncEnergyPacket.syncEnergy(blockEntity.getBlockPos(), currentEnergy, blockEntity.getLevel().dimension(), 8);
+			blockEntity.setChanged();
 		}
 		prevEnergy = currentEnergy;
 	}

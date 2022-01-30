@@ -1,9 +1,9 @@
 package thelm.packagedauto.api;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.world.World;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 public interface IPackageRecipeListItem {
 
-	IPackageRecipeList getRecipeList(World world, ItemStack stack);
+	IPackageRecipeList getRecipeList(Level world, ItemStack stack);
 }

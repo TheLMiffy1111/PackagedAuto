@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.level.Level;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeList;
 
@@ -14,8 +14,8 @@ public class PackageRecipeList implements IPackageRecipeList {
 
 	private List<IPackageRecipeInfo> recipeList = new ArrayList<>();
 
-	public PackageRecipeList(World world, CompoundNBT nbt) {
-		read(world, nbt);
+	public PackageRecipeList(Level level, CompoundTag nbt) {
+		load(level, nbt);
 	}
 
 	public PackageRecipeList(List<IPackageRecipeInfo> recipeList) {
@@ -34,13 +34,13 @@ public class PackageRecipeList implements IPackageRecipeList {
 	}
 
 	@Override
-	public void read(World world, CompoundNBT nbt) {
+	public void load(Level level, CompoundTag nbt) {
 		recipeList.clear();
 		if(nbt != null) {
-			ListNBT tagList = nbt.getList("Recipes", 10);
+			ListTag tagList = nbt.getList("Recipes", 10);
 			for(int i = 0; i < tagList.size(); ++i) {
-				CompoundNBT tag = tagList.getCompound(i);
-				IPackageRecipeInfo recipe = MiscHelper.INSTANCE.readRecipe(tag);
+				CompoundTag tag = tagList.getCompound(i);
+				IPackageRecipeInfo recipe = MiscHelper.INSTANCE.loadRecipe(tag);
 				if(recipe != null) {
 					recipeList.add(recipe);
 				}
@@ -49,13 +49,12 @@ public class PackageRecipeList implements IPackageRecipeList {
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT nbt) {
-		ListNBT tagList = new ListNBT();
+	public void save(CompoundTag nbt) {
+		ListTag tagList = new ListTag();
 		for(IPackageRecipeInfo recipe : recipeList) {
-			CompoundNBT tag = MiscHelper.INSTANCE.writeRecipe(new CompoundNBT(), recipe);
+			CompoundTag tag = MiscHelper.INSTANCE.saveRecipe(new CompoundTag(), recipe);
 			tagList.add(tag);
 		}
 		nbt.put("Recipes", tagList);
-		return nbt;
 	}
 }

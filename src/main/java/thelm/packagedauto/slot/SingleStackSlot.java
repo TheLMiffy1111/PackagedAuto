@@ -10,7 +10,7 @@ public class SingleStackSlot extends SlotItemHandler {
 	}
 
 	@Override
-	public int getSlotStackLimit() {
+	public int getMaxStackSize() {
 		return 1;
 	}
 }

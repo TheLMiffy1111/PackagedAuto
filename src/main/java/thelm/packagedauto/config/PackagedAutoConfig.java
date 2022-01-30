@@ -3,11 +3,11 @@ package thelm.packagedauto.config;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
-import thelm.packagedauto.tile.CrafterTile;
-import thelm.packagedauto.tile.EncoderTile;
-import thelm.packagedauto.tile.PackagerExtensionTile;
-import thelm.packagedauto.tile.PackagerTile;
-import thelm.packagedauto.tile.UnpackagerTile;
+import thelm.packagedauto.block.entity.CrafterBlockEntity;
+import thelm.packagedauto.block.entity.EncoderBlockEntity;
+import thelm.packagedauto.block.entity.PackagerBlockEntity;
+import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
+import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
 
 public class PackagedAutoConfig {
 
@@ -107,29 +107,29 @@ public class PackagedAutoConfig {
 	}
 
 	public static void reloadServerConfig() {
-		EncoderTile.patternSlots = encoderPatternSlots.get();
+		EncoderBlockEntity.patternSlots = encoderPatternSlots.get();
 
-		PackagerTile.energyCapacity = packagerEnergyCapacity.get();
-		PackagerTile.energyReq = packagerEnergyReq.get();
-		PackagerTile.energyUsage = packagerEnergyUsage.get();
-		PackagerTile.drawMEEnergy = packagerDrawMEEnergy.get();
-		PackagerTile.checkDisjoint = packagerCheckDisjoint.get();
-		PackagerTile.forceDisjoint = packagerForceDisjoint.get();
+		PackagerBlockEntity.energyCapacity = packagerEnergyCapacity.get();
+		PackagerBlockEntity.energyReq = packagerEnergyReq.get();
+		PackagerBlockEntity.energyUsage = packagerEnergyUsage.get();
+		PackagerBlockEntity.drawMEEnergy = packagerDrawMEEnergy.get();
+		PackagerBlockEntity.checkDisjoint = packagerCheckDisjoint.get();
+		PackagerBlockEntity.forceDisjoint = packagerForceDisjoint.get();
 
-		PackagerExtensionTile.energyCapacity = packagerExtensionEnergyCapacity.get();
-		PackagerExtensionTile.energyReq = packagerExtensionEnergyReq.get();
-		PackagerExtensionTile.energyUsage = packagerExtensionEnergyUsage.get();
-		PackagerExtensionTile.drawMEEnergy = packagerExtensionDrawMEEnergy.get();
-		PackagerExtensionTile.checkDisjoint = packagerExtensionCheckDisjoint.get();
-		PackagerExtensionTile.forceDisjoint = packagerExtensionForceDisjoint.get();
+		PackagerExtensionBlockEntity.energyCapacity = packagerExtensionEnergyCapacity.get();
+		PackagerExtensionBlockEntity.energyReq = packagerExtensionEnergyReq.get();
+		PackagerExtensionBlockEntity.energyUsage = packagerExtensionEnergyUsage.get();
+		PackagerExtensionBlockEntity.drawMEEnergy = packagerExtensionDrawMEEnergy.get();
+		PackagerExtensionBlockEntity.checkDisjoint = packagerExtensionCheckDisjoint.get();
+		PackagerExtensionBlockEntity.forceDisjoint = packagerExtensionForceDisjoint.get();
 
-		UnpackagerTile.energyCapacity = unpackagerEnergyCapacity.get();
-		UnpackagerTile.energyUsage = unpackagerEnergyUsage.get();
-		UnpackagerTile.drawMEEnergy = unpackagerDrawMEEnergy.get();
+		UnpackagerBlockEntity.energyCapacity = unpackagerEnergyCapacity.get();
+		UnpackagerBlockEntity.energyUsage = unpackagerEnergyUsage.get();
+		UnpackagerBlockEntity.drawMEEnergy = unpackagerDrawMEEnergy.get();
 
-		CrafterTile.energyCapacity = crafterEnergyCapacity.get();
-		CrafterTile.energyReq = crafterEnergyReq.get();
-		CrafterTile.energyUsage = crafterEnergyUsage.get();
-		CrafterTile.drawMEEnergy = crafterDrawMEEnergy.get();
+		CrafterBlockEntity.energyCapacity = crafterEnergyCapacity.get();
+		CrafterBlockEntity.energyReq = crafterEnergyReq.get();
+		CrafterBlockEntity.energyUsage = crafterEnergyUsage.get();
+		CrafterBlockEntity.drawMEEnergy = crafterDrawMEEnergy.get();
 	}
 }

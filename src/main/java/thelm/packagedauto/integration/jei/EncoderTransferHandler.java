@@ -5,15 +5,16 @@ import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
+import mezz.jei.gui.recipes.RecipeLayout;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import thelm.packagedauto.api.IPackageRecipeType;
-import thelm.packagedauto.container.EncoderContainer;
+import thelm.packagedauto.menu.EncoderMenu;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.SetRecipePacket;
 
-public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderContainer> {
+public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderMenu, Object> {
 
 	private final IRecipeTransferHandlerHelper transferHelper;
 
@@ -22,25 +23,33 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderCon
 	}
 
 	@Override
-	public Class<EncoderContainer> getContainerClass() {
-		return EncoderContainer.class;
+	public Class<EncoderMenu> getContainerClass() {
+		return EncoderMenu.class;
 	}
 
 	@Override
-	public IRecipeTransferError transferRecipe(EncoderContainer container, Object recipe, IRecipeLayout recipeLayout, PlayerEntity player, boolean maxTransfer, boolean doTransfer) {
-		ResourceLocation category = recipeLayout.getRecipeCategory().getUid();
-		IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
-		if(!(recipeType.getJEICategories().contains(category))) {
-			return transferHelper.createInternalError();
-		}
-		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(new RecipeLayoutWrapper(recipeLayout));
-		if(map == null || map.isEmpty()) {
-			return transferHelper.createInternalError();
-		}
-		if(!doTransfer) {
+	public Class<Object> getRecipeClass() {
+		return Object.class;
+	}
+
+	@Override
+	public IRecipeTransferError transferRecipe(EncoderMenu menu, Object recipe, IRecipeLayout recipeLayout, Player player, boolean maxTransfer, boolean doTransfer) {
+		if(recipeLayout instanceof RecipeLayout<?> recipeLayoutImpl) {
+			ResourceLocation category = recipeLayoutImpl.getRecipeCategory().getUid();
+			IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
+			if(!(recipeType.getJEICategories().contains(category))) {
+				return transferHelper.createInternalError();
+			}
+			Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(new RecipeLayoutWrapper(recipeLayoutImpl));
+			if(map == null || map.isEmpty()) {
+				return transferHelper.createInternalError();
+			}
+			if(!doTransfer) {
+				return null;
+			}
+			PacketHandler.INSTANCE.sendToServer(new SetRecipePacket(map));
 			return null;
 		}
-		PacketHandler.INSTANCE.sendToServer(new SetRecipePacket(map));
-		return null;
+		return transferHelper.createInternalError();
 	}
 }

@@ -1,19 +1,19 @@
-package thelm.packagedauto.tile;
+package thelm.packagedauto.block.entity;
 
 import java.util.List;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -21,18 +21,20 @@ import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.block.CrafterBlock;
-import thelm.packagedauto.container.CrafterContainer;
 import thelm.packagedauto.energy.EnergyStorage;
-import thelm.packagedauto.integration.appeng.tile.AECrafterTile;
+import thelm.packagedauto.integration.appeng.blockentity.AECrafterBlockEntity;
 import thelm.packagedauto.inventory.CrafterItemHandler;
+import thelm.packagedauto.menu.CrafterMenu;
 import thelm.packagedauto.recipe.ICraftingPackageRecipeInfo;
 import thelm.packagedauto.util.MiscHelper;
 
-public class CrafterTile extends BaseTile implements ITickableTileEntity, IPackageCraftingMachine {
+public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraftingMachine {
 
-	public static final TileEntityType<CrafterTile> TYPE_INSTANCE = (TileEntityType<CrafterTile>)TileEntityType.Builder.
-			create(MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("appliedenergistics2"),
-					()->AECrafterTile::new, ()->CrafterTile::new), CrafterBlock.INSTANCE).
+	public static final BlockEntityType<CrafterBlockEntity> TYPE_INSTANCE = (BlockEntityType<CrafterBlockEntity>)BlockEntityType.Builder.
+			of(MiscHelper.INSTANCE.<BlockEntityType.BlockEntitySupplier<CrafterBlockEntity>>conditionalSupplier(
+					()->ModList.get().isLoaded("ae2"),
+					()->()->AECrafterBlockEntity::new, ()->()->CrafterBlockEntity::new).get(),
+					CrafterBlock.INSTANCE).
 			build(null).setRegistryName("packagedauto:crafter");
 
 	public static int energyCapacity = 5000;
@@ -40,24 +42,28 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
 
+	public boolean firstTick = true;
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
 	public ICraftingPackageRecipeInfo currentRecipe;
 
-	public CrafterTile() {
-		super(TYPE_INSTANCE);
+	public CrafterBlockEntity(BlockPos pos, BlockState state) {
+		super(TYPE_INSTANCE, pos, state);
 		setItemHandler(new CrafterItemHandler(this));
 		setEnergyStorage(new EnergyStorage(this, energyCapacity));
 	}
 
 	@Override
-	protected ITextComponent getDefaultName() {
-		return new TranslationTextComponent("block.packagedauto.crafter");
+	protected Component getDefaultName() {
+		return new TranslatableComponent("block.packagedauto.crafter");
 	}
 
 	@Override
 	public void tick() {
-		if(!world.isRemote) {
+		if(firstTick) {
+			firstTick = false;
+		}
+		if(!level.isClientSide) {
 			if(isWorking) {
 				tickProcess();
 				if(remainingProgress <= 0) {
@@ -67,7 +73,7 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 				}
 			}
 			chargeEnergy();
-			if(world.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % 8 == 0) {
 				ejectItems();
 			}
 			energyStorage.updateIfChanged();
@@ -80,14 +86,14 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 			ICraftingPackageRecipeInfo recipe = (ICraftingPackageRecipeInfo)recipeInfo;
 			ItemStack slotStack = itemHandler.getStackInSlot(9);
 			ItemStack outputStack = recipe.getOutput();
-			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.areItemStackTagsEqual(slotStack, outputStack) && slotStack.getCount()+outputStack.getCount() <= outputStack.getMaxStackSize()) {
+			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+outputStack.getCount() <= outputStack.getMaxStackSize()) {
 				currentRecipe = recipe;
 				isWorking = true;
 				remainingProgress = energyReq;
 				for(int i = 0; i < 9; ++i) {
-					itemHandler.setStackInSlot(i, recipe.getMatrix().getStackInSlot(i).copy());
+					itemHandler.setStackInSlot(i, recipe.getMatrix().getItem(i).copy());
 				}
-				markDirty();
+				setChanged();
 				return true;
 			}
 		}
@@ -126,15 +132,15 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 		remainingProgress = 0;
 		isWorking = false;
 		currentRecipe = null;
-		markDirty();
+		setChanged();
 	}
 
 	protected void ejectItems() {
 		int endIndex = isWorking ? 9 : 0;
 		for(Direction direction : Direction.values()) {
-			TileEntity tile = world.getTileEntity(pos.offset(direction));
-			if(tile != null && !(tile instanceof UnpackagerTile) && tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
-				IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).resolve().get();
+			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
+			if(blockEntity != null && !(blockEntity instanceof UnpackagerBlockEntity) && blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
+				IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).resolve().get();
 				boolean flag = true;
 				for(int i = 9; i >= endIndex; --i) {
 					ItemStack stack = this.itemHandler.getStackInSlot(i);
@@ -173,12 +179,12 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 	}
 
 	@Override
-	public void read(BlockState blockState, CompoundNBT nbt) {
-		super.read(blockState, nbt);
+	public void load(CompoundTag nbt) {
+		super.load(nbt);
 		currentRecipe = null;
 		if(nbt.contains("Recipe")) {
-			CompoundNBT tag = nbt.getCompound("Recipe");
-			IPackageRecipeInfo recipe = MiscHelper.INSTANCE.readRecipe(tag);
+			CompoundTag tag = nbt.getCompound("Recipe");
+			IPackageRecipeInfo recipe = MiscHelper.INSTANCE.loadRecipe(tag);
 			if(recipe instanceof ICraftingPackageRecipeInfo) {
 				currentRecipe = (ICraftingPackageRecipeInfo)recipe;
 			}
@@ -186,25 +192,24 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT nbt) {
-		super.write(nbt);
+	public void saveAdditional(CompoundTag nbt) {
+		super.saveAdditional(nbt);
 		if(currentRecipe != null) {
-			CompoundNBT tag = MiscHelper.INSTANCE.writeRecipe(new CompoundNBT(), currentRecipe);
+			CompoundTag tag = MiscHelper.INSTANCE.saveRecipe(new CompoundTag(), currentRecipe);
 			nbt.put("Recipe", tag);
 		}
-		return nbt;
 	}
 
 	@Override
-	public void readSync(CompoundNBT nbt) {
-		super.readSync(nbt);
+	public void loadSync(CompoundTag nbt) {
+		super.loadSync(nbt);
 		isWorking = nbt.getBoolean("Working");
 		remainingProgress = nbt.getInt("Progress");
 	}
 
 	@Override
-	public CompoundNBT writeSync(CompoundNBT nbt) {
-		super.writeSync(nbt);
+	public CompoundTag saveSync(CompoundTag nbt) {
+		super.saveSync(nbt);
 		nbt.putBoolean("Working", isWorking);
 		nbt.putInt("Progress", remainingProgress);
 		return nbt;
@@ -225,8 +230,8 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 	}
 
 	@Override
-	public Container createMenu(int windowId, PlayerInventory playerInventory, PlayerEntity player) {
-		syncTile(false);
-		return new CrafterContainer(windowId, playerInventory, this);
+	public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player player) {
+		sync(false);
+		return new CrafterMenu(windowId, inventory, this);
 	}
 }

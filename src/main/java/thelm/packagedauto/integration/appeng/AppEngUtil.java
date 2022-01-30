@@ -2,37 +2,50 @@ package thelm.packagedauto.integration.appeng;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Functions;
 
+import appeng.api.crafting.IPatternDetails.IInput;
 import appeng.api.parts.IPartHost;
-import appeng.api.storage.data.IAEItemStack;
-import appeng.helpers.IInterfaceHost;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
+import appeng.api.stacks.GenericStack;
+import appeng.helpers.iface.PatternProviderLogicHost;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.integration.appeng.recipe.SimpleInput;
 
 public class AppEngUtil {
 
-	private static final Comparator<IAEItemStack> COMPARE_BY_STACKSIZE = (s1, s2)->Long.compare(s1.getStackSize(), s2.getStackSize());
+	private static final Comparator<GenericStack> COMPARE_BY_STACKSIZE = (s1, s2)->Long.compare(s1.amount(), s2.amount());
 
 	private AppEngUtil() {}
 
-	public static List<IAEItemStack> condenseStacks(IAEItemStack... stacks) {
-		List<IAEItemStack> merged = Arrays.stream(stacks).filter(Objects::nonNull).
-				collect(Collectors.toMap(Function.identity(), IAEItemStack::copy,
-						(s1, s2)->s1.setStackSize(s1.getStackSize()+s2.getStackSize()))).
-				values().stream().sorted(COMPARE_BY_STACKSIZE).collect(ImmutableList.toImmutableList());
-		if(merged.isEmpty()) {
+	public static GenericStack[] condenseStacks(GenericStack[] stacks) {
+		GenericStack[] merged = Arrays.stream(stacks).filter(Objects::nonNull).
+				collect(Collectors.toMap(GenericStack::what, Functions.identity(), GenericStack::sum, LinkedHashMap::new)).
+				values().stream().toArray(GenericStack[]::new);
+		if(merged.length == 0) {
 			throw new IllegalStateException("No pattern here!");
 		}
 		return merged;
 	}
 
-	public static boolean isInterface(TileEntity tile, Direction direction) {
-		return tile instanceof IInterfaceHost || tile instanceof IPartHost && ((IPartHost)tile).getPart(direction) instanceof IInterfaceHost;
+	public static IInput[] toInputs(GenericStack[] stacks) {
+		return toInputs(null, stacks);
+	}
+
+	public static IInput[] toInputs(IPackageRecipeInfo recipe, GenericStack[] stacks) {
+		IInput[] inputs = new IInput[stacks.length];
+		for(int i = 0; i < stacks.length; ++i) {
+			inputs[i] = new SimpleInput(recipe, stacks[i]);
+		}
+		return inputs;
+	}
+
+	public static boolean isPatternProvider(BlockEntity blockEntity, Direction direction) {
+		return blockEntity instanceof PatternProviderLogicHost || blockEntity instanceof IPartHost partHost && partHost.getPart(direction) instanceof PatternProviderLogicHost;
 	}
 }

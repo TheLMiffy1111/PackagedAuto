@@ -2,29 +2,28 @@ package thelm.packagedauto.network.packet;
 
 import java.util.function.Supplier;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.PacketBuffer;
-import net.minecraftforge.fml.network.NetworkEvent;
-import thelm.packagedauto.container.EncoderContainer;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.network.NetworkEvent;
+import thelm.packagedauto.menu.EncoderMenu;
 
 public class LoadRecipeListPacket {
 
 	public LoadRecipeListPacket() {}
 
-	public static void encode(LoadRecipeListPacket pkt, PacketBuffer buf) {
+	public static void encode(LoadRecipeListPacket pkt, FriendlyByteBuf buf) {
 
 	}
 
-	public static LoadRecipeListPacket decode(PacketBuffer buf) {
+	public static LoadRecipeListPacket decode(FriendlyByteBuf buf) {
 		return new LoadRecipeListPacket();
 	}
 
 	public static void handle(LoadRecipeListPacket pkt, Supplier<NetworkEvent.Context> ctx) {
-		ServerPlayerEntity player = ctx.get().getSender();
+		ServerPlayer player = ctx.get().getSender();
 		ctx.get().enqueueWork(()->{
-			if(player.openContainer instanceof EncoderContainer) {
-				EncoderContainer container = (EncoderContainer)player.openContainer;
-				container.tile.loadRecipeList();
+			if(player.containerMenu instanceof EncoderMenu menu) {
+				menu.blockEntity.loadRecipeList();
 			}
 		});
 		ctx.get().setPacketHandled(true);

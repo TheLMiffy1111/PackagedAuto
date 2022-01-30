@@ -2,8 +2,8 @@ package thelm.packagedauto.inventory;
 
 import java.util.Arrays;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 
 public class UnpackagerItemHandlerWrapper extends SidedItemHandlerWrapper<UnpackagerItemHandler> {
 
@@ -25,6 +25,6 @@ public class UnpackagerItemHandlerWrapper extends SidedItemHandlerWrapper<Unpack
 
 	@Override
 	public boolean canExtractItem(int slot, Direction direction) {
-		return direction == Direction.UP && !Arrays.stream(itemHandler.tile.trackers).anyMatch(t->t.isEmpty());
+		return direction == Direction.UP && !Arrays.stream(itemHandler.blockEntity.trackers).anyMatch(t->t.isEmpty());
 	}
 }

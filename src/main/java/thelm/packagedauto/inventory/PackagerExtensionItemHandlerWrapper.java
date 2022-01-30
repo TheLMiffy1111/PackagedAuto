@@ -1,7 +1,7 @@
 package thelm.packagedauto.inventory;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 
 public class PackagerExtensionItemHandlerWrapper extends SidedItemHandlerWrapper<PackagerExtensionItemHandler> {
 

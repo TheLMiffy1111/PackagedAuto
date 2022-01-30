@@ -1,15 +1,15 @@
 package thelm.packagedauto.event;
 
-import net.minecraft.block.Block;
-import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.Item;
-import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import thelm.packagedauto.block.CrafterBlock;
@@ -17,24 +17,25 @@ import thelm.packagedauto.block.EncoderBlock;
 import thelm.packagedauto.block.PackagerBlock;
 import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.block.UnpackagerBlock;
+import thelm.packagedauto.block.entity.CrafterBlockEntity;
+import thelm.packagedauto.block.entity.EncoderBlockEntity;
+import thelm.packagedauto.block.entity.PackagerBlockEntity;
+import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
+import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
 import thelm.packagedauto.config.PackagedAutoConfig;
-import thelm.packagedauto.container.CrafterContainer;
-import thelm.packagedauto.container.EncoderContainer;
-import thelm.packagedauto.container.PackagerContainer;
-import thelm.packagedauto.container.PackagerExtensionContainer;
-import thelm.packagedauto.container.UnpackagerContainer;
+import thelm.packagedauto.item.FluidPackageItem;
 import thelm.packagedauto.item.MiscItem;
 import thelm.packagedauto.item.PackageItem;
 import thelm.packagedauto.item.RecipeHolderItem;
+import thelm.packagedauto.menu.CrafterMenu;
+import thelm.packagedauto.menu.EncoderMenu;
+import thelm.packagedauto.menu.PackagerExtensionMenu;
+import thelm.packagedauto.menu.PackagerMenu;
+import thelm.packagedauto.menu.UnpackagerMenu;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.recipe.CraftingPackageRecipeType;
 import thelm.packagedauto.recipe.OrderedProcessingPackageRecipeType;
 import thelm.packagedauto.recipe.ProcessingPackageRecipeType;
-import thelm.packagedauto.tile.CrafterTile;
-import thelm.packagedauto.tile.EncoderTile;
-import thelm.packagedauto.tile.PackagerExtensionTile;
-import thelm.packagedauto.tile.PackagerTile;
-import thelm.packagedauto.tile.UnpackagerTile;
 import thelm.packagedauto.util.ApiImpl;
 import thelm.packagedauto.util.MiscHelper;
 
@@ -72,28 +73,29 @@ public class CommonEventHandler {
 		registry.register(CrafterBlock.ITEM_INSTANCE);
 		registry.register(RecipeHolderItem.INSTANCE);
 		registry.register(PackageItem.INSTANCE);
+		registry.register(FluidPackageItem.INSTANCE);
 		registry.register(MiscItem.PACKAGE_COMPONENT);
 		registry.register(MiscItem.ME_PACKAGE_COMPONENT);
 	}
 
 	@SubscribeEvent
-	public void onTileRegister(RegistryEvent.Register<TileEntityType<?>> event) {
-		IForgeRegistry<TileEntityType<?>> registry = event.getRegistry();
-		registry.register(EncoderTile.TYPE_INSTANCE);
-		registry.register(PackagerTile.TYPE_INSTANCE);
-		registry.register(PackagerExtensionTile.TYPE_INSTANCE);
-		registry.register(UnpackagerTile.TYPE_INSTANCE);
-		registry.register(CrafterTile.TYPE_INSTANCE);
+	public void onBlockEntityRegister(RegistryEvent.Register<BlockEntityType<?>> event) {
+		IForgeRegistry<BlockEntityType<?>> registry = event.getRegistry();
+		registry.register(EncoderBlockEntity.TYPE_INSTANCE);
+		registry.register(PackagerBlockEntity.TYPE_INSTANCE);
+		registry.register(PackagerExtensionBlockEntity.TYPE_INSTANCE);
+		registry.register(UnpackagerBlockEntity.TYPE_INSTANCE);
+		registry.register(CrafterBlockEntity.TYPE_INSTANCE);
 	}
 
 	@SubscribeEvent
-	public void onContainerRegister(RegistryEvent.Register<ContainerType<?>> event) {
-		IForgeRegistry<ContainerType<?>> registry = event.getRegistry();
-		registry.register(EncoderContainer.TYPE_INSTANCE);
-		registry.register(PackagerContainer.TYPE_INSTANCE);
-		registry.register(PackagerExtensionContainer.TYPE_INSTANCE);
-		registry.register(UnpackagerContainer.TYPE_INSTANCE);
-		registry.register(CrafterContainer.TYPE_INSTANCE);
+	public void onMenuTypeRegister(RegistryEvent.Register<MenuType<?>> event) {
+		IForgeRegistry<MenuType<?>> registry = event.getRegistry();
+		registry.register(EncoderMenu.TYPE_INSTANCE);
+		registry.register(PackagerMenu.TYPE_INSTANCE);
+		registry.register(PackagerExtensionMenu.TYPE_INSTANCE);
+		registry.register(UnpackagerMenu.TYPE_INSTANCE);
+		registry.register(CrafterMenu.TYPE_INSTANCE);
 	}
 
 	@SubscribeEvent
@@ -106,7 +108,7 @@ public class CommonEventHandler {
 	}
 
 	@SubscribeEvent
-	public void onModConfig(ModConfig.ModConfigEvent event) {
+	public void onModConfig(ModConfigEvent event) {
 		switch(event.getConfig().getType()) {
 		case SERVER:
 			PackagedAutoConfig.reloadServerConfig();
@@ -116,7 +118,7 @@ public class CommonEventHandler {
 		}
 	}
 
-	public void onServerAboutToStart(FMLServerAboutToStartEvent event) {
+	public void onServerAboutToStart(ServerAboutToStartEvent event) {
 		MiscHelper.INSTANCE.setServer(event.getServer());
 	}
 }

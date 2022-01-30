@@ -6,18 +6,18 @@ import java.util.List;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntSet;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 public interface IPackageRecipeType {
 
 	ResourceLocation getName();
 
-	IFormattableTextComponent getDisplayName();
+	MutableComponent getDisplayName();
 
-	IFormattableTextComponent getShortDisplayName();
+	MutableComponent getShortDisplayName();
 
 	IPackageRecipeInfo getNewRecipeInfo();
 
@@ -26,7 +26,9 @@ public interface IPackageRecipeType {
 	boolean canSetOutput();
 
 	boolean hasMachine();
-
+	
+	boolean hasContainerItem();
+	
 	default List<ResourceLocation> getJEICategories() {
 		return new ArrayList<>();
 	}
@@ -37,5 +39,5 @@ public interface IPackageRecipeType {
 
 	Object getRepresentation();
 
-	Vector3i getSlotColor(int slot);
+	Vec3i getSlotColor(int slot);
 }

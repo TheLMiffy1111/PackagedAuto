@@ -8,10 +8,10 @@ import java.util.stream.Collectors;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
@@ -25,7 +25,7 @@ public class OrderedProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 	List<IPackagePattern> patterns = new ArrayList<>();
 
 	@Override
-	public void read(CompoundNBT nbt) {
+	public void load(CompoundTag nbt) {
 		MiscHelper.INSTANCE.loadAllItems(nbt.getList("Input", 10), input);
 		MiscHelper.INSTANCE.loadAllItems(nbt.getList("Output", 10), output);
 		patterns.clear();
@@ -35,12 +35,11 @@ public class OrderedProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT nbt) {
-		ListNBT inputTag = MiscHelper.INSTANCE.saveAllItems(new ListNBT(), input);
+	public void save(CompoundTag nbt) {
+		ListTag inputTag = MiscHelper.INSTANCE.saveAllItems(new ListTag(), input);
 		nbt.put("Input", inputTag);
-		ListNBT outputTag = MiscHelper.INSTANCE.saveAllItems(new ListNBT(), output);
+		ListTag outputTag = MiscHelper.INSTANCE.saveAllItems(new ListTag(), output);
 		nbt.put("Output", outputTag);
-		return nbt;
 	}
 
 	@Override
@@ -73,7 +72,7 @@ public class OrderedProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 	}
 
 	@Override
-	public void generateFromStacks(List<ItemStack> input, List<ItemStack> output, World world) {
+	public void generateFromStacks(List<ItemStack> input, List<ItemStack> output, Level level) {
 		this.input.clear();
 		this.input.addAll(removeEmptyStacks(input));
 		this.output.clear();
@@ -104,12 +103,12 @@ public class OrderedProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 				return false;
 			}
 			for(int i = 0; i < input.size(); ++i) {
-				if(!ItemStack.areItemStackTagsEqual(input.get(i), other.input.get(i))) {
+				if(!ItemStack.isSameItemSameTags(input.get(i), other.input.get(i))) {
 					return false;
 				}
 			}
 			for(int i = 0; i < output.size(); ++i) {
-				if(!ItemStack.areItemStackTagsEqual(output.get(i), other.output.get(i))) {
+				if(!ItemStack.isSameItemSameTags(output.get(i), other.output.get(i))) {
 					return false;
 				}
 			}

@@ -2,7 +2,7 @@ package thelm.packagedauto.api;
 
 import java.util.NavigableMap;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 
 public abstract class PackagedAutoApi {
 
