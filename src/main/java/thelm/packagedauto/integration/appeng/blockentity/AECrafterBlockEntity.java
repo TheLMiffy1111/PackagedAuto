@@ -30,6 +30,7 @@ import thelm.packagedauto.block.entity.CrafterBlockEntity;
 
 public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorldGridNodeHost, IGridNodeListener<AECrafterBlockEntity>, IActionHost {
 
+	public boolean firstTick = true;
 	public MachineSource source;
 	public IManagedGridNode gridNode;
 
@@ -41,6 +42,7 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 	@Override
 	public void tick() {
 		if(firstTick) {
+			firstTick = false;
 			getMainNode().create(level, worldPosition);
 		}
 		super.tick();

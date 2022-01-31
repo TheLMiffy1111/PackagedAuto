@@ -42,7 +42,6 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
 
-	public boolean firstTick = true;
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
 	public ICraftingPackageRecipeInfo currentRecipe;
@@ -60,9 +59,6 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 
 	@Override
 	public void tick() {
-		if(firstTick) {
-			firstTick = false;
-		}
 		if(!level.isClientSide) {
 			if(isWorking) {
 				tickProcess();
