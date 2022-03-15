@@ -1,0 +1,29 @@
+itemGroup.packagedauto=PackagedAuto
+
+tile.packagedauto.packager.name=Упаковщик
+tile.packagedauto.encoder.name=Кодировщик программы рецепта
+tile.packagedauto.encoder.save=Сохранить
+tile.packagedauto.encoder.save_single=Сохранить одиночный
+tile.packagedauto.encoder.load=Загрузить
+tile.packagedauto.encoder.pattern_slot=Слот рецепта %s
+tile.packagedauto.encoder.change_recipe_type=Сменить тип рецепта
+tile.packagedauto.unpackager.name=Распаковщик
+tile.packagedauto.unpackager.blocking.false=Режим блокировки: Отключено
+tile.packagedauto.unpackager.blocking.true=Режим блокировки: Включено
+tile.packagedauto.packager_extension.name=Расширение упаковщика
+tile.packagedauto.crafter.name=Изготовитель программы
+
+item.packagedauto.recipe_holder.name=Носитель программы рецепта
+item.packagedauto.recipe_holder.recipes=Рецепты:
+item.packagedauto.package.name=Программа рецепта
+item.packagedauto.package.index=Индекс: %d
+item.packagedauto.package.items=Предметы:
+item.packagedauto.package_component.name=Программа компонента
+item.packagedauto.me_package_component.name=ME Программа компонента
+
+recipe.packagedauto.processing=Обработка
+recipe.packagedauto.processing.short=Обработка
+recipe.packagedauto.processing_ordered=Заказанная обработка
+recipe.packagedauto.processing_ordered.short=Заказанный
+recipe.packagedauto.crafting=Изготовление
+recipe.packagedauto.crafting.short=Изготовление
