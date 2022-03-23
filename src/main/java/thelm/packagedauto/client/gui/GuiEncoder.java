@@ -48,11 +48,11 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 				drawModalRectWithCustomSizedTexture(guiLeft+8+j*18, guiTop+56+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
-		for(int i = 0; i < 3; ++i) {
+		for(int i = 0; i < 6; ++i) {
 			for(int j = 0; j < 3; ++j) {
 				Color color = recipeType.getSlotColor(81+i*3+j);
 				GlStateManager.color(color.getRed()/255F, color.getGreen()/255F, color.getBlue()/255F, color.getAlpha()/255F);
-				drawModalRectWithCustomSizedTexture(guiLeft+198+j*18, guiTop+110+i*18, 258, 0, 16, 16, 512, 512);
+				drawModalRectWithCustomSizedTexture(guiLeft+198+j*18, guiTop+56+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		GlStateManager.color(1, 1, 1, 1);
@@ -61,11 +61,10 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
-		String s = container.inventory.getDisplayName().getUnformattedText();
+		String modeStr = fontRenderer.trimStringToWidth(container.patternInventory.recipeType.getLocalizedNameShort(), 86);
+		String s = container.inventory.getDisplayName().getUnformattedText() + " (" + modeStr + ")";
 		fontRenderer.drawString(s, xSize/2 - fontRenderer.getStringWidth(s)/2, 6, 0x404040);
 		fontRenderer.drawString(container.playerInventory.getDisplayName().getUnformattedText(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
-		String str = fontRenderer.trimStringToWidth(container.patternInventory.recipeType.getLocalizedNameShort(), 86);
-		fontRenderer.drawString(str, 212 - fontRenderer.getStringWidth(str)/2, 64, 0x404040);
 		for(GuiButton guibutton : buttonList) {
 			if(guibutton.isMouseOver()) {
 				guibutton.drawButtonForegroundLayer(mouseX-guiLeft, mouseY-guiTop);
@@ -82,11 +81,11 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		for(int i = 0; i < patternSlots; ++i) {
 			addButton(new GuiButtonPatternSlot(i, guiLeft+29+(i%10)*18, guiTop+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
 		}
-		addButton(new GuiButtonRecipeType(0, guiLeft+204, guiTop+74));
+		addButton(new GuiButtonRecipeType(0, guiLeft+7, guiTop+16));
 		addButton(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+16, I18n.translateToLocal("tile.packagedauto.encoder.save")));
 		addButton(new GuiButtonLoadPatterns(0, guiLeft+213, guiTop+34, I18n.translateToLocal("tile.packagedauto.encoder.load")));
 		if(Loader.isModLoaded("jei")) {
-			addButton(new GuiButtonShowRecipesJEI(0, guiLeft+172, guiTop+129));
+			addButton(new GuiButtonShowRecipesJEI(0, guiLeft+172, guiTop+71));
 		}
 	}
 
@@ -135,7 +134,7 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		@Override
 		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
 			super.drawButton(mc, mouseX, mouseY, partialTicks);
-			for(int i = 81; i < 90; ++i) {
+			for(int i = 81; i < 99; ++i) {
 				ItemStack stack = container.tile.patternInventories[id].stacks.get(i);
 				if(!stack.isEmpty()) {
 					RenderHelper.enableGUIStandardItemLighting();

@@ -31,7 +31,7 @@ public class RecipeTypeProcessing implements IRecipeType {
 
 	static {
 		SLOTS = new IntRBTreeSet();
-		IntStream.range(0, 90).forEachOrdered(SLOTS::add);
+		IntStream.range(0, 99).forEachOrdered(SLOTS::add);
 	}
 
 	protected RecipeTypeProcessing() {};
@@ -96,7 +96,7 @@ public class RecipeTypeProcessing implements IRecipeType {
 				++inputIndex;
 			}
 			else {
-				if(outputIndex >= 90) {
+				if(outputIndex >= 99) {
 					continue;
 				}
 				ItemStack displayed = entry.getValue().getDisplayedIngredient();
@@ -105,7 +105,7 @@ public class RecipeTypeProcessing implements IRecipeType {
 				}
 				++outputIndex;
 			}
-			if(inputIndex >= 81 && outputIndex >= 90) {
+			if(inputIndex >= 81 && outputIndex >= 99) {
 				break;
 			}
 		}
