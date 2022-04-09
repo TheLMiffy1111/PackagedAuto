@@ -30,8 +30,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
-		super.renderBg(poseStack, partialTicks, mouseX, mouseY);
+	protected void renderBgAdditional(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
 		int scaledEnergy = menu.blockEntity.getScaledEnergy(40);
 		blit(poseStack, leftPos+10, topPos+10+40-scaledEnergy, 176, 40-scaledEnergy, 12, scaledEnergy);
 		for(int i = 0; i < menu.blockEntity.trackers.length; ++i) {
@@ -61,6 +60,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 				break;
 			}
 		}
+		super.renderLabels(poseStack, mouseX, mouseY);
 	}
 
 	@Override

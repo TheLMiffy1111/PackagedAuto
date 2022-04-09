@@ -37,7 +37,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 		switch(slot) {
 		case 9: return false;
 		case 10: return stack.getItem() instanceof IPackageRecipeListItem || stack.getItem() instanceof IPackageItem;
-		case 11: return stack.getCapability(CapabilityEnergy.ENERGY, null).isPresent();
+		case 11: return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
 		default: return blockEntity.isWorking ? !getStackInSlot(slot).isEmpty() : true;
 		}
 	}

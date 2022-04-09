@@ -4,9 +4,11 @@ import appeng.api.crafting.IPatternDetails.IInput;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
-import thelm.packagedauto.api.IFluidPackageItem;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.IVolumePackageItem;
+import thelm.packagedauto.api.IVolumeStackWrapper;
 
 public class SimpleInput implements IInput {
 
@@ -16,7 +18,7 @@ public class SimpleInput implements IInput {
 
 	public SimpleInput(IPackageRecipeInfo recipe, GenericStack stack) {
 		this.recipe = recipe;
-		template = new GenericStack[] {getItemOrFluidInput(stack)};
+		template = new GenericStack[] {getGenericInput(stack)};
 		multiplier = stack.amount();
 	}
 
@@ -43,9 +45,10 @@ public class SimpleInput implements IInput {
 		return null;
 	}
 
-	private GenericStack getItemOrFluidInput(GenericStack stack) {
-		if(stack.what() instanceof AEItemKey itemKey && itemKey.getItem() instanceof IFluidPackageItem fluidPackage) {
-			return GenericStack.fromFluidStack(fluidPackage.getFluidStack(itemKey.toStack()));
+	private GenericStack getGenericInput(GenericStack stack) {
+		if(stack.what() instanceof AEItemKey itemKey && itemKey.getItem() instanceof IVolumePackageItem vPackage) {
+			IVolumeStackWrapper vStack = vPackage.getVolumeStack(itemKey.toStack());
+			return new GenericStack(AEKey.fromTagGeneric(vStack.saveAEKey(new CompoundTag())), vStack.getAmount());
 		}
 		return new GenericStack(stack.what(), 1);
 	}

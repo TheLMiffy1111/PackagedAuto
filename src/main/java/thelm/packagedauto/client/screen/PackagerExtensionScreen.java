@@ -22,8 +22,7 @@ public class PackagerExtensionScreen extends BaseScreen<PackagerExtensionMenu> {
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
-		super.renderBg(poseStack, partialTicks, mouseX, mouseY);
+	protected void renderBgAdditional(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
 		blit(poseStack, leftPos+102, topPos+53, 176, 0, menu.blockEntity.getScaledProgress(22), 16);
 		int scaledEnergy = menu.blockEntity.getScaledEnergy(40);
 		blit(poseStack, leftPos+10, topPos+10+40-scaledEnergy, 176, 16+40-scaledEnergy, 12, scaledEnergy);
@@ -37,5 +36,6 @@ public class PackagerExtensionScreen extends BaseScreen<PackagerExtensionMenu> {
 		if(mouseX-leftPos >= 10 && mouseY-topPos >= 10 && mouseX-leftPos <= 21 && mouseY-topPos <= 49) {
 			renderTooltip(poseStack, new TextComponent(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
 		}
+		super.renderLabels(poseStack, mouseX, mouseY);
 	}
 }

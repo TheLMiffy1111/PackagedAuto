@@ -27,7 +27,7 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 	public boolean isItemValid(int index, ItemStack stack) {
 		switch(index) {
 		case 9: return false;
-		case 10: return stack.getCapability(CapabilityEnergy.ENERGY, null).isPresent();
+		case 10: return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
 		default: return blockEntity.isWorking ? !getStackInSlot(index).isEmpty() : true;
 		}
 	}

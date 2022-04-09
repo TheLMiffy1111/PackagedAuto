@@ -23,10 +23,10 @@ import thelm.packagedauto.block.entity.PackagerBlockEntity;
 import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
 import thelm.packagedauto.config.PackagedAutoConfig;
-import thelm.packagedauto.item.FluidPackageItem;
 import thelm.packagedauto.item.MiscItem;
 import thelm.packagedauto.item.PackageItem;
 import thelm.packagedauto.item.RecipeHolderItem;
+import thelm.packagedauto.item.VolumePackageItem;
 import thelm.packagedauto.menu.CrafterMenu;
 import thelm.packagedauto.menu.EncoderMenu;
 import thelm.packagedauto.menu.PackagerExtensionMenu;
@@ -38,6 +38,7 @@ import thelm.packagedauto.recipe.OrderedProcessingPackageRecipeType;
 import thelm.packagedauto.recipe.ProcessingPackageRecipeType;
 import thelm.packagedauto.util.ApiImpl;
 import thelm.packagedauto.util.MiscHelper;
+import thelm.packagedauto.volume.FluidVolumeType;
 
 public class CommonEventHandler {
 
@@ -73,7 +74,7 @@ public class CommonEventHandler {
 		registry.register(CrafterBlock.ITEM_INSTANCE);
 		registry.register(RecipeHolderItem.INSTANCE);
 		registry.register(PackageItem.INSTANCE);
-		registry.register(FluidPackageItem.INSTANCE);
+		registry.register(VolumePackageItem.INSTANCE);
 		registry.register(MiscItem.PACKAGE_COMPONENT);
 		registry.register(MiscItem.ME_PACKAGE_COMPONENT);
 	}
@@ -100,6 +101,8 @@ public class CommonEventHandler {
 
 	@SubscribeEvent
 	public void onCommonSetup(FMLCommonSetupEvent event) {
+		ApiImpl.INSTANCE.registerVolumeType(FluidVolumeType.INSTANCE);
+
 		ApiImpl.INSTANCE.registerRecipeType(ProcessingPackageRecipeType.INSTANCE);
 		ApiImpl.INSTANCE.registerRecipeType(OrderedProcessingPackageRecipeType.INSTANCE);
 		ApiImpl.INSTANCE.registerRecipeType(CraftingPackageRecipeType.INSTANCE);

@@ -21,12 +21,17 @@
     "item.packagedauto.package.items": "Items:",
     "item.packagedauto.package_component": "Packaging Component",
     "item.packagedauto.me_package_component": "ME Packaging Component",
-    "item.packagedauto.fluid_package": "Fluid Package",
+    "item.packagedauto.volume_package": "Volume Package",
 
     "recipe.packagedauto.processing": "Processing",
     "recipe.packagedauto.processing.short": "Processing",
     "recipe.packagedauto.ordered_processing": "Ordered Processing",
     "recipe.packagedauto.ordered_processing.short": "Ordered",
     "recipe.packagedauto.crafting": "Crafting",
-    "recipe.packagedauto.crafting.short": "Crafting"
+    "recipe.packagedauto.crafting.short": "Crafting",
+
+    "gui.packagedauto.item_amount_specifying": "Item amount",
+    "gui.packagedauto.volume_amount_specifying": "Volume amount in mB",
+
+    "misc.packagedauto.set": "Set"
 }

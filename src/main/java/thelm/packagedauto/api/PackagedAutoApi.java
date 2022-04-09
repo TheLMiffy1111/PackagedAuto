@@ -35,5 +35,11 @@ public abstract class PackagedAutoApi {
 
 	public abstract IPackageRecipeType getNextRecipeType(IPackageRecipeType type, boolean reverse);
 
+	public abstract boolean registerVolumeType(IVolumeType type);
+
+	public abstract IVolumeType getVolumeType(ResourceLocation name);
+
+	public abstract IVolumeType getVolumeType(Class<?> typeClass);
+
 	public abstract IMiscHelper miscHelper();
 }

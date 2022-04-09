@@ -30,7 +30,9 @@ public class BaseItemHandler<T extends BaseBlockEntity> extends ItemStackHandler
 
 	@Override
 	protected void onContentsChanged(int slot) {
-		blockEntity.setChanged();
+		if(blockEntity != null) {
+			blockEntity.setChanged();
+		}
 	}
 
 	public void load(CompoundTag nbt) {
@@ -43,11 +45,15 @@ public class BaseItemHandler<T extends BaseBlockEntity> extends ItemStackHandler
 	}
 
 	public void setChanged() {
-		blockEntity.setChanged();
+		if(blockEntity != null) {
+			blockEntity.setChanged();
+		}
 	}
 
 	public void sync(boolean rerender) {
-		blockEntity.sync(rerender);
+		if(blockEntity != null) {
+			blockEntity.sync(rerender);
+		}
 	}
 
 	public IItemHandlerModifiable getWrapperForDirection(Direction side) {

@@ -2,12 +2,14 @@ package thelm.packagedauto.integration.appeng.recipe;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.stacks.AEItemKey;
+import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
-import thelm.packagedauto.api.IFluidPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.IVolumePackageItem;
+import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.integration.appeng.AppEngUtil;
 
 public class RecipeCraftingPatternDetails implements IPatternDetails {
@@ -24,7 +26,7 @@ public class RecipeCraftingPatternDetails implements IPatternDetails {
 		this.recipeHolder = AEItemKey.of(recipeHolder);
 		this.recipe = recipe;
 		sparseInputs = recipe.getPatterns().stream().map(IPackagePattern::getOutput).map(GenericStack::fromItemStack).toArray(GenericStack[]::new);
-		sparseOutputs = recipe.getOutputs().stream().map(this::getItemOrFluidOutput).toArray(GenericStack[]::new);
+		sparseOutputs = recipe.getOutputs().stream().map(this::getGenericOutput).toArray(GenericStack[]::new);
 		inputs = AppEngUtil.toInputs(sparseInputs);
 		outputs = AppEngUtil.condenseStacks(sparseOutputs);
 	}
@@ -66,10 +68,10 @@ public class RecipeCraftingPatternDetails implements IPatternDetails {
 		return recipe.hashCode();
 	}
 
-	private GenericStack getItemOrFluidOutput(ItemStack stack) {
-		if(stack.getItem() instanceof IFluidPackageItem fluidPackage) {
-			FluidStack fluidStack = fluidPackage.getFluidStack(stack);
-			return GenericStack.fromFluidStack(new FluidStack(fluidStack.getFluid(), fluidStack.getAmount()*stack.getCount()));
+	private GenericStack getGenericOutput(ItemStack stack) {
+		if(stack.getItem() instanceof IVolumePackageItem vPackage) {
+			IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
+			return new GenericStack(AEKey.fromTagGeneric(vStack.saveAEKey(new CompoundTag())), vStack.getAmount()*stack.getCount());
 		}
 		return GenericStack.fromItemStack(stack);
 	}

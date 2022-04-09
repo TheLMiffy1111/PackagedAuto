@@ -10,6 +10,7 @@ import thelm.packagedauto.network.packet.ChangeBlockingPacket;
 import thelm.packagedauto.network.packet.CycleRecipeTypePacket;
 import thelm.packagedauto.network.packet.LoadRecipeListPacket;
 import thelm.packagedauto.network.packet.SaveRecipeListPacket;
+import thelm.packagedauto.network.packet.SetItemStackPacket;
 import thelm.packagedauto.network.packet.SetPatternIndexPacket;
 import thelm.packagedauto.network.packet.SetRecipePacket;
 import thelm.packagedauto.network.packet.SyncEnergyPacket;
@@ -26,6 +27,9 @@ public class PacketHandler {
 		INSTANCE.registerMessage(id++, SyncEnergyPacket.class,
 				SyncEnergyPacket::encode, SyncEnergyPacket::decode,
 				SyncEnergyPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+		INSTANCE.registerMessage(id++, SetItemStackPacket.class,
+				SetItemStackPacket::encode, SetItemStackPacket::decode,
+				SetItemStackPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 		INSTANCE.registerMessage(id++, SetPatternIndexPacket.class,
 				SetPatternIndexPacket::encode, SetPatternIndexPacket::decode,
 				SetPatternIndexPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));

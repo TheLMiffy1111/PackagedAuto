@@ -23,17 +23,15 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
-import thelm.packagedauto.api.IFluidPackageItem;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.IVolumePackageItem;
+import thelm.packagedauto.api.IVolumeStackWrapper;
+import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.integration.appeng.blockentity.AEUnpackagerBlockEntity;
@@ -171,21 +169,21 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				trackerToEmpty.direction = null;
 				continue;
 			}
-			if(blockEntity == null || blockEntity instanceof PackagerBlockEntity || blockEntity instanceof UnpackagerBlockEntity || isPatternProvider(blockEntity, direction.getOpposite()) || !blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
+			if(blockEntity == null || blockEntity instanceof PackagerBlockEntity || blockEntity instanceof UnpackagerBlockEntity || isPatternProvider(blockEntity, direction.getOpposite())) {
 				trackerToEmpty.direction = null;
 				continue;
 			}
-			IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).resolve().get();
-			IFluidHandler fluidHandler = blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction.getOpposite()).resolve().orElse(null);
+			IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).orElse(null);
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
-				if(fluidHandler != null && stack.getItem() instanceof IFluidPackageItem fluidPackage) {
+				if(stack.getItem() instanceof IVolumePackageItem vPackage && vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
 					ItemStack stackCopy = stack.copy();
-					FluidStack fluidStack = fluidPackage.getFluidStack(stack);
-					while(!stack.isEmpty()) {
-						int simulateFilled = fluidHandler.fill(fluidStack, FluidAction.SIMULATE);
-						if(simulateFilled == fluidStack.getAmount()) {
-							fluidHandler.fill(fluidStack, FluidAction.EXECUTE);
+					IVolumeType vType = vPackage.getVolumeType(stack);
+					IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
+					while(!stackCopy.isEmpty()) {
+						int simulateFilled = vType.fill(blockEntity, direction.getOpposite(), vStack, true);
+						if(simulateFilled == vStack.getAmount()) {
+							vType.fill(blockEntity, direction.getOpposite(), vStack, false);
 							stackCopy.shrink(1);
 						}
 						else {
@@ -194,7 +192,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 					}
 					stack = stackCopy;
 				}
-				else {
+				else if(itemHandler != null) {
 					for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
 						ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
 						if(stackRem.getCount() < stack.getCount()) {
@@ -215,10 +213,10 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 		}
 		for(Direction direction : Direction.values()) {
 			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
-			if(blockEntity == null || blockEntity instanceof PackagerBlockEntity || blockEntity instanceof UnpackagerBlockEntity || isPatternProvider(blockEntity, direction.getOpposite()) || !blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
+			if(blockEntity == null || blockEntity instanceof PackagerBlockEntity || blockEntity instanceof UnpackagerBlockEntity || isPatternProvider(blockEntity, direction.getOpposite())) {
 				continue;
 			}
-			IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).resolve().get();
+			IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).orElse(null);
 			if(powered || blocking && !MiscHelper.INSTANCE.isEmpty(itemHandler)) {
 				continue;
 			}
@@ -230,16 +228,16 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				trackerToEmpty.setupToSend();
 			}
 			boolean inserted = false;
-			IFluidHandler fluidHandler = blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction.getOpposite()).resolve().orElse(null);
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
-				if(fluidHandler != null && stack.getItem() instanceof IFluidPackageItem fluidPackage) {
+				if(stack.getItem() instanceof IVolumePackageItem vPackage && vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
 					ItemStack stackCopy = stack.copy();
-					FluidStack fluidStack = fluidPackage.getFluidStack(stack);
-					while(!stack.isEmpty()) {
-						int simulateFilled = fluidHandler.fill(fluidStack, FluidAction.SIMULATE);
-						if(simulateFilled == fluidStack.getAmount()) {
-							fluidHandler.fill(fluidStack, FluidAction.EXECUTE);
+					IVolumeType vType = vPackage.getVolumeType(stack);
+					IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
+					while(!stackCopy.isEmpty()) {
+						int simulateFilled = vType.fill(blockEntity, direction.getOpposite(), vStack, true);
+						if(simulateFilled == vStack.getAmount()) {
+							vType.fill(blockEntity, direction.getOpposite(), vStack, false);
 							stackCopy.shrink(1);
 						}
 						else {
@@ -248,7 +246,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 					}
 					stack = stackCopy;
 				}
-				else {
+				else if(itemHandler != null) {
 					for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
 						ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
 						if(stackRem.getCount() < stack.getCount()) {
@@ -383,7 +381,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				}
 				else if(this.recipe.equals(recipe)) {
 					int index = packageItem.getIndex(stack);
-					if(!received.get(index)) {
+					if(!received.getBoolean(index)) {
 						received.set(index, true);
 						sync(false);
 						setChanged();

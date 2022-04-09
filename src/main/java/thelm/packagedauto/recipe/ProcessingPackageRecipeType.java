@@ -2,7 +2,6 @@ package thelm.packagedauto.recipe;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -15,14 +14,13 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fml.ModList;
-import thelm.packagedauto.api.IGuiIngredientWrapper;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
-import thelm.packagedauto.api.IRecipeLayoutWrapper;
+import thelm.packagedauto.api.IRecipeSlotViewWrapper;
+import thelm.packagedauto.api.IRecipeSlotsViewWrapper;
 import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
-import thelm.packagedauto.item.FluidPackageItem;
+import thelm.packagedauto.item.VolumePackageItem;
 import thelm.packagedauto.util.MiscHelper;
 
 public class ProcessingPackageRecipeType implements IPackageRecipeType {
@@ -87,61 +85,43 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 	}
 
 	@Override
-	public Int2ObjectMap<ItemStack> getRecipeTransferMap(IRecipeLayoutWrapper recipeLayoutWrapper) {
+	public Int2ObjectMap<ItemStack> getRecipeTransferMap(IRecipeSlotsViewWrapper recipeLayoutWrapper) {
 		Int2ObjectMap<ItemStack> map = new Int2ObjectOpenHashMap<>();
-		Map<Integer, IGuiIngredientWrapper<ItemStack>> ingredients = recipeLayoutWrapper.getItemStackIngredients();
+		List<IRecipeSlotViewWrapper> slotViews = recipeLayoutWrapper.getRecipeSlotViews();
 		int inputIndex = 0;
 		int outputIndex = 81;
-		for(Map.Entry<Integer, IGuiIngredientWrapper<ItemStack>> entry : ingredients.entrySet()) {
-			IGuiIngredientWrapper<ItemStack> ingredient = entry.getValue();
-			if(ingredient.isInput()) {
+		for(IRecipeSlotViewWrapper slotView : slotViews) {
+			if(slotView.isInput()) {
 				if(inputIndex >= 81) {
 					continue;
 				}
-				ItemStack displayed = entry.getValue().getDisplayedIngredient();
-				if(displayed != null && !displayed.isEmpty()) {
-					map.put(inputIndex, displayed);
+				Object displayed = slotView.getDisplayedIngredient().orElse(null);
+				if(displayed instanceof ItemStack stack && !stack.isEmpty()) {
+					map.put(inputIndex, stack);
+				}
+				else if(displayed != null) {
+					ItemStack stack = VolumePackageItem.tryMakeVolumePackage(displayed);
+					if(!stack.isEmpty()) {
+						map.put(inputIndex, stack);
+					}
 				}
 				++inputIndex;
 			}
-			else {
+			else if(slotView.isOutput()) {
 				if(outputIndex >= 90) {
 					continue;
 				}
-				ItemStack displayed = entry.getValue().getDisplayedIngredient();
-				if(displayed != null && !displayed.isEmpty()) {
-					map.put(outputIndex, displayed);
+				Object displayed = slotView.getDisplayedIngredient().orElse(null);
+				if(displayed instanceof ItemStack stack && !stack.isEmpty()) {
+					map.put(outputIndex, stack);
+				}
+				else {
+					ItemStack stack = VolumePackageItem.tryMakeVolumePackage(displayed);
+					if(!stack.isEmpty()) {
+						map.put(outputIndex, stack);
+					}
 				}
 				++outputIndex;
-				outputIndex += 3;
-			}
-			if(inputIndex >= 81 && outputIndex >= 90) {
-				break;
-			}
-		}
-		Map<Integer, IGuiIngredientWrapper<FluidStack>> fluidIngredients = recipeLayoutWrapper.getFluidStackIngredients();
-		for(Map.Entry<Integer, IGuiIngredientWrapper<FluidStack>> entry : fluidIngredients.entrySet()) {
-			IGuiIngredientWrapper<FluidStack> ingredient = entry.getValue();
-			if(ingredient.isInput()) {
-				if(inputIndex >= 81) {
-					continue;
-				}
-				ItemStack displayed = FluidPackageItem.makeFluidPackage(entry.getValue().getDisplayedIngredient());
-				if(displayed != null && !displayed.isEmpty()) {
-					map.put(inputIndex, displayed);
-				}
-				++inputIndex;
-			}
-			else {
-				if(outputIndex >= 90) {
-					continue;
-				}
-				ItemStack displayed = FluidPackageItem.makeFluidPackage(entry.getValue().getDisplayedIngredient());
-				if(displayed != null && !displayed.isEmpty()) {
-					map.put(outputIndex, displayed);
-				}
-				++outputIndex;
-				outputIndex += 3;
 			}
 			if(inputIndex >= 81 && outputIndex >= 90) {
 				break;

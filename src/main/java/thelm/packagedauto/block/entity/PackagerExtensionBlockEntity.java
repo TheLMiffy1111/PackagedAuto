@@ -313,7 +313,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	protected void chargeEnergy() {
 		int prevStored = energyStorage.getEnergyStored();
 		ItemStack energyStack = itemHandler.getStackInSlot(10);
-		if(energyStack.getCapability(CapabilityEnergy.ENERGY, null).isPresent()) {
+		if(energyStack.getCapability(CapabilityEnergy.ENERGY).isPresent()) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
 			energyStorage.receiveEnergy(energyStack.getCapability(CapabilityEnergy.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
 			if(energyStack.getCount() <= 0) {

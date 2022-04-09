@@ -33,7 +33,7 @@ public interface IPackageRecipeType {
 		return new ArrayList<>();
 	}
 
-	default Int2ObjectMap<ItemStack> getRecipeTransferMap(IRecipeLayoutWrapper recipeLayoutWrapper) {
+	default Int2ObjectMap<ItemStack> getRecipeTransferMap(IRecipeSlotsViewWrapper recipeLayoutWrapper) {
 		return new Int2ObjectOpenHashMap<>();
 	}
 

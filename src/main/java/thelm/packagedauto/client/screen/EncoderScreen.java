@@ -39,8 +39,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 	}
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
-		super.renderBg(poseStack, partialTicks, mouseX, mouseY);
+	protected void renderBgAdditional(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
 		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
 		for(int i = 0; i < 9; ++i) {
 			for(int j = 0; j < 9; ++j) {
@@ -67,6 +66,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		font.draw(poseStack, menu.inventory.getDisplayName().getString(), menu.getPlayerInvX(), menu.getPlayerInvY()-11, 0x404040);
 		String str = menu.patternItemHandler.recipeType.getShortDisplayName().getString();
 		font.draw(poseStack, str, 212 - font.width(str)/2, 64, 0x404040);
+		super.renderLabels(poseStack, mouseX, mouseY);
 		for(GuiEventListener child : children()) {
 			if(child.isMouseOver(mouseX, mouseY) && child instanceof AbstractWidget button) {
 				button.renderToolTip(poseStack, mouseX-leftPos, mouseY-topPos);

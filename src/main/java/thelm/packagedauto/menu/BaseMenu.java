@@ -26,7 +26,7 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 		super(menuType, windowId);
 		this.blockEntity = blockEntity;
 		this.inventory = inventory;
-		itemHandler = blockEntity.getItemHandler();
+		itemHandler = blockEntity != null ? blockEntity.getItemHandler() : new BaseItemHandler(null, 0);
 		addDataSlots(itemHandler);
 	}
 
@@ -163,11 +163,11 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 		Out:if(slot instanceof FalseCopySlot) {
 			ItemStack stack = slot.getItem().copy();
 			switch(mouseButton) {
-			case 0:
+			case 0 -> {
 				slot.set(getCarried().isEmpty() ? ItemStack.EMPTY : getCarried().copy());
-				break;
-			case 1:
-				if(!player.getInventory().getSelected().isEmpty()) {
+			}
+			case 1 -> {
+				if(!getCarried().isEmpty()) {
 					ItemStack toPut = getCarried().copy();
 					if(stack.getItem() == toPut.getItem() &&
 							ItemStack.isSameItemSameTags(stack, toPut) && stack.getCount() < stack.getMaxStackSize()) {
@@ -183,8 +183,8 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 					stack.shrink(1);
 					slot.set(stack);
 				}
-				break;
-			case 2:
+			}
+			case 2 -> {
 				if(player.isCreative()) {
 					break Out;
 				}
@@ -192,7 +192,7 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 					stack.grow(1);
 					slot.set(stack);
 				}
-				break;
+			}
 			}
 			return;
 		}

@@ -7,6 +7,7 @@ import java.util.List;
 import mezz.jei.api.gui.handlers.IGuiClickableArea;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
 import mezz.jei.api.recipe.IFocusFactory;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.runtime.IRecipesGui;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.resources.ResourceLocation;
@@ -29,7 +30,10 @@ public class EncoderGuiHandler implements IGuiContainerHandler<EncoderScreen> {
 				if(categories.isEmpty()) {
 					categories = PackagedAutoJEIPlugin.getAllRecipeCategories();
 				}
-				recipesGui.showCategories(categories);
+				List<ResourceLocation> categories2 = categories;
+				List<RecipeType<?>> types = PackagedAutoJEIPlugin.jeiRuntime.getRecipeManager().createRecipeCategoryLookup().get().
+						<RecipeType<?>>map(c->c.getRecipeType()).filter(t->categories2.contains(t.getUid())).toList();
+				recipesGui.showTypes(types);
 			}
 		};
 		return Collections.singleton(clickableArea);
