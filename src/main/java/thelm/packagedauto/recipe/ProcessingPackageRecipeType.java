@@ -98,14 +98,15 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 				Object displayed = slotView.getDisplayedIngredient().orElse(null);
 				if(displayed instanceof ItemStack stack && !stack.isEmpty()) {
 					map.put(inputIndex, stack);
+					++inputIndex;
 				}
 				else if(displayed != null) {
 					ItemStack stack = VolumePackageItem.tryMakeVolumePackage(displayed);
 					if(!stack.isEmpty()) {
 						map.put(inputIndex, stack);
+						++inputIndex;
 					}
 				}
-				++inputIndex;
 			}
 			else if(slotView.isOutput()) {
 				if(outputIndex >= 90) {
@@ -114,14 +115,15 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 				Object displayed = slotView.getDisplayedIngredient().orElse(null);
 				if(displayed instanceof ItemStack stack && !stack.isEmpty()) {
 					map.put(outputIndex, stack);
+					++outputIndex;
 				}
 				else {
 					ItemStack stack = VolumePackageItem.tryMakeVolumePackage(displayed);
 					if(!stack.isEmpty()) {
 						map.put(outputIndex, stack);
+						++outputIndex;
 					}
 				}
-				++outputIndex;
 			}
 			if(inputIndex >= 81 && outputIndex >= 90) {
 				break;

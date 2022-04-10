@@ -38,5 +38,4 @@ public class EncoderGuiHandler implements IGuiContainerHandler<EncoderScreen> {
 		};
 		return Collections.singleton(clickableArea);
 	}
-
 }

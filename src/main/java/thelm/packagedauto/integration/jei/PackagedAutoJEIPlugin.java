@@ -32,6 +32,7 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 	@Override
 	public void registerGuiHandlers(IGuiHandlerRegistration registration) {
 		registration.addGuiContainerHandler(EncoderScreen.class, new EncoderGuiHandler());
+		registration.addGhostIngredientHandler(EncoderScreen.class, new EncoderGhostIngredientHandler());
 	}
 
 	@Override
