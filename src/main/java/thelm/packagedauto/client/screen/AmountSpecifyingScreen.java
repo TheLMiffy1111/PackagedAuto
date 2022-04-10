@@ -67,9 +67,6 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "+" + increment;
-			if(text.equals("+1000")) {
-				text = "+1B";
-			}
 			addButton(leftPos+xx, topPos+20, width, 20, new TextComponent(text), true, true, btn->onIncrementButtonClicked(increment));
 			xx += width+3;
 		}
@@ -78,9 +75,6 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "-" + increment;
-			if(text.equals("-1000")) {
-				text = "-1B";
-			}
 			addButton(leftPos+xx, topPos+imageHeight - 20 - 7, width, 20, new TextComponent(text), true, true, btn->onIncrementButtonClicked(-increment));
 			xx += width+3;
 		}

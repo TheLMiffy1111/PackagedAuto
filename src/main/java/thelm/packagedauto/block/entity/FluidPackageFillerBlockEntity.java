@@ -14,6 +14,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
@@ -129,10 +130,8 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 		if(template.isEmpty()) {
 			return;
 		}
-		template.getCapability(CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY).ifPresent(fluidHandler->{
-			if(fluidHandler.getTanks() > 0) {
-				(currentFluid = fluidHandler.getFluidInTank(0).copy()).setAmount(requiredAmount);
-			}
+		FluidUtil.getFluidContained(template).filter(s->!s.isEmpty()).ifPresent(s->{
+			(currentFluid = s.copy()).setAmount(requiredAmount);
 		});
 	}
 
