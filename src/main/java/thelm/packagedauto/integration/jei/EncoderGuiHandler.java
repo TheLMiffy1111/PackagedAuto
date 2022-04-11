@@ -33,7 +33,9 @@ public class EncoderGuiHandler implements IGuiContainerHandler<EncoderScreen> {
 				List<ResourceLocation> categories2 = categories;
 				List<RecipeType<?>> types = PackagedAutoJEIPlugin.jeiRuntime.getRecipeManager().createRecipeCategoryLookup().get().
 						<RecipeType<?>>map(c->c.getRecipeType()).filter(t->categories2.contains(t.getUid())).toList();
-				recipesGui.showTypes(types);
+				if(!types.isEmpty()) {
+					recipesGui.showTypes(types);
+				}
 			}
 		};
 		return Collections.singleton(clickableArea);
