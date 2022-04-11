@@ -11,17 +11,17 @@ import thelm.packagedauto.api.IRecipeSlotsViewWrapper;
 
 public class RecipeSlotsViewWrapper implements IRecipeSlotsViewWrapper {
 
-	private final ResourceLocation category;
+	private final Object recipe;
 	private final IRecipeSlotsView recipeSlotsView;
 
-	public RecipeSlotsViewWrapper(ResourceLocation category, IRecipeSlotsView recipeSlotsView) {
-		this.category = category;
+	public RecipeSlotsViewWrapper(Object recipe, IRecipeSlotsView recipeSlotsView) {
+		this.recipe = recipe;
 		this.recipeSlotsView = recipeSlotsView;
 	}
 
 	@Override
-	public ResourceLocation getCategoryUid() {
-		return category;
+	public Object getRecipe() {
+		return recipe;
 	}
 
 	@Override

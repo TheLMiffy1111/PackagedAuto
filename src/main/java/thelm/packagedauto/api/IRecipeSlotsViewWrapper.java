@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 
 public interface IRecipeSlotsViewWrapper {
 
-	ResourceLocation getCategoryUid();
+	Object getRecipe();
 
 	List<IRecipeSlotViewWrapper> getRecipeSlotViews();
 }

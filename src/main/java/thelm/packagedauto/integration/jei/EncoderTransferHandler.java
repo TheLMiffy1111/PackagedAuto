@@ -1,7 +1,7 @@
 package thelm.packagedauto.integration.jei;
 
 
-import java.util.Optional;
+import java.util.List;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -36,18 +36,17 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderMen
 
 	@Override
 	public IRecipeTransferError transferRecipe(EncoderMenu menu, Object recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer) {
-		Optional<ResourceLocation> categoryOp = PackagedAutoJEIPlugin.jeiRuntime.getRecipeManager().createRecipeCategoryLookup().get().
+		List<ResourceLocation> categories = PackagedAutoJEIPlugin.jeiRuntime.getRecipeManager().createRecipeCategoryLookup().get().
 				map(c->c.getRecipeType()).filter(t->t.getRecipeClass().isAssignableFrom(recipe.getClass())).
-				map(t->t.getUid()).findAny();
-		if(categoryOp.isEmpty()) {
+				map(t->t.getUid()).toList();
+		if(categories.isEmpty()) {
 			return transferHelper.createInternalError();
 		}
-		ResourceLocation category = categoryOp.get();
 		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
-		if(!(recipeType.getJEICategories().contains(category))) {
+		if(!(categories.stream().anyMatch(recipeType.getJEICategories()::contains))) {
 			return transferHelper.createInternalError();
 		}
-		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(new RecipeSlotsViewWrapper(category, recipeSlots));
+		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(new RecipeSlotsViewWrapper(recipe, recipeSlots));
 		if(map == null || map.isEmpty()) {
 			return transferHelper.createInternalError();
 		}
