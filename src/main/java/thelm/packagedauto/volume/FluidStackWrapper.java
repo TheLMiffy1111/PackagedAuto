@@ -47,12 +47,12 @@ public record FluidStackWrapper(FluidStack stack) implements IVolumeStackWrapper
 
 	@Override
 	public CompoundTag saveAEKey(CompoundTag tag) {
-		CompoundTag result = new CompoundTag();
-		result.putString("id", stack.getFluid().getRegistryName().toString());
+		tag.putString("#c", "ae2:f");
+		tag.putString("id", stack.getFluid().getRegistryName().toString());
 		if(stack.hasTag()) {
-			result.put("tag", stack.getTag().copy());
+			tag.put("tag", stack.getTag().copy());
 		}
-		return result;
+		return tag;
 	}
 
 	@Override
