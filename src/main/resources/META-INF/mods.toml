@@ -16,3 +16,9 @@ description="An Applied Energistics 2 addon that uses 'packages' to allow autocr
     versionRange="[40.0.0,)"
     ordering="NONE"
     side="BOTH"
+[[dependencies.packagedauto]]
+    modId="ae2"
+    mandatory=false
+    versionRange="[11.0.0-alpha.4,)"
+    ordering="NONE"
+    side="BOTH"

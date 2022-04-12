@@ -263,11 +263,11 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
 			if(inserted) {
 				trackerToEmpty.direction = direction;
-				if(trackerToEmpty.toSend.isEmpty()) {
-					trackerToEmpty.clearRecipe();
-				}
-				setChanged();
 			}
+			if(trackerToEmpty.toSend.isEmpty()) {
+				trackerToEmpty.clearRecipe();
+			}
+			setChanged();
 		}
 	}
 
