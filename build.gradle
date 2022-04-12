@@ -101,11 +101,11 @@ minecraft {
 dependencies {
     minecraft "net.minecraftforge:forge:1.18.2-40.0.44"
 
-    implementation fg.deobf("appeng:appliedenergistics2:11.0.0-alpha.3")
+    implementation fg.deobf("appeng:appliedenergistics2:11.0.0-alpha.4")
     implementation fg.deobf("mezz.jei:jei-1.18.2:9.7.0.180")
     implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.18.2:9.1.90")
     implementation fg.deobf("vazkii.patchouli:Patchouli:1.18.2-66")
-    implementation fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.2.66")
+    implementation fg.deobf("com.jozufozu.flywheel:Flywheel-Forge:1.18-0.6.2.64")
     implementation fg.deobf("com.simibubi.create:Create:mc1.18.2_v0.4.1+111")
     implementation fg.deobf("mekanism:Mekanism:1.18.2-10.2.0.459")
     implementation fg.deobf("mekanism:Mekanism:1.18.2-10.2.0.459:generators")
