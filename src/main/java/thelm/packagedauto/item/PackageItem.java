@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
@@ -17,6 +18,8 @@ import net.minecraft.world.level.Level;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.IVolumePackageItem;
+import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.util.MiscHelper;
 
 public class PackageItem extends Item implements IPackageItem {
@@ -69,7 +72,14 @@ public class PackageItem extends Item implements IPackageItem {
 		if(recipe != null) {
 			tooltip.add(recipe.getRecipeType().getDisplayName().append(": "));
 			for(ItemStack is : recipe.getOutputs()) {
-				tooltip.add(new TextComponent(is.getCount()+" ").append(is.getDisplayName()));
+				if(is.getItem() instanceof IVolumePackageItem vp) {
+					IVolumeStackWrapper vs = vp.getVolumeStack(is);
+					tooltip.add(new TextComponent(is.getCount()+"x").append(vs.getAmountDesc()).append(" ").
+							append(ComponentUtils.wrapInSquareBrackets(vs.getDisplayName())));
+				}
+				else {
+					tooltip.add(new TextComponent(is.getCount()+" ").append(is.getDisplayName()));
+				}
 			}
 			int index = getIndex(stack);
 			tooltip.add(new TranslatableComponent("item.packagedauto.package.index", index));
@@ -77,7 +87,14 @@ public class PackageItem extends Item implements IPackageItem {
 			List<ItemStack> recipeInputs = recipe.getInputs();
 			List<ItemStack> packageItems = recipeInputs.subList(9*index, Math.min(9*index+9, recipeInputs.size()));
 			for(ItemStack is : packageItems) {
-				tooltip.add(new TextComponent(is.getCount()+" ").append(is.getDisplayName()));
+				if(is.getItem() instanceof IVolumePackageItem vp) {
+					IVolumeStackWrapper vs = vp.getVolumeStack(is);
+					tooltip.add(new TextComponent(is.getCount()+"x").append(vs.getAmountDesc()).append(" ").
+							append(ComponentUtils.wrapInSquareBrackets(vs.getDisplayName())));
+				}
+				else {
+					tooltip.add(new TextComponent(is.getCount()+" ").append(is.getDisplayName()));
+				}
 			}
 		}
 		super.appendHoverText(stack, level, tooltip, isAdvanced);

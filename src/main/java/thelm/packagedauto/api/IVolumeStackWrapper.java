@@ -23,7 +23,7 @@ public interface IVolumeStackWrapper {
 
 	Component getDisplayName();
 
-	String getAmountDesc();
+	Component getAmountDesc();
 
 	List<Component> getTooltip();
 }

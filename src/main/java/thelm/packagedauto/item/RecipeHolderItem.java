@@ -3,7 +3,9 @@ package thelm.packagedauto.item;
 import java.util.List;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -16,6 +18,8 @@ import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeList;
 import thelm.packagedauto.api.IPackageRecipeListItem;
+import thelm.packagedauto.api.IVolumePackageItem;
+import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.util.PackageRecipeList;
 
 public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
@@ -52,7 +56,14 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 						component.append(", ");
 					}
 					ItemStack is = recipe.getOutputs().get(i);
-					component.append(is.getCount()+" ").append(is.getDisplayName());
+					if(is.getItem() instanceof IVolumePackageItem vp) {
+						IVolumeStackWrapper vs = vp.getVolumeStack(is);
+						component.append(is.getCount()+"x").append(vs.getAmountDesc()).append(" ").
+						append(ComponentUtils.wrapInSquareBrackets(vs.getDisplayName()));
+					}
+					else {
+						component.append(is.getCount()+" ").append(is.getDisplayName());
+					}
 				}
 				tooltip.add(component);
 			}

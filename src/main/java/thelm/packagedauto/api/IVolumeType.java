@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
@@ -16,6 +17,8 @@ public interface IVolumeType {
 	ResourceLocation getName();
 
 	Class<?> getTypeClass();
+
+	MutableComponent getDisplayName();
 
 	boolean supportsAE();
 

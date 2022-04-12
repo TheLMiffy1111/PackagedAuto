@@ -28,16 +28,6 @@ public class ItemAmountSpecifyingScreen extends AmountSpecifyingScreen<ItemAmoun
 	}
 
 	@Override
-	protected int getOkCancelButtonWidth() {
-		return 50;
-	}
-
-	@Override
-	protected Pair<Integer, Integer> getOkCancelPos() {
-		return Pair.of(114, 22);
-	}
-
-	@Override
 	protected int getDefaultAmount() {
 		return stack.getCount();
 	}

@@ -29,16 +29,6 @@ public class VolumeAmountSpecifyingScreen extends AmountSpecifyingScreen<VolumeA
 	}
 
 	@Override
-	protected int getOkCancelButtonWidth() {
-		return 50;
-	}
-
-	@Override
-	protected Pair<Integer, Integer> getOkCancelPos() {
-		return Pair.of(114, 22);
-	}
-
-	@Override
 	protected int getDefaultAmount() {
 		return stack.getAmount();
 	}

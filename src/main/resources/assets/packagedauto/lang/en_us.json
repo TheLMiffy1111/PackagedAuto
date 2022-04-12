@@ -30,6 +30,8 @@
     "recipe.packagedauto.crafting": "Crafting",
     "recipe.packagedauto.crafting.short": "Crafting",
 
+    "volume.packagedauto.minecraft.fluid": "Fluid",
+
     "gui.packagedauto.item_amount_specifying": "Item amount",
     "gui.packagedauto.volume_amount_specifying": "Volume amount in mB",
 

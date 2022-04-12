@@ -33,23 +33,14 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 
 	protected abstract int getDefaultAmount();
 
-	protected Pair<Integer, Integer> getAmountPos() {
-		return Pair.of(9, 51);
-	}
-
-	protected abstract Pair<Integer, Integer> getOkCancelPos();
-
-	protected abstract int getOkCancelButtonWidth();
-
 	@Override
 	public void init() {
 		super.init();
-		Pair<Integer, Integer> pos = getOkCancelPos();
 
-		okButton = addButton(leftPos+pos.getLeft(), topPos+pos.getRight(), getOkCancelButtonWidth(), 20, new TranslatableComponent("misc.packagedauto.set"), true, true, btn->onOkButtonPressed(hasShiftDown()));
-		cancelButton = addButton(leftPos+pos.getLeft(), topPos+pos.getRight()+24, getOkCancelButtonWidth(), 20, new TranslatableComponent("gui.cancel"), true, true, btn->close());
+		okButton = addButton(leftPos+114, topPos+22, 50, 20, new TranslatableComponent("misc.packagedauto.set"), true, true, btn->onOkButtonPressed(hasShiftDown()));
+		cancelButton = addButton(leftPos+114, topPos+22+24, 50, 20, new TranslatableComponent("gui.cancel"), true, true, btn->close());
 
-		amountField = new EditBox(font, leftPos+getAmountPos().getLeft(), topPos+getAmountPos().getRight(), 69 - 6, font.lineHeight, TextComponent.EMPTY);
+		amountField = new EditBox(font, leftPos+9, topPos+51, 69-6, font.lineHeight, TextComponent.EMPTY);
 		amountField.setBordered(false);
 		amountField.setVisible(true);
 		amountField.setValue(String.valueOf(getDefaultAmount()));
@@ -63,12 +54,12 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		int[] increments = getIncrements();
 
 		int xx = 7;
-		int width = 30;
+		int width = 34;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "+" + increment;
 			addButton(leftPos+xx, topPos+20, width, 20, new TextComponent(text), true, true, btn->onIncrementButtonClicked(increment));
-			xx += width+3;
+			xx += width;
 		}
 
 		xx = 7;
@@ -76,7 +67,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 			int increment = increments[i];
 			String text = "-" + increment;
 			addButton(leftPos+xx, topPos+imageHeight - 20 - 7, width, 20, new TextComponent(text), true, true, btn->onIncrementButtonClicked(-increment));
-			xx += width+3;
+			xx += width;
 		}
 	}
 

@@ -6,6 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
@@ -32,6 +34,11 @@ public class FluidVolumeType implements IVolumeType {
 	@Override
 	public Class<?> getTypeClass() {
 		return FluidStack.class;
+	}
+
+	@Override
+	public MutableComponent getDisplayName() {
+		return new TranslatableComponent("volume.packagedauto.minecraft.fluid");
 	}
 
 	@Override

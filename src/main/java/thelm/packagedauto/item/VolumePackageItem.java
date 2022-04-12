@@ -5,7 +5,6 @@ import java.util.List;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -56,7 +55,9 @@ public class VolumePackageItem extends Item implements IVolumePackageItem {
 	public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag isAdvanced) {
 		IVolumeStackWrapper volumeStack = getVolumeStack(stack);
 		if(volumeStack != null) {
-			tooltip.add(new TextComponent("").append(volumeStack.getDisplayName()).append(' '+volumeStack.getAmountDesc()));
+			tooltip.add(volumeStack.getVolumeType().getDisplayName().append(": ").
+					append(volumeStack.getDisplayName()).append(" ").
+					append(volumeStack.getAmountDesc()));
 		}
 		super.appendHoverText(stack, level, tooltip, isAdvanced);
 	}

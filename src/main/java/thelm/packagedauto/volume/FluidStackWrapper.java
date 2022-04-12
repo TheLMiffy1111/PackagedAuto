@@ -61,13 +61,13 @@ public record FluidStackWrapper(FluidStack stack) implements IVolumeStackWrapper
 	}
 
 	@Override
-	public String getAmountDesc() {
-		return stack.getAmount()+"mB";
+	public Component getAmountDesc() {
+		return new TextComponent(stack.getAmount()+"mB");
 	}
 
 	@Override
 	public List<Component> getTooltip() {
-		return Lists.newArrayList(stack.getDisplayName(), new TextComponent(getAmountDesc()));
+		return Lists.newArrayList(stack.getDisplayName());
 	}
 
 	@Override

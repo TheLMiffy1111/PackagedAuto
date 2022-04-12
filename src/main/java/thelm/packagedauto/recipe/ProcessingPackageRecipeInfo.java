@@ -98,12 +98,14 @@ public class ProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 				return false;
 			}
 			for(int i = 0; i < input.size(); ++i) {
-				if(!ItemStack.isSameItemSameTags(input.get(i), other.input.get(i))) {
+				if(!ItemStack.isSameItemSameTags(input.get(i), other.input.get(i)) ||
+						input.get(i).getCount() != other.input.get(i).getCount()) {
 					return false;
 				}
 			}
 			for(int i = 0; i < output.size(); ++i) {
-				if(!ItemStack.isSameItemSameTags(output.get(i), other.output.get(i))) {
+				if(!ItemStack.isSameItemSameTags(output.get(i), other.output.get(i)) ||
+						output.get(i).getCount() != other.output.get(i).getCount()) {
 					return false;
 				}
 			}
