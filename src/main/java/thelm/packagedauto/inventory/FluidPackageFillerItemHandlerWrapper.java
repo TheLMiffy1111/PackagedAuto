@@ -5,7 +5,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class FluidPackageFillerItemHandlerWrapper extends SidedItemHandlerWrapper<FluidPackageFillerItemHandler> {
 
-	public static final int[] SLOTS = {0, 1};
+	public static final int[] SLOTS = {1};
 
 	public FluidPackageFillerItemHandlerWrapper(FluidPackageFillerItemHandler itemHandler, Direction direction) {
 		super(itemHandler, direction);
@@ -18,7 +18,7 @@ public class FluidPackageFillerItemHandlerWrapper extends SidedItemHandlerWrappe
 
 	@Override
 	public boolean canInsertItem(int slot, ItemStack stack, Direction direction) {
-		return slot == 0;
+		return false;
 	}
 
 	@Override

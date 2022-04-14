@@ -10,6 +10,7 @@ import thelm.packagedauto.network.packet.ChangeBlockingPacket;
 import thelm.packagedauto.network.packet.CycleRecipeTypePacket;
 import thelm.packagedauto.network.packet.LoadRecipeListPacket;
 import thelm.packagedauto.network.packet.SaveRecipeListPacket;
+import thelm.packagedauto.network.packet.SetFluidAmountPacket;
 import thelm.packagedauto.network.packet.SetItemStackPacket;
 import thelm.packagedauto.network.packet.SetPatternIndexPacket;
 import thelm.packagedauto.network.packet.SetRecipePacket;
@@ -48,5 +49,8 @@ public class PacketHandler {
 		INSTANCE.registerMessage(id++, ChangeBlockingPacket.class,
 				ChangeBlockingPacket::encode, ChangeBlockingPacket::decode,
 				ChangeBlockingPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+		INSTANCE.registerMessage(id++, SetFluidAmountPacket.class,
+				SetFluidAmountPacket::encode, SetFluidAmountPacket::decode,
+				SetFluidAmountPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 	}
 }

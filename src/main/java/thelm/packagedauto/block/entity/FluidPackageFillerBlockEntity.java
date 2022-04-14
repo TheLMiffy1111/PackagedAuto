@@ -25,11 +25,12 @@ import thelm.packagedauto.block.FluidPackageFillerBlock;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.FluidPackageFillerItemHandler;
 import thelm.packagedauto.item.VolumePackageItem;
+import thelm.packagedauto.menu.FluidPackageFillerMenu;
 
 public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 
 	public static final BlockEntityType<FluidPackageFillerBlockEntity> TYPE_INSTANCE = (BlockEntityType<FluidPackageFillerBlockEntity>)BlockEntityType.Builder.
-			of(EncoderBlockEntity::new, FluidPackageFillerBlock.INSTANCE).
+			of(FluidPackageFillerBlockEntity::new, FluidPackageFillerBlock.INSTANCE).
 			build(null).setRegistryName("packagedauto:fluid_package_filler");
 
 	public static int energyCapacity = 5000;
@@ -39,10 +40,11 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	public boolean firstTick = true;
 	public boolean isWorking = false;
 	public FluidStack currentFluid = FluidStack.EMPTY;
-	public int requiredAmount = 0;
+	public int requiredAmount = 100;
 	public int amount = 0;
 	public int remainingProgress = 0;
 	public boolean powered = false;
+	public boolean activated = false;
 
 	public FluidPackageFillerBlockEntity(BlockPos pos, BlockState state) {
 		super(TYPE_INSTANCE, pos, state);
@@ -67,7 +69,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 				if(remainingProgress <= 0 && isTemplateValid()) {
 					energyStorage.receiveEnergy(Math.abs(remainingProgress), false);
 					finishProcess();
-					if(!itemHandler.getStackInSlot(9).isEmpty()) {
+					if(!itemHandler.getStackInSlot(1).isEmpty()) {
 						ejectItem();
 					}
 					if(!canStart()) {
@@ -78,16 +80,17 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 					}
 				}
 			}
-			else if(level.getGameTime() % 8 == 0) {
+			else if(activated) {
 				if(canStart()) {
 					startProcess();
 					tickProcess();
+					activated = false;
 					isWorking = true;
 				}
 			}
 			chargeEnergy();
 			if(level.getGameTime() % 8 == 0) {
-				if(!itemHandler.getStackInSlot(9).isEmpty()) {
+				if(!itemHandler.getStackInSlot(1).isEmpty()) {
 					ejectItem();
 				}
 			}
@@ -123,9 +126,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	}
 
 	protected void getFluid() {
-		if(!powered) {
-			return;
-		}
+		currentFluid = FluidStack.EMPTY;
 		ItemStack template = itemHandler.getStackInSlot(0);
 		if(template.isEmpty()) {
 			return;
@@ -139,8 +140,8 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 		if(amount < requiredAmount) {
 			for(Direction direction : Direction.values()) {
 				BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
-				if(blockEntity != null && blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).isPresent()) {
-					IFluidHandler fluidHandler = blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY).resolve().get();
+				if(blockEntity != null && blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
+					IFluidHandler fluidHandler = blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction.getOpposite()).resolve().get();
 					FluidStack toDrain = currentFluid.copy();
 					toDrain.setAmount(requiredAmount-amount);
 					amount += fluidHandler.drain(toDrain, FluidAction.EXECUTE).getAmount();
@@ -164,7 +165,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 		if(itemHandler.getStackInSlot(1).isEmpty()) {
 			itemHandler.setStackInSlot(1, VolumePackageItem.tryMakeVolumePackage(currentFluid));
 		}
-		else if(itemHandler.getStackInSlot(9).getItem() instanceof IVolumePackageItem) {
+		else if(itemHandler.getStackInSlot(1).getItem() instanceof IVolumePackageItem) {
 			itemHandler.getStackInSlot(1).grow(1);
 		}
 		endProcess();
@@ -186,7 +187,9 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	protected void ejectItem() {
 		for(Direction direction : Direction.values()) {
 			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
-			if(blockEntity != null && !(blockEntity instanceof UnpackagerBlockEntity) && blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
+			if(blockEntity != null && !(blockEntity instanceof UnpackagerBlockEntity)
+					&& blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()
+					&& !blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
 				IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).resolve().get();
 				ItemStack stack = this.itemHandler.getStackInSlot(1);
 				if(stack.isEmpty()) {
@@ -221,6 +224,9 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	public void updatePowered() {
 		if(level.getBestNeighborSignal(worldPosition) > 0 != powered) {
 			powered = !powered;
+			if(powered) {
+				activated = true;
+			}
 			sync(false);
 			setChanged();
 		}
@@ -242,6 +248,8 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 		super.saveSync(nbt);
 		nbt.putBoolean("Working", isWorking);
 		nbt.put("Fluid", currentFluid.writeToNBT(new CompoundTag()));
+		nbt.putInt("AmountReq", requiredAmount);
+		nbt.putInt("Amount", amount);
 		nbt.putInt("Progress", remainingProgress);
 		nbt.putBoolean("Powered", powered);
 		return nbt;
@@ -270,7 +278,8 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	}
 
 	@Override
-	public AbstractContainerMenu createMenu(int containerId, Inventory inventory, Player player) {
-		return null;
+	public AbstractContainerMenu createMenu(int windowId, Inventory inventory, Player player) {
+		sync(false);
+		return new FluidPackageFillerMenu(windowId, inventory, this);
 	}
 }

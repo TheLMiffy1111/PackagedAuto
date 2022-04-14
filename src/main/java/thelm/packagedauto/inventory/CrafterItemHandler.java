@@ -27,22 +27,18 @@ public class CrafterItemHandler extends BaseItemHandler<CrafterBlockEntity> {
 
 	@Override
 	public int get(int id) {
-		switch(id) {
-		case 0: return blockEntity.remainingProgress;
-		case 1: return blockEntity.isWorking ? 1 : 0;
-		default: return 0;
-		}
+		return switch(id) {
+		case 0 -> blockEntity.remainingProgress;
+		case 1 -> blockEntity.isWorking ? 1 : 0;
+		default -> 0;
+		};
 	}
 
 	@Override
 	public void set(int id, int value) {
 		switch(id) {
-		case 0:
-			blockEntity.remainingProgress = value;
-			break;
-		case 1:
-			blockEntity.isWorking = value != 0;
-			break;
+		case 0 -> blockEntity.remainingProgress = value;
+		case 1 -> blockEntity.isWorking = value != 0;
 		}
 	}
 

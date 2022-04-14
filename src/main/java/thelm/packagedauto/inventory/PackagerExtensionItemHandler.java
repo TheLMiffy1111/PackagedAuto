@@ -25,11 +25,11 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 
 	@Override
 	public boolean isItemValid(int index, ItemStack stack) {
-		switch(index) {
-		case 9: return false;
-		case 10: return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
-		default: return blockEntity.isWorking ? !getStackInSlot(index).isEmpty() : true;
-		}
+		return switch(index) {
+		case 9 -> false;
+		case 10 -> stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
+		default -> blockEntity.isWorking ? !getStackInSlot(index).isEmpty() : true;
+		};
 	}
 
 	@Override
@@ -39,22 +39,18 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 
 	@Override
 	public int get(int id) {
-		switch(id) {
-		case 0: return blockEntity.remainingProgress;
-		case 1: return blockEntity.isWorking ? 1 : 0;
-		default: return 0;
-		}
+		return switch(id) {
+		case 0 -> blockEntity.remainingProgress;
+		case 1 -> blockEntity.isWorking ? 1 : 0;
+		default -> 0;
+		};
 	}
 
 	@Override
 	public void set(int id, int value) {
 		switch(id) {
-		case 0:
-			blockEntity.remainingProgress = value;
-			break;
-		case 1:
-			blockEntity.isWorking = value != 0;
-			break;
+		case 0 -> blockEntity.remainingProgress = value;
+		case 1 -> blockEntity.isWorking = value != 0;
 		}
 	}
 

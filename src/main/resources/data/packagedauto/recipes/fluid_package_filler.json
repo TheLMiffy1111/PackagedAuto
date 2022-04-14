@@ -1,29 +1,20 @@
 {
-    "conditions": [
-        {
-            "type": "forge:not",
-            "value": {
-                "type": "forge:mod_loaded",
-                "modid": "ae2"
-            }
-        }
-    ],
     "type": "minecraft:crafting_shaped",
     "result": {
-        "item": "packagedauto:packager_extension",
+        "item": "packagedauto:fluid_package_filler",
         "count": 1
     },
     "pattern": [
         "ICI",
-        "GTG",
+        "UBU",
         "IPI"
     ],
     "key": {
         "C": {
             "item": "packagedauto:package_component"
         },
-        "T": {
-            "item": "minecraft:crafting_table"
+        "B": {
+            "item": "minecraft:bucket"
         },
         "P": {
             "item": "minecraft:piston"
@@ -31,8 +22,8 @@
         "I": {
             "tag": "forge:ingots/iron"
         },
-        "G": {
-            "tag": "forge:dusts/glowstone"
+        "U": {
+            "tag": "forge:ingots/copper"
         }
     }
 }

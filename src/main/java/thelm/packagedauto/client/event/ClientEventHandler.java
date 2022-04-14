@@ -8,12 +8,14 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import thelm.packagedauto.client.screen.CrafterScreen;
 import thelm.packagedauto.client.screen.EncoderScreen;
+import thelm.packagedauto.client.screen.FluidPackageFillerScreen;
 import thelm.packagedauto.client.screen.PackagerExtensionScreen;
 import thelm.packagedauto.client.screen.PackagerScreen;
 import thelm.packagedauto.client.screen.UnpackagerScreen;
 import thelm.packagedauto.item.RecipeHolderItem;
 import thelm.packagedauto.menu.CrafterMenu;
 import thelm.packagedauto.menu.EncoderMenu;
+import thelm.packagedauto.menu.FluidPackageFillerMenu;
 import thelm.packagedauto.menu.PackagerExtensionMenu;
 import thelm.packagedauto.menu.PackagerMenu;
 import thelm.packagedauto.menu.UnpackagerMenu;
@@ -25,7 +27,7 @@ public class ClientEventHandler {
 	public static ClientEventHandler getInstance() {
 		return INSTANCE;
 	}
-	
+
 	public void onConstruct() {
 		FMLJavaModLoadingContext.get().getModEventBus().register(this);
 	}
@@ -37,6 +39,7 @@ public class ClientEventHandler {
 		MenuScreens.register(PackagerExtensionMenu.TYPE_INSTANCE, PackagerExtensionScreen::new);
 		MenuScreens.register(UnpackagerMenu.TYPE_INSTANCE, UnpackagerScreen::new);
 		MenuScreens.register(CrafterMenu.TYPE_INSTANCE, CrafterScreen::new);
+		MenuScreens.register(FluidPackageFillerMenu.TYPE_INSTANCE, FluidPackageFillerScreen::new);
 
 		event.enqueueWork(()->{
 			ItemProperties.register(RecipeHolderItem.INSTANCE, 

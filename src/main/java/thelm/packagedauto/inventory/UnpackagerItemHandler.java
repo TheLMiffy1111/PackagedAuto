@@ -28,11 +28,11 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerBlockEntity
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		switch(slot) {
-		case 9: return stack.getItem() instanceof IPackageRecipeListItem;
-		case 10: return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
-		default: return stack.getItem() instanceof IPackageItem;
-		}
+		return switch(slot) {
+		case 9 -> stack.getItem() instanceof IPackageRecipeListItem;
+		case 10 -> stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
+		default -> stack.getItem() instanceof IPackageItem;
+		};
 	}
 
 	@Override

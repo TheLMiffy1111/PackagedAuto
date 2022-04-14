@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.common.collect.Lists;
 
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
-import net.minecraft.resources.ResourceLocation;
 import thelm.packagedauto.api.IRecipeSlotViewWrapper;
 import thelm.packagedauto.api.IRecipeSlotsViewWrapper;
 

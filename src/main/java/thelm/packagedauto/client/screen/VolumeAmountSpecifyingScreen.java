@@ -1,9 +1,8 @@
 package thelm.packagedauto.client.screen;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.item.VolumePackageItem;
@@ -53,7 +52,7 @@ public class VolumeAmountSpecifyingScreen extends AmountSpecifyingScreen<VolumeA
 	@Override
 	protected void onOkButtonPressed(boolean shiftDown) {
 		try {
-			int amount = Integer.parseInt(amountField.getValue());
+			int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
 			IVolumeStackWrapper newStack = stack.copy();
 			newStack.setAmount(amount);
 			PacketHandler.INSTANCE.sendToServer(new SetItemStackPacket((short)containerSlot, VolumePackageItem.makeVolumePackage(newStack)));

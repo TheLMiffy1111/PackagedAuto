@@ -2,7 +2,7 @@
     "conditions": [
         {
             "type": "forge:mod_loaded",
-            "modid": "appliedenergistics2"
+            "modid": "ae2"
         }
     ],
     "type": "minecraft:crafting_shaped",
@@ -20,13 +20,13 @@
             "item": "packagedauto:package_component"
         },
         "A": {
-            "item": "appliedenergistics2:annihilation_core"
+            "item": "ae2:annihilation_core"
         },
         "F": {
-            "item": "appliedenergistics2:formation_core"
+            "item": "ae2:formation_core"
         },
         "G": {
-            "item": "appliedenergistics2:quartz_glass"
+            "item": "ae2:quartz_glass"
         },
         "I": {
             "tag": "forge:ingots/iron"

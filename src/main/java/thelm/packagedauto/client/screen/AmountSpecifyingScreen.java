@@ -1,8 +1,8 @@
 package thelm.packagedauto.client.screen;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.Button;
@@ -10,6 +10,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import thelm.packagedauto.menu.BaseMenu;
 
@@ -34,18 +35,28 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 	protected abstract int getDefaultAmount();
 
 	@Override
-	public void init() {
+	protected void init() {
 		super.init();
 
 		okButton = addButton(leftPos+114, topPos+22, 50, 20, new TranslatableComponent("misc.packagedauto.set"), true, true, btn->onOkButtonPressed(hasShiftDown()));
 		cancelButton = addButton(leftPos+114, topPos+22+24, 50, 20, new TranslatableComponent("gui.cancel"), true, true, btn->close());
 
-		amountField = new EditBox(font, leftPos+9, topPos+51, 69-6, font.lineHeight, TextComponent.EMPTY);
+		amountField = new EditBox(font, leftPos+9, topPos+51, 63, font.lineHeight, TextComponent.EMPTY);
 		amountField.setBordered(false);
-		amountField.setVisible(true);
 		amountField.setValue(String.valueOf(getDefaultAmount()));
 		amountField.setTextColor(0xFFFFFF);
-		amountField.setCanLoseFocus(false);
+		amountField.setFilter(s->{
+			if(s.isEmpty()) {
+				return true;
+			}
+			try {
+				int amount = Integer.parseInt(s);
+				return amount >= 0 && amount <= getMaxAmount();
+			}
+			catch(NumberFormatException e) {
+				return false;
+			}
+		});
 		amountField.changeFocus(true);
 
 		addRenderableWidget(amountField);
@@ -66,14 +77,14 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "-" + increment;
-			addButton(leftPos+xx, topPos+imageHeight - 20 - 7, width, 20, new TextComponent(text), true, true, btn->onIncrementButtonClicked(-increment));
+			addButton(leftPos+xx, topPos+imageHeight-20-7, width, 20, new TextComponent(text), true, true, btn->onIncrementButtonClicked(-increment));
 			xx += width;
 		}
 	}
 
 	@Override
 	protected void renderBgAdditional(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
-		amountField.renderButton(poseStack, 0, 0, 0F);
+		amountField.renderButton(poseStack, mouseX, mouseY, partialTicks);
 	}
 
 	@Override
@@ -95,6 +106,10 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		if(amountField.keyPressed(key, scanCode, modifiers)) {
 			return true;
 		}
+		InputConstants.Key mouseKey = InputConstants.getKey(key, scanCode);
+		if(minecraft.options.keyInventory.isActiveAndMatches(mouseKey) && amountField.isFocused()) {
+			return true;
+		}
 		return super.keyPressed(key, scanCode, modifiers);
 	}
 
@@ -106,7 +121,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		catch(NumberFormatException e) {
 			// NO OP
 		}
-		int newAmount = Math.min(Math.max(oldAmount+increment, 0), getMaxAmount());
+		int newAmount = Mth.clamp(oldAmount+increment, 0, getMaxAmount());
 		amountField.setValue(String.valueOf(newAmount));
 	}
 

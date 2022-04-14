@@ -13,6 +13,8 @@
     "block.packagedauto.unpackager.blocking.true": "Blocking Mode Enabled",
     "block.packagedauto.packager_extension": "Packager Extension",
     "block.packagedauto.crafter": "Package Crafter",
+    "block.packagedauto.fluid_package_filler": "Fluid Package Filler",
+    "block.packagedauto.fluid_package_filler.redstone": "Activate with redstone to start",
 
     "item.packagedauto.recipe_holder": "Package Recipe Holder",
     "item.packagedauto.recipe_holder.recipes": "Recipes:",

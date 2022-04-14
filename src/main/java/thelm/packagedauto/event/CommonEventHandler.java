@@ -14,11 +14,13 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import thelm.packagedauto.block.CrafterBlock;
 import thelm.packagedauto.block.EncoderBlock;
+import thelm.packagedauto.block.FluidPackageFillerBlock;
 import thelm.packagedauto.block.PackagerBlock;
 import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.block.entity.CrafterBlockEntity;
 import thelm.packagedauto.block.entity.EncoderBlockEntity;
+import thelm.packagedauto.block.entity.FluidPackageFillerBlockEntity;
 import thelm.packagedauto.block.entity.PackagerBlockEntity;
 import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
@@ -29,6 +31,7 @@ import thelm.packagedauto.item.RecipeHolderItem;
 import thelm.packagedauto.item.VolumePackageItem;
 import thelm.packagedauto.menu.CrafterMenu;
 import thelm.packagedauto.menu.EncoderMenu;
+import thelm.packagedauto.menu.FluidPackageFillerMenu;
 import thelm.packagedauto.menu.PackagerExtensionMenu;
 import thelm.packagedauto.menu.PackagerMenu;
 import thelm.packagedauto.menu.UnpackagerMenu;
@@ -62,6 +65,7 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionBlock.INSTANCE);
 		registry.register(UnpackagerBlock.INSTANCE);
 		registry.register(CrafterBlock.INSTANCE);
+		registry.register(FluidPackageFillerBlock.INSTANCE);
 	}
 
 	@SubscribeEvent
@@ -72,6 +76,7 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionBlock.ITEM_INSTANCE);
 		registry.register(UnpackagerBlock.ITEM_INSTANCE);
 		registry.register(CrafterBlock.ITEM_INSTANCE);
+		registry.register(FluidPackageFillerBlock.ITEM_INSTANCE);
 		registry.register(RecipeHolderItem.INSTANCE);
 		registry.register(PackageItem.INSTANCE);
 		registry.register(VolumePackageItem.INSTANCE);
@@ -87,6 +92,7 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionBlockEntity.TYPE_INSTANCE);
 		registry.register(UnpackagerBlockEntity.TYPE_INSTANCE);
 		registry.register(CrafterBlockEntity.TYPE_INSTANCE);
+		registry.register(FluidPackageFillerBlockEntity.TYPE_INSTANCE);
 	}
 
 	@SubscribeEvent
@@ -97,6 +103,7 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionMenu.TYPE_INSTANCE);
 		registry.register(UnpackagerMenu.TYPE_INSTANCE);
 		registry.register(CrafterMenu.TYPE_INSTANCE);
+		registry.register(FluidPackageFillerMenu.TYPE_INSTANCE);
 	}
 
 	@SubscribeEvent
@@ -113,11 +120,8 @@ public class CommonEventHandler {
 	@SubscribeEvent
 	public void onModConfig(ModConfigEvent event) {
 		switch(event.getConfig().getType()) {
-		case SERVER:
-			PackagedAutoConfig.reloadServerConfig();
-			break;
-		default:
-			break;
+		case SERVER -> PackagedAutoConfig.reloadServerConfig();
+		default -> {}
 		}
 	}
 

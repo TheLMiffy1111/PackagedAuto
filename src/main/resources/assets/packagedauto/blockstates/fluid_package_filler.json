@@ -1,0 +1,5 @@
+{
+    "variants": {
+        "": { "model": "packagedauto:block/fluid_package_filler" }
+    }
+}

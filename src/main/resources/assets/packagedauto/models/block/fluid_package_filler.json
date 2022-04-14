@@ -1,0 +1,8 @@
+{
+    "parent": "block/cube_bottom_top",
+    "textures": {
+        "side": "packagedauto:blocks/fluid_package_filler_side",
+        "top": "packagedauto:blocks/fluid_package_filler_top",
+        "bottom": "packagedauto:blocks/machine_bottom"
+    }
+}

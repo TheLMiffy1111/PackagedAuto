@@ -1,9 +1,8 @@
 package thelm.packagedauto.client.screen;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import thelm.packagedauto.menu.ItemAmountSpecifyingMenu;
@@ -52,7 +51,7 @@ public class ItemAmountSpecifyingScreen extends AmountSpecifyingScreen<ItemAmoun
 	@Override
 	protected void onOkButtonPressed(boolean shiftDown) {
 		try {
-			int amount = Integer.parseInt(amountField.getValue());
+			int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
 			ItemStack newStack = stack.copy();
 			newStack.setCount(amount);
 			PacketHandler.INSTANCE.sendToServer(new SetItemStackPacket((short)containerSlot, newStack));

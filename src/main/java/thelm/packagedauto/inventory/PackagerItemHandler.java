@@ -34,12 +34,12 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		switch(slot) {
-		case 9: return false;
-		case 10: return stack.getItem() instanceof IPackageRecipeListItem || stack.getItem() instanceof IPackageItem;
-		case 11: return stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
-		default: return blockEntity.isWorking ? !getStackInSlot(slot).isEmpty() : true;
-		}
+		return switch(slot) {
+		case 9 -> false;
+		case 10 -> stack.getItem() instanceof IPackageRecipeListItem || stack.getItem() instanceof IPackageItem;
+		case 11 -> stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
+		default -> blockEntity.isWorking ? !getStackInSlot(slot).isEmpty() : true;
+		};
 	}
 
 	@Override
@@ -49,22 +49,18 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 
 	@Override
 	public int get(int id) {
-		switch(id) {
-		case 0: return blockEntity.remainingProgress;
-		case 1: return blockEntity.isWorking ? 1 : 0;
-		default: return 0;
-		}
+		return switch(id) {
+		case 0 -> blockEntity.remainingProgress;
+		case 1 -> blockEntity.isWorking ? 1 : 0;
+		default -> 0;
+		};
 	}
 
 	@Override
 	public void set(int id, int value) {
 		switch(id) {
-		case 0:
-			blockEntity.remainingProgress = value;
-			break;
-		case 1:
-			blockEntity.isWorking = value != 0;
-			break;
+		case 0 -> blockEntity.remainingProgress = value;
+		case 1 -> blockEntity.isWorking = value != 0;
 		}
 	}
 
