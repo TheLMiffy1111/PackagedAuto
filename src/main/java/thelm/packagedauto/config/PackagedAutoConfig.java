@@ -5,6 +5,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
 import thelm.packagedauto.block.entity.CrafterBlockEntity;
 import thelm.packagedauto.block.entity.EncoderBlockEntity;
+import thelm.packagedauto.block.entity.FluidPackageFillerBlockEntity;
 import thelm.packagedauto.block.entity.PackagerBlockEntity;
 import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
@@ -40,6 +41,10 @@ public class PackagedAutoConfig {
 	public static ForgeConfigSpec.IntValue crafterEnergyUsage;
 	public static ForgeConfigSpec.BooleanValue crafterDrawMEEnergy;
 
+	public static ForgeConfigSpec.IntValue fluidPackageFillerEnergyCapacity;
+	public static ForgeConfigSpec.IntValue fluidPackageFillerEnergyReq;
+	public static ForgeConfigSpec.IntValue fluidPackageFillerEnergyUsage;
+
 	public static void registerConfig() {
 		buildConfig();
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, serverSpec);
@@ -62,10 +67,6 @@ public class PackagedAutoConfig {
 		packagerEnergyUsage = builder.defineInRange("energy_usage", 100, 0, Integer.MAX_VALUE);
 		builder.comment("Should the Packager draw energy from ME systems.");
 		packagerDrawMEEnergy = builder.define("draw_me_energy", true);
-		builder.comment("Should the Packager not require exact inputs when it will not be ambiguous which package to make.");
-		packagerCheckDisjoint = builder.define("check_disjoint", true);
-		builder.comment("Should the Packager not require exact inputs. Overrides check_disjoint.");
-		packagerForceDisjoint = builder.define("force_disjoint", false);
 		builder.pop();
 
 		builder.push("packager_extension");
@@ -77,10 +78,6 @@ public class PackagedAutoConfig {
 		packagerExtensionEnergyUsage = builder.defineInRange("energy_usage", 100, 0, Integer.MAX_VALUE);
 		builder.comment("Should the Packager Extension draw energy from ME systems.");
 		packagerExtensionDrawMEEnergy = builder.define("draw_me_energy", true);
-		builder.comment("Should the Packager Extension not require exact inputs when it will not be ambiguous which package to make.");
-		packagerExtensionCheckDisjoint = builder.define("check_disjoint", true);
-		builder.comment("Should the Packager Extension not require exact inputs. Overrides check_disjoint.");
-		packagerExtensionForceDisjoint = builder.define("force_disjoint", false);
 		builder.pop();
 
 		builder.push("unpackager");
@@ -103,6 +100,15 @@ public class PackagedAutoConfig {
 		crafterDrawMEEnergy = builder.define("draw_me_energy", true);
 		builder.pop();
 
+		builder.push("fluid_package_filler");
+		builder.comment("How much FE the Fluid Package Filler should hold.");
+		fluidPackageFillerEnergyCapacity = builder.defineInRange("energy_capacity", 5000, 0, Integer.MAX_VALUE);
+		builder.comment("How much total FE the Fluid Package Filler should use per operation.");
+		fluidPackageFillerEnergyReq = builder.defineInRange("energy_req", 500, 0, Integer.MAX_VALUE);
+		builder.comment("How much FE/t maximum the Fluid Package Filler can use.");
+		fluidPackageFillerEnergyUsage = builder.defineInRange("energy_usage", 100, 0, Integer.MAX_VALUE);
+		builder.pop();
+
 		serverSpec = builder.build();
 	}
 
@@ -113,15 +119,11 @@ public class PackagedAutoConfig {
 		PackagerBlockEntity.energyReq = packagerEnergyReq.get();
 		PackagerBlockEntity.energyUsage = packagerEnergyUsage.get();
 		PackagerBlockEntity.drawMEEnergy = packagerDrawMEEnergy.get();
-		PackagerBlockEntity.checkDisjoint = packagerCheckDisjoint.get();
-		PackagerBlockEntity.forceDisjoint = packagerForceDisjoint.get();
 
 		PackagerExtensionBlockEntity.energyCapacity = packagerExtensionEnergyCapacity.get();
 		PackagerExtensionBlockEntity.energyReq = packagerExtensionEnergyReq.get();
 		PackagerExtensionBlockEntity.energyUsage = packagerExtensionEnergyUsage.get();
 		PackagerExtensionBlockEntity.drawMEEnergy = packagerExtensionDrawMEEnergy.get();
-		PackagerExtensionBlockEntity.checkDisjoint = packagerExtensionCheckDisjoint.get();
-		PackagerExtensionBlockEntity.forceDisjoint = packagerExtensionForceDisjoint.get();
 
 		UnpackagerBlockEntity.energyCapacity = unpackagerEnergyCapacity.get();
 		UnpackagerBlockEntity.energyUsage = unpackagerEnergyUsage.get();
@@ -131,5 +133,9 @@ public class PackagedAutoConfig {
 		CrafterBlockEntity.energyReq = crafterEnergyReq.get();
 		CrafterBlockEntity.energyUsage = crafterEnergyUsage.get();
 		CrafterBlockEntity.drawMEEnergy = crafterDrawMEEnergy.get();
+
+		FluidPackageFillerBlockEntity.energyCapacity = fluidPackageFillerEnergyCapacity.get();
+		FluidPackageFillerBlockEntity.energyReq = fluidPackageFillerEnergyReq.get();
+		FluidPackageFillerBlockEntity.energyUsage = fluidPackageFillerEnergyUsage.get();
 	}
 }

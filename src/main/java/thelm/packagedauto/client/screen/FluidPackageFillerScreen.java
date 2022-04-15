@@ -34,6 +34,7 @@ public class FluidPackageFillerScreen extends BaseScreen<FluidPackageFillerMenu>
 
 	@Override
 	protected void init() {
+		clearWidgets();
 		super.init();
 		amountField = new EditBox(font, leftPos+30, topPos+57, 41, font.lineHeight, TextComponent.EMPTY);
 		amountField.setBordered(false);

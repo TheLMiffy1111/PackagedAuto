@@ -7,6 +7,7 @@ import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
 import thelm.packagedauto.network.packet.ChangeBlockingPacket;
+import thelm.packagedauto.network.packet.ChangePackagingPacket;
 import thelm.packagedauto.network.packet.CycleRecipeTypePacket;
 import thelm.packagedauto.network.packet.LoadRecipeListPacket;
 import thelm.packagedauto.network.packet.SaveRecipeListPacket;
@@ -52,5 +53,8 @@ public class PacketHandler {
 		INSTANCE.registerMessage(id++, SetFluidAmountPacket.class,
 				SetFluidAmountPacket::encode, SetFluidAmountPacket::decode,
 				SetFluidAmountPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+		INSTANCE.registerMessage(id++, ChangePackagingPacket.class,
+				ChangePackagingPacket::encode, ChangePackagingPacket::decode,
+				ChangePackagingPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 	}
 }

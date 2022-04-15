@@ -1,12 +1,19 @@
 package thelm.packagedauto.client.screen;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import thelm.packagedauto.client.screen.UnpackagerScreen.ButtonChangeBlocking;
 import thelm.packagedauto.menu.PackagerMenu;
+import thelm.packagedauto.network.PacketHandler;
+import thelm.packagedauto.network.packet.ChangePackagingPacket;
 
 public class PackagerScreen extends BaseScreen<PackagerMenu> {
 
@@ -19,6 +26,13 @@ public class PackagerScreen extends BaseScreen<PackagerMenu> {
 	@Override
 	protected ResourceLocation getBackgroundTexture() {
 		return BACKGROUND;
+	}
+
+	@Override
+	public void init() {
+		clearWidgets();
+		super.init();
+		addRenderableWidget(new ButtonChangePackaging(leftPos+98, topPos+16));
 	}
 
 	@Override
@@ -36,6 +50,43 @@ public class PackagerScreen extends BaseScreen<PackagerMenu> {
 		if(mouseX-leftPos >= 10 && mouseY-topPos >= 10 && mouseX-leftPos <= 21 && mouseY-topPos <= 49) {
 			renderTooltip(poseStack, new TextComponent(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
 		}
+		for(GuiEventListener child : children()) {
+			if(child.isMouseOver(mouseX, mouseY) && child instanceof AbstractWidget button) {
+				button.renderToolTip(poseStack, mouseX-leftPos, mouseY-topPos);
+				break;
+			}
+		}
 		super.renderLabels(poseStack, mouseX, mouseY);
+	}
+
+	class ButtonChangePackaging extends AbstractWidget {
+
+		public ButtonChangePackaging(int x, int y) {
+			super(x, y, 16, 18, TextComponent.EMPTY);
+		}
+
+		@Override
+		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+			RenderSystem.setShaderTexture(0, BACKGROUND);
+			blit(poseStack, x+1, y+2, 176, 56+14*menu.blockEntity.mode.ordinal(), 14, 14);
+		}
+
+		@Override
+		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
+			renderTooltip(poseStack, menu.blockEntity.mode.getTooltip(), mouseX, mouseY);
+		}
+
+		@Override
+		public void onClick(double mouseX, double mouseY) {
+			PacketHandler.INSTANCE.sendToServer(new ChangePackagingPacket());
+			menu.blockEntity.changePackagingMode();
+		}
+
+		@Override
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+
+		}
 	}
 }

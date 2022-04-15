@@ -39,6 +39,19 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 	}
 
 	@Override
+	public void init() {
+		clearWidgets();
+		super.init();
+		int patternSlots = menu.blockEntity.patternItemHandlers.length;
+		for(int i = 0; i < patternSlots; ++i) {
+			addRenderableWidget(new ButtonPatternSlot(i, leftPos+29+(i%10)*18, topPos+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
+		}
+		addRenderableWidget(new ButtonRecipeType(leftPos+204, topPos+74));
+		addRenderableWidget(new ButtonSavePatterns(leftPos+213, topPos+16, new TranslatableComponent("block.packagedauto.encoder.save")));
+		addRenderableWidget(new ButtonLoadPatterns(leftPos+213, topPos+34, new TranslatableComponent("block.packagedauto.encoder.load")));
+	}
+
+	@Override
 	protected void renderBgAdditional(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
 		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
 		for(int i = 0; i < 9; ++i) {
@@ -73,19 +86,6 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 				break;
 			}
 		}
-	}
-
-	@Override
-	public void init() {
-		clearWidgets();
-		super.init();
-		int patternSlots = menu.blockEntity.patternItemHandlers.length;
-		for(int i = 0; i < patternSlots; ++i) {
-			addRenderableWidget(new ButtonPatternSlot(i, leftPos+29+(i%10)*18, topPos+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
-		}
-		addRenderableWidget(new ButtonRecipeType(leftPos+204, topPos+74));
-		addRenderableWidget(new ButtonSavePatterns(leftPos+213, topPos+16, new TranslatableComponent("block.packagedauto.encoder.save")));
-		addRenderableWidget(new ButtonLoadPatterns(leftPos+213, topPos+34, new TranslatableComponent("block.packagedauto.encoder.load")));
 	}
 
 	class ButtonPatternSlot extends AbstractWidget {

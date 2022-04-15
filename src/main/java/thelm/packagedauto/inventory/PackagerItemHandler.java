@@ -85,10 +85,10 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 			IPackageItem packageItem = (IPackageItem)listStack.getItem();
 			blockEntity.patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 		}
-		if(blockEntity.forceDisjoint) {
+		if(blockEntity.mode == PackagerBlockEntity.Mode.FIRST) {
 			blockEntity.disjoint = true;
 		}
-		else if(blockEntity.checkDisjoint) {
+		else if(blockEntity.mode == PackagerBlockEntity.Mode.DISJOINT) {
 			blockEntity.disjoint = MiscHelper.INSTANCE.arePatternsDisjoint(blockEntity.patternList);
 		}
 		if(blockEntity.getLevel() != null && !blockEntity.getLevel().isClientSide) {

@@ -36,6 +36,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 
 	@Override
 	protected void init() {
+		clearWidgets();
 		super.init();
 
 		okButton = addButton(leftPos+114, topPos+22, 50, 20, new TranslatableComponent("misc.packagedauto.set"), true, true, btn->onOkButtonPressed(hasShiftDown()));

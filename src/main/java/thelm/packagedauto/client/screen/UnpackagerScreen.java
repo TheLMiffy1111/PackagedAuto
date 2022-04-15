@@ -30,6 +30,13 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 	}
 
 	@Override
+	public void init() {
+		clearWidgets();
+		super.init();
+		addRenderableWidget(new ButtonChangeBlocking(leftPos+98, topPos+16));
+	}
+
+	@Override
 	protected void renderBgAdditional(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
 		int scaledEnergy = menu.blockEntity.getScaledEnergy(40);
 		blit(poseStack, leftPos+10, topPos+10+40-scaledEnergy, 176, 40-scaledEnergy, 12, scaledEnergy);
@@ -61,13 +68,6 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 			}
 		}
 		super.renderLabels(poseStack, mouseX, mouseY);
-	}
-
-	@Override
-	public void init() {
-		clearWidgets();
-		super.init();
-		addRenderableWidget(new ButtonChangeBlocking(leftPos+98, topPos+16));
 	}
 
 	class ButtonChangeBlocking extends AbstractWidget {

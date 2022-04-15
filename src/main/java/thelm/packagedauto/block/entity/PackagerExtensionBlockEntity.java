@@ -47,8 +47,6 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
-	public static boolean checkDisjoint = true;
-	public static boolean forceDisjoint = false;
 
 	public boolean firstTick = true;
 	public boolean isWorking = false;
@@ -57,6 +55,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
+	public PackagerBlockEntity.Mode mode = PackagerBlockEntity.Mode.EXACT;
 	public boolean disjoint = false;
 	public boolean powered = false;
 
@@ -200,10 +199,10 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 					else if(listStack.getItem() instanceof IPackageItem packageItem) {
 						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 					}
-					if(forceDisjoint) {
+					if(mode == PackagerBlockEntity.Mode.FIRST) {
 						disjoint = true;
 					}
-					else if(checkDisjoint) {
+					else if(mode == PackagerBlockEntity.Mode.DISJOINT) {
 						disjoint = MiscHelper.INSTANCE.arePatternsDisjoint(patternList);
 					}
 					break;
@@ -370,6 +369,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 		isWorking = nbt.getBoolean("Working");
 		remainingProgress = nbt.getInt("Progress");
 		powered = nbt.getBoolean("Powered");
+		mode = PackagerBlockEntity.Mode.values()[nbt.getByte("Mode")];
 	}
 
 	@Override
@@ -378,7 +378,12 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 		nbt.putBoolean("Working", isWorking);
 		nbt.putInt("Progress", remainingProgress);
 		nbt.putBoolean("Powered", powered);
+		nbt.putByte("Mode", (byte)mode.ordinal());
 		return nbt;
+	}
+
+	public void changePackagingMode() {
+		mode = PackagerBlockEntity.Mode.values()[((mode.ordinal()+1) % 3)];
 	}
 
 	@Override

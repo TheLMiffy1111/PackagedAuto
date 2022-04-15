@@ -2,6 +2,9 @@
     "itemGroup.packagedauto": "PackagedAuto",
 
     "block.packagedauto.packager": "Packager",
+    "block.packagedauto.packager.mode.exact": "Mode: Require Exact",
+    "block.packagedauto.packager.mode.disjoint": "Mode: Require Disjoint",
+    "block.packagedauto.packager.mode.first": "Mode: First Match",
     "block.packagedauto.encoder": "Package Recipe Encoder",
     "block.packagedauto.encoder.save": "Save",
     "block.packagedauto.encoder.save_single": "Save Single",
