@@ -96,6 +96,21 @@ public class FluidVolumeType implements IVolumeType {
 	}
 
 	@Override
+	public boolean isEmpty(ICapabilityProvider capProvider, Direction direction) {
+		return capProvider.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction).map(handler->{
+			if(handler.getTanks() == 0) {
+				return false;
+			}
+			for(int i = 0; i < handler.getTanks(); ++i) {
+				if(!handler.getFluidInTank(i).isEmpty()) {
+					return false;
+				}
+			}
+			return true;
+		}).orElse(false);
+	}
+
+	@Override
 	public int fill(ICapabilityProvider capProvider, Direction direction, IVolumeStackWrapper resource, boolean simulate) {
 		if(resource instanceof FluidStackWrapper fluidStack) {
 			FluidAction action = simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE;

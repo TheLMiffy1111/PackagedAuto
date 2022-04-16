@@ -71,7 +71,12 @@ public class RecipeCraftingPatternDetails implements IPatternDetails {
 	private GenericStack getGenericOutput(ItemStack stack) {
 		if(stack.getItem() instanceof IVolumePackageItem vPackage) {
 			IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
-			return new GenericStack(AEKey.fromTagGeneric(vStack.saveAEKey(new CompoundTag())), vStack.getAmount()*stack.getCount());
+			if(!vStack.isEmpty() && vStack.getVolumeType() != null && vStack.getVolumeType().supportsAE()) {
+				AEKey key = AEKey.fromTagGeneric(vStack.saveAEKey(new CompoundTag()));
+				if(key != null) {
+					return new GenericStack(key, vStack.getAmount()*stack.getCount());
+				}
+			}
 		}
 		return GenericStack.fromItemStack(stack);
 	}

@@ -48,7 +48,12 @@ public class SimpleInput implements IInput {
 	private GenericStack getGenericInput(GenericStack stack) {
 		if(stack.what() instanceof AEItemKey itemKey && itemKey.getItem() instanceof IVolumePackageItem vPackage) {
 			IVolumeStackWrapper vStack = vPackage.getVolumeStack(itemKey.toStack());
-			return new GenericStack(AEKey.fromTagGeneric(vStack.saveAEKey(new CompoundTag())), vStack.getAmount());
+			if(!vStack.isEmpty() && vStack.getVolumeType().supportsAE()) {
+				AEKey key = AEKey.fromTagGeneric(vStack.saveAEKey(new CompoundTag()));
+				if(key != null) {
+					return new GenericStack(key, vStack.getAmount());
+				}
+			}
 		}
 		return new GenericStack(stack.what(), 1);
 	}

@@ -157,7 +157,6 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			}
 		}
 		for(Direction direction : Direction.values()) {
-			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
 			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.direction == direction).findFirst().orElse(null);
 			if(trackerToEmpty == null) {
 				continue;
@@ -169,6 +168,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				trackerToEmpty.direction = null;
 				continue;
 			}
+			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
 			if(blockEntity == null || blockEntity instanceof PackagerBlockEntity || blockEntity instanceof UnpackagerBlockEntity || isPatternProvider(blockEntity, direction.getOpposite())) {
 				trackerToEmpty.direction = null;
 				continue;
@@ -176,7 +176,9 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).orElse(null);
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
-				if(stack.getItem() instanceof IVolumePackageItem vPackage && vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
+				if(stack.getItem() instanceof IVolumePackageItem vPackage &&
+						vPackage.getVolumeType(stack) != null &&
+						vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
 					ItemStack stackCopy = stack.copy();
 					IVolumeType vType = vPackage.getVolumeType(stack);
 					IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
@@ -211,34 +213,53 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			}
 			setChanged();
 		}
-		for(Direction direction : Direction.values()) {
-			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
-			if(blockEntity == null || blockEntity instanceof PackagerBlockEntity || blockEntity instanceof UnpackagerBlockEntity || isPatternProvider(blockEntity, direction.getOpposite())) {
-				continue;
-			}
-			IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).orElse(null);
-			if(powered || blocking && !MiscHelper.INSTANCE.isEmpty(itemHandler)) {
+		dir:for(Direction direction : Direction.values()) {
+			if(powered) {
 				continue;
 			}
 			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.isFilled() && t.direction == null && t.recipe != null && !t.recipe.getRecipeType().hasMachine()).findFirst().orElse(null);
 			if(trackerToEmpty == null) {
 				continue;
 			}
+			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
+			if(blockEntity == null || blockEntity instanceof PackagerBlockEntity || blockEntity instanceof UnpackagerBlockEntity || isPatternProvider(blockEntity, direction.getOpposite())) {
+				continue;
+			}
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.setupToSend();
+			}
+			IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).orElse(null);
+			if(blocking) {
+				for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
+					ItemStack stack = trackerToEmpty.toSend.get(i);
+					if(stack.getItem() instanceof IVolumePackageItem vPackage &&
+							vPackage.getVolumeType(stack) != null &&
+							vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
+						IVolumeType vType = vPackage.getVolumeType(stack);
+						if(!vType.isEmpty(blockEntity, direction.getOpposite())) {
+							continue dir;
+						}
+					}
+					else if(itemHandler != null && !MiscHelper.INSTANCE.isEmpty(itemHandler)) {
+						continue dir;
+					}
+				}
 			}
 			boolean inserted = false;
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
-				if(stack.getItem() instanceof IVolumePackageItem vPackage && vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
-					ItemStack stackCopy = stack.copy();
+				if(stack.getItem() instanceof IVolumePackageItem vPackage &&
+						vPackage.getVolumeType(stack) != null &&
+						vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
 					IVolumeType vType = vPackage.getVolumeType(stack);
+					ItemStack stackCopy = stack.copy();
 					IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
 					while(!stackCopy.isEmpty()) {
 						int simulateFilled = vType.fill(blockEntity, direction.getOpposite(), vStack, true);
 						if(simulateFilled == vStack.getAmount()) {
 							vType.fill(blockEntity, direction.getOpposite(), vStack, false);
 							stackCopy.shrink(1);
+							inserted = true;
 						}
 						else {
 							break;

@@ -20,7 +20,9 @@ public interface IVolumeType {
 
 	MutableComponent getDisplayName();
 
-	boolean supportsAE();
+	default boolean supportsAE() {
+		return false;
+	}
 
 	IVolumeStackWrapper getEmptyStackInstance();
 
@@ -37,6 +39,10 @@ public interface IVolumeType {
 	Capability getItemCapability();
 
 	boolean hasBlockCapability(ICapabilityProvider capProvider, Direction direction);
+	
+	default boolean isEmpty(ICapabilityProvider capProvider, Direction direction) {
+		return false;
+	}
 
 	int fill(ICapabilityProvider capProvider, Direction direction, IVolumeStackWrapper resource, boolean simulate);
 

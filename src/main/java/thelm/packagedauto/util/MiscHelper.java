@@ -244,10 +244,7 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public boolean isEmpty(IItemHandler itemHandler) {
-		if(itemHandler == null) {
-			return false;
-		}
-		if(itemHandler.getSlots() == 0) {
+		if(itemHandler == null || itemHandler.getSlots() == 0) {
 			return false;
 		}
 		for(int i = 0; i < itemHandler.getSlots(); ++i) {

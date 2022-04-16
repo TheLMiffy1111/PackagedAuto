@@ -10,7 +10,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import thelm.packagedauto.client.screen.PackagerScreen.ButtonChangePackaging;
 import thelm.packagedauto.menu.PackagerExtensionMenu;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.ChangePackagingPacket;

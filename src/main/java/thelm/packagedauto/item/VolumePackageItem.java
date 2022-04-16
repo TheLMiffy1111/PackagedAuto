@@ -17,6 +17,7 @@ import thelm.packagedauto.api.IVolumePackageItem;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.util.ApiImpl;
+import thelm.packagedauto.volume.UnknownStackWrapper;
 
 public class VolumePackageItem extends Item implements IVolumePackageItem {
 
@@ -54,7 +55,7 @@ public class VolumePackageItem extends Item implements IVolumePackageItem {
 	@Override
 	public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag isAdvanced) {
 		IVolumeStackWrapper volumeStack = getVolumeStack(stack);
-		if(volumeStack != null) {
+		if(!volumeStack.isEmpty()) {
 			tooltip.add(volumeStack.getVolumeType().getDisplayName().append(": ").
 					append(volumeStack.getDisplayName()).append(" ").
 					append(volumeStack.getAmountDesc()));
@@ -74,7 +75,10 @@ public class VolumePackageItem extends Item implements IVolumePackageItem {
 	@Override
 	public IVolumeStackWrapper getVolumeStack(ItemStack stack) {
 		IVolumeType type = getVolumeType(stack);
-		return type.getStackContained(stack).orElse(type.getEmptyStackInstance());
+		if(type != null) {
+			return type.getStackContained(stack).orElse(type.getEmptyStackInstance());
+		}
+		return UnknownStackWrapper.INSTANCE;
 	}
 
 	@Override
@@ -94,7 +98,9 @@ public class VolumePackageItem extends Item implements IVolumePackageItem {
 		public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction facing) {
 			if(container.getItem() instanceof IVolumePackageItem volumePackage) {
 				IVolumeType type = volumePackage.getVolumeType(container);
-				return type.getItemCapability().orEmpty(capability, LazyOptional.of(()->type.makeItemCapability(container)));
+				if(type != null) {
+					return type.getItemCapability().orEmpty(capability, LazyOptional.of(()->type.makeItemCapability(container)));
+				}
 			}
 			return LazyOptional.empty();
 		}
