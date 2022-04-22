@@ -84,7 +84,7 @@ public class StackFluidHandlerItem implements IFluidHandlerItem {
 	@Override
 	public FluidStack drain(int maxDrain, FluidAction action) {
 		FluidStack fluidStack = getFluid();
-		if(container.getCount() != 1 || maxDrain < fluidStack.getAmount()) {
+		if(maxDrain < fluidStack.getAmount()) {
 			return FluidStack.EMPTY;
 		}
 		if(!fluidStack.isEmpty()) {
