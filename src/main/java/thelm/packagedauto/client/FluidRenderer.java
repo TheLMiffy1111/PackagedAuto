@@ -81,7 +81,7 @@ public class FluidRenderer {
 	}
 
 	private void drawFluid(PoseStack poseStack, int xPosition, int yPosition, FluidStack fluidStack, int capacity) {
-		if(fluidStack == null) {
+		if(capacity <= 0 || fluidStack == null) {
 			return;
 		}
 		Fluid fluid = fluidStack.getFluid();

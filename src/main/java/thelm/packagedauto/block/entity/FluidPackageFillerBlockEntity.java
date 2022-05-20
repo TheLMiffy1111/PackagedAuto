@@ -271,7 +271,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	}
 
 	public int getScaledProgress(int scale) {
-		if(remainingProgress <= 0) {
+		if(remainingProgress <= 0 || energyReq <= 0) {
 			return 0;
 		}
 		return scale * (energyReq-remainingProgress) / energyReq;
