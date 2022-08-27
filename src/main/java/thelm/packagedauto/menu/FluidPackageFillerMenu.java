@@ -11,8 +11,7 @@ import thelm.packagedauto.slot.RemoveOnlySlot;
 public class FluidPackageFillerMenu extends BaseMenu<FluidPackageFillerBlockEntity> {
 
 	public static final MenuType<FluidPackageFillerMenu> TYPE_INSTANCE = (MenuType<FluidPackageFillerMenu>)IForgeMenuType.
-			create(new PositionalBlockEntityMenuFactory<>(FluidPackageFillerMenu::new)).
-			setRegistryName("packagedauto:fluid_package_filler");
+			create(new PositionalBlockEntityMenuFactory<>(FluidPackageFillerMenu::new));
 
 	public FluidPackageFillerMenu(int windowId, Inventory inventory, FluidPackageFillerBlockEntity blockEntity) {
 		super(TYPE_INSTANCE, windowId, inventory, blockEntity);

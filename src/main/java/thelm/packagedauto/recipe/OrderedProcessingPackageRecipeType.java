@@ -1,7 +1,7 @@
 package thelm.packagedauto.recipe;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 
@@ -17,12 +17,12 @@ public class OrderedProcessingPackageRecipeType extends ProcessingPackageRecipeT
 
 	@Override
 	public MutableComponent getDisplayName() {
-		return new TranslatableComponent("recipe.packagedauto.ordered_processing");
+		return Component.translatable("recipe.packagedauto.ordered_processing");
 	}
 
 	@Override
 	public MutableComponent getShortDisplayName() {
-		return new TranslatableComponent("recipe.packagedauto.ordered_processing.short");
+		return Component.translatable("recipe.packagedauto.ordered_processing.short");
 	}
 
 	@Override

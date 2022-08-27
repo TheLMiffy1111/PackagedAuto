@@ -30,9 +30,9 @@ public interface IPackageRecipeInfo {
 
 	Int2ObjectMap<ItemStack> getEncoderStacks();
 
-	default ItemStack getContainerItem(ItemStack stack) {
-		if(getRecipeType().hasContainerItem()) {
-			return stack.getContainerItem();
+	default ItemStack getCraftingRemainingItem(ItemStack stack) {
+		if(getRecipeType().hasCraftingRemainingItem()) {
+			return stack.getCraftingRemainingItem();
 		}
 		return ItemStack.EMPTY;
 	}

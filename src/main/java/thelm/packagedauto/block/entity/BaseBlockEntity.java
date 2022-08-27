@@ -16,9 +16,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.items.CapabilityItemHandler;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.BaseItemHandler;
 
@@ -139,10 +138,10 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction direction) {
-		if(capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
+		if(capability == ForgeCapabilities.ITEM_HANDLER) {
 			return LazyOptional.of(()->(T)itemHandler.getWrapperForDirection(direction));
 		}
-		else if(capability == CapabilityEnergy.ENERGY && energyStorage.getMaxEnergyStored() > 0) {
+		else if(capability == ForgeCapabilities.ENERGY && energyStorage.getMaxEnergyStored() > 0) {
 			return LazyOptional.of(()->(T)energyStorage);
 		}
 		return super.getCapability(capability, direction);

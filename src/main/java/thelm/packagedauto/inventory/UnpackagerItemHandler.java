@@ -3,7 +3,7 @@ package thelm.packagedauto.inventory;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeListItem;
@@ -30,7 +30,7 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerBlockEntity
 	public boolean isItemValid(int slot, ItemStack stack) {
 		return switch(slot) {
 		case 9 -> stack.getItem() instanceof IPackageRecipeListItem;
-		case 10 -> stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
+		case 10 -> stack.getCapability(ForgeCapabilities.ENERGY).isPresent();
 		default -> stack.getItem() instanceof IPackageItem;
 		};
 	}

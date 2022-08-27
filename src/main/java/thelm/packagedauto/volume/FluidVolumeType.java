@@ -6,15 +6,15 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
@@ -38,7 +38,7 @@ public class FluidVolumeType implements IVolumeType {
 
 	@Override
 	public MutableComponent getDisplayName() {
-		return new TranslatableComponent("volume.packagedauto.minecraft.fluid");
+		return Component.translatable("volume.packagedauto.minecraft.fluid");
 	}
 
 	@Override
@@ -87,17 +87,17 @@ public class FluidVolumeType implements IVolumeType {
 
 	@Override
 	public Capability getItemCapability() {
-		return CapabilityFluidHandler.FLUID_HANDLER_ITEM_CAPABILITY;
+		return ForgeCapabilities.FLUID_HANDLER_ITEM;
 	}
 
 	@Override
 	public boolean hasBlockCapability(ICapabilityProvider capProvider, Direction direction) {
-		return capProvider.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction).isPresent();
+		return capProvider.getCapability(ForgeCapabilities.FLUID_HANDLER, direction).isPresent();
 	}
 
 	@Override
 	public boolean isEmpty(ICapabilityProvider capProvider, Direction direction) {
-		return capProvider.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction).map(handler->{
+		return capProvider.getCapability(ForgeCapabilities.FLUID_HANDLER, direction).map(handler->{
 			if(handler.getTanks() == 0) {
 				return false;
 			}
@@ -114,7 +114,7 @@ public class FluidVolumeType implements IVolumeType {
 	public int fill(ICapabilityProvider capProvider, Direction direction, IVolumeStackWrapper resource, boolean simulate) {
 		if(resource instanceof FluidStackWrapper fluidStack) {
 			FluidAction action = simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE;
-			return capProvider.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction).
+			return capProvider.getCapability(ForgeCapabilities.FLUID_HANDLER, direction).
 					map(handler->handler.fill(fluidStack.stack(), action)).orElse(0);
 		}
 		return 0;
@@ -124,7 +124,7 @@ public class FluidVolumeType implements IVolumeType {
 	public IVolumeStackWrapper drain(ICapabilityProvider capProvider, Direction direction, IVolumeStackWrapper resource, boolean simulate) {
 		if(resource instanceof FluidStackWrapper fluidStack) {
 			FluidAction action = simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE;
-			return capProvider.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction).
+			return capProvider.getCapability(ForgeCapabilities.FLUID_HANDLER, direction).
 					map(handler->handler.drain(fluidStack.stack(), action)).
 					map(FluidStackWrapper::new).orElse(FluidStackWrapper.EMPTY);
 		}

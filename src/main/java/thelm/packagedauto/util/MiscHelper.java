@@ -37,6 +37,7 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.registries.ForgeRegistries;
 import thelm.packagedauto.api.IMiscHelper;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
@@ -127,7 +128,7 @@ public class MiscHelper implements IMiscHelper {
 				while(count > 0) {
 					ItemStack toAdd = new ItemStack(item, 1);
 					toAdd.setTag(nbt);
-					int limit = item.getItemStackLimit(toAdd);
+					int limit = item.getMaxStackSize(toAdd);
 					toAdd.setCount(Math.min(count, limit));
 					list.add(toAdd);
 					count -= limit;
@@ -215,8 +216,8 @@ public class MiscHelper implements IMiscHelper {
 		if(stack.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
-		if(stack.getItem().hasContainerItem(stack)) {
-			stack = stack.getItem().getContainerItem(stack);
+		if(stack.getItem().hasCraftingRemainingItem(stack)) {
+			stack = stack.getItem().getCraftingRemainingItem(stack);
 			if(!stack.isEmpty() && stack.isDamageableItem() && stack.getDamageValue() > stack.getMaxDamage()) {
 				return ItemStack.EMPTY;
 			}
@@ -319,7 +320,7 @@ public class MiscHelper implements IMiscHelper {
 	@Override
 	public boolean arePatternsDisjoint(List<IPackagePattern> patternList) {
 		ObjectRBTreeSet<Pair<Item, CompoundTag>> set = new ObjectRBTreeSet<>(
-				Comparator.comparing(pair->Pair.of(pair.getLeft().getRegistryName(), ""+pair.getRight())));
+				Comparator.comparing(pair->Pair.of(ForgeRegistries.ITEMS.getKey(pair.getLeft()), ""+pair.getRight())));
 		for(IPackagePattern pattern : patternList) {
 			List<ItemStack> condensedInputs = condenseStacks(pattern.getInputs(), true);
 			for(ItemStack stack : condensedInputs) {

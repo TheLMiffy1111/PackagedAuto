@@ -6,7 +6,6 @@ import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -25,8 +24,7 @@ import thelm.packagedauto.recipe.ProcessingPackageRecipeType;
 public class EncoderBlockEntity extends BaseBlockEntity {
 
 	public static final BlockEntityType<EncoderBlockEntity> TYPE_INSTANCE = (BlockEntityType<EncoderBlockEntity>)BlockEntityType.Builder.
-			of(EncoderBlockEntity::new, EncoderBlock.INSTANCE).
-			build(null).setRegistryName("packagedauto:encoder");
+			of(EncoderBlockEntity::new, EncoderBlock.INSTANCE).build(null);
 
 	public static int patternSlots = 20;
 
@@ -43,7 +41,7 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 
 	@Override
 	protected Component getDefaultName() {
-		return new TranslatableComponent("block.packagedauto.encoder");
+		return Component.translatable("block.packagedauto.encoder");
 	}
 
 	@Override

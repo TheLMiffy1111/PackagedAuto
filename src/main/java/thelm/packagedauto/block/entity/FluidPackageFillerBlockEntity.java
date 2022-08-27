@@ -4,7 +4,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -12,13 +11,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.CapabilityFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IVolumePackageItem;
 import thelm.packagedauto.block.FluidPackageFillerBlock;
@@ -30,8 +27,7 @@ import thelm.packagedauto.menu.FluidPackageFillerMenu;
 public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 
 	public static final BlockEntityType<FluidPackageFillerBlockEntity> TYPE_INSTANCE = (BlockEntityType<FluidPackageFillerBlockEntity>)BlockEntityType.Builder.
-			of(FluidPackageFillerBlockEntity::new, FluidPackageFillerBlock.INSTANCE).
-			build(null).setRegistryName("packagedauto:fluid_package_filler");
+			of(FluidPackageFillerBlockEntity::new, FluidPackageFillerBlock.INSTANCE).build(null);
 
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
@@ -54,7 +50,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 
 	@Override
 	protected Component getDefaultName() {
-		return new TranslatableComponent("block.packagedauto.fluid_package_filler");
+		return Component.translatable("block.packagedauto.fluid_package_filler");
 	}
 
 	@Override
@@ -140,8 +136,8 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 		if(amount < requiredAmount) {
 			for(Direction direction : Direction.values()) {
 				BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
-				if(blockEntity != null && blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
-					IFluidHandler fluidHandler = blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction.getOpposite()).resolve().get();
+				if(blockEntity != null && blockEntity.getCapability(ForgeCapabilities.FLUID_HANDLER, direction.getOpposite()).isPresent()) {
+					IFluidHandler fluidHandler = blockEntity.getCapability(ForgeCapabilities.FLUID_HANDLER, direction.getOpposite()).resolve().get();
 					FluidStack toDrain = currentFluid.copy();
 					toDrain.setAmount(requiredAmount-amount);
 					amount += fluidHandler.drain(toDrain, FluidAction.EXECUTE).getAmount();
@@ -188,9 +184,9 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 		for(Direction direction : Direction.values()) {
 			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
 			if(blockEntity != null && !(blockEntity instanceof UnpackagerBlockEntity)
-					&& blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()
-					&& !blockEntity.getCapability(CapabilityFluidHandler.FLUID_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
-				IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).resolve().get();
+					&& blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).isPresent()
+					&& !blockEntity.getCapability(ForgeCapabilities.FLUID_HANDLER, direction.getOpposite()).isPresent()) {
+				IItemHandler itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).resolve().get();
 				ItemStack stack = this.itemHandler.getStackInSlot(1);
 				if(stack.isEmpty()) {
 					return;
@@ -212,9 +208,9 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	protected void chargeEnergy() {
 		int prevStored = energyStorage.getEnergyStored();
 		ItemStack energyStack = itemHandler.getStackInSlot(2);
-		if(energyStack.getCapability(CapabilityEnergy.ENERGY).isPresent()) {
+		if(energyStack.getCapability(ForgeCapabilities.ENERGY).isPresent()) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(energyStack.getCapability(CapabilityEnergy.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
+			energyStorage.receiveEnergy(energyStack.getCapability(ForgeCapabilities.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
 			if(energyStack.getCount() <= 0) {
 				itemHandler.setStackInSlot(2, ItemStack.EMPTY);
 			}

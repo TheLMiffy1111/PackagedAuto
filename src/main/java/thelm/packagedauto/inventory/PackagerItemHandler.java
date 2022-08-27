@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeListItem;
@@ -37,7 +37,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 		return switch(slot) {
 		case 9 -> false;
 		case 10 -> stack.getItem() instanceof IPackageRecipeListItem || stack.getItem() instanceof IPackageItem;
-		case 11 -> stack.getCapability(CapabilityEnergy.ENERGY).isPresent();
+		case 11 -> stack.getCapability(ForgeCapabilities.ENERGY).isPresent();
 		default -> blockEntity.isWorking ? !getStackInSlot(slot).isEmpty() : true;
 		};
 	}

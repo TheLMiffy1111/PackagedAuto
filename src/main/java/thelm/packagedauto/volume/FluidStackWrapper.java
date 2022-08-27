@@ -6,8 +6,8 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.registries.ForgeRegistries;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 
@@ -48,7 +48,7 @@ public record FluidStackWrapper(FluidStack stack) implements IVolumeStackWrapper
 	@Override
 	public CompoundTag saveAEKey(CompoundTag tag) {
 		tag.putString("#c", "ae2:f");
-		tag.putString("id", stack.getFluid().getRegistryName().toString());
+		tag.putString("id", ForgeRegistries.FLUIDS.getKey(stack.getFluid()).toString());
 		if(stack.hasTag()) {
 			tag.put("tag", stack.getTag().copy());
 		}
@@ -62,7 +62,7 @@ public record FluidStackWrapper(FluidStack stack) implements IVolumeStackWrapper
 
 	@Override
 	public Component getAmountDesc() {
-		return new TextComponent(stack.getAmount()+"mB");
+		return Component.literal(stack.getAmount()+"mB");
 	}
 
 	@Override

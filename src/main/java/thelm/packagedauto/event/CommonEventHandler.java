@@ -1,17 +1,18 @@
 package thelm.packagedauto.event;
 
+import net.minecraft.core.Registry;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.DeferredRegister;
 import thelm.packagedauto.block.CrafterBlock;
 import thelm.packagedauto.block.EncoderBlock;
 import thelm.packagedauto.block.FluidPackageFillerBlock;
@@ -52,58 +53,51 @@ public class CommonEventHandler {
 	}
 
 	public void onConstruct() {
-		FMLJavaModLoadingContext.get().getModEventBus().register(this);
+		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+		modEventBus.register(this);
 		MinecraftForge.EVENT_BUS.addListener(this::onServerAboutToStart);
 		PackagedAutoConfig.registerConfig();
-	}
 
-	@SubscribeEvent
-	public void onBlockRegister(RegistryEvent.Register<Block> event) {
-		IForgeRegistry<Block> registry = event.getRegistry();
-		registry.register(EncoderBlock.INSTANCE);
-		registry.register(PackagerBlock.INSTANCE);
-		registry.register(PackagerExtensionBlock.INSTANCE);
-		registry.register(UnpackagerBlock.INSTANCE);
-		registry.register(CrafterBlock.INSTANCE);
-		registry.register(FluidPackageFillerBlock.INSTANCE);
-	}
+		DeferredRegister<Block> blockRegister = DeferredRegister.create(Registry.BLOCK_REGISTRY, "packagedauto");
+		blockRegister.register(modEventBus);
+		blockRegister.register("encoder", ()->EncoderBlock.INSTANCE);
+		blockRegister.register("packager", ()->PackagerBlock.INSTANCE);
+		blockRegister.register("packager_extension", ()->PackagerExtensionBlock.INSTANCE);
+		blockRegister.register("unpackager", ()->UnpackagerBlock.INSTANCE);
+		blockRegister.register("crafter", ()->CrafterBlock.INSTANCE);
+		blockRegister.register("fluid_package_filler", ()->FluidPackageFillerBlock.INSTANCE);
 
-	@SubscribeEvent
-	public void onItemRegister(RegistryEvent.Register<Item> event) {
-		IForgeRegistry<Item> registry = event.getRegistry();
-		registry.register(EncoderBlock.ITEM_INSTANCE);
-		registry.register(PackagerBlock.ITEM_INSTANCE);
-		registry.register(PackagerExtensionBlock.ITEM_INSTANCE);
-		registry.register(UnpackagerBlock.ITEM_INSTANCE);
-		registry.register(CrafterBlock.ITEM_INSTANCE);
-		registry.register(FluidPackageFillerBlock.ITEM_INSTANCE);
-		registry.register(RecipeHolderItem.INSTANCE);
-		registry.register(PackageItem.INSTANCE);
-		registry.register(VolumePackageItem.INSTANCE);
-		registry.register(MiscItem.PACKAGE_COMPONENT);
-		registry.register(MiscItem.ME_PACKAGE_COMPONENT);
-	}
+		DeferredRegister<Item> itemRegister = DeferredRegister.create(Registry.ITEM_REGISTRY, "packagedauto");
+		itemRegister.register(modEventBus);
+		itemRegister.register("encoder", ()->EncoderBlock.ITEM_INSTANCE);
+		itemRegister.register("packager", ()->PackagerBlock.ITEM_INSTANCE);
+		itemRegister.register("packager_extension", ()->PackagerExtensionBlock.ITEM_INSTANCE);
+		itemRegister.register("unpackager", ()->UnpackagerBlock.ITEM_INSTANCE);
+		itemRegister.register("crafter", ()->CrafterBlock.ITEM_INSTANCE);
+		itemRegister.register("fluid_package_filler", ()->FluidPackageFillerBlock.ITEM_INSTANCE);
+		itemRegister.register("recipe_holder", ()->RecipeHolderItem.INSTANCE);
+		itemRegister.register("package", ()->PackageItem.INSTANCE);
+		itemRegister.register("volume_package", ()->VolumePackageItem.INSTANCE);
+		itemRegister.register("package_component", ()->MiscItem.PACKAGE_COMPONENT);
+		itemRegister.register("me_package_component", ()->MiscItem.ME_PACKAGE_COMPONENT);
 
-	@SubscribeEvent
-	public void onBlockEntityRegister(RegistryEvent.Register<BlockEntityType<?>> event) {
-		IForgeRegistry<BlockEntityType<?>> registry = event.getRegistry();
-		registry.register(EncoderBlockEntity.TYPE_INSTANCE);
-		registry.register(PackagerBlockEntity.TYPE_INSTANCE);
-		registry.register(PackagerExtensionBlockEntity.TYPE_INSTANCE);
-		registry.register(UnpackagerBlockEntity.TYPE_INSTANCE);
-		registry.register(CrafterBlockEntity.TYPE_INSTANCE);
-		registry.register(FluidPackageFillerBlockEntity.TYPE_INSTANCE);
-	}
+		DeferredRegister<BlockEntityType<?>> blockEntityRegister = DeferredRegister.create(Registry.BLOCK_ENTITY_TYPE_REGISTRY, "packagedauto");
+		blockEntityRegister.register(modEventBus);	
+		blockEntityRegister.register("encoder", ()->EncoderBlockEntity.TYPE_INSTANCE);
+		blockEntityRegister.register("packager", ()->PackagerBlockEntity.TYPE_INSTANCE);
+		blockEntityRegister.register("packager_extension", ()->PackagerExtensionBlockEntity.TYPE_INSTANCE);
+		blockEntityRegister.register("unpackager", ()->UnpackagerBlockEntity.TYPE_INSTANCE);
+		blockEntityRegister.register("crafter", ()->CrafterBlockEntity.TYPE_INSTANCE);
+		blockEntityRegister.register("fluid_package_filler", ()->FluidPackageFillerBlockEntity.TYPE_INSTANCE);
 
-	@SubscribeEvent
-	public void onMenuTypeRegister(RegistryEvent.Register<MenuType<?>> event) {
-		IForgeRegistry<MenuType<?>> registry = event.getRegistry();
-		registry.register(EncoderMenu.TYPE_INSTANCE);
-		registry.register(PackagerMenu.TYPE_INSTANCE);
-		registry.register(PackagerExtensionMenu.TYPE_INSTANCE);
-		registry.register(UnpackagerMenu.TYPE_INSTANCE);
-		registry.register(CrafterMenu.TYPE_INSTANCE);
-		registry.register(FluidPackageFillerMenu.TYPE_INSTANCE);
+		DeferredRegister<MenuType<?>> menuRegister = DeferredRegister.create(Registry.MENU_REGISTRY, "packagedauto");
+		menuRegister.register(modEventBus);	
+		menuRegister.register("encoder", ()->EncoderMenu.TYPE_INSTANCE);
+		menuRegister.register("packager", ()->PackagerMenu.TYPE_INSTANCE);
+		menuRegister.register("packager_extension", ()->PackagerExtensionMenu.TYPE_INSTANCE);
+		menuRegister.register("unpackager", ()->UnpackagerMenu.TYPE_INSTANCE);
+		menuRegister.register("crafter", ()->CrafterMenu.TYPE_INSTANCE);
+		menuRegister.register("fluid_package_filler", ()->FluidPackageFillerMenu.TYPE_INSTANCE);
 	}
 
 	@SubscribeEvent

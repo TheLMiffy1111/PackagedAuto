@@ -5,8 +5,6 @@ import java.util.List;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -28,7 +26,6 @@ public class PackageItem extends Item implements IPackageItem {
 
 	protected PackageItem() {
 		super(new Item.Properties());
-		setRegistryName("packagedauto:package");
 	}
 
 	public static ItemStack makePackage(IPackageRecipeInfo recipeInfo, int index) {
@@ -74,26 +71,26 @@ public class PackageItem extends Item implements IPackageItem {
 			for(ItemStack is : recipe.getOutputs()) {
 				if(is.getItem() instanceof IVolumePackageItem vp) {
 					IVolumeStackWrapper vs = vp.getVolumeStack(is);
-					tooltip.add(new TextComponent(is.getCount()+"x").append(vs.getAmountDesc()).append(" ").
+					tooltip.add(Component.literal(is.getCount()+"x").append(vs.getAmountDesc()).append(" ").
 							append(ComponentUtils.wrapInSquareBrackets(vs.getDisplayName())));
 				}
 				else {
-					tooltip.add(new TextComponent(is.getCount()+" ").append(is.getDisplayName()));
+					tooltip.add(Component.literal(is.getCount()+" ").append(is.getDisplayName()));
 				}
 			}
 			int index = getIndex(stack);
-			tooltip.add(new TranslatableComponent("item.packagedauto.package.index", index));
-			tooltip.add(new TranslatableComponent("item.packagedauto.package.items"));
+			tooltip.add(Component.translatable("item.packagedauto.package.index", index));
+			tooltip.add(Component.translatable("item.packagedauto.package.items"));
 			List<ItemStack> recipeInputs = recipe.getInputs();
 			List<ItemStack> packageItems = recipeInputs.subList(9*index, Math.min(9*index+9, recipeInputs.size()));
 			for(ItemStack is : packageItems) {
 				if(is.getItem() instanceof IVolumePackageItem vp) {
 					IVolumeStackWrapper vs = vp.getVolumeStack(is);
-					tooltip.add(new TextComponent(is.getCount()+"x").append(vs.getAmountDesc()).append(" ").
+					tooltip.add(Component.literal(is.getCount()+"x").append(vs.getAmountDesc()).append(" ").
 							append(ComponentUtils.wrapInSquareBrackets(vs.getDisplayName())));
 				}
 				else {
-					tooltip.add(new TextComponent(is.getCount()+" ").append(is.getDisplayName()));
+					tooltip.add(Component.literal(is.getCount()+" ").append(is.getDisplayName()));
 				}
 			}
 		}

@@ -13,8 +13,7 @@ import thelm.packagedauto.slot.PreviewSlot;
 public class EncoderMenu extends BaseMenu<EncoderBlockEntity> {
 
 	public static final MenuType<EncoderMenu> TYPE_INSTANCE = (MenuType<EncoderMenu>)IForgeMenuType.
-			create(new PositionalBlockEntityMenuFactory<>(EncoderMenu::new)).
-			setRegistryName("packagedauto:encoder");
+			create(new PositionalBlockEntityMenuFactory<>(EncoderMenu::new));
 
 	public EncoderPatternItemHandler patternItemHandler;
 

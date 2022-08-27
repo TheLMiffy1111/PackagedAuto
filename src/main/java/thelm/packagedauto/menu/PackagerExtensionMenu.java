@@ -12,8 +12,7 @@ import thelm.packagedauto.slot.RemoveOnlySlot;
 public class PackagerExtensionMenu extends BaseMenu<PackagerExtensionBlockEntity> {
 
 	public static final MenuType<PackagerExtensionMenu> TYPE_INSTANCE = (MenuType<PackagerExtensionMenu>)IForgeMenuType.
-			create(new PositionalBlockEntityMenuFactory<>(PackagerExtensionMenu::new)).
-			setRegistryName("packagedauto:packager_extension");
+			create(new PositionalBlockEntityMenuFactory<>(PackagerExtensionMenu::new));
 
 	public PackagerExtensionMenu(int windowId, Inventory inventory, PackagerExtensionBlockEntity blockEntity) {
 		super(TYPE_INSTANCE, windowId, inventory, blockEntity);

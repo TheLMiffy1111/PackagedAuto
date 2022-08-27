@@ -9,8 +9,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntRBTreeSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
@@ -45,12 +45,12 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 
 	@Override
 	public MutableComponent getDisplayName() {
-		return new TranslatableComponent("recipe.packagedauto.processing");
+		return Component.translatable("recipe.packagedauto.processing");
 	}
 
 	@Override
 	public MutableComponent getShortDisplayName() {
-		return new TranslatableComponent("recipe.packagedauto.processing.short");
+		return Component.translatable("recipe.packagedauto.processing.short");
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 	}
 
 	@Override
-	public boolean hasContainerItem() {
+	public boolean hasCraftingRemainingItem() {
 		return false;
 	}
 

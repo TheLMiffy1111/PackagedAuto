@@ -14,8 +14,9 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidAttributes;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 
 // Code from Refined Storage
 public class FluidRenderer {
@@ -37,9 +38,7 @@ public class FluidRenderer {
 
 	private static TextureAtlasSprite getStillFluidSprite(FluidStack fluidStack) {
 		Minecraft minecraft = Minecraft.getInstance();
-		Fluid fluid = fluidStack.getFluid();
-		FluidAttributes attributes = fluid.getAttributes();
-		ResourceLocation fluidStill = attributes.getStillTexture(fluidStack);
+		ResourceLocation fluidStill = IClientFluidTypeExtensions.of(fluidStack.getFluid()).getStillTexture(fluidStack);
 		return minecraft.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidStill);
 	}
 
@@ -70,7 +69,7 @@ public class FluidRenderer {
 	}
 
 	public void render(PoseStack poseStack, int xPosition, int yPosition, FluidStack fluidStack) {
-		render(poseStack, xPosition, yPosition, fluidStack, FluidAttributes.BUCKET_VOLUME);
+		render(poseStack, xPosition, yPosition, fluidStack, FluidType.BUCKET_VOLUME);
 	}
 
 	public void render(PoseStack poseStack, int xPosition, int yPosition, FluidStack fluidStack, int capacity) {
@@ -89,8 +88,7 @@ public class FluidRenderer {
 			return;
 		}
 		TextureAtlasSprite fluidStillSprite = getStillFluidSprite(fluidStack);
-		FluidAttributes attributes = fluid.getAttributes();
-		int fluidColor = attributes.getColor(fluidStack);
+		int fluidColor = IClientFluidTypeExtensions.of(fluid).getTintColor(fluidStack);
 		int amount = fluidStack.getAmount();
 		int scaledAmount = (amount * height) / capacity;
 		if(amount > 0 && scaledAmount < minHeight) {

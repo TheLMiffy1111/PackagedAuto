@@ -41,7 +41,7 @@ public abstract class BaseBlock extends Block implements EntityBlock {
 		if(!level.isClientSide) {
 			BlockEntity blockEntity = level.getBlockEntity(pos);
 			if(blockEntity instanceof MenuProvider menuProvider) {
-				NetworkHooks.openGui((ServerPlayer)player, menuProvider, pos);
+				NetworkHooks.openScreen((ServerPlayer)player, menuProvider, pos);
 			}
 		}
 		return InteractionResult.SUCCESS;

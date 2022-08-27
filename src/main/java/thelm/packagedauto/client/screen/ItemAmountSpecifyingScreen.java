@@ -1,6 +1,6 @@
 package thelm.packagedauto.client.screen;
 
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,7 +18,7 @@ public class ItemAmountSpecifyingScreen extends AmountSpecifyingScreen<ItemAmoun
 	private int maxAmount;
 
 	public ItemAmountSpecifyingScreen(BaseScreen<?> parent, Inventory inventory, int containerSlot, ItemStack stack, int maxAmount) {
-		super(parent, new ItemAmountSpecifyingMenu(inventory, stack), inventory, new TranslatableComponent("gui.packagedauto.item_amount_specifying"));
+		super(parent, new ItemAmountSpecifyingMenu(inventory, stack), inventory, Component.translatable("gui.packagedauto.item_amount_specifying"));
 		imageWidth = 172;
 		imageHeight = 99;
 		this.containerSlot = containerSlot;

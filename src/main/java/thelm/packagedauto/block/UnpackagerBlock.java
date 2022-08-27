@@ -26,11 +26,10 @@ import thelm.packagedauto.block.entity.UnpackagerBlockEntity.PackageTracker;
 public class UnpackagerBlock extends BaseBlock {
 
 	public static final UnpackagerBlock INSTANCE = new UnpackagerBlock();
-	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.CREATIVE_TAB)).setRegistryName("packagedauto:unpackager");
+	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.CREATIVE_TAB));
 
 	protected UnpackagerBlock() {
 		super(BlockBehaviour.Properties.of(Material.METAL).strength(15F, 25F).sound(SoundType.METAL));
-		setRegistryName("packagedauto:unpackager");
 	}
 
 	@Override

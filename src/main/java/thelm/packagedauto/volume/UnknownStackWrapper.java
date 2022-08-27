@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 
@@ -51,16 +50,16 @@ public class UnknownStackWrapper implements IVolumeStackWrapper {
 
 	@Override
 	public Component getDisplayName() {
-		return new TextComponent("Unknown");
+		return Component.literal("Unknown");
 	}
 
 	@Override
 	public Component getAmountDesc() {
-		return new TextComponent("");
+		return Component.literal("");
 	}
 
 	@Override
 	public List<Component> getTooltip() {
-		return Lists.newArrayList(new TextComponent("Unknown"));
+		return Lists.newArrayList(Component.literal("Unknown"));
 	}
 }

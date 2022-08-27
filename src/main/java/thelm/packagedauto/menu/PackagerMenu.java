@@ -12,8 +12,7 @@ import thelm.packagedauto.slot.SingleStackSlot;
 public class PackagerMenu extends BaseMenu<PackagerBlockEntity> {
 
 	public static final MenuType<PackagerMenu> TYPE_INSTANCE = (MenuType<PackagerMenu>)IForgeMenuType.
-			create(new PositionalBlockEntityMenuFactory<>(PackagerMenu::new)).
-			setRegistryName("packagedauto:packager");
+			create(new PositionalBlockEntityMenuFactory<>(PackagerMenu::new));
 
 	public PackagerMenu(int windowId, Inventory inventory, PackagerBlockEntity blockEntity) {
 		super(TYPE_INSTANCE, windowId, inventory, blockEntity);

@@ -14,7 +14,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -22,9 +21,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
@@ -45,8 +43,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			of(MiscHelper.INSTANCE.<BlockEntityType.BlockEntitySupplier<UnpackagerBlockEntity>>conditionalSupplier(
 					()->ModList.get().isLoaded("ae2"),
 					()->()->AEUnpackagerBlockEntity::new, ()->()->UnpackagerBlockEntity::new).get(),
-					UnpackagerBlock.INSTANCE).
-			build(null).setRegistryName("packagedauto:unpackager");
+					UnpackagerBlock.INSTANCE).build(null);
 
 	public static int energyCapacity = 5000;
 	public static int energyUsage = 50;
@@ -69,7 +66,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 
 	@Override
 	protected Component getDefaultName() {
-		return new TranslatableComponent("block.packagedauto.unpackager");
+		return Component.translatable("block.packagedauto.unpackager");
 	}
 
 	@Override
@@ -173,7 +170,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				trackerToEmpty.direction = null;
 				continue;
 			}
-			IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).orElse(null);
+			IItemHandler itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).orElse(null);
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
 				if(stack.getItem() instanceof IVolumePackageItem vPackage &&
@@ -228,7 +225,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.setupToSend();
 			}
-			IItemHandler itemHandler = blockEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).orElse(null);
+			IItemHandler itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).orElse(null);
 			if(blocking) {
 				for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 					ItemStack stack = trackerToEmpty.toSend.get(i);
@@ -295,9 +292,9 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 	protected void chargeEnergy() {
 		int prevStored = energyStorage.getEnergyStored();
 		ItemStack energyStack = itemHandler.getStackInSlot(10);
-		if(energyStack.getCapability(CapabilityEnergy.ENERGY).isPresent()) {
+		if(energyStack.getCapability(ForgeCapabilities.ENERGY).isPresent()) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(energyStack.getCapability(CapabilityEnergy.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
+			energyStorage.receiveEnergy(energyStack.getCapability(ForgeCapabilities.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
 			if(energyStack.getCount() <= 0) {
 				itemHandler.setStackInSlot(10, ItemStack.EMPTY);
 			}

@@ -5,7 +5,6 @@ import java.util.List;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.player.Player;
@@ -27,7 +26,6 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 
 	protected RecipeHolderItem() {
 		super(new Item.Properties().tab(PackagedAuto.CREATIVE_TAB));
-		setRegistryName("packagedauto:recipe_holder");
 	}
 
 	@Override
@@ -47,7 +45,7 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 	public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag isAdvanced) {
 		if(stack.hasTag()) {
 			List<IPackageRecipeInfo> recipeList = getRecipeList(level, stack).getRecipeList();
-			tooltip.add(new TranslatableComponent("item.packagedauto.recipe_holder.recipes"));
+			tooltip.add(Component.translatable("item.packagedauto.recipe_holder.recipes"));
 			for(IPackageRecipeInfo recipe : recipeList) {
 				MutableComponent component = recipe.getRecipeType().getDisplayName().append(": ");
 				for(int i = 0; i < recipe.getOutputs().size(); ++i) {

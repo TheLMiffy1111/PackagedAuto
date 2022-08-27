@@ -25,7 +25,6 @@ public class VolumePackageItem extends Item implements IVolumePackageItem {
 
 	protected VolumePackageItem() {
 		super(new Item.Properties());
-		setRegistryName("packagedauto:volume_package");
 	}
 
 	public static ItemStack makeVolumePackage(IVolumeStackWrapper volumeStack) {

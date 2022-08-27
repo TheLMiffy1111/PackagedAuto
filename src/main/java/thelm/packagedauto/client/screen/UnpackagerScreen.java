@@ -7,8 +7,6 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity.PackageTracker;
@@ -59,7 +57,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		font.draw(poseStack, s, imageWidth/2 - font.width(s)/2, 6, 0x404040);
 		font.draw(poseStack, menu.inventory.getDisplayName().getString(), menu.getPlayerInvX(), menu.getPlayerInvY()-11, 0x404040);
 		if(mouseX-leftPos >= 10 && mouseY-topPos >= 10 && mouseX-leftPos <= 21 && mouseY-topPos <= 49) {
-			renderTooltip(poseStack, new TextComponent(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
+			renderTooltip(poseStack, Component.literal(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
 		}
 		for(GuiEventListener child : children()) {
 			if(child.isMouseOver(mouseX, mouseY) && child instanceof AbstractWidget button) {
@@ -73,7 +71,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 	class ButtonChangeBlocking extends AbstractWidget {
 
 		public ButtonChangeBlocking(int x, int y) {
-			super(x, y, 16, 18, TextComponent.EMPTY);
+			super(x, y, 16, 18, Component.empty());
 		}
 
 		@Override
@@ -86,7 +84,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 
 		@Override
 		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
-			renderTooltip(poseStack, new TranslatableComponent("block.packagedauto.unpackager.blocking."+menu.blockEntity.blocking), mouseX, mouseY);
+			renderTooltip(poseStack, Component.translatable("block.packagedauto.unpackager.blocking."+menu.blockEntity.blocking), mouseX, mouseY);
 		}
 
 		@Override

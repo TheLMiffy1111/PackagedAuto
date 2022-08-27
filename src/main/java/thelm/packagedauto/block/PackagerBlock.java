@@ -19,11 +19,10 @@ import thelm.packagedauto.block.entity.PackagerBlockEntity;
 public class PackagerBlock extends BaseBlock {
 
 	public static final PackagerBlock INSTANCE = new PackagerBlock();
-	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.CREATIVE_TAB)).setRegistryName("packagedauto:packager");
+	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.CREATIVE_TAB));
 
 	protected PackagerBlock() {
 		super(BlockBehaviour.Properties.of(Material.METAL).strength(15F, 25F).sound(SoundType.METAL));
-		setRegistryName("packagedauto:packager");
 	}
 
 	@Override

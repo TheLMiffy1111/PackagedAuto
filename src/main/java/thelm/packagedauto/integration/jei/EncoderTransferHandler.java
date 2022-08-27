@@ -2,14 +2,17 @@ package thelm.packagedauto.integration.jei;
 
 
 import java.util.List;
+import java.util.Optional;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
+import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.menu.EncoderMenu;
@@ -30,8 +33,13 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderMen
 	}
 
 	@Override
-	public Class<Object> getRecipeClass() {
-		return Object.class;
+	public Optional<MenuType<EncoderMenu>> getMenuType() {
+		return Optional.empty();
+	}
+
+	@Override
+	public RecipeType<Object> getRecipeType() {
+		return null;
 	}
 
 	@Override

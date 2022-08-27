@@ -27,7 +27,7 @@ public interface IPackageRecipeType {
 
 	boolean hasMachine();
 	
-	boolean hasContainerItem();
+	boolean hasCraftingRemainingItem();
 	
 	default List<ResourceLocation> getJEICategories() {
 		return new ArrayList<>();

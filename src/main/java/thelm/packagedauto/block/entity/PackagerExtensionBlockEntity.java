@@ -10,7 +10,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -18,8 +17,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.util.RecipeMatcher;
-import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.ItemStackHandler;
@@ -40,8 +39,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 			of(MiscHelper.INSTANCE.<BlockEntityType.BlockEntitySupplier<PackagerExtensionBlockEntity>>conditionalSupplier(
 					()->ModList.get().isLoaded("ae2"),
 					()->()->AEPackagerExtensionBlockEntity::new, ()->()->PackagerExtensionBlockEntity::new).get(),
-					PackagerExtensionBlock.INSTANCE).
-			build(null).setRegistryName("packagedauto:packager_extension");
+					PackagerExtensionBlock.INSTANCE).build(null);
 
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
@@ -67,7 +65,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 
 	@Override
 	protected Component getDefaultName() {
-		return new TranslatableComponent("block.packagedauto.packager_extension");
+		return Component.translatable("block.packagedauto.packager_extension");
 	}
 
 	@Override
@@ -312,9 +310,9 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	protected void chargeEnergy() {
 		int prevStored = energyStorage.getEnergyStored();
 		ItemStack energyStack = itemHandler.getStackInSlot(10);
-		if(energyStack.getCapability(CapabilityEnergy.ENERGY).isPresent()) {
+		if(energyStack.getCapability(ForgeCapabilities.ENERGY).isPresent()) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(energyStack.getCapability(CapabilityEnergy.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
+			energyStorage.receiveEnergy(energyStack.getCapability(ForgeCapabilities.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
 			if(energyStack.getCount() <= 0) {
 				itemHandler.setStackInSlot(10, ItemStack.EMPTY);
 			}

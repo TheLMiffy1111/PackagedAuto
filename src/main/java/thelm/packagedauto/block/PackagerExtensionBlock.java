@@ -19,11 +19,10 @@ import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 public class PackagerExtensionBlock extends BaseBlock {
 
 	public static final PackagerExtensionBlock INSTANCE = new PackagerExtensionBlock();
-	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.CREATIVE_TAB)).setRegistryName("packagedauto:packager_extension");
+	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.CREATIVE_TAB));
 
 	protected PackagerExtensionBlock() {
 		super(BlockBehaviour.Properties.of(Material.METAL).strength(15F, 25F).sound(SoundType.METAL));
-		setRegistryName("packagedauto:packager_extension");
 	}
 
 	@Override

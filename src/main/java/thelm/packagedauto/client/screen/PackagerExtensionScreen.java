@@ -7,7 +7,6 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import thelm.packagedauto.menu.PackagerExtensionMenu;
@@ -47,7 +46,7 @@ public class PackagerExtensionScreen extends BaseScreen<PackagerExtensionMenu> {
 		font.draw(poseStack, s, imageWidth/2 - font.width(s)/2, 6, 0x404040);
 		font.draw(poseStack, menu.inventory.getDisplayName().getString(), menu.getPlayerInvX(), menu.getPlayerInvY()-11, 0x404040);
 		if(mouseX-leftPos >= 10 && mouseY-topPos >= 10 && mouseX-leftPos <= 21 && mouseY-topPos <= 49) {
-			renderTooltip(poseStack, new TextComponent(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
+			renderTooltip(poseStack, Component.literal(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
 		}
 		for(GuiEventListener child : children()) {
 			if(child.isMouseOver(mouseX, mouseY) && child instanceof AbstractWidget button) {
@@ -61,7 +60,7 @@ public class PackagerExtensionScreen extends BaseScreen<PackagerExtensionMenu> {
 	class ButtonChangePackaging extends AbstractWidget {
 
 		public ButtonChangePackaging(int x, int y) {
-			super(x, y, 16, 18, TextComponent.EMPTY);
+			super(x, y, 16, 18, Component.empty());
 		}
 
 		@Override

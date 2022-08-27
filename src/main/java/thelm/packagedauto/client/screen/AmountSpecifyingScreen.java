@@ -8,8 +8,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import thelm.packagedauto.menu.BaseMenu;
@@ -39,10 +37,10 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		clearWidgets();
 		super.init();
 
-		okButton = addButton(leftPos+114, topPos+22, 50, 20, new TranslatableComponent("misc.packagedauto.set"), true, true, btn->onOkButtonPressed(hasShiftDown()));
-		cancelButton = addButton(leftPos+114, topPos+22+24, 50, 20, new TranslatableComponent("gui.cancel"), true, true, btn->close());
+		okButton = addButton(leftPos+114, topPos+22, 50, 20, Component.translatable("misc.packagedauto.set"), true, true, btn->onOkButtonPressed(hasShiftDown()));
+		cancelButton = addButton(leftPos+114, topPos+22+24, 50, 20, Component.translatable("gui.cancel"), true, true, btn->close());
 
-		amountField = new EditBox(font, leftPos+9, topPos+51, 63, font.lineHeight, TextComponent.EMPTY);
+		amountField = new EditBox(font, leftPos+9, topPos+51, 63, font.lineHeight, Component.empty());
 		amountField.setBordered(false);
 		amountField.setValue(String.valueOf(getDefaultAmount()));
 		amountField.setTextColor(0xFFFFFF);
@@ -70,7 +68,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "+" + increment;
-			addButton(leftPos+xx, topPos+20, width, 20, new TextComponent(text), true, true, btn->onIncrementButtonClicked(increment));
+			addButton(leftPos+xx, topPos+20, width, 20, Component.literal(text), true, true, btn->onIncrementButtonClicked(increment));
 			xx += width;
 		}
 
@@ -78,7 +76,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "-" + increment;
-			addButton(leftPos+xx, topPos+imageHeight-20-7, width, 20, new TextComponent(text), true, true, btn->onIncrementButtonClicked(-increment));
+			addButton(leftPos+xx, topPos+imageHeight-20-7, width, 20, Component.literal(text), true, true, btn->onIncrementButtonClicked(-increment));
 			xx += width;
 		}
 	}

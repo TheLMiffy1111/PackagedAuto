@@ -5,8 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
@@ -36,7 +34,7 @@ public class FluidPackageFillerScreen extends BaseScreen<FluidPackageFillerMenu>
 	protected void init() {
 		clearWidgets();
 		super.init();
-		amountField = new EditBox(font, leftPos+30, topPos+57, 41, font.lineHeight, TextComponent.EMPTY);
+		amountField = new EditBox(font, leftPos+30, topPos+57, 41, font.lineHeight, Component.empty());
 		amountField.setBordered(false);
 		amountField.setValue(String.valueOf(menu.blockEntity.requiredAmount));
 		amountField.setTextColor(0xFFFFFF);
@@ -93,13 +91,13 @@ public class FluidPackageFillerScreen extends BaseScreen<FluidPackageFillerMenu>
 		font.draw(poseStack, s, imageWidth/2 - font.width(s)/2, 6, 0x404040);
 		font.draw(poseStack, menu.inventory.getDisplayName().getString(), menu.getPlayerInvX(), menu.getPlayerInvY()-11, 0x404040);
 		if(mouseX-leftPos >= 10 && mouseY-topPos >= 10 && mouseX-leftPos <= 21 && mouseY-topPos <= 49) {
-			renderTooltip(poseStack, new TextComponent(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
+			renderTooltip(poseStack, Component.literal(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
 		}
 		if(!menu.blockEntity.isWorking && mouseX-leftPos >= 102 && mouseY-topPos >= 30 && mouseX-leftPos <= 107 && mouseY-topPos <= 34) {
-			renderTooltip(poseStack, new TranslatableComponent("block.packagedauto.fluid_package_filler.redstone"), mouseX-leftPos, mouseY-topPos);
+			renderTooltip(poseStack, Component.translatable("block.packagedauto.fluid_package_filler.redstone"), mouseX-leftPos, mouseY-topPos);
 		}
 		if(menu.blockEntity.isWorking && !menu.blockEntity.currentFluid.isEmpty() && mouseX-leftPos >= 80 && mouseY-topPos >= 17 && mouseX-leftPos <= 95 && mouseY-topPos <= 68) {
-			renderTooltip(poseStack, new TextComponent("").append(menu.blockEntity.currentFluid.getDisplayName()).append(" "+menu.blockEntity.amount+" / "+menu.blockEntity.requiredAmount+" mB"), mouseX-leftPos, mouseY-topPos);
+			renderTooltip(poseStack, Component.literal("").append(menu.blockEntity.currentFluid.getDisplayName()).append(" "+menu.blockEntity.amount+" / "+menu.blockEntity.requiredAmount+" mB"), mouseX-leftPos, mouseY-topPos);
 		}
 		super.renderLabels(poseStack, mouseX, mouseY);
 	}

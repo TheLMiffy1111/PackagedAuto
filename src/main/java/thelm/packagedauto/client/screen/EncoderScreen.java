@@ -9,8 +9,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -47,8 +45,8 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 			addRenderableWidget(new ButtonPatternSlot(i, leftPos+29+(i%10)*18, topPos+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
 		}
 		addRenderableWidget(new ButtonRecipeType(leftPos+204, topPos+74));
-		addRenderableWidget(new ButtonSavePatterns(leftPos+213, topPos+16, new TranslatableComponent("block.packagedauto.encoder.save")));
-		addRenderableWidget(new ButtonLoadPatterns(leftPos+213, topPos+34, new TranslatableComponent("block.packagedauto.encoder.load")));
+		addRenderableWidget(new ButtonSavePatterns(leftPos+213, topPos+16, Component.translatable("block.packagedauto.encoder.save")));
+		addRenderableWidget(new ButtonLoadPatterns(leftPos+213, topPos+34, Component.translatable("block.packagedauto.encoder.load")));
 	}
 
 	@Override
@@ -93,7 +91,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		int id;
 
 		ButtonPatternSlot(int id, int x, int y) {
-			super(x, y, 18, 18, TextComponent.EMPTY);
+			super(x, y, 18, 18, Component.empty());
 			this.id = id;
 		}
 
@@ -120,7 +118,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
 		@Override
 		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
-			renderTooltip(poseStack, new TranslatableComponent("block.packagedauto.encoder.pattern_slot", String.format("%02d", id)), mouseX, mouseY);
+			renderTooltip(poseStack, Component.translatable("block.packagedauto.encoder.pattern_slot", String.format("%02d", id)), mouseX, mouseY);
 		}
 
 		@Override
@@ -139,7 +137,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 	class ButtonRecipeType extends AbstractWidget {
 
 		ButtonRecipeType(int x, int y) {
-			super(x, y, 18, 18, TextComponent.EMPTY);
+			super(x, y, 18, 18, Component.empty());
 		}
 
 		@Override
@@ -162,7 +160,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
 		@Override
 		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
-			renderTooltip(poseStack, new TranslatableComponent("block.packagedauto.encoder.change_recipe_type"), mouseX, mouseY);
+			renderTooltip(poseStack, Component.translatable("block.packagedauto.encoder.change_recipe_type"), mouseX, mouseY);
 		}
 
 		@Override
@@ -188,7 +186,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		@Override
 		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
 			if(hasShiftDown()) {
-				renderTooltip(poseStack, new TranslatableComponent("block.packagedauto.encoder.save_single"), mouseX, mouseY);
+				renderTooltip(poseStack, Component.translatable("block.packagedauto.encoder.save_single"), mouseX, mouseY);
 			}
 		}
 

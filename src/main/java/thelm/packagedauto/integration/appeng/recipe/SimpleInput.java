@@ -39,8 +39,8 @@ public class SimpleInput implements IInput {
 
 	@Override
 	public AEKey getRemainingKey(AEKey template) {
-		if(recipe != null && recipe.getRecipeType().hasContainerItem() && template instanceof AEItemKey itemTemplate) {
-			return AEItemKey.of(recipe.getContainerItem(itemTemplate.toStack()));
+		if(recipe != null && recipe.getRecipeType().hasCraftingRemainingItem() && template instanceof AEItemKey itemTemplate) {
+			return AEItemKey.of(recipe.getCraftingRemainingItem(itemTemplate.toStack()));
 		}
 		return null;
 	}
