@@ -1,7 +1,6 @@
 package thelm.packagedauto.integration.jei;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import mezz.jei.api.gui.handlers.IGuiClickableArea;
@@ -38,6 +37,6 @@ public class EncoderGuiHandler implements IGuiContainerHandler<EncoderScreen> {
 				}
 			}
 		};
-		return Collections.singleton(clickableArea);
+		return List.of(clickableArea);
 	}
 }

@@ -1,6 +1,5 @@
 package thelm.packagedauto.recipe;
 
-import java.util.Collections;
 import java.util.List;
 
 import net.minecraft.world.inventory.CraftingContainer;
@@ -20,6 +19,6 @@ public interface ICraftingPackageRecipeInfo extends IPackageRecipeInfo {
 
 	@Override
 	default List<ItemStack> getOutputs() {
-		return Collections.singletonList(getOutput());
+		return List.of(getOutput());
 	}
 }
