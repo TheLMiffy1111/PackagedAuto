@@ -1,6 +1,5 @@
 package thelm.packagedauto.inventory;
 
-import java.util.Collections;
 import java.util.List;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -66,7 +65,7 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 	public void updateRecipeInfo() {
 		validateRecipeType();
 		IPackageRecipeInfo info = recipeType.getNewRecipeInfo();
-		info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), blockEntity.getLevel());
+		info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : List.of(), blockEntity.getLevel());
 		if(info.isValid()) {
 			if(recipeInfo == null || !recipeInfo.equals(info)) {
 				recipeInfo = info;
@@ -117,6 +116,19 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 			}
 		}
 		updateRecipeInfo();
+		for(EncoderPatternItemHandler patternItemHandler : blockEntity.patternItemHandlers) {
+			if(patternItemHandler != this) {
+				patternItemHandler.setRecipeTypeIfEmpty(recipeType);
+			}
+		}
+	}
+
+	public void setRecipeTypeIfEmpty(IPackageRecipeType recipeType) {
+		if(stacks.stream().allMatch(ItemStack::isEmpty)) {
+			this.recipeType = recipeType;
+			validateRecipeType();
+			updateRecipeInfo();
+		}
 	}
 
 	public void setRecipe(Int2ObjectMap<ItemStack> map) {

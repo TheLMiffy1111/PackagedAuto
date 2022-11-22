@@ -213,6 +213,8 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new LoadRecipeListPacket());
+			menu.blockEntity.loadRecipeList();
+			menu.setupSlots();
 		}
 
 		@Override
