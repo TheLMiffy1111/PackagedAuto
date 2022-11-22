@@ -1,0 +1,11 @@
+{
+    "replace": false,
+    "values": [
+        "packagedauto:encoder",
+        "packagedauto:packager",
+        "packagedauto:packager_extension",
+        "packagedauto:unpackager",
+        "packagedauto:crafter",
+        "packagedauto:fluid_package_filler"
+    ]
+}

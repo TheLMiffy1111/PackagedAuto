@@ -1,6 +1,5 @@
 package thelm.packagedauto.integration.jei;
 
-import java.util.Collections;
 import java.util.List;
 
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
@@ -25,7 +24,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<En
 			return gui.menu.slots.stream().filter(s->s instanceof FalseCopySlot).
 					<Target<I>>map(s->new SlotTarget<>(gui, s)).toList();
 		}
-		return Collections.emptyList();
+		return List.of();
 	}
 
 	@Override

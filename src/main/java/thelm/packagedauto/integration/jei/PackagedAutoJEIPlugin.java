@@ -1,6 +1,5 @@
 package thelm.packagedauto.integration.jei;
 
-import java.util.Collections;
 import java.util.List;
 
 import mezz.jei.api.IModPlugin;
@@ -17,7 +16,7 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 	public static final ResourceLocation UID = new ResourceLocation("packagedauto:jei");
 
 	public static IJeiRuntime jeiRuntime;
-	public static List<ResourceLocation> allCategories = Collections.emptyList();
+	public static List<ResourceLocation> allCategories = List.of();
 
 	@Override
 	public ResourceLocation getPluginUid() {

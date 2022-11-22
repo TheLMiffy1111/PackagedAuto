@@ -1,6 +1,5 @@
 package thelm.packagedauto.recipe;
 
-import java.util.Collections;
 import java.util.List;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -23,7 +22,7 @@ public class CraftingPackageRecipeType implements IPackageRecipeType {
 	public static final CraftingPackageRecipeType INSTANCE = new CraftingPackageRecipeType();
 	public static final ResourceLocation NAME = new ResourceLocation("packagedauto:crafting");
 	public static final IntSet SLOTS;
-	public static final List<ResourceLocation> CATEGORIES = Collections.singletonList(new ResourceLocation("minecraft:crafting"));
+	public static final List<ResourceLocation> CATEGORIES = List.of(new ResourceLocation("minecraft:crafting"));
 	public static final Vec3i COLOR = new Vec3i(139, 139, 139);
 	public static final Vec3i COLOR_DISABLED = new Vec3i(64, 64, 64);
 

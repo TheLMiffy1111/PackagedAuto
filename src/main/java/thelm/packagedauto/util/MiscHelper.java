@@ -2,7 +2,6 @@ package thelm.packagedauto.util;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -75,7 +74,7 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public List<ItemStack> condenseStacks(ItemStack... stacks) {
-		return condenseStacks(Arrays.asList(stacks));
+		return condenseStacks(List.of(stacks));
 	}
 
 	@Override
@@ -199,7 +198,7 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public List<ItemStack> getRemainingItems(ItemStack... stacks) {
-		return getRemainingItems(Arrays.asList(stacks));
+		return getRemainingItems(List.of(stacks));
 	}
 
 	@Override
