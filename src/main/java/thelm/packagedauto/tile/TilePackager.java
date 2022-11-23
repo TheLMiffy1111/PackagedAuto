@@ -26,8 +26,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.crafting.IngredientNBT;
 import net.minecraftforge.common.util.RecipeMatcher;
@@ -501,8 +499,8 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	public static enum Mode {
 		EXACT, DISJOINT, FIRST;
 
-		public ITextComponent getTooltip() {
-			return new TextComponentTranslation("block.packagedauto.packager.mode."+name().toLowerCase(Locale.US));
+		public String getTooltip() {
+			return I18n.translateToLocal("tile.packagedauto.packager.mode."+name().toLowerCase(Locale.US));
 		}
 	}
 }

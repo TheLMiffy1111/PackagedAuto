@@ -79,7 +79,7 @@ public class GuiPackagerExtension extends GuiContainerTileBase<ContainerPackager
 
 		@Override
 		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
-			drawHoveringText(container.tile.mode.getTooltip().toString(), mouseX, mouseY);
+			drawHoveringText(container.tile.mode.getTooltip(), mouseX, mouseY);
 		}
 	}
 }
