@@ -33,8 +33,8 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 
 	public AmountSpecifyingScreen(BaseScreen<?> parent, PlayerInventory playerInventory, int containerSlot, ItemStack stack, int maxAmount) {
 		super(new AmountSpecifyingContainer(playerInventory, stack), playerInventory, new TranslationTextComponent("gui.packagedauto.amount_specifying"));
-		width = 172;
-		height = 99;
+		xSize = 172;
+		ySize = 99;
 		this.parent = parent;
 		this.containerSlot = containerSlot;
 		this.stack = stack;
@@ -104,7 +104,7 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "-" + increment;
-			addButton(guiLeft+xx, guiTop+99-20-7, width, 20, new StringTextComponent(text), true, true, btn->onIncrementButtonClicked(-increment));
+			addButton(guiLeft+xx, guiTop+ySize-20-7, width, 20, new StringTextComponent(text), true, true, btn->onIncrementButtonClicked(-increment));
 			xx += width;
 		}
 	}
