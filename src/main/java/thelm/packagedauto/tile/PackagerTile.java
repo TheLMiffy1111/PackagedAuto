@@ -361,6 +361,7 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 
 	public void changePackagingMode() {
 		mode = Mode.values()[((mode.ordinal()+1) % 3)];
+		markDirty();
 	}
 
 	@Override

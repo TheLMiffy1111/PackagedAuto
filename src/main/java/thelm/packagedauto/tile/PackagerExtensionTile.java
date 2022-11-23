@@ -390,6 +390,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 
 	public void changePackagingMode() {
 		mode = PackagerTile.Mode.values()[((mode.ordinal()+1) % 3)];
+		markDirty();
 	}
 
 	@Override

@@ -291,6 +291,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 
 	public void changeBlockingMode() {
 		blocking = !blocking;
+		markDirty();
 	}
 
 	@Override
