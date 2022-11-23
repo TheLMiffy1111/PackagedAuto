@@ -461,6 +461,7 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 
 	public void changePackagingMode() {
 		mode = Mode.values()[((mode.ordinal()+1) % 3)];
+		markDirty();
 	}
 
 	@Override

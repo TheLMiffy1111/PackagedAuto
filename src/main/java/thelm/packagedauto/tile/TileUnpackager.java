@@ -411,6 +411,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 
 	public void changeBlockingMode() {
 		blocking = !blocking;
+		markDirty();
 	}
 
 	@SideOnly(Side.CLIENT)
