@@ -2,8 +2,7 @@ package thelm.packagedauto.integration.jei;
 
 import java.util.Collections;
 import java.util.List;
-
-import com.google.common.collect.Lists;
+import java.util.stream.Collectors;
 
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -41,7 +40,7 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 	@Override
 	public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
 		PackagedAutoJEIPlugin.jeiRuntime = jeiRuntime;
-		allCategories = Lists.transform(jeiRuntime.getRecipeManager().getRecipeCategories(), IRecipeCategory::getUid);
+		allCategories = jeiRuntime.getRecipeManager().getRecipeCategories(null, false).stream().map(IRecipeCategory::getUid).collect(Collectors.toList());
 	}
 
 	public static List<ResourceLocation> getAllRecipeCategories() {

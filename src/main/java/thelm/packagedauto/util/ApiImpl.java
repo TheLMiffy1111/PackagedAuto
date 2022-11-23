@@ -1,13 +1,12 @@
 package thelm.packagedauto.util;
 
+import java.util.Collections;
 import java.util.NavigableMap;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
@@ -22,7 +21,7 @@ public class ApiImpl extends PackagedAutoApi {
 	public static final ApiImpl INSTANCE = new ApiImpl();
 
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final SortedMap<ResourceLocation, IPackageRecipeType> REGISTRY = new TreeMap<>();
+	private static final NavigableMap<ResourceLocation, IPackageRecipeType> REGISTRY = new TreeMap<>();
 	private static final Multimap<String, IPackageRecipeType> ORDER = MultimapBuilder.treeKeys().arrayListValues().build();
 	private static final IntIdentityHashBiMap<IPackageRecipeType> IDS = new IntIdentityHashBiMap<>(4);
 	private static int id = 0;
@@ -65,7 +64,7 @@ public class ApiImpl extends PackagedAutoApi {
 
 	@Override
 	public NavigableMap<ResourceLocation, IPackageRecipeType> getRecipeTypeRegistry() {
-		return ImmutableSortedMap.copyOf(REGISTRY);
+		return Collections.unmodifiableNavigableMap(REGISTRY);
 	}
 
 	@Override

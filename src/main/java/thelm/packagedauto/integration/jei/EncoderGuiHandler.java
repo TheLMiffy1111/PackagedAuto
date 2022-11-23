@@ -17,22 +17,20 @@ public class EncoderGuiHandler implements IGuiContainerHandler<EncoderScreen> {
 	@Override
 	public Collection<IGuiClickableArea> getGuiClickableAreas(EncoderScreen containerScreen, double mouseX, double mouseY) {
 		Rectangle2d area = new Rectangle2d(172, 129, 22, 16);
-		IGuiClickableArea clickableArea = new IGuiClickableArea() {
-			@Override
-			public Rectangle2d getArea() {
-				return area;
-			}
-
-			@Override
-			public void onClick(IFocusFactory focusFactory, IRecipesGui recipesGui) {
-				List<ResourceLocation> categories = containerScreen.container.patternItemHandler.recipeType.getJEICategories();
-				if(categories.isEmpty()) {
-					categories = PackagedAutoJEIPlugin.getAllRecipeCategories();
+		List<ResourceLocation> categories = containerScreen.container.patternItemHandler.recipeType.getJEICategories();
+		if(!categories.isEmpty()) {
+			return Collections.singleton(new IGuiClickableArea() {
+				@Override
+				public Rectangle2d getArea() {
+					return area;
 				}
-				recipesGui.showCategories(categories);
-			}
-		};
-		return Collections.singleton(clickableArea);
-	}
 
+				@Override
+				public void onClick(IFocusFactory focusFactory, IRecipesGui recipesGui) {
+					recipesGui.showCategories(categories);
+				}
+			});
+		}
+		return Collections.emptyList();
+	}
 }

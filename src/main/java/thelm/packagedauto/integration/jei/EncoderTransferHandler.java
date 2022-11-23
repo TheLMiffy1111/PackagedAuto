@@ -1,5 +1,7 @@
 package thelm.packagedauto.integration.jei;
 
+import java.util.List;
+
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
@@ -30,7 +32,7 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderCon
 	public IRecipeTransferError transferRecipe(EncoderContainer container, Object recipe, IRecipeLayout recipeLayout, PlayerEntity player, boolean maxTransfer, boolean doTransfer) {
 		ResourceLocation category = recipeLayout.getRecipeCategory().getUid();
 		IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
-		if(!(recipeType.getJEICategories().contains(category))) {
+		if(!recipeType.getJEICategories().contains(category)) {
 			return transferHelper.createInternalError();
 		}
 		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(new RecipeLayoutWrapper(recipeLayout));
