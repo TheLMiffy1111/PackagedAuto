@@ -349,6 +349,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 
 	public void changeBlockingMode() {
 		blocking = !blocking;
+		setChanged();
 	}
 
 	@Override

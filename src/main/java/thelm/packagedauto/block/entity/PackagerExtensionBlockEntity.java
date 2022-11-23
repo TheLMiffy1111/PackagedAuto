@@ -382,6 +382,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 
 	public void changePackagingMode() {
 		mode = PackagerBlockEntity.Mode.values()[((mode.ordinal()+1) % 3)];
+		setChanged();
 	}
 
 	@Override
