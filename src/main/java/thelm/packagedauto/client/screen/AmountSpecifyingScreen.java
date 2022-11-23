@@ -5,12 +5,13 @@ import org.lwjgl.glfw.GLFW;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import thelm.packagedauto.container.AmountSpecifyingContainer;
@@ -28,8 +29,6 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 	private int maxAmount;
 
 	protected TextFieldWidget amountField;
-	protected Button okButton;
-	protected Button cancelButton;
 
 	public AmountSpecifyingScreen(BaseScreen<?> parent, PlayerInventory playerInventory, int containerSlot, ItemStack stack, int maxAmount) {
 		super(new AmountSpecifyingContainer(playerInventory, stack), playerInventory, new TranslationTextComponent("gui.packagedauto.amount_specifying"));
@@ -65,8 +64,8 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 		buttons.clear();
 		super.init();
 
-		okButton = addButton(guiLeft+114, guiTop+22, 50, 20, new TranslationTextComponent("misc.packagedauto.set"), true, true, btn->onOkButtonPressed(hasShiftDown()));
-		cancelButton = addButton(guiLeft+114, guiTop+22+24, 50, 20, new TranslationTextComponent("gui.cancel"), true, true, btn->close());
+		addButton(new ButtonSet(guiLeft+114, guiTop+22, new TranslationTextComponent("misc.packagedauto.set")));
+		addButton(new ButtonCancel(guiLeft+114, guiTop+22+24, new TranslationTextComponent("gui.cancel")));
 
 		amountField = new TextFieldWidget(font, guiLeft+9, guiTop+51, 63, font.FONT_HEIGHT, StringTextComponent.EMPTY);
 		amountField.setEnableBackgroundDrawing(false);
@@ -85,27 +84,23 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 			}
 		});
 		amountField.changeFocus(true);
-
 		addButton(amountField);
 		setListener(amountField);
 
 		int[] increments = getIncrements();
-
 		int xx = 7;
-		int width = 34;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "+" + increment;
-			addButton(guiLeft+xx, guiTop+20, width, 20, new StringTextComponent(text), true, true, btn->onIncrementButtonClicked(increment));
-			xx += width;
+			addButton(new ButtonIncrement(increment, guiLeft+xx, guiTop+20, new StringTextComponent(text)));
+			xx += 34;
 		}
-
 		xx = 7;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "-" + increment;
-			addButton(guiLeft+xx, guiTop+ySize-20-7, width, 20, new StringTextComponent(text), true, true, btn->onIncrementButtonClicked(-increment));
-			xx += width;
+			addButton(new ButtonIncrement(-increment, guiLeft+xx, guiTop+ySize-20-7, new StringTextComponent(text)));
+			xx += 34;
 		}
 	}
 
@@ -140,7 +135,7 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 		return super.keyPressed(key, scanCode, modifiers);
 	}
 
-	private void onIncrementButtonClicked(int increment) {
+	protected void onIncrementButtonClicked(int increment) {
 		int oldAmount = 0;
 		try {
 			oldAmount = Integer.parseInt(amountField.getText());
@@ -171,5 +166,44 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 
 	public BaseScreen<?> getParent() {
 		return parent;
+	}
+
+	class ButtonSet extends Widget {
+
+		public ButtonSet(int x, int y, ITextComponent text) {
+			super(x, y, 50, 20, text);
+		}
+
+		@Override
+		public void onClick(double mouseX, double mouseY) {
+			onOkButtonPressed(hasShiftDown());
+		}
+	}
+
+	class ButtonCancel extends Widget {
+
+		public ButtonCancel(int x, int y, ITextComponent text) {
+			super(x, y, 50, 20, text);
+		}
+
+		@Override
+		public void onClick(double mouseX, double mouseY) {
+			close();
+		}
+	}
+
+	class ButtonIncrement extends Widget {
+
+		int increment;
+
+		public ButtonIncrement(int increment, int x, int y, ITextComponent text) {
+			super(x, y, 34, 20, text);
+			this.increment = increment;
+		}
+
+		@Override
+		public void onClick(double mouseX, double mouseY) {
+			onIncrementButtonClicked(increment);
+		}
 	}
 }

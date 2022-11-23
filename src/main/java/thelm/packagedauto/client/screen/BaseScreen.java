@@ -45,7 +45,7 @@ public abstract class BaseScreen<C extends BaseContainer<?>> extends ContainerSc
 
 	@Override
 	protected void handleMouseClick(Slot slot, int slotId, int mouseButton, ClickType type) {
-		boolean valid = type != ClickType.QUICK_MOVE && playerInventory.getItemStack().isEmpty();
+		boolean valid = type != ClickType.QUICK_MOVE && minecraft.player.inventory.getItemStack().isEmpty();
 		if(valid && slot instanceof FalseCopySlot && slot.isEnabled()) {
 			if(!slot.getStack().isEmpty()) {
 				minecraft.displayGuiScreen(new AmountSpecifyingScreen(
@@ -57,17 +57,5 @@ public abstract class BaseScreen<C extends BaseContainer<?>> extends ContainerSc
 		else {
 			super.handleMouseClick(slot, slotId, mouseButton, type);
 		}
-	}
-
-	public boolean inBounds(int x, int y, int w, int h, double ox, double oy) {
-		return ox >= x && ox <= x + w && oy >= y && oy <= y + h;
-	}
-
-	public Button addButton(int x, int y, int w, int h, ITextComponent text, boolean enabled, boolean visible, Button.IPressable onPress) {
-		Button button = new Button(x, y, w, h, text, onPress);
-		button.active = enabled;
-		button.visible = visible;
-		addButton(button);
-		return button;
 	}
 }
