@@ -43,8 +43,7 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderMen
 			return transferHelper.createInternalError();
 		}
 		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
-		List<ResourceLocation> typeCategories = recipeType.getJEICategories();
-		if(!typeCategories.isEmpty() && !typeCategories.stream().anyMatch(recipeType.getJEICategories()::contains)) {
+		if(!categories.stream().anyMatch(recipeType.getJEICategories()::contains)) {
 			return transferHelper.createInternalError();
 		}
 		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(new RecipeSlotsViewWrapper(recipe, recipeSlots));
