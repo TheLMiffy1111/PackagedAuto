@@ -89,10 +89,10 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 			IPackageItem packageItem = (IPackageItem)listStack.getItem();
 			tile.patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 		}
-		if(tile.forceDisjoint) {
+		if(tile.mode == PackagerTile.Mode.FIRST) {
 			tile.disjoint = true;
 		}
-		else if(tile.checkDisjoint) {
+		else if(tile.mode == PackagerTile.Mode.DISJOINT) {
 			tile.disjoint = MiscHelper.INSTANCE.arePatternsDisjoint(tile.patternList);
 		}
 		if(tile.getWorld() != null && !tile.getWorld().isRemote) {

@@ -17,7 +17,6 @@ buildscript {
     }
     dependencies {
         classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.1.+", changing: true
-        classpath "org.spongepowered:mixingradle:0.7-SNAPSHOT"
     }
 }
 
@@ -31,16 +30,13 @@ repositories {
         dirs "libs"
     }
     maven {
-        url = "https://repo.spongepowered.org/maven"
+        url = "https://repo.spongepowered.org/maven/"
     }
     maven {
         url = "https://dvs1.progwml6.com/files/maven/"
     }
     maven {
         url = "https://maven.blamejared.com/"
-    }
-    maven {
-        url = "https://maven.covers1624.net/"
     }
     maven {
         url = "https://jitpack.io/"
@@ -60,15 +56,14 @@ sourceSets {
     main
 }
 
-version = "2.0.0.7"
+version = "2.0.1.8"
 group = "thelm.packagedauto"
 archivesBaseName = "PackagedAuto-1.16.5"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = "1.8"
 
 minecraft {
-    mappings channel: "snapshot", version: "20201028-1.16.3"
-    accessTransformer = file("src/main/resources/META-INF/accesstransformer.cfg")
+    mappings channel: "snapshot", version: "20210309-1.16.5"
     runs {
         client = {
             properties "forge.logging.markers": "SCAN,REGISTRIES,REGISTRYDUMP"
@@ -90,24 +85,23 @@ minecraft {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.16.5-36.2.30"
+    minecraft "net.minecraftforge:forge:1.16.5-36.2.39"
 
     implementation fg.deobf("appeng:appliedenergistics2:8.4.7")
-    implementation fg.deobf("mezz.jei:jei-1.16.5:7.7.1.152")
-    implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-1.16.5:7.1.2.505")
+    implementation fg.deobf("mezz.jei:jei-1.16.5:7.7.1.153")
+    implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-1.16.5:7.1.2.515")
+    implementation fg.deobf("vazkii.patchouli:Patchouli:1.16.4-53.3")
+    implementation fg.deobf("com.jozufozu.flywheel:Flywheel:1.16-0.2.5.53")
+    implementation fg.deobf("com.simibubi.create:Create:mc1.16.5_v0.3.2g+480")
     implementation fg.deobf("mekanism:Mekanism:1.16.5-10.1.2.457")
     implementation fg.deobf("mekanism:Mekanism:1.16.5-10.1.2.457:generators")
-    implementation fg.deobf("vazkii.patchouli:Patchouli:1.16.4-53.2")
-    implementation fg.deobf("slimeknights.mantle:Mantle:1.16.5-1.6.157")
 
     //JitPack
 
     //CurseMaven
-    implementation fg.deobf("curse.maven:cofh-core-69162:3788884")
-    implementation fg.deobf("curse.maven:thermal-foundation-222880:3788893")
-    implementation fg.deobf("curse.maven:thermal-expansion-69163:3788892")
     implementation fg.deobf("curse.maven:cucumber-272335:3507886")
-    implementation fg.deobf("curse.maven:extended-crafting-268387:3591820")
+    implementation fg.deobf("curse.maven:extended-crafting-268387:3881753")
+    implementation fg.deobf("curse.maven:ato-405593:3405905")
 }
 
 jar {

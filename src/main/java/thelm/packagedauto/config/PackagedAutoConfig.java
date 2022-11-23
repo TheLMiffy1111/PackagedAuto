@@ -21,15 +21,11 @@ public class PackagedAutoConfig {
 	public static ForgeConfigSpec.IntValue packagerEnergyReq;
 	public static ForgeConfigSpec.IntValue packagerEnergyUsage;
 	public static ForgeConfigSpec.BooleanValue packagerDrawMEEnergy;
-	public static ForgeConfigSpec.BooleanValue packagerCheckDisjoint;
-	public static ForgeConfigSpec.BooleanValue packagerForceDisjoint;
 
 	public static ForgeConfigSpec.IntValue packagerExtensionEnergyCapacity;
 	public static ForgeConfigSpec.IntValue packagerExtensionEnergyReq;
 	public static ForgeConfigSpec.IntValue packagerExtensionEnergyUsage;
 	public static ForgeConfigSpec.BooleanValue packagerExtensionDrawMEEnergy;
-	public static ForgeConfigSpec.BooleanValue packagerExtensionCheckDisjoint;
-	public static ForgeConfigSpec.BooleanValue packagerExtensionForceDisjoint;
 
 	public static ForgeConfigSpec.IntValue unpackagerEnergyCapacity;
 	public static ForgeConfigSpec.IntValue unpackagerEnergyUsage;
@@ -62,10 +58,6 @@ public class PackagedAutoConfig {
 		packagerEnergyUsage = builder.defineInRange("energy_usage", 100, 0, Integer.MAX_VALUE);
 		builder.comment("Should the Packager draw energy from ME systems.");
 		packagerDrawMEEnergy = builder.define("draw_me_energy", true);
-		builder.comment("Should the Packager not require exact inputs when it will not be ambiguous which package to make.");
-		packagerCheckDisjoint = builder.define("check_disjoint", true);
-		builder.comment("Should the Packager not require exact inputs. Overrides check_disjoint.");
-		packagerForceDisjoint = builder.define("force_disjoint", false);
 		builder.pop();
 
 		builder.push("packager_extension");
@@ -77,10 +69,6 @@ public class PackagedAutoConfig {
 		packagerExtensionEnergyUsage = builder.defineInRange("energy_usage", 100, 0, Integer.MAX_VALUE);
 		builder.comment("Should the Packager Extension draw energy from ME systems.");
 		packagerExtensionDrawMEEnergy = builder.define("draw_me_energy", true);
-		builder.comment("Should the Packager Extension not require exact inputs when it will not be ambiguous which package to make.");
-		packagerExtensionCheckDisjoint = builder.define("check_disjoint", true);
-		builder.comment("Should the Packager Extension not require exact inputs. Overrides check_disjoint.");
-		packagerExtensionForceDisjoint = builder.define("force_disjoint", false);
 		builder.pop();
 
 		builder.push("unpackager");
@@ -113,15 +101,11 @@ public class PackagedAutoConfig {
 		PackagerTile.energyReq = packagerEnergyReq.get();
 		PackagerTile.energyUsage = packagerEnergyUsage.get();
 		PackagerTile.drawMEEnergy = packagerDrawMEEnergy.get();
-		PackagerTile.checkDisjoint = packagerCheckDisjoint.get();
-		PackagerTile.forceDisjoint = packagerForceDisjoint.get();
 
 		PackagerExtensionTile.energyCapacity = packagerExtensionEnergyCapacity.get();
 		PackagerExtensionTile.energyReq = packagerExtensionEnergyReq.get();
 		PackagerExtensionTile.energyUsage = packagerExtensionEnergyUsage.get();
 		PackagerExtensionTile.drawMEEnergy = packagerExtensionDrawMEEnergy.get();
-		PackagerExtensionTile.checkDisjoint = packagerExtensionCheckDisjoint.get();
-		PackagerExtensionTile.forceDisjoint = packagerExtensionForceDisjoint.get();
 
 		UnpackagerTile.energyCapacity = unpackagerEnergyCapacity.get();
 		UnpackagerTile.energyUsage = unpackagerEnergyUsage.get();

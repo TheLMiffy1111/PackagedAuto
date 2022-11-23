@@ -8,6 +8,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 
 import net.minecraft.util.IntIdentityHashBiMap;
 import net.minecraft.util.ResourceLocation;
@@ -21,7 +23,8 @@ public class ApiImpl extends PackagedAutoApi {
 
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final SortedMap<ResourceLocation, IPackageRecipeType> REGISTRY = new TreeMap<>();
-	private static final IntIdentityHashBiMap<IPackageRecipeType> ID_MAP = new IntIdentityHashBiMap<>(4);
+	private static final Multimap<String, IPackageRecipeType> ORDER = MultimapBuilder.treeKeys().arrayListValues().build();
+	private static final IntIdentityHashBiMap<IPackageRecipeType> IDS = new IntIdentityHashBiMap<>(4);
 	private static int id = 0;
 
 	private ApiImpl() {}
@@ -31,8 +34,9 @@ public class ApiImpl extends PackagedAutoApi {
 		if(REGISTRY.containsKey(type.getName())) {
 			return false;
 		}
+		IDS.clear();
 		REGISTRY.put(type.getName(), type);
-		ID_MAP.put(type, id++);
+		ORDER.put(type.getName().getNamespace(), type);
 		return true;
 	}
 
@@ -43,12 +47,20 @@ public class ApiImpl extends PackagedAutoApi {
 
 	@Override
 	public IPackageRecipeType getRecipeType(int id) {
-		return ID_MAP.getByValue(id);
+		computeIds();
+		return IDS.getByValue(id);
 	}
 
 	@Override
 	public int getId(IPackageRecipeType type) {
-		return ID_MAP.getId(type);
+		computeIds();
+		return IDS.getId(type);
+	}
+
+	private void computeIds() {
+		if(IDS.size() == 0) {
+			ORDER.forEach((mod, type)->IDS.add(type));
+		}
 	}
 
 	@Override
@@ -58,11 +70,8 @@ public class ApiImpl extends PackagedAutoApi {
 
 	@Override
 	public IPackageRecipeType getNextRecipeType(IPackageRecipeType type, boolean reverse) {
-		int toGet = ID_MAP.getId(type) + (!reverse ? 1 : -1);
-		IPackageRecipeType ret = ID_MAP.getByValue(toGet);
-		if(ret == null) {
-			ret = ID_MAP.getByValue(!reverse ? 0 : ID_MAP.size()-1);
-		}
+		int toGet = Math.floorMod(getId(type) + (!reverse ? 1 : -1), REGISTRY.size());
+		IPackageRecipeType ret = getRecipeType(toGet);
 		return ret;
 	}
 

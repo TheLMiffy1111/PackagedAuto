@@ -2,6 +2,7 @@ package thelm.packagedauto.tile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
@@ -44,8 +45,6 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
-	public static boolean checkDisjoint = true;
-	public static boolean forceDisjoint = false;
 
 	public boolean firstTick = true;
 	public boolean isWorking = false;
@@ -53,6 +52,7 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
+	public Mode mode = Mode.EXACT;
 	public boolean disjoint = false;
 	public boolean powered = false;
 
@@ -346,6 +346,7 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 		isWorking = nbt.getBoolean("Working");
 		remainingProgress = nbt.getInt("Progress");
 		powered = nbt.getBoolean("Powered");
+		mode = Mode.values()[nbt.getByte("Mode")];
 	}
 
 	@Override
@@ -354,7 +355,12 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 		nbt.putBoolean("Working", isWorking);
 		nbt.putInt("Progress", remainingProgress);
 		nbt.putBoolean("Powered", powered);
+		nbt.putByte("Mode", (byte)mode.ordinal());
 		return nbt;
+	}
+
+	public void changePackagingMode() {
+		mode = Mode.values()[((mode.ordinal()+1) % 3)];
 	}
 
 	@Override
@@ -383,5 +389,13 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 	public Container createMenu(int windowId, PlayerInventory playerInventory, PlayerEntity player) {
 		syncTile(false);
 		return new PackagerContainer(windowId, playerInventory, this);
+	}
+
+	public static enum Mode {
+		EXACT, DISJOINT, FIRST;
+
+		public ITextComponent getTooltip() {
+			return new TranslationTextComponent("block.packagedauto.packager.mode."+name().toLowerCase(Locale.US));
+		}
 	}
 }

@@ -28,6 +28,13 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 	}
 
 	@Override
+	public void init() {
+		buttons.clear();
+		super.init();
+		addButton(new ButtonChangeBlocking(guiLeft+98, guiTop+16));
+	}
+
+	@Override
 	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
 		super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
 		int scaledEnergy = container.tile.getScaledEnergy(40);
@@ -61,13 +68,6 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 		}
 	}
 
-	@Override
-	public void init() {
-		buttons.clear();
-		super.init();
-		addButton(new ButtonChangeBlocking(guiLeft+98, guiTop+16));
-	}
-
 	class ButtonChangeBlocking extends Widget {
 
 		public ButtonChangeBlocking(int x, int y) {
@@ -75,8 +75,8 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 		}
 
 		@Override
-		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
+		public void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+			super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
 			minecraft.getTextureManager().bindTexture(BACKGROUND);
 			blit(matrixStack, x+1, y+2, 176, container.tile.blocking ? 64 : 50, 14, 14);

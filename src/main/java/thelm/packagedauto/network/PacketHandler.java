@@ -7,9 +7,11 @@ import net.minecraftforge.fml.network.NetworkDirection;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import thelm.packagedauto.network.packet.ChangeBlockingPacket;
+import thelm.packagedauto.network.packet.ChangePackagingPacket;
 import thelm.packagedauto.network.packet.CycleRecipeTypePacket;
 import thelm.packagedauto.network.packet.LoadRecipeListPacket;
 import thelm.packagedauto.network.packet.SaveRecipeListPacket;
+import thelm.packagedauto.network.packet.SetItemStackPacket;
 import thelm.packagedauto.network.packet.SetPatternIndexPacket;
 import thelm.packagedauto.network.packet.SetRecipePacket;
 import thelm.packagedauto.network.packet.SyncEnergyPacket;
@@ -44,5 +46,11 @@ public class PacketHandler {
 		INSTANCE.registerMessage(id++, ChangeBlockingPacket.class,
 				ChangeBlockingPacket::encode, ChangeBlockingPacket::decode,
 				ChangeBlockingPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+		INSTANCE.registerMessage(id++, SetItemStackPacket.class,
+				SetItemStackPacket::encode, SetItemStackPacket::decode,
+				SetItemStackPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
+		INSTANCE.registerMessage(id++, ChangePackagingPacket.class,
+				ChangePackagingPacket::encode, ChangePackagingPacket::decode,
+				ChangePackagingPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 	}
 }

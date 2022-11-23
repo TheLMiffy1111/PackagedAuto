@@ -70,7 +70,7 @@ public class PackageItem extends Item implements IPackageItem {
 		if(recipe != null) {
 			tooltip.add(recipe.getRecipeType().getDisplayName().appendString(": "));
 			for(ItemStack is : recipe.getOutputs()) {
-				tooltip.add(new StringTextComponent(is.getCount()+" ").append(is.getDisplayName()));
+				tooltip.add(new StringTextComponent(is.getCount()+" ").appendSibling(is.getDisplayName()));
 			}
 			int index = getIndex(stack);
 			tooltip.add(new TranslationTextComponent("item.packagedauto.package.index", index));
@@ -78,7 +78,7 @@ public class PackageItem extends Item implements IPackageItem {
 			List<ItemStack> recipeInputs = recipe.getInputs();
 			List<ItemStack> packageItems = recipeInputs.subList(9*index, Math.min(9*index+9, recipeInputs.size()));
 			for(ItemStack is : packageItems) {
-				tooltip.add(new StringTextComponent(is.getCount()+" ").append(is.getDisplayName()));
+				tooltip.add(new StringTextComponent(is.getCount()+" ").appendSibling(is.getDisplayName()));
 			}
 		}
 		super.addInformation(stack, worldIn, tooltip, flagIn);

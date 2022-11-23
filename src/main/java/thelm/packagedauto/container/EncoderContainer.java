@@ -29,25 +29,29 @@ public class EncoderContainer extends BaseContainer<EncoderTile> {
 		addSlot(new SlotItemHandler(itemHandler, 0, 8, 26));
 		for(int i = 0; i < 9; ++i) {
 			for(int j = 0; j < 9; ++j) {
-				addSlot(new FalseCopySlot(patternItemHandler, i*9+j, 8+j*18, 57+i*18));
+				addSlot(patternItemHandler, i*9+j, 8+j*18, 57+i*18);
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
-				if(patternItemHandler.recipeType.canSetOutput()) {
-					addSlot(new FalseCopySlot(patternItemHandler, 81+i*3+j, 198+j*18, 111+i*18));
-				}
-				else {
-					addSlot(new PreviewSlot(patternItemHandler, 81+i*3+j, 198+j*18, 111+i*18));
-				}
+				addSlot(patternItemHandler, 81+i*3+j, 198+j*18, 111+i*18);
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
-				addSlot(new PreviewSlot(patternItemHandler, 90+i*3+j, 198+j*18, 165+i*18));
+				addSlot(patternItemHandler, 90+i*3+j, 198+j*18, 165+i*18);
 			}
 		}
 		setupPlayerInventory();
+	}
+
+	public void addSlot(EncoderPatternItemHandler patternItemHandler, int index, int x, int y) {
+		if((index < 81 || index < 90 && patternItemHandler.recipeType.canSetOutput()) && patternItemHandler.recipeType.getEnabledSlots().contains(index)) {
+			addSlot(new FalseCopySlot(patternItemHandler, index, x, y));
+		}
+		else {
+			addSlot(new PreviewSlot(patternItemHandler, index, x, y));
+		}
 	}
 
 	@Override

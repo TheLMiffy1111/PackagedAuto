@@ -38,6 +38,19 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 	}
 
 	@Override
+	public void init() {
+		buttons.clear();
+		super.init();
+		int patternSlots = container.tile.patternItemHandlers.length;
+		for(int i = 0; i < patternSlots; ++i) {
+			addButton(new ButtonPatternSlot(i, guiLeft+29+(i%10)*18, guiTop+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
+		}
+		addButton(new ButtonRecipeType(guiLeft+204, guiTop+74));
+		addButton(new ButtonSavePatterns(guiLeft+213, guiTop+16, new TranslationTextComponent("block.packagedauto.encoder.save")));
+		addButton(new ButtonLoadPatterns(guiLeft+213, guiTop+34, new TranslationTextComponent("block.packagedauto.encoder.load")));
+	}
+
+	@Override
 	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
 		super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
 		IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
@@ -73,19 +86,6 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		}
 	}
 
-	@Override
-	public void init() {
-		buttons.clear();
-		super.init();
-		int patternSlots = container.tile.patternItemHandlers.length;
-		for(int i = 0; i < patternSlots; ++i) {
-			addButton(new ButtonPatternSlot(i, guiLeft+29+(i%10)*18, guiTop+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
-		}
-		addButton(new ButtonRecipeType(guiLeft+204, guiTop+74));
-		addButton(new ButtonSavePatterns(guiLeft+213, guiTop+16, new TranslationTextComponent("block.packagedauto.encoder.save")));
-		addButton(new ButtonLoadPatterns(guiLeft+213, guiTop+34, new TranslationTextComponent("block.packagedauto.encoder.load")));
-	}
-
 	class ButtonPatternSlot extends Widget {
 
 		int id;
@@ -104,8 +104,8 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		}
 
 		@Override
-		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
+		public void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+			super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
 			for(int i = 81; i < 90; ++i) {
 				ItemStack stack = container.tile.patternItemHandlers[id].getStackInSlot(i);
 				if(!stack.isEmpty()) {
@@ -138,8 +138,8 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		}
 
 		@Override
-		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
+		public void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+			super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
 			IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
 			if(recipeType != null) {
 				Object rep = recipeType.getRepresentation();
@@ -200,6 +200,8 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new LoadRecipeListPacket());
+			container.tile.loadRecipeList();
+			container.setupSlots();
 		}
 	}
 }

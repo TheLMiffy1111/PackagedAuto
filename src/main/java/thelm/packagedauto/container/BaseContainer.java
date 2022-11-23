@@ -26,7 +26,7 @@ public class BaseContainer<T extends BaseTile> extends Container {
 		super(containerType, windowId);
 		this.tile = tile;
 		this.playerInventory = playerInventory;
-		itemHandler = tile.getItemHandler();
+		itemHandler = tile != null ? tile.getItemHandler() : new BaseItemHandler(null, 0);
 		trackIntArray(itemHandler);
 	}
 

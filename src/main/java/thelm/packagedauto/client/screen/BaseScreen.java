@@ -4,17 +4,21 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.container.ClickType;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import thelm.packagedauto.container.BaseContainer;
+import thelm.packagedauto.slot.FalseCopySlot;
 
 public abstract class BaseScreen<C extends BaseContainer<?>> extends ContainerScreen<C> {
 
 	public final C container;
 
-	public BaseScreen(C container, PlayerInventory inventory, ITextComponent title) {
-		super(container, inventory, title);
+	public BaseScreen(C container, PlayerInventory playerInventory, ITextComponent title) {
+		super(container, playerInventory, title);
 		this.container = container;
 	}
 
@@ -37,5 +41,33 @@ public abstract class BaseScreen<C extends BaseContainer<?>> extends ContainerSc
 		else {
 			blit(matrixStack, guiLeft, guiTop, 0, 0, xSize, ySize);
 		}
+	}
+
+	@Override
+	protected void handleMouseClick(Slot slot, int slotId, int mouseButton, ClickType type) {
+		boolean valid = type != ClickType.QUICK_MOVE && playerInventory.getItemStack().isEmpty();
+		if(valid && slot instanceof FalseCopySlot && slot.isEnabled()) {
+			if(!slot.getStack().isEmpty()) {
+				minecraft.displayGuiScreen(new AmountSpecifyingScreen(
+						this, minecraft.player.inventory,
+						slot.slotNumber, slot.getStack(),
+						Math.min(slot.getSlotStackLimit(), slot.getStack().getMaxStackSize())));
+			}
+		}
+		else {
+			super.handleMouseClick(slot, slotId, mouseButton, type);
+		}
+	}
+
+	public boolean inBounds(int x, int y, int w, int h, double ox, double oy) {
+		return ox >= x && ox <= x + w && oy >= y && oy <= y + h;
+	}
+
+	public Button addButton(int x, int y, int w, int h, ITextComponent text, boolean enabled, boolean visible, Button.IPressable onPress) {
+		Button button = new Button(x, y, w, h, text, onPress);
+		button.active = enabled;
+		button.visible = visible;
+		addButton(button);
+		return button;
 	}
 }

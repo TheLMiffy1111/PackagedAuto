@@ -47,8 +47,6 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
-	public static boolean checkDisjoint = true;
-	public static boolean forceDisjoint = false;
 
 	public boolean firstTick = true;
 	public boolean isWorking = false;
@@ -57,6 +55,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
+	public PackagerTile.Mode mode = PackagerTile.Mode.EXACT;
 	public boolean disjoint = false;
 	public boolean powered = false;
 
@@ -203,10 +202,10 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 						IPackageItem packageItem = (IPackageItem)listStack.getItem();
 						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 					}
-					if(forceDisjoint) {
+					if(mode == PackagerTile.Mode.FIRST) {
 						disjoint = true;
 					}
-					else if(checkDisjoint) {
+					else if(mode == PackagerTile.Mode.DISJOINT) {
 						disjoint = MiscHelper.INSTANCE.arePatternsDisjoint(patternList);
 					}
 					break;
@@ -376,6 +375,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 		isWorking = nbt.getBoolean("Working");
 		remainingProgress = nbt.getInt("Progress");
 		powered = nbt.getBoolean("Powered");
+		mode = PackagerTile.Mode.values()[nbt.getByte("Mode")];
 	}
 
 	@Override
@@ -384,7 +384,12 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 		nbt.putBoolean("Working", isWorking);
 		nbt.putInt("Progress", remainingProgress);
 		nbt.putBoolean("Powered", powered);
+		nbt.putByte("Mode", (byte)mode.ordinal());
 		return nbt;
+	}
+
+	public void changePackagingMode() {
+		mode = PackagerTile.Mode.values()[((mode.ordinal()+1) % 3)];
 	}
 
 	@Override

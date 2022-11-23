@@ -124,6 +124,19 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 			}
 		}
 		updateRecipeInfo();
+		for(EncoderPatternItemHandler patternItemHandler : tile.patternItemHandlers) {
+			if(patternItemHandler != this) {
+				patternItemHandler.setRecipeTypeIfEmpty(recipeType);
+			}
+		}
+	}
+
+	public void setRecipeTypeIfEmpty(IPackageRecipeType recipeType) {
+		if(stacks.stream().allMatch(ItemStack::isEmpty)) {
+			this.recipeType = recipeType;
+			validateRecipeType();
+			updateRecipeInfo();
+		}
 	}
 
 	public void setRecipe(Int2ObjectMap<ItemStack> map) {
