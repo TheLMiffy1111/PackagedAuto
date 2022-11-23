@@ -489,6 +489,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 
 	public void changePackagingMode() {
 		mode = Mode.values()[((mode.ordinal()+1) % 3)];
+		markDirty();
 	}
 
 	@Override
