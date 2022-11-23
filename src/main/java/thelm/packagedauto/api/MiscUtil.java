@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -69,7 +71,7 @@ public class MiscUtil {
 	}
 
 	public static List<ItemStack> condenseStacks(List<ItemStack> stacks, boolean ignoreStackSize) {
-;		Object2IntRBTreeMap<Triple<Item, Integer, NBTTagCompound>> map = new Object2IntRBTreeMap<>(
+		Object2IntRBTreeMap<Triple<Item, Integer, NBTTagCompound>> map = new Object2IntRBTreeMap<>(
 				Comparator.comparing(triple->Triple.of(triple.getLeft().getRegistryName(), triple.getMiddle(), ""+triple.getRight())));
 		for(ItemStack stack : stacks) {
 			if(stack.isEmpty()) {
@@ -284,5 +286,9 @@ public class MiscUtil {
 		}
 		set.clear();
 		return true;
+	}
+
+	public static <T> Supplier<T> conditionalSupplier(BooleanSupplier conditionSupplier, Supplier<Supplier<T>> trueSupplier, Supplier<Supplier<T>> falseSupplier) {
+		return ()->conditionSupplier.getAsBoolean() ? trueSupplier.get().get() : falseSupplier.get().get();
 	}
 }

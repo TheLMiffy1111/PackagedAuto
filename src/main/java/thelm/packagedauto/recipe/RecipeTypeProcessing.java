@@ -1,6 +1,7 @@
 package thelm.packagedauto.recipe;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.IntStream;
@@ -15,11 +16,13 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Optional;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeType;
+import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
 
 public class RecipeTypeProcessing implements IRecipeType {
@@ -73,7 +76,8 @@ public class RecipeTypeProcessing implements IRecipeType {
 
 	@Override
 	public List<String> getJEICategories() {
-		return PackagedAutoJEIPlugin.getAllRecipeCategories();
+		return MiscUtil.conditionalSupplier(()->Loader.isModLoaded("jei"),
+				()->PackagedAutoJEIPlugin::getAllRecipeCategories, ()->ArrayList<String>::new).get();
 	}
 
 	@Optional.Method(modid="jei")

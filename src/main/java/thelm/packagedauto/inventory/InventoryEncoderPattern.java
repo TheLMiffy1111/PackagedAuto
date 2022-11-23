@@ -138,6 +138,19 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 			}
 		}
 		updateRecipeInfo();
+		for(InventoryEncoderPattern patternInventory : tile.patternInventories) {
+			if(patternInventory != this) {
+				patternInventory.setRecipeTypeIfEmpty(recipeType);
+			}
+		}
+	}
+
+	public void setRecipeTypeIfEmpty(IRecipeType recipeType) {
+		if(stacks.stream().allMatch(ItemStack::isEmpty)) {
+			this.recipeType = recipeType;
+			validateRecipeType();
+			updateRecipeInfo();
+		}
 	}
 
 	public void setRecipe(Int2ObjectMap<ItemStack> map) {

@@ -7,12 +7,13 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import thelm.packagedauto.api.MiscUtil;
-import thelm.packagedauto.inventory.InventoryTileBase;
 import thelm.packagedauto.slot.SlotFalseCopy;
 import thelm.packagedauto.tile.TileBase;
 
@@ -21,13 +22,13 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 
 	public final TILE tile;
 	public final InventoryPlayer playerInventory;
-	public final InventoryTileBase inventory;
+	public final IInventory inventory;
 	public final Int2IntMap prevSyncValues = new Int2IntRBTreeMap();
 
 	public ContainerTileBase(InventoryPlayer playerInventory, TILE tile) {
 		this.tile = tile;
 		this.playerInventory = playerInventory;
-		this.inventory = tile.getInventory();
+		this.inventory = tile != null ? tile.getInventory() : new InventoryBasic("[Null]", true, 0);
 	}
 
 	public int getPlayerInvY() {

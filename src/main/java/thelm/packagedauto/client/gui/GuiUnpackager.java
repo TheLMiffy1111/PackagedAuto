@@ -26,6 +26,13 @@ public class GuiUnpackager extends GuiContainerTileBase<ContainerUnpackager> {
 	}
 
 	@Override
+	public void initGui() {
+		buttonList.clear();
+		super.initGui();
+		addButton(new GuiButtonChangeBlocking(0, guiLeft+98, guiTop+16));
+	}
+
+	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
 		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
 		int scaledEnergy = container.tile.getScaledEnergy(40);
@@ -58,13 +65,6 @@ public class GuiUnpackager extends GuiContainerTileBase<ContainerUnpackager> {
 				break;
 			}
 		}
-	}
-
-	@Override
-	public void initGui() {
-		buttonList.clear();
-		super.initGui();
-		addButton(new GuiButtonChangeBlocking(0, guiLeft+98, guiTop+16));
 	}
 
 	@Override

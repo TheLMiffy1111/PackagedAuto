@@ -2,14 +2,14 @@ package thelm.packagedauto.integration.jei;
 
 import java.util.Collections;
 import java.util.List;
-
-import com.google.common.collect.Lists;
+import java.util.stream.Collectors;
 
 import mezz.jei.api.IJeiRuntime;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.IModRegistry;
 import mezz.jei.api.JEIPlugin;
 import mezz.jei.api.recipe.IRecipeCategory;
+import thelm.packagedauto.client.gui.GuiEncoder;
 
 @JEIPlugin
 public class PackagedAutoJEIPlugin implements IModPlugin {
@@ -22,12 +22,13 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 	public void register(IModRegistry registry) {
 		PackagedAutoJEIPlugin.registry = registry;
 		registry.getRecipeTransferRegistry().addUniversalRecipeTransferHandler(EncoderTransferHandler.INSTANCE);
+		registry.addGhostIngredientHandler(GuiEncoder.class, new EncoderGhostIngredientHandler());
 	}
 
 	@Override
 	public void onRuntimeAvailable(IJeiRuntime jeiRuntime) {
 		PackagedAutoJEIPlugin.jeiRuntime = jeiRuntime;
-		allCategories = Lists.transform(jeiRuntime.getRecipeRegistry().getRecipeCategories(), IRecipeCategory::getUid);
+		allCategories = jeiRuntime.getRecipeRegistry().getRecipeCategories().stream().map(IRecipeCategory::getUid).collect(Collectors.toList());
 	}
 
 	public static List<String> getAllRecipeCategories() {

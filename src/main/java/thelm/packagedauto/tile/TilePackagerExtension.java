@@ -46,6 +46,7 @@ import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.integration.appeng.networking.HostHelperTilePackagerExtension;
 import thelm.packagedauto.integration.appeng.recipe.PackageCraftingPatternHelper;
 import thelm.packagedauto.inventory.InventoryPackagerExtension;
+import thelm.packagedauto.tile.TilePackager.Mode;
 
 @Optional.InterfaceList({
 	@Optional.Interface(iface="appeng.api.networking.IGridHost", modid="appliedenergistics2"),
@@ -58,8 +59,6 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
 	public static boolean drawMEEnergy = true;
-	public static boolean checkDisjoint = true;
-	public static boolean forceDisjoint = false;
 
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
@@ -67,6 +66,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
+	public TilePackager.Mode mode = TilePackager.Mode.EXACT;
 	public boolean disjoint = false;
 	public boolean powered = false;
 	public boolean firstTick = true;
@@ -231,10 +231,10 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 						IPackageItem packageItem = (IPackageItem)listStack.getItem();
 						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 					}
-					if(forceDisjoint) {
+					if(mode == TilePackager.Mode.FIRST) {
 						disjoint = true;
 					}
-					else if(checkDisjoint) {
+					else if(mode == TilePackager.Mode.DISJOINT) {
 						disjoint = MiscUtil.arePatternsDisjoint(patternList);
 					}
 					break;
@@ -474,6 +474,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		isWorking = nbt.getBoolean("Working");
 		remainingProgress = nbt.getInteger("Progress");
 		powered = nbt.getBoolean("Powered");
+		mode = Mode.values()[nbt.getByte("Mode")];
 	}
 
 	@Override
@@ -482,7 +483,12 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		nbt.setBoolean("Working", isWorking);
 		nbt.setInteger("Progress", remainingProgress);
 		nbt.setBoolean("Powered", powered);
+		nbt.setByte("Mode", (byte)mode.ordinal());
 		return nbt;
+	}
+
+	public void changePackagingMode() {
+		mode = Mode.values()[((mode.ordinal()+1) % 3)];
 	}
 
 	@Override

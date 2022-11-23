@@ -1,10 +1,8 @@
 package thelm.packagedauto.api;
 
+import java.util.Collections;
 import java.util.NavigableMap;
-import java.util.SortedMap;
 import java.util.TreeMap;
-
-import com.google.common.collect.ImmutableSortedMap;
 
 import net.minecraft.util.IntIdentityHashBiMap;
 import net.minecraft.util.ResourceLocation;
@@ -13,8 +11,8 @@ public class RecipeTypeRegistry {
 
 	private RecipeTypeRegistry() {}
 
-	private static final SortedMap<ResourceLocation, IRecipeType> REGISTRY = new TreeMap<>();
-	private static final IntIdentityHashBiMap<IRecipeType> ID_MAP = new IntIdentityHashBiMap<>(4);
+	private static final NavigableMap<ResourceLocation, IRecipeType> REGISTRY = new TreeMap<>();
+	private static final IntIdentityHashBiMap<IRecipeType> IDS = new IntIdentityHashBiMap<>(4);
 	private static int id = 0;
 
 	public static boolean registerRecipeType(IRecipeType type) {
@@ -22,7 +20,7 @@ public class RecipeTypeRegistry {
 			return false;
 		}
 		REGISTRY.put(type.getName(), type);
-		ID_MAP.put(type, id++);
+		IDS.add(type);
 		return true;
 	}
 
@@ -31,23 +29,20 @@ public class RecipeTypeRegistry {
 	}
 
 	public static IRecipeType getRecipeType(int id) {
-		return ID_MAP.get(id);
+		return IDS.get(id);
 	}
 
 	public static int getId(IRecipeType type) {
-		return ID_MAP.getId(type);
+		return IDS.getId(type);
 	}
 
 	public static NavigableMap<ResourceLocation, IRecipeType> getRegistry() {
-		return ImmutableSortedMap.copyOf(REGISTRY);
+		return Collections.unmodifiableNavigableMap(REGISTRY);
 	}
 
 	public static IRecipeType getNextRecipeType(IRecipeType type, boolean reverse) {
-		int toGet = ID_MAP.getId(type) + (!reverse ? 1 : -1);
-		IRecipeType ret = ID_MAP.get(toGet);
-		if(ret == null) {
-			ret = ID_MAP.get(!reverse ? 0 : ID_MAP.size()-1);
-		}
+		int toGet = Math.floorMod(getId(type) + (!reverse ? 1 : -1), REGISTRY.size());
+		IRecipeType ret = getRecipeType(toGet);
 		return ret;
 	}
 }

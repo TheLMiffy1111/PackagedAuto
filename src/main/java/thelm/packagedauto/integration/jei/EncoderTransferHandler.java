@@ -24,7 +24,7 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<ContainerE
 	public IRecipeTransferError transferRecipe(ContainerEncoder container, IRecipeLayout recipeLayout, EntityPlayer player, boolean maxTransfer, boolean doTransfer) {
 		String category = recipeLayout.getRecipeCategory().getUid();
 		IRecipeType recipeType = container.patternInventory.recipeType;
-		if(!(recipeType.getJEICategories().contains(category))) {
+		if(!recipeType.getJEICategories().contains(category)) {
 			return PackagedAutoJEIPlugin.registry.getJeiHelpers().recipeTransferHandlerHelper().createInternalError();
 		}
 		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(recipeLayout, category);

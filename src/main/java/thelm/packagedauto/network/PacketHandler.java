@@ -8,9 +8,11 @@ import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.network.packet.PacketChangeBlocking;
+import thelm.packagedauto.network.packet.PacketChangePackaging;
 import thelm.packagedauto.network.packet.PacketCycleRecipeType;
 import thelm.packagedauto.network.packet.PacketLoadRecipeList;
 import thelm.packagedauto.network.packet.PacketSaveRecipeList;
+import thelm.packagedauto.network.packet.PacketSetItemStack;
 import thelm.packagedauto.network.packet.PacketSetPatternIndex;
 import thelm.packagedauto.network.packet.PacketSetRecipe;
 import thelm.packagedauto.network.packet.PacketSyncEnergy;
@@ -28,6 +30,8 @@ public class PacketHandler<REQ extends ISelfHandleMessage<? extends IMessage>> i
 		INSTANCE.registerMessage(get(), PacketSetRecipe.class, id++, Side.SERVER);
 		INSTANCE.registerMessage(get(), PacketLoadRecipeList.class, id++, Side.SERVER);
 		INSTANCE.registerMessage(get(), PacketChangeBlocking.class, id++, Side.SERVER);
+		INSTANCE.registerMessage(get(), PacketSetItemStack.class, id++, Side.SERVER);
+		INSTANCE.registerMessage(get(), PacketChangePackaging.class, id++, Side.SERVER);
 	}
 
 	public static <REQ extends ISelfHandleMessage<? extends IMessage>> PacketHandler<REQ> get() {

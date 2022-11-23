@@ -34,8 +34,6 @@ public class PackagedAutoConfig {
 		TilePackager.energyReq = config.get(category, "energy_req", TilePackager.energyReq, "How much FE the Packager should use.", 0, Integer.MAX_VALUE).getInt();
 		TilePackager.energyUsage = config.get(category, "energy_usage", TilePackager.energyUsage, "How much FE/t maximum the Packager should use.", 0, Integer.MAX_VALUE).getInt();
 		TilePackager.drawMEEnergy = config.get(category, "draw_me_energy", TilePackager.drawMEEnergy, "Should the Packager draw energy from ME systems.").getBoolean();
-		TilePackager.checkDisjoint = config.get(category, "check_disjoint", TilePackager.checkDisjoint, "Should the Packager not require exact inputs only when it will not be ambiguous which package to make.").getBoolean();
-		TilePackager.forceDisjoint = config.get(category, "force_disjoint", TilePackager.forceDisjoint, "Should the Packager not require exact inputs. Overrides check_disjoint.").getBoolean();
 		category = "blocks.unpackager";
 		TileUnpackager.energyCapacity = config.get(category, "energy_capacity", TileUnpackager.energyCapacity, "How much FE the Unpackager should hold.", 0, Integer.MAX_VALUE).getInt();
 		TileUnpackager.energyUsage = config.get(category, "energy_usage", TileUnpackager.energyUsage, "How much FE/t maximum the Unpackager should use.", 0, Integer.MAX_VALUE).getInt();
@@ -45,8 +43,6 @@ public class PackagedAutoConfig {
 		TilePackagerExtension.energyReq = config.get(category, "energy_req", TilePackagerExtension.energyReq, "How much FE the Packager Extension should use.", 0, Integer.MAX_VALUE).getInt();
 		TilePackagerExtension.energyUsage = config.get(category, "energy_usage", TilePackagerExtension.energyUsage, "How much FE/t maximum the Packager Extension should use.", 0, Integer.MAX_VALUE).getInt();
 		TilePackagerExtension.drawMEEnergy = config.get(category, "draw_me_energy", TilePackagerExtension.drawMEEnergy, "Should the Packager Extension draw energy from ME systems.").getBoolean();
-		TilePackagerExtension.checkDisjoint = config.get(category, "check_disjoint", TilePackagerExtension.checkDisjoint, "Should the Packager Extension not require exact inputs only when it will not be ambiguous which package to make.").getBoolean();
-		TilePackagerExtension.forceDisjoint = config.get(category, "force_disjoint", TilePackagerExtension.forceDisjoint, "Should the Packager Extension not require exact inputs. Overrides check_disjoint.").getBoolean();
 		category = "blocks.crafter";
 		TileCrafter.enabled = config.get(category, "enabled", TileCrafter.enabled, "Should the Package Crafter be enabled.").setRequiresMcRestart(true).getBoolean();
 		TileCrafter.energyCapacity = config.get(category, "energy_capacity", TileCrafter.energyCapacity, "How much FE the Package Crafter should hold.", 0, Integer.MAX_VALUE).getInt();

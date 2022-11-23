@@ -14,6 +14,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.common.Loader;
 import thelm.packagedauto.api.IRecipeType;
+import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.container.ContainerEncoder;
 import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
 import thelm.packagedauto.network.PacketHandler;
@@ -35,6 +36,22 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 	@Override
 	protected ResourceLocation getBackgroundTexture() {
 		return BACKGROUND;
+	}
+
+	@Override
+	public void initGui() {
+		buttonList.clear();
+		super.initGui();
+		int patternSlots = container.tile.patternInventories.length;
+		for(int i = 0; i < patternSlots; ++i) {
+			addButton(new GuiButtonPatternSlot(i, guiLeft+29+(i%10)*18, guiTop+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
+		}
+		addButton(new GuiButtonRecipeType(0, guiLeft+204, guiTop+74));
+		addButton(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+16, I18n.translateToLocal("tile.packagedauto.encoder.save")));
+		addButton(new GuiButtonLoadPatterns(0, guiLeft+213, guiTop+34, I18n.translateToLocal("tile.packagedauto.encoder.load")));
+		if(Loader.isModLoaded("jei")) {
+			addButton(new GuiButtonShowRecipesJEI(0, guiLeft+172, guiTop+129));
+		}
 	}
 
 	@Override
@@ -75,22 +92,6 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 	}
 
 	@Override
-	public void initGui() {
-		buttonList.clear();
-		super.initGui();
-		int patternSlots = container.tile.patternInventories.length;
-		for(int i = 0; i < patternSlots; ++i) {
-			addButton(new GuiButtonPatternSlot(i, guiLeft+29+(i%10)*18, guiTop+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
-		}
-		addButton(new GuiButtonRecipeType(0, guiLeft+204, guiTop+74));
-		addButton(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+16, I18n.translateToLocal("tile.packagedauto.encoder.save")));
-		addButton(new GuiButtonLoadPatterns(0, guiLeft+213, guiTop+34, I18n.translateToLocal("tile.packagedauto.encoder.load")));
-		if(Loader.isModLoaded("jei")) {
-			addButton(new GuiButtonShowRecipesJEI(0, guiLeft+172, guiTop+129));
-		}
-	}
-
-	@Override
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if(button instanceof GuiButtonPatternSlot) {
 			PacketHandler.INSTANCE.sendToServer(new PacketSetPatternIndex(button.id));
@@ -109,12 +110,17 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		}
 		if(button instanceof GuiButtonLoadPatterns) {
 			PacketHandler.INSTANCE.sendToServer(new PacketLoadRecipeList());
+			container.tile.loadRecipeList();
+			container.setupSlots();
 		}
-		if(button instanceof GuiButtonShowRecipesJEI && Loader.isModLoaded("jei")) {
-			IRecipeType recipeType = container.patternInventory.recipeType;
-			if(recipeType != null) {
-				PackagedAutoJEIPlugin.showCategories(container.patternInventory.recipeType.getJEICategories());
-			}
+		if(button instanceof GuiButtonShowRecipesJEI) {
+			MiscUtil.conditionalSupplier(()->true, ()->()->{
+				IRecipeType recipeType = container.patternInventory.recipeType;
+				if(recipeType != null) {
+					PackagedAutoJEIPlugin.showCategories(recipeType.getJEICategories());
+				}
+				return null;
+			}, null).get();
 		}
 	}
 
