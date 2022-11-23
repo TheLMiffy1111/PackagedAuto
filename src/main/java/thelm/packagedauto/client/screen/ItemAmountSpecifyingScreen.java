@@ -37,15 +37,15 @@ public class ItemAmountSpecifyingScreen extends AmountSpecifyingScreen<ItemAmoun
 	}
 
 	@Override
-	protected ResourceLocation getBackgroundTexture() {
-		return BACKGROUND;
-	}
-
-	@Override
 	protected int[] getIncrements() {
 		return new int[] {
 				1, 10, 64,
 		};
+	}
+
+	@Override
+	protected ResourceLocation getBackgroundTexture() {
+		return BACKGROUND;
 	}
 
 	@Override

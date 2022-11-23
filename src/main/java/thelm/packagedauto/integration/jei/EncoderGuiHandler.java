@@ -17,26 +17,22 @@ public class EncoderGuiHandler implements IGuiContainerHandler<EncoderScreen> {
 	@Override
 	public Collection<IGuiClickableArea> getGuiClickableAreas(EncoderScreen containerScreen, double mouseX, double mouseY) {
 		Rect2i area = new Rect2i(172, 129, 22, 16);
-		IGuiClickableArea clickableArea = new IGuiClickableArea() {
-			@Override
-			public Rect2i getArea() {
-				return area;
-			}
-
-			@Override
-			public void onClick(IFocusFactory focusFactory, IRecipesGui recipesGui) {
-				List<ResourceLocation> categories = containerScreen.menu.patternItemHandler.recipeType.getJEICategories();
-				if(categories.isEmpty()) {
-					categories = PackagedAutoJEIPlugin.getAllRecipeCategories();
+		List<ResourceLocation> categories = containerScreen.menu.patternItemHandler.recipeType.getJEICategories();
+		List<RecipeType<?>> types = PackagedAutoJEIPlugin.jeiRuntime.getRecipeManager().createRecipeCategoryLookup().get().
+				<RecipeType<?>>map(c->c.getRecipeType()).filter(t->categories.contains(t.getUid())).toList();
+		if(!types.isEmpty()) {
+			return List.of(new IGuiClickableArea() {
+				@Override
+				public Rect2i getArea() {
+					return area;
 				}
-				List<ResourceLocation> categories2 = categories;
-				List<RecipeType<?>> types = PackagedAutoJEIPlugin.jeiRuntime.getRecipeManager().createRecipeCategoryLookup().get().
-						<RecipeType<?>>map(c->c.getRecipeType()).filter(t->categories2.contains(t.getUid())).toList();
-				if(!types.isEmpty()) {
+
+				@Override
+				public void onClick(IFocusFactory focusFactory, IRecipesGui recipesGui) {
 					recipesGui.showTypes(types);
 				}
-			}
-		};
-		return List.of(clickableArea);
+			});
+		}
+		return List.of();
 	}
 }

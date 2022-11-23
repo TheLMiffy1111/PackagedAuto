@@ -38,15 +38,15 @@ public class VolumeAmountSpecifyingScreen extends AmountSpecifyingScreen<VolumeA
 	}
 
 	@Override
-	protected ResourceLocation getBackgroundTexture() {
-		return BACKGROUND;
-	}
-
-	@Override
 	protected int[] getIncrements() {
 		return new int[] {
 				100, 500, 1000,
 		};
+	}
+
+	@Override
+	protected ResourceLocation getBackgroundTexture() {
+		return BACKGROUND;
 	}
 
 	@Override

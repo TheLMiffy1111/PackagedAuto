@@ -22,15 +22,11 @@ public class PackagedAutoConfig {
 	public static ForgeConfigSpec.IntValue packagerEnergyReq;
 	public static ForgeConfigSpec.IntValue packagerEnergyUsage;
 	public static ForgeConfigSpec.BooleanValue packagerDrawMEEnergy;
-	public static ForgeConfigSpec.BooleanValue packagerCheckDisjoint;
-	public static ForgeConfigSpec.BooleanValue packagerForceDisjoint;
 
 	public static ForgeConfigSpec.IntValue packagerExtensionEnergyCapacity;
 	public static ForgeConfigSpec.IntValue packagerExtensionEnergyReq;
 	public static ForgeConfigSpec.IntValue packagerExtensionEnergyUsage;
 	public static ForgeConfigSpec.BooleanValue packagerExtensionDrawMEEnergy;
-	public static ForgeConfigSpec.BooleanValue packagerExtensionCheckDisjoint;
-	public static ForgeConfigSpec.BooleanValue packagerExtensionForceDisjoint;
 
 	public static ForgeConfigSpec.IntValue unpackagerEnergyCapacity;
 	public static ForgeConfigSpec.IntValue unpackagerEnergyUsage;
