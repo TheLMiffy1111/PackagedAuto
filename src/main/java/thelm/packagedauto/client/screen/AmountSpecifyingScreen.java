@@ -5,8 +5,9 @@ import org.lwjgl.glfw.GLFW;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
@@ -18,27 +19,25 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 	private BaseScreen<?> parent;
 
 	protected EditBox amountField;
-	protected Button okButton;
-	protected Button cancelButton;
 
 	public AmountSpecifyingScreen(BaseScreen<?> parent, C menu, Inventory inventory, Component title) {
 		super(menu, inventory, title);
 		this.parent = parent;
 	}
 
-	protected abstract int[] getIncrements();
+	protected abstract int getDefaultAmount();
 
 	protected abstract int getMaxAmount();
 
-	protected abstract int getDefaultAmount();
+	protected abstract int[] getIncrements();
 
 	@Override
 	protected void init() {
 		clearWidgets();
 		super.init();
 
-		okButton = addButton(leftPos+114, topPos+22, 50, 20, Component.translatable("misc.packagedauto.set"), true, true, btn->onOkButtonPressed(hasShiftDown()));
-		cancelButton = addButton(leftPos+114, topPos+22+24, 50, 20, Component.translatable("gui.cancel"), true, true, btn->close());
+		addRenderableWidget(new ButtonSet(leftPos+114, topPos+22, Component.translatable("misc.packagedauto.set")));
+		addRenderableWidget(new ButtonCancel(leftPos+114, topPos+22+24, Component.translatable("gui.cancel")));
 
 		amountField = new EditBox(font, leftPos+9, topPos+51, 63, font.lineHeight, Component.empty());
 		amountField.setBordered(false);
@@ -68,7 +67,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "+" + increment;
-			addButton(leftPos+xx, topPos+20, width, 20, Component.literal(text), true, true, btn->onIncrementButtonClicked(increment));
+			addRenderableWidget(new ButtonIncrement(increment, leftPos+xx, topPos+20, Component.literal(text)));
 			xx += width;
 		}
 
@@ -76,7 +75,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "-" + increment;
-			addButton(leftPos+xx, topPos+imageHeight-20-7, width, 20, Component.literal(text), true, true, btn->onIncrementButtonClicked(-increment));
+			addRenderableWidget(new ButtonIncrement(-increment, leftPos+xx, topPos+imageHeight-20-7, Component.literal(text)));
 			xx += width;
 		}
 	}
@@ -132,5 +131,59 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 
 	public BaseScreen<?> getParent() {
 		return parent;
+	}
+
+	class ButtonSet extends AbstractWidget {
+
+		public ButtonSet(int x, int y, Component text) {
+			super(x, y, 50, 20, text);
+		}
+
+		@Override
+		public void onClick(double mouseX, double mouseY) {
+			onOkButtonPressed(hasShiftDown());
+		}
+
+		@Override
+		public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+
+		}
+	}
+
+	class ButtonCancel extends AbstractWidget {
+
+		public ButtonCancel(int x, int y, Component text) {
+			super(x, y, 50, 20, text);
+		}
+
+		@Override
+		public void onClick(double mouseX, double mouseY) {
+			close();
+		}
+
+		@Override
+		public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+
+		}
+	}
+
+	class ButtonIncrement extends AbstractWidget {
+
+		int increment;
+
+		public ButtonIncrement(int increment, int x, int y, Component text) {
+			super(x, y, 34, 20, text);
+			this.increment = increment;
+		}
+
+		@Override
+		public void onClick(double mouseX, double mouseY) {
+			onIncrementButtonClicked(increment);
+		}
+
+		@Override
+		public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
+
+		}
 	}
 }

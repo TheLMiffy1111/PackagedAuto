@@ -41,5 +41,7 @@ public abstract class PackagedAutoApi {
 
 	public abstract IVolumeType getVolumeType(Class<?> typeClass);
 
+	public abstract NavigableMap<ResourceLocation, IVolumeType> getVolumeTypeRegistry();
+
 	public abstract IMiscHelper miscHelper();
 }
