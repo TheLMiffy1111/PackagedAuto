@@ -35,7 +35,7 @@ import thelm.packagedauto.util.MiscHelper;
 
 public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 
-	public static final BlockEntityType<PackagerExtensionBlockEntity> TYPE_INSTANCE = (BlockEntityType<PackagerExtensionBlockEntity>)BlockEntityType.Builder.
+	public static final BlockEntityType<PackagerExtensionBlockEntity> TYPE_INSTANCE = BlockEntityType.Builder.
 			of(MiscHelper.INSTANCE.<BlockEntityType.BlockEntitySupplier<PackagerExtensionBlockEntity>>conditionalSupplier(
 					()->ModList.get().isLoaded("ae2"),
 					()->()->AEPackagerExtensionBlockEntity::new, ()->()->PackagerExtensionBlockEntity::new).get(),

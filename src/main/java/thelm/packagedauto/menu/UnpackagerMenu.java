@@ -10,8 +10,7 @@ import thelm.packagedauto.slot.SingleStackSlot;
 
 public class UnpackagerMenu extends BaseMenu<UnpackagerBlockEntity> {
 
-	public static final MenuType<UnpackagerMenu> TYPE_INSTANCE = (MenuType<UnpackagerMenu>)IForgeMenuType.
-			create(new PositionalBlockEntityMenuFactory<>(UnpackagerMenu::new));
+	public static final MenuType<UnpackagerMenu> TYPE_INSTANCE = IForgeMenuType.create(new PositionalBlockEntityMenuFactory<>(UnpackagerMenu::new));
 
 	public UnpackagerMenu(int windowId, Inventory inventory, UnpackagerBlockEntity blockEntity) {
 		super(TYPE_INSTANCE, windowId, inventory, blockEntity);

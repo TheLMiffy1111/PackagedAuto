@@ -26,9 +26,9 @@ public interface IPackageRecipeType {
 	boolean canSetOutput();
 
 	boolean hasMachine();
-	
+
 	boolean hasCraftingRemainingItem();
-	
+
 	default List<ResourceLocation> getJEICategories() {
 		return new ArrayList<>();
 	}

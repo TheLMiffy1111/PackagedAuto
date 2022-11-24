@@ -110,7 +110,7 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
 				currentPattern = pattern.pattern;
 				lockPattern = true;
-				List<ItemStack> inputs = pattern.pattern.getInputs();	
+				List<ItemStack> inputs = pattern.pattern.getInputs();
 				for(int i = 0; i < inputs.size(); ++i) {
 					itemHandler.setStackInSlot(i, inputs.get(i).copy());
 				}

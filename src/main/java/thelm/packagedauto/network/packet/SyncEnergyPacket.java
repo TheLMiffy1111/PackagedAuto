@@ -39,8 +39,8 @@ public class SyncEnergyPacket {
 			ClientLevel level = Minecraft.getInstance().level;
 			if(level.isLoaded(pkt.pos)) {
 				BlockEntity be = level.getBlockEntity(pkt.pos);
-				if(be instanceof BaseBlockEntity) {
-					((BaseBlockEntity)be).getEnergyStorage().setEnergyStored(pkt.energy);
+				if(be instanceof BaseBlockEntity bbe) {
+					bbe.getEnergyStorage().setEnergyStored(pkt.energy);
 				}
 			}
 		});

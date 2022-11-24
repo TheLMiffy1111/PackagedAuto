@@ -49,8 +49,8 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerBlockEntity
 	public void updateRecipeList() {
 		blockEntity.recipeList.clear();
 		ItemStack listStack = getStackInSlot(9);
-		if(listStack.getItem() instanceof IPackageRecipeListItem) {
-			blockEntity.recipeList.addAll(((IPackageRecipeListItem)listStack.getItem()).getRecipeList(blockEntity.getLevel(), listStack).getRecipeList());
+		if(listStack.getItem() instanceof IPackageRecipeListItem listItem) {
+			blockEntity.recipeList.addAll(listItem.getRecipeList(blockEntity.getLevel(), listStack).getRecipeList());
 		}
 		if(blockEntity.getLevel() != null && !blockEntity.getLevel().isClientSide) {
 			blockEntity.postPatternChange();

@@ -11,8 +11,7 @@ import thelm.packagedauto.slot.RemoveOnlySlot;
 
 public class CrafterMenu extends BaseMenu<CrafterBlockEntity> {
 
-	public static final MenuType<CrafterMenu> TYPE_INSTANCE = (MenuType<CrafterMenu>)IForgeMenuType.
-			create(new PositionalBlockEntityMenuFactory<>(CrafterMenu::new));
+	public static final MenuType<CrafterMenu> TYPE_INSTANCE = IForgeMenuType.create(new PositionalBlockEntityMenuFactory<>(CrafterMenu::new));
 
 	public CrafterMenu(int windowId, Inventory inventory, CrafterBlockEntity blockEntity) {
 		super(TYPE_INSTANCE, windowId, inventory, blockEntity);

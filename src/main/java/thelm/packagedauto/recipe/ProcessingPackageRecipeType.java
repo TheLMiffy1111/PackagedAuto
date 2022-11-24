@@ -36,7 +36,7 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 		IntStream.range(0, 90).forEachOrdered(SLOTS::add);
 	}
 
-	protected ProcessingPackageRecipeType() {};
+	protected ProcessingPackageRecipeType() {}
 
 	@Override
 	public ResourceLocation getName() {

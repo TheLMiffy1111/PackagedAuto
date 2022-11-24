@@ -27,7 +27,7 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 	}
 
 	public EnergyStorage read(CompoundTag nbt) {
-		this.energy = nbt.getInt("Energy");
+		energy = nbt.getInt("Energy");
 		if(energy > capacity) {
 			energy = capacity;
 		}

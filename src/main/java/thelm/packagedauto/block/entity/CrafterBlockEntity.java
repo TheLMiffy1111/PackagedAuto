@@ -28,7 +28,7 @@ import thelm.packagedauto.util.MiscHelper;
 
 public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraftingMachine {
 
-	public static final BlockEntityType<CrafterBlockEntity> TYPE_INSTANCE = (BlockEntityType<CrafterBlockEntity>)BlockEntityType.Builder.
+	public static final BlockEntityType<CrafterBlockEntity> TYPE_INSTANCE = BlockEntityType.Builder.
 			of(MiscHelper.INSTANCE.<BlockEntityType.BlockEntitySupplier<CrafterBlockEntity>>conditionalSupplier(
 					()->ModList.get().isLoaded("ae2"),
 					()->()->AECrafterBlockEntity::new, ()->()->CrafterBlockEntity::new).get(),
@@ -75,8 +75,7 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 
 	@Override
 	public boolean acceptPackage(IPackageRecipeInfo recipeInfo, List<ItemStack> stacks, Direction direction) {
-		if(!isBusy() && recipeInfo instanceof ICraftingPackageRecipeInfo) {
-			ICraftingPackageRecipeInfo recipe = (ICraftingPackageRecipeInfo)recipeInfo;
+		if(!isBusy() && recipeInfo instanceof ICraftingPackageRecipeInfo recipe) {
 			ItemStack slotStack = itemHandler.getStackInSlot(9);
 			ItemStack outputStack = recipe.getOutput();
 			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+outputStack.getCount() <= outputStack.getMaxStackSize()) {
@@ -178,8 +177,8 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 		if(nbt.contains("Recipe")) {
 			CompoundTag tag = nbt.getCompound("Recipe");
 			IPackageRecipeInfo recipe = MiscHelper.INSTANCE.loadRecipe(tag);
-			if(recipe instanceof ICraftingPackageRecipeInfo) {
-				currentRecipe = (ICraftingPackageRecipeInfo)recipe;
+			if(recipe instanceof ICraftingPackageRecipeInfo craftingRecipe) {
+				currentRecipe = craftingRecipe;
 			}
 		}
 	}

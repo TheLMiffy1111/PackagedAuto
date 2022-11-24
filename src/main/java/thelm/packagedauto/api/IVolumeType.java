@@ -39,7 +39,7 @@ public interface IVolumeType {
 	Capability getItemCapability();
 
 	boolean hasBlockCapability(ICapabilityProvider capProvider, Direction direction);
-	
+
 	default boolean isEmpty(ICapabilityProvider capProvider, Direction direction) {
 		return false;
 	}

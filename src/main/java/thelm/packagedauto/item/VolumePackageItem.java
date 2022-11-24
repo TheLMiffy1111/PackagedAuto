@@ -48,7 +48,7 @@ public class VolumePackageItem extends Item implements IVolumePackageItem {
 		if(type == null) {
 			return ItemStack.EMPTY;
 		}
-		return type.wrapStack(volumeStack).map(s->makeVolumePackage(s)).orElse(ItemStack.EMPTY);	
+		return type.wrapStack(volumeStack).map(s->makeVolumePackage(s)).orElse(ItemStack.EMPTY);
 	}
 
 	@Override

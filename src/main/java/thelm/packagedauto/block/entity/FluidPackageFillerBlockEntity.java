@@ -26,7 +26,7 @@ import thelm.packagedauto.menu.FluidPackageFillerMenu;
 
 public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 
-	public static final BlockEntityType<FluidPackageFillerBlockEntity> TYPE_INSTANCE = (BlockEntityType<FluidPackageFillerBlockEntity>)BlockEntityType.Builder.
+	public static final BlockEntityType<FluidPackageFillerBlockEntity> TYPE_INSTANCE = BlockEntityType.Builder.
 			of(FluidPackageFillerBlockEntity::new, FluidPackageFillerBlock.INSTANCE).build(null);
 
 	public static int energyCapacity = 5000;

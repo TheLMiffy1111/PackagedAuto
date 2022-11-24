@@ -39,7 +39,7 @@ import thelm.packagedauto.util.MiscHelper;
 
 public class UnpackagerBlockEntity extends BaseBlockEntity {
 
-	public static final BlockEntityType<UnpackagerBlockEntity> TYPE_INSTANCE = (BlockEntityType<UnpackagerBlockEntity>)BlockEntityType.Builder.
+	public static final BlockEntityType<UnpackagerBlockEntity> TYPE_INSTANCE = BlockEntityType.Builder.
 			of(MiscHelper.INSTANCE.<BlockEntityType.BlockEntitySupplier<UnpackagerBlockEntity>>conditionalSupplier(
 					()->ModList.get().isLoaded("ae2"),
 					()->()->AEUnpackagerBlockEntity::new, ()->()->UnpackagerBlockEntity::new).get(),
@@ -94,8 +94,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 		for(int i = 0; i < 9; ++i) {
 			if(energyStorage.getEnergyStored() >= energyUsage) {
 				ItemStack stack = itemHandler.getStackInSlot(i);
-				if(!stack.isEmpty() && stack.getItem() instanceof IPackageItem) {
-					IPackageItem packageItem = (IPackageItem)stack.getItem();
+				if(!stack.isEmpty() && stack.getItem() instanceof IPackageItem packageItem) {
 					boolean flag = false;
 					for(PackageTracker tracker : nonEmptyTrackers) {
 						if(tracker.tryAcceptPackage(packageItem, stack, i)) {

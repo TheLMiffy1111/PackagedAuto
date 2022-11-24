@@ -17,7 +17,7 @@ import thelm.packagedauto.network.packet.SetFluidAmountPacket;
 public class FluidPackageFillerScreen extends BaseScreen<FluidPackageFillerMenu> {
 
 	public static final ResourceLocation BACKGROUND = new ResourceLocation("packagedauto:textures/gui/fluid_package_filler.png");
-	public static final FluidRenderer FLUID_RENDERER = new FluidRenderer(16, 52, 1);	
+	public static final FluidRenderer FLUID_RENDERER = new FluidRenderer(16, 52, 1);
 
 	protected EditBox amountField;
 

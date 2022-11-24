@@ -12,8 +12,7 @@ import thelm.packagedauto.slot.PreviewSlot;
 
 public class EncoderMenu extends BaseMenu<EncoderBlockEntity> {
 
-	public static final MenuType<EncoderMenu> TYPE_INSTANCE = (MenuType<EncoderMenu>)IForgeMenuType.
-			create(new PositionalBlockEntityMenuFactory<>(EncoderMenu::new));
+	public static final MenuType<EncoderMenu> TYPE_INSTANCE = IForgeMenuType.create(new PositionalBlockEntityMenuFactory<>(EncoderMenu::new));
 
 	public EncoderPatternItemHandler patternItemHandler;
 
@@ -47,7 +46,7 @@ public class EncoderMenu extends BaseMenu<EncoderBlockEntity> {
 		}
 		setupPlayerInventory();
 	}
-	
+
 	public void addSlot(EncoderPatternItemHandler patternItemHandler, int index, int x, int y) {
 		if((index < 81 || index < 90 && patternItemHandler.recipeType.canSetOutput()) && patternItemHandler.recipeType.getEnabledSlots().contains(index)) {
 			addSlot(new FalseCopySlot(patternItemHandler, index, x, y));

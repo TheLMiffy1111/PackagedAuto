@@ -82,7 +82,7 @@ public class CommonEventHandler {
 		itemRegister.register("me_package_component", ()->MiscItem.ME_PACKAGE_COMPONENT);
 
 		DeferredRegister<BlockEntityType<?>> blockEntityRegister = DeferredRegister.create(Registry.BLOCK_ENTITY_TYPE_REGISTRY, "packagedauto");
-		blockEntityRegister.register(modEventBus);	
+		blockEntityRegister.register(modEventBus);
 		blockEntityRegister.register("encoder", ()->EncoderBlockEntity.TYPE_INSTANCE);
 		blockEntityRegister.register("packager", ()->PackagerBlockEntity.TYPE_INSTANCE);
 		blockEntityRegister.register("packager_extension", ()->PackagerExtensionBlockEntity.TYPE_INSTANCE);
@@ -91,7 +91,7 @@ public class CommonEventHandler {
 		blockEntityRegister.register("fluid_package_filler", ()->FluidPackageFillerBlockEntity.TYPE_INSTANCE);
 
 		DeferredRegister<MenuType<?>> menuRegister = DeferredRegister.create(Registry.MENU_REGISTRY, "packagedauto");
-		menuRegister.register(modEventBus);	
+		menuRegister.register(modEventBus);
 		menuRegister.register("encoder", ()->EncoderMenu.TYPE_INSTANCE);
 		menuRegister.register("packager", ()->PackagerMenu.TYPE_INSTANCE);
 		menuRegister.register("packager_extension", ()->PackagerExtensionMenu.TYPE_INSTANCE);

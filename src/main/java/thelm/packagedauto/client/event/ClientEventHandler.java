@@ -42,7 +42,7 @@ public class ClientEventHandler {
 		MenuScreens.register(FluidPackageFillerMenu.TYPE_INSTANCE, FluidPackageFillerScreen::new);
 
 		event.enqueueWork(()->{
-			ItemProperties.register(RecipeHolderItem.INSTANCE, 
+			ItemProperties.register(RecipeHolderItem.INSTANCE,
 					new ResourceLocation("packagedauto", "filled"), (stack, world, living, seed)->{
 						return stack.hasTag() ? 1F : 0F;
 					});

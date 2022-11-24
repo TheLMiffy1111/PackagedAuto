@@ -37,8 +37,8 @@ public class SetItemStackPacket {
 			if(container != null) {
 				if(pkt.containerSlot >= 0 && pkt.containerSlot < container.slots.size()) {
 					Slot slot = container.getSlot(pkt.containerSlot);
-					if(slot instanceof FalseCopySlot) {
-						ItemStackHandler handler = (ItemStackHandler)((FalseCopySlot)slot).getItemHandler();
+					if(slot instanceof FalseCopySlot fSlot) {
+						ItemStackHandler handler = (ItemStackHandler)fSlot.getItemHandler();
 						handler.setStackInSlot(slot.getSlotIndex(), pkt.stack);
 					}
 				}

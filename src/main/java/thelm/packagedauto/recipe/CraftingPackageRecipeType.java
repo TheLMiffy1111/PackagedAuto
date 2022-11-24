@@ -35,7 +35,7 @@ public class CraftingPackageRecipeType implements IPackageRecipeType {
 		}
 	}
 
-	protected CraftingPackageRecipeType() {};
+	protected CraftingPackageRecipeType() {}
 
 	@Override
 	public ResourceLocation getName() {
