@@ -1,7 +1,5 @@
 package thelm.packagedauto.integration.jei;
 
-import java.util.List;
-
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;

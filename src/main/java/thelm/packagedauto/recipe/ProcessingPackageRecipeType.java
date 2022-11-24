@@ -41,7 +41,7 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 		SLOTS.add(88);
 	}
 
-	protected ProcessingPackageRecipeType() {};
+	protected ProcessingPackageRecipeType() {}
 
 	@Override
 	public ResourceLocation getName() {

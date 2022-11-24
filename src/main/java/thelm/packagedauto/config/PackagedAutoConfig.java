@@ -11,7 +11,7 @@ import thelm.packagedauto.tile.UnpackagerTile;
 
 public class PackagedAutoConfig {
 
-	private PackagedAutoConfig() {};
+	private PackagedAutoConfig() {}
 
 	private static ForgeConfigSpec serverSpec;
 

@@ -25,7 +25,7 @@ public class ClientEventHandler {
 	public static ClientEventHandler getInstance() {
 		return INSTANCE;
 	}
-	
+
 	public void onConstruct() {
 		FMLJavaModLoadingContext.get().getModEventBus().register(this);
 	}
@@ -39,7 +39,7 @@ public class ClientEventHandler {
 		ScreenManager.registerFactory(CrafterContainer.TYPE_INSTANCE, CrafterScreen::new);
 
 		event.enqueueWork(()->{
-			ItemModelsProperties.registerProperty(RecipeHolderItem.INSTANCE, 
+			ItemModelsProperties.registerProperty(RecipeHolderItem.INSTANCE,
 					new ResourceLocation("packagedauto", "filled"), (stack, world, living)->{
 						return stack.hasTag() ? 1F : 0F;
 					});
