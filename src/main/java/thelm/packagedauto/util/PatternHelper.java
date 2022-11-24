@@ -27,12 +27,12 @@ public class PatternHelper implements IPackagePattern {
 		List<ItemStack> recipeInputs = recipeInfo.getInputs();
 		recipeInputs = recipeInputs.subList(9*index, Math.min(9*index+9, recipeInputs.size()));
 		if(condense) {
-			this.inputs = ImmutableList.copyOf(MiscUtil.condenseStacks(recipeInputs));
+			inputs = ImmutableList.copyOf(MiscUtil.condenseStacks(recipeInputs));
 		}
 		else {
-			this.inputs = ImmutableList.copyOf(recipeInputs);
+			inputs = ImmutableList.copyOf(recipeInputs);
 		}
-		this.output = ItemPackage.makePackage(recipeInfo, index);
+		output = ItemPackage.makePackage(recipeInfo, index);
 	}
 
 	@Override

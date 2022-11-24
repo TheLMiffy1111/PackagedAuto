@@ -11,9 +11,9 @@ import thelm.packagedauto.network.ISelfHandleMessage;
 public class PacketCycleRecipeType implements ISelfHandleMessage<IMessage> {
 
 	private boolean reverse;
-	
+
 	public PacketCycleRecipeType() {}
-	
+
 	public PacketCycleRecipeType(boolean reverse) {
 		this.reverse = reverse;
 	}

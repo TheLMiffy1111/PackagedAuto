@@ -11,7 +11,7 @@ import thelm.packagedauto.network.ISelfHandleMessage;
 public class PacketSaveRecipeList implements ISelfHandleMessage<IMessage> {
 
 	private boolean single;
-	
+
 	public PacketSaveRecipeList() {}
 
 	public PacketSaveRecipeList(boolean single) {

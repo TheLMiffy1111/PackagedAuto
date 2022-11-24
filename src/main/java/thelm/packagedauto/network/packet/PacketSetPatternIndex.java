@@ -35,7 +35,7 @@ public class PacketSetPatternIndex implements ISelfHandleMessage<IMessage> {
 		world.addScheduledTask(()->{
 			if(player.openContainer instanceof ContainerEncoder) {
 				ContainerEncoder container = (ContainerEncoder)player.openContainer;
-				container.tile.setPatternIndex(this.index);
+				container.tile.setPatternIndex(index);
 				container.setupSlots();
 			}
 		});

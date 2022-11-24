@@ -39,7 +39,7 @@ public class RecipeTypeCrafting implements IRecipeType {
 		}
 	}
 
-	protected RecipeTypeCrafting() {};
+	protected RecipeTypeCrafting() {}
 
 	@Override
 	public ResourceLocation getName() {

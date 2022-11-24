@@ -20,8 +20,8 @@ public class InventoryTileBase implements ISidedInventory {
 
 	public InventoryTileBase(TileBase tile, int size) {
 		this.tile = tile;
-		this.stacks = NonNullList.withSize(size, ItemStack.EMPTY);
-		this.slots = IntStream.range(0, size).toArray();
+		stacks = NonNullList.withSize(size, ItemStack.EMPTY);
+		slots = IntStream.range(0, size).toArray();
 	}
 
 	@Override

@@ -37,7 +37,7 @@ public class RecipeTypeProcessing implements IRecipeType {
 		IntStream.range(0, 90).forEachOrdered(SLOTS::add);
 	}
 
-	protected RecipeTypeProcessing() {};
+	protected RecipeTypeProcessing() {}
 
 	@Override
 	public ResourceLocation getName() {

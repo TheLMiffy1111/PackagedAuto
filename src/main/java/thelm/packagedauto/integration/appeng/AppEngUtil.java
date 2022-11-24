@@ -35,7 +35,7 @@ public class AppEngUtil {
 		}
 		return ret;
 	}
-	
+
 	public static boolean isInterface(TileEntity tile, EnumFacing facing) {
 		return tile instanceof IInterfaceHost || tile instanceof IPartHost && ((IPartHost)tile).getPart(facing) instanceof IInterfaceHost;
 	}

@@ -47,7 +47,7 @@ public abstract class BlockBase extends Block implements ITileEntityProvider, IM
 				return;
 			}
 			int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.FORTUNE, stack);
-			Item item = this.getItemDropped(state, worldIn.rand, i);
+			Item item = getItemDropped(state, worldIn.rand, i);
 			if(item == Items.AIR) {
 				return;
 			}

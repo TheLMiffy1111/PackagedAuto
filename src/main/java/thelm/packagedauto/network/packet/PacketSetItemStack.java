@@ -47,7 +47,7 @@ public class PacketSetItemStack implements ISelfHandleMessage<IMessage> {
 				if(containerSlot >= 0 && containerSlot < container.inventorySlots.size()) {
 					Slot slot = container.getSlot(containerSlot);
 					if(slot instanceof SlotFalseCopy) {
-						IInventory inventory = (IInventory)((SlotFalseCopy)slot).inventory;
+						IInventory inventory = ((SlotFalseCopy)slot).inventory;
 						inventory.setInventorySlotContents(slot.getSlotIndex(), stack);
 					}
 				}

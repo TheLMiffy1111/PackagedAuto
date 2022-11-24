@@ -156,7 +156,7 @@ public class GuiAmountSpecifying extends GuiContainerTileBase<ContainerAmountSpe
 	}
 
 	protected void onOkButtonPressed(boolean shiftDown) {
-		try {	
+		try {
 			int amount = MathHelper.clamp(Integer.parseInt(amountField.getText()), 0, maxAmount);
 			ItemStack newStack = stack.copy();
 			newStack.setCount(amount);
