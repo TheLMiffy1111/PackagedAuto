@@ -31,7 +31,7 @@ public class UnknownStackWrapper implements IVolumeStackWrapper {
 
 	@Override
 	public void setAmount(int amount) {
-		
+
 	}
 
 	@Override

@@ -97,8 +97,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 		for(int i = 0; i < 9; ++i) {
 			if(energyStorage.getEnergyStored() >= energyUsage) {
 				ItemStack stack = itemHandler.getStackInSlot(i);
-				if(!stack.isEmpty() && stack.getItem() instanceof IPackageItem) {
-					IPackageItem packageItem = (IPackageItem)stack.getItem();
+				if(!stack.isEmpty() && stack.getItem() instanceof IPackageItem packageItem) {
 					boolean flag = false;
 					for(PackageTracker tracker : nonEmptyTrackers) {
 						if(tracker.tryAcceptPackage(packageItem, stack, i)) {

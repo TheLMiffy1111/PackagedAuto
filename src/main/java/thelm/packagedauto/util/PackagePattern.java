@@ -24,12 +24,12 @@ public class PackagePattern implements IPackagePattern {
 		List<ItemStack> recipeInputs = recipeInfo.getInputs();
 		recipeInputs = recipeInputs.subList(9*index, Math.min(9*index+9, recipeInputs.size()));
 		if(condense) {
-			this.inputs = List.copyOf(MiscHelper.INSTANCE.condenseStacks(recipeInputs));
+			inputs = List.copyOf(MiscHelper.INSTANCE.condenseStacks(recipeInputs));
 		}
 		else {
-			this.inputs = List.copyOf(recipeInputs);
+			inputs = List.copyOf(recipeInputs);
 		}
-		this.output = PackageItem.makePackage(recipeInfo, index);
+		output = PackageItem.makePackage(recipeInfo, index);
 	}
 
 	@Override

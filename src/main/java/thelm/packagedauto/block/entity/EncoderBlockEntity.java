@@ -75,7 +75,7 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 
 	public void saveRecipeList(boolean single) {
 		ItemStack stack = itemHandler.getStackInSlot(0);
-		if(stack.getItem() instanceof IPackageRecipeListItem) {
+		if(stack.getItem() instanceof IPackageRecipeListItem listItem) {
 			List<IPackageRecipeInfo> recipeList = new ArrayList<>();
 			if(!single) {
 				for(EncoderPatternItemHandler inv : patternItemHandlers) {
@@ -90,7 +90,7 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 					recipeList.add(inv.recipeInfo);
 				}
 			}
-			IPackageRecipeList recipeListItem = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(level, stack);
+			IPackageRecipeList recipeListItem = listItem.getRecipeList(level, stack);
 			recipeListItem.setRecipeList(recipeList);
 			CompoundTag nbt = new CompoundTag();
 			recipeListItem.save(nbt);
@@ -100,8 +100,8 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 
 	public void loadRecipeList() {
 		ItemStack stack = itemHandler.getStackInSlot(0);
-		if(stack.getItem() instanceof IPackageRecipeListItem) {
-			IPackageRecipeList recipeListItem = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(level, stack);
+		if(stack.getItem() instanceof IPackageRecipeListItem listItem) {
+			IPackageRecipeList recipeListItem = listItem.getRecipeList(level, stack);
 			List<IPackageRecipeInfo> recipeList = recipeListItem.getRecipeList();
 			for(int i = 0; i < patternItemHandlers.length; ++i) {
 				EncoderPatternItemHandler inv = patternItemHandlers[i];

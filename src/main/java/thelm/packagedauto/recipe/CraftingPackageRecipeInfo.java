@@ -138,8 +138,7 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof CraftingPackageRecipeInfo) {
-			CraftingPackageRecipeInfo other = (CraftingPackageRecipeInfo)obj;
+		if(obj instanceof CraftingPackageRecipeInfo other) {
 			if(input.size() != other.input.size()) {
 				return false;
 			}

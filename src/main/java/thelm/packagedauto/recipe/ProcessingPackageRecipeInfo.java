@@ -92,8 +92,7 @@ public class ProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof ProcessingPackageRecipeInfo) {
-			ProcessingPackageRecipeInfo other = (ProcessingPackageRecipeInfo)obj;
+		if(obj instanceof ProcessingPackageRecipeInfo other) {
 			if(input.size() != other.input.size() || output.size() != other.output.size()) {
 				return false;
 			}

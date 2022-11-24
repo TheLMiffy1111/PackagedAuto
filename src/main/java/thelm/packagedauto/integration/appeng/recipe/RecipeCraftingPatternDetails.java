@@ -56,8 +56,7 @@ public class RecipeCraftingPatternDetails implements IPatternDetails {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof RecipeCraftingPatternDetails) {
-			RecipeCraftingPatternDetails other = (RecipeCraftingPatternDetails)obj;
+		if(obj instanceof RecipeCraftingPatternDetails other) {
 			return recipe.equals(other.recipe);
 		}
 		return false;

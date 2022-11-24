@@ -15,7 +15,7 @@ public class BaseVolumeInventory {
 
 	public BaseVolumeInventory(IVolumeType type, int size) {
 		this.type = type;
-		this.stacks = new IVolumeStackWrapper[size];
+		stacks = new IVolumeStackWrapper[size];
 		Arrays.fill(stacks, type.getEmptyStackInstance());
 	}
 

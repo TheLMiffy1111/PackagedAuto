@@ -103,14 +103,13 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 
 	@Override
 	public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
-		if(!isBusy() && patternDetails instanceof PackageCraftingPatternDetails) {
-			PackageCraftingPatternDetails pattern = (PackageCraftingPatternDetails)patternDetails;
+		if(!isBusy() && patternDetails instanceof PackageCraftingPatternDetails pattern) {
 			ItemStack slotStack = itemHandler.getStackInSlot(9);
 			ItemStack outputStack = pattern.pattern.getOutput();
 			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
 				currentPattern = pattern.pattern;
 				lockPattern = true;
-				List<ItemStack> inputs = pattern.pattern.getInputs();	
+				List<ItemStack> inputs = pattern.pattern.getInputs();
 				for(int i = 0; i < inputs.size(); ++i) {
 					itemHandler.setStackInSlot(i, inputs.get(i).copy());
 				}

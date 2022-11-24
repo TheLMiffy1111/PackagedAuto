@@ -51,8 +51,7 @@ public class PackageCraftingPatternDetails implements IPatternDetails {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(obj instanceof PackageCraftingPatternDetails) {
-			PackageCraftingPatternDetails other = (PackageCraftingPatternDetails)obj;
+		if(obj instanceof PackageCraftingPatternDetails other) {
 			return pattern.getIndex() == other.pattern.getIndex() && pattern.getRecipeInfo().equals(other.pattern.getRecipeInfo());
 		}
 		return false;

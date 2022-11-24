@@ -12,7 +12,7 @@ import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
 
 public class PackagedAutoConfig {
 
-	private PackagedAutoConfig() {};
+	private PackagedAutoConfig() {}
 
 	private static ForgeConfigSpec serverSpec;
 

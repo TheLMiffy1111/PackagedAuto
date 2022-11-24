@@ -148,14 +148,14 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 			IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
 			if(recipeType != null) {
 				Object rep = recipeType.getRepresentation();
-				if(rep instanceof TextureAtlasSprite) {
+				if(rep instanceof TextureAtlasSprite sprite) {
 					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 					RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-					blit(poseStack, x+1, y+1, 0, 16, 16, (TextureAtlasSprite)rep);
+					blit(poseStack, x+1, y+1, 0, 16, 16, sprite);
 				}
-				if(rep instanceof ItemStack) {
+				if(rep instanceof ItemStack stack) {
 					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-					minecraft.getItemRenderer().renderGuiItem((ItemStack)rep, x+1, y+1);
+					minecraft.getItemRenderer().renderGuiItem(stack, x+1, y+1);
 				}
 			}
 		}
