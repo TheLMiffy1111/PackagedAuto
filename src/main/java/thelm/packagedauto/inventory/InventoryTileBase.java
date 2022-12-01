@@ -10,6 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import thelm.packagedauto.tile.TileBase;
 
 public class InventoryTileBase implements ISidedInventory {
@@ -73,16 +74,20 @@ public class InventoryTileBase implements ISidedInventory {
 
 	@Override
 	public void markDirty() {
-		tile.markDirty();
+		if(tile != null) {
+			tile.markDirty();
+		}
 	}
 
 	public void syncTile(boolean rerender) {
-		tile.syncTile(rerender);
+		if(tile != null) {
+			tile.syncTile(rerender);
+		}
 	}
 
 	@Override
 	public boolean isUsableByPlayer(EntityPlayer player) {
-		return player.getDistanceSq(tile.getPos().getX()+0.5D, tile.getPos().getY()+0.5D, tile.getPos().getZ()+0.5D) <= 64D;
+		return tile != null && player.getDistanceSq(tile.getPos().getX()+0.5D, tile.getPos().getY()+0.5D, tile.getPos().getZ()+0.5D) <= 64D;
 	}
 
 	@Override
@@ -116,17 +121,17 @@ public class InventoryTileBase implements ISidedInventory {
 
 	@Override
 	public String getName() {
-		return tile.getName();
+		return tile != null ? tile.getName() : "[null]";
 	}
 
 	@Override
 	public boolean hasCustomName() {
-		return tile.hasCustomName();
+		return tile != null && tile.hasCustomName();
 	}
 
 	@Override
 	public ITextComponent getDisplayName() {
-		return tile.getDisplayName();
+		return tile != null ? tile.getDisplayName() : new TextComponentString("[null]");
 	}
 
 	@Override
