@@ -46,7 +46,7 @@ repositories {
     }
 }
 
-version = "1.12.2-1.0.6.21"
+version = "1.12.2-1.0.6.22"
 group = "thelm.packagedauto"
 archivesBaseName = "PackagedAuto"
 
@@ -60,28 +60,13 @@ minecraft {
     version = "1.12.2-14.23.5.2847"
     runDir = "run"
     mappings = "stable_39"
+    clientRunArgs.add("--username=Dev")
     makeObfSourceJar = false
 }
 
 dependencies {
     deobfCompile "mezz.jei:jei_1.12.2:4.16.1.302"
     deobfCompile "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
-    deobfCompile "cofh:RedstoneFlux:1.12-2.1.0.6:universal"
-    deobfCompile("cofh:CoFHCore:1.12.2-4.6.3.27:universal") {
-        transitive = false
-    }
-    deobfCompile("cofh:CoFHWorld:1.12.2-1.3.1.7:universal") {
-        transitive = false
-    }
-    deobfCompile("cofh:ThermalFoundation:1.12.2-2.6.3.27:universal") {
-        transitive = false
-    }
-    deobfCompile("cofh:ThermalExpansion:1.12.2-5.5.4.43:universal") {
-        transitive = false
-    }
-    deobfCompile("cofh:ThermalDynamics:1.12.2-2.5.5.21:universal") {
-        transitive = false
-    }
     deobfCompile "CraftTweaker2:CraftTweaker2-API:4.1.20.675"
     deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.675"
     deobfCompile("morph.avaritia:Avaritia:1.12.2-3.3.0.33:universal") {
@@ -89,6 +74,12 @@ dependencies {
     }
 
     deobfCompile "curse.maven:applied-energistics-2-223794:2747063"
+    deobfCompile "curse.maven:redstone-flux-270789:2920436"
+    deobfCompile "curse.maven:cofh-core-69162:2920433"
+    deobfCompile "curse.maven:cofh-world-271384:2920434"
+    deobfCompile "curse.maven:thermal-foundation-222880:2926428"
+    deobfCompile "curse.maven:thermal-expansion-69163:2926431"
+    deobfCompile "curse.maven:thermal-dynamics-227443:2920505"
 }
 
 jar {

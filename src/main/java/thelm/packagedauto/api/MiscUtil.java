@@ -143,7 +143,7 @@ public class MiscUtil {
 
 	public static IPackagePattern getPatternHelper(IRecipeInfo recipeInfo, int index) {
 		try {
-			Class<? extends IPackagePattern> helperClass = (Class<? extends IPackagePattern>)Class.forName("thelm.packagedauto.util.PatternHelper.PatternHelper");
+			Class<? extends IPackagePattern> helperClass = (Class<? extends IPackagePattern>)Class.forName("thelm.packagedauto.util.PatternHelper");
 			Constructor<? extends IPackagePattern> helperConstructor = helperClass.getConstructor(IRecipeInfo.class, int.class);
 			return helperConstructor.newInstance(recipeInfo, index);
 		}
@@ -255,7 +255,7 @@ public class MiscUtil {
 		for(ItemStack req : condensedRequired) {
 			int count = req.getCount();
 			for(ItemStack offer : offered) {
-				if(!req.isEmpty()) {
+				if(!offer.isEmpty()) {
 					if(req.getItem() == offer.getItem() && offer.getItemDamage() == req.getItemDamage() &&
 							(!req.hasTagCompound() || ItemStack.areItemStackShareTagsEqual(req, offer))) {
 						int toRemove = Math.min(count, offer.getCount());
