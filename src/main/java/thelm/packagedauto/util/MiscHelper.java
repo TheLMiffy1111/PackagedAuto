@@ -175,15 +175,7 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public IPackagePattern getPattern(IPackageRecipeInfo recipeInfo, int index) {
-		try {
-			Class<? extends IPackagePattern> helperClass = (Class<? extends IPackagePattern>)Class.forName("thelm.packagedauto.util.PatternHelper.PatternHelper");
-			Constructor<? extends IPackagePattern> helperConstructor = helperClass.getConstructor(IPackageRecipeInfo.class, int.class);
-			return helperConstructor.newInstance(recipeInfo, index);
-		}
-		catch(Exception e) {
-			e.printStackTrace();
-		}
-		return null;
+		return new PackagePattern(recipeInfo, index);
 	}
 
 	@Override
@@ -300,7 +292,7 @@ public class MiscHelper implements IMiscHelper {
 		for(ItemStack req : condensedRequired) {
 			int count = req.getCount();
 			for(ItemStack offer : offered) {
-				if(!req.isEmpty()) {
+				if(!offer.isEmpty()) {
 					if(req.getItem() == offer.getItem() &&
 							(!req.hasTag() || ItemStack.isSameItemSameTags(req, offer))) {
 						int toRemove = Math.min(count, offer.getCount());
