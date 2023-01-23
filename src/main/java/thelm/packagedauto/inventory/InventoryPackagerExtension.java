@@ -31,10 +31,8 @@ public class InventoryPackagerExtension extends InventoryTileBase {
 	public ItemStack decrStackSize(int index, int count) {
 		ItemStack stack = super.decrStackSize(index, count);
 		if(index < 9 && !tile.getWorld().isRemote) {
-			if(tile.isWorking && !getStackInSlot(index).isEmpty()) {
-				if(tile.isWorking && (getStackInSlot(index).isEmpty() || !tile.isInputValid())) {
-					tile.endProcess();
-				}
+			if(tile.isWorking && !getStackInSlot(index).isEmpty() && !tile.isInputValid()) {
+				tile.endProcess();
 			}
 		}
 		return stack;

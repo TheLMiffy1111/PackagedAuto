@@ -1,0 +1,36 @@
+itemGroup.packagedauto=封包合成
+
+tile.packagedauto.packager.name=封包機
+tile.packagedauto.packager.mode.exact=模式: 完全匹配
+tile.packagedauto.packager.mode.disjoint=模式: 物品互斥
+tile.packagedauto.packager.mode.first=模式: 第一匹配
+tile.packagedauto.encoder.name=封包配方編碼器
+tile.packagedauto.encoder.save=保存
+tile.packagedauto.encoder.save_single=保存單個
+tile.packagedauto.encoder.load=加載
+tile.packagedauto.encoder.pattern_slot=配方欄位%s
+tile.packagedauto.encoder.change_recipe_type=更改配方類型
+tile.packagedauto.unpackager.name=解包機
+tile.packagedauto.unpackager.blocking.false=阻擋模式已禁用
+tile.packagedauto.unpackager.blocking.true=阻擋模式已啟用
+tile.packagedauto.packager_extension.name=封包機擴展
+tile.packagedauto.crafter.name=封包合成器
+
+item.packagedauto.recipe_holder.name=封包配方儲存器
+item.packagedauto.recipe_holder.recipes=配方:
+item.packagedauto.package.name=配方封包
+item.packagedauto.package.index=編號: %d
+item.packagedauto.package.items=物品:
+item.packagedauto.package_component.name=封包組件
+item.packagedauto.me_package_component.name=ME封包組件
+
+recipe.packagedauto.processing=處理
+recipe.packagedauto.processing.short=處理
+recipe.packagedauto.processing_ordered=有序處理
+recipe.packagedauto.processing_ordered.short=有序
+recipe.packagedauto.crafting=合成
+recipe.packagedauto.crafting.short=合成
+
+gui.packagedauto.amount_specifying=物品數量
+
+misc.packagedauto.set=設置
