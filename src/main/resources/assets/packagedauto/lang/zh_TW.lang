@@ -21,8 +21,8 @@ item.packagedauto.recipe_holder.recipes=配方:
 item.packagedauto.package.name=配方封包
 item.packagedauto.package.index=編號: %d
 item.packagedauto.package.items=物品:
-item.packagedauto.package_component.name=封包組件
-item.packagedauto.me_package_component.name=ME封包組件
+item.packagedauto.package_component.name=封包元件
+item.packagedauto.me_package_component.name=ME封包元件
 
 recipe.packagedauto.processing=處理
 recipe.packagedauto.processing.short=處理
