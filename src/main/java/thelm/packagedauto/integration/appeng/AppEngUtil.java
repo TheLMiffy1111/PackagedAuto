@@ -19,7 +19,7 @@ public class AppEngUtil {
 			if(stack == null) {
 				continue;
 			}
-			IAEItemStack stored = map.get( stack );
+			IAEItemStack stored = map.get(stack);
 			if(stored == null) {
 				map.put(stack, stack.copy());
 			}

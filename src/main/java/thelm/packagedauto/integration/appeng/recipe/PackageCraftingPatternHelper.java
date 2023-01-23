@@ -25,7 +25,7 @@ public class PackageCraftingPatternHelper implements ICraftingPatternDetails {
 		this.recipeHolder = recipeHolder;
 		this.pattern = pattern;
 		IItemStorageChannel storageChannel = AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class);
-		inputs = pattern.getInputs().stream().map(storageChannel::createStack).toArray(i->new IAEItemStack[i]);
+		inputs = pattern.getInputs().stream().map(storageChannel::createStack).toArray(IAEItemStack[]::new);
 		outputs = new IAEItemStack[] {storageChannel.createStack(pattern.getOutput())};
 		condensedInputs = AppEngUtil.condenseStacks(inputs);
 		condensedOutputs = outputs.clone();

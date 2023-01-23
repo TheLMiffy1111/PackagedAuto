@@ -24,8 +24,8 @@ public class RecipeCraftingPatternHelper implements ICraftingPatternDetails {
 		this.recipeHolder = recipeHolder;
 		this.recipe = recipe;
 		IItemStorageChannel storageChannel = AEApi.instance().storage().getStorageChannel(IItemStorageChannel.class);
-		inputs = recipe.getPatterns().stream().map(IPackagePattern::getOutput).map(storageChannel::createStack).toArray(i->new IAEItemStack[i]);
-		outputs = recipe.getOutputs().stream().map(storageChannel::createStack).toArray(i->new IAEItemStack[i]);
+		inputs = recipe.getPatterns().stream().map(IPackagePattern::getOutput).map(storageChannel::createStack).toArray(IAEItemStack[]::new);
+		outputs = recipe.getOutputs().stream().map(storageChannel::createStack).toArray(IAEItemStack[]::new);
 		condensedInputs = AppEngUtil.condenseStacks(inputs);
 		condensedOutputs = AppEngUtil.condenseStacks(outputs);
 	}
