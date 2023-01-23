@@ -21,10 +21,8 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 	@Override
 	protected void onContentsChanged(int slot) {
 		if(slot < 9 && !tile.getWorld().isRemote) {
-			if(tile.isWorking && !getStackInSlot(slot).isEmpty()) {
-				if(tile.isWorking && (getStackInSlot(slot).isEmpty() || !tile.isInputValid())) {
-					tile.endProcess();
-				}
+			if(tile.isWorking && !getStackInSlot(slot).isEmpty() && !tile.isInputValid()) {
+				tile.endProcess();
 			}
 		}
 		if(slot == 10) {

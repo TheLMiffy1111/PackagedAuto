@@ -33,7 +33,7 @@ public class PackageCraftingPatternDetails implements ICraftingPatternDetails {
 		this.recipeHolder = recipeHolder;
 		this.pattern = pattern;
 		IItemStorageChannel storageChannel = Api.instance().storage().getStorageChannel(IItemStorageChannel.class);
-		sparseInputs = pattern.getInputs().stream().map(storageChannel::createStack).toArray(i->new IAEItemStack[i]);
+		sparseInputs = pattern.getInputs().stream().map(storageChannel::createStack).toArray(IAEItemStack[]::new);
 		sparseOutputs = new IAEItemStack[] {storageChannel.createStack(pattern.getOutput())};
 		inputs = AppEngUtil.condenseStacks(sparseInputs);
 		outputs = ImmutableList.copyOf(sparseOutputs);

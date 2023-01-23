@@ -31,8 +31,8 @@ public class RecipeCraftingPatternDetails implements ICraftingPatternDetails {
 		this.recipeHolder = recipeHolder;
 		this.recipe = recipe;
 		IItemStorageChannel storageChannel = Api.instance().storage().getStorageChannel(IItemStorageChannel.class);
-		sparseInputs = recipe.getPatterns().stream().map(IPackagePattern::getOutput).map(storageChannel::createStack).toArray(i->new IAEItemStack[i]);
-		sparseOutputs = recipe.getOutputs().stream().map(storageChannel::createStack).toArray(i->new IAEItemStack[i]);
+		sparseInputs = recipe.getPatterns().stream().map(IPackagePattern::getOutput).map(storageChannel::createStack).toArray(IAEItemStack[]::new);
+		sparseOutputs = recipe.getOutputs().stream().map(storageChannel::createStack).toArray(IAEItemStack[]::new);
 		inputs = AppEngUtil.condenseStacks(sparseInputs);
 		outputs = AppEngUtil.condenseStacks(sparseOutputs);
 	}
