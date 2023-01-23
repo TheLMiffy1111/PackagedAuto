@@ -15,10 +15,8 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 	@Override
 	protected void onContentsChanged(int slot) {
 		if(slot < 9 && !blockEntity.getLevel().isClientSide) {
-			if(blockEntity.isWorking && !getStackInSlot(slot).isEmpty()) {
-				if(blockEntity.isWorking && (getStackInSlot(slot).isEmpty() || !blockEntity.isInputValid())) {
-					blockEntity.endProcess();
-				}
+			if(blockEntity.isWorking && !getStackInSlot(slot).isEmpty() && !blockEntity.isInputValid()) {
+				blockEntity.endProcess();
 			}
 		}
 	}
