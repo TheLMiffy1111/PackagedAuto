@@ -7,7 +7,7 @@ import thelm.packagedauto.slot.SlotFalseCopy;
 import thelm.packagedauto.slot.SlotPreview;
 import thelm.packagedauto.tile.TileEncoder;
 
-public class ContainerEncoder extends ContainerTileBase<TileEncoder> {
+public class ContainerEncoder extends ContainerBase<TileEncoder> {
 
 	public InventoryEncoderPattern patternInventory;
 

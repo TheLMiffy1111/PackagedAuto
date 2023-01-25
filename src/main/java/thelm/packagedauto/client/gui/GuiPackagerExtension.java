@@ -1,16 +1,18 @@
 package thelm.packagedauto.client.gui;
 
-import java.io.IOException;
+import java.util.List;
+
+import org.lwjgl.opengl.GL11;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import thelm.packagedauto.container.ContainerPackagerExtension;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.PacketChangePackaging;
 
-public class GuiPackagerExtension extends GuiContainerTileBase<ContainerPackagerExtension> {
+public class GuiPackagerExtension extends GuiBase<ContainerPackagerExtension> {
 
 	public static final ResourceLocation BACKGROUND = new ResourceLocation("packagedauto:textures/gui/packager_extension.png");
 
@@ -27,7 +29,7 @@ public class GuiPackagerExtension extends GuiContainerTileBase<ContainerPackager
 	public void initGui() {
 		buttonList.clear();
 		super.initGui();
-		addButton(new ButtonChangePackaging(0, guiLeft+98, guiTop+16));
+		buttonList.add(new ButtonChangePackaging(0, guiLeft+98, guiTop+16));
 	}
 
 	@Override
@@ -41,22 +43,22 @@ public class GuiPackagerExtension extends GuiContainerTileBase<ContainerPackager
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
-		String s = container.inventory.getDisplayName().getUnformattedText();
-		fontRenderer.drawString(s, xSize/2 - fontRenderer.getStringWidth(s)/2, 6, 0x404040);
-		fontRenderer.drawString(container.playerInventory.getDisplayName().getUnformattedText(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
+		String s = container.inventory.getInventoryName();
+		fontRendererObj.drawString(s, xSize/2 - fontRendererObj.getStringWidth(s)/2, 6, 0x404040);
+		fontRendererObj.drawString(StatCollector.translateToLocal(container.playerInventory.getInventoryName()), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
 		if(mouseX-guiLeft >= 10 && mouseY-guiTop >= 10 && mouseX-guiLeft <= 21 && mouseY-guiTop <= 49) {
-			drawHoveringText(container.tile.getEnergyStorage().getEnergyStored()+" / "+container.tile.getEnergyStorage().getMaxEnergyStored()+" FE", mouseX-guiLeft, mouseY-guiTop);
+			drawCreativeTabHoveringText(container.tile.getEnergyStorage().getEnergyStored()+" / "+container.tile.getEnergyStorage().getMaxEnergyStored()+" RF", mouseX-guiLeft, mouseY-guiTop);
 		}
-		for(GuiButton guibutton : buttonList) {
-			if(guibutton.isMouseOver()) {
-				guibutton.drawButtonForegroundLayer(mouseX-guiLeft, mouseY-guiTop);
+		for(GuiButton guibutton : (List<GuiButton>)buttonList) {
+			if(guibutton.func_146115_a()) {
+				guibutton.func_146111_b(mouseX-guiLeft, mouseY-guiTop);
 				break;
 			}
 		}
 	}
 
 	@Override
-	protected void actionPerformed(GuiButton button) throws IOException {
+	protected void actionPerformed(GuiButton button) {
 		if(button instanceof ButtonChangePackaging) {
 			PacketHandler.INSTANCE.sendToServer(new PacketChangePackaging());
 			container.tile.changePackagingMode();
@@ -70,16 +72,16 @@ public class GuiPackagerExtension extends GuiContainerTileBase<ContainerPackager
 		}
 
 		@Override
-		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-			super.drawButton(mc, mouseX, mouseY, partialTicks);
-			GlStateManager.color(1, 1, 1, 1);
+		public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+			super.drawButton(mc, mouseX, mouseY);
+			GL11.glColor4f(1, 1, 1, 1);
 			mc.renderEngine.bindTexture(BACKGROUND);
-			drawTexturedModalRect(x+1, y+2, 176, 56+14*container.tile.mode.ordinal(), 14, 14);
+			drawTexturedModalRect(xPosition+1, yPosition+2, 176, 56+14*container.tile.mode.ordinal(), 14, 14);
 		}
 
 		@Override
-		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
-			drawHoveringText(container.tile.mode.getTooltip(), mouseX, mouseY);
+		public void func_146111_b(int mouseX, int mouseY) {
+			drawCreativeTabHoveringText(container.tile.mode.getTooltip(), mouseX, mouseY);
 		}
 	}
 }

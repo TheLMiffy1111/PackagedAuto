@@ -1,11 +1,11 @@
 package thelm.packagedauto.inventory;
 
+import cofh.api.energy.IEnergyContainerItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.common.util.ForgeDirection;
 import thelm.packagedauto.tile.TileCrafter;
 
-public class InventoryCrafter extends InventoryTileBase {
+public class InventoryCrafter extends InventoryBase {
 
 	public final TileCrafter tile;
 
@@ -17,7 +17,7 @@ public class InventoryCrafter extends InventoryTileBase {
 	@Override
 	public boolean isItemValidForSlot(int index, ItemStack stack) {
 		if(index == 10) {
-			return stack.hasCapability(CapabilityEnergy.ENERGY, null);
+			return stack != null && stack.getItem() instanceof IEnergyContainerItem;
 		}
 		return false;
 	}
@@ -49,12 +49,12 @@ public class InventoryCrafter extends InventoryTileBase {
 	}
 
 	@Override
-	public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
+	public boolean canInsertItem(int index, ItemStack stack, int side) {
 		return false;
 	}
 
 	@Override
-	public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
+	public boolean canExtractItem(int index, ItemStack stack, int side) {
 		return tile.isWorking ? index == 9 : index != 10;
 	}
 }

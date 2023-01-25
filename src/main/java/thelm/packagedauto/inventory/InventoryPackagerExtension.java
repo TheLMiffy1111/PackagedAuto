@@ -1,11 +1,11 @@
 package thelm.packagedauto.inventory;
 
+import cofh.api.energy.IEnergyContainerItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumFacing;
-import net.minecraftforge.energy.CapabilityEnergy;
+import net.minecraftforge.common.util.ForgeDirection;
 import thelm.packagedauto.tile.TilePackagerExtension;
 
-public class InventoryPackagerExtension extends InventoryTileBase {
+public class InventoryPackagerExtension extends InventoryBase {
 
 	public static final int[] SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 	public final TilePackagerExtension tile;
@@ -17,9 +17,9 @@ public class InventoryPackagerExtension extends InventoryTileBase {
 
 	@Override
 	public void setInventorySlotContents(int index, ItemStack stack) {
-		if(index < 9 && !tile.getWorld().isRemote) {
-			if(tile.isWorking && !getStackInSlot(index).isEmpty()) {
-				if(stack.isEmpty() || !stack.isItemEqual(getStackInSlot(index)) || !tile.isInputValid()) {
+		if(index < 9 && !tile.getWorldObj().isRemote) {
+			if(tile.isWorking && getStackInSlot(index) != null) {
+				if(stack == null || !stack.isItemEqual(getStackInSlot(index)) || !tile.isInputValid()) {
 					tile.endProcess();
 				}
 			}
@@ -30,8 +30,8 @@ public class InventoryPackagerExtension extends InventoryTileBase {
 	@Override
 	public ItemStack decrStackSize(int index, int count) {
 		ItemStack stack = super.decrStackSize(index, count);
-		if(index < 9 && !tile.getWorld().isRemote) {
-			if(tile.isWorking && !getStackInSlot(index).isEmpty() && !tile.isInputValid()) {
+		if(index < 9 && !tile.getWorldObj().isRemote) {
+			if(tile.isWorking && getStackInSlot(index) != null && !tile.isInputValid()) {
 				tile.endProcess();
 			}
 		}
@@ -42,8 +42,8 @@ public class InventoryPackagerExtension extends InventoryTileBase {
 	public boolean isItemValidForSlot(int index, ItemStack stack) {
 		switch(index) {
 		case 9: return false;
-		case 10: return stack.hasCapability(CapabilityEnergy.ENERGY, null);
-		default: return tile.isWorking ? !getStackInSlot(index).isEmpty() : true;
+		case 10: return stack != null && stack.getItem() instanceof IEnergyContainerItem;
+		default: return tile.isWorking ? getStackInSlot(index) != null : true;
 		}
 	}
 
@@ -74,17 +74,17 @@ public class InventoryPackagerExtension extends InventoryTileBase {
 	}
 
 	@Override
-	public int[] getSlotsForFace(EnumFacing side) {
+	public int[] getAccessibleSlotsFromSide(int side) {
 		return SLOTS;
 	}
 
 	@Override
-	public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
+	public boolean canInsertItem(int index, ItemStack stack, int side) {
 		return index < 9;
 	}
 
 	@Override
-	public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-		return index == 9 || direction == EnumFacing.UP && index != 10;
+	public boolean canExtractItem(int index, ItemStack stack, int side) {
+		return index == 9 || side == 1 && index != 10;
 	}
 }

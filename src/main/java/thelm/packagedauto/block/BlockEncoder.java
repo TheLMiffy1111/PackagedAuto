@@ -1,14 +1,13 @@
 package thelm.packagedauto.block;
 
-import net.minecraft.block.SoundType;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.material.Material;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
+import net.minecraft.util.IIcon;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.tile.TileBase;
 import thelm.packagedauto.tile.TileEncoder;
@@ -16,16 +15,19 @@ import thelm.packagedauto.tile.TileEncoder;
 public class BlockEncoder extends BlockBase {
 
 	public static final BlockEncoder INSTANCE = new BlockEncoder();
-	public static final Item ITEM_INSTANCE = new ItemBlock(INSTANCE).setRegistryName("packagedauto:encoder");
-	public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation("packagedauto:encoder#normal");
+	public static final Item ITEM_INSTANCE = new ItemBlock(INSTANCE);
+
+	@SideOnly(Side.CLIENT)
+	protected IIcon topIcon;
+	@SideOnly(Side.CLIENT)
+	protected IIcon bottomIcon;
 
 	protected BlockEncoder() {
-		super(Material.IRON);
+		super(Material.iron);
 		setHardness(15F);
 		setResistance(25F);
-		setSoundType(SoundType.METAL);
-		setTranslationKey("packagedauto.encoder");
-		setRegistryName("packagedauto:encoder");
+		setStepSound(soundTypeMetal);
+		setBlockName("packagedauto.encoder");
 		setCreativeTab(PackagedAuto.CREATIVE_TAB);
 	}
 
@@ -36,7 +38,18 @@ public class BlockEncoder extends BlockBase {
 
 	@SideOnly(Side.CLIENT)
 	@Override
-	public void registerModels() {
-		ModelLoader.setCustomModelResourceLocation(ITEM_INSTANCE, 0, MODEL_LOCATION);
+	public void registerBlockIcons(IIconRegister reg) {
+		blockIcon = reg.registerIcon("packagedauto:encoder_side");
+		topIcon = reg.registerIcon("packagedauto:encoder_top");
+		bottomIcon = reg.registerIcon("packagedauto:machine_bottom");
+	}
+
+	@Override
+	public IIcon getIcon(int side, int meta) {
+		switch(side) {
+		case 0: return bottomIcon;
+		case 1: return topIcon;
+		default: return blockIcon;
+		}
 	}
 }

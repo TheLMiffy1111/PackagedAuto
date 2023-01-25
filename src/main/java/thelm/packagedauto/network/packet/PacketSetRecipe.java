@@ -1,24 +1,23 @@
 package thelm.packagedauto.network.packet;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import cpw.mods.fml.common.network.ByteBufUtils;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import thelm.packagedauto.container.ContainerEncoder;
-import thelm.packagedauto.network.ISelfHandleMessage;
 
-public class PacketSetRecipe implements ISelfHandleMessage<IMessage> {
+public class PacketSetRecipe implements IMessage {
 
-	private Int2ObjectMap<ItemStack> map = new Int2ObjectOpenHashMap<>();
+	private Map<Integer, ItemStack> map = new HashMap<>();
 
 	public PacketSetRecipe() {}
 
-	public PacketSetRecipe(Int2ObjectMap<ItemStack> map) {
+	public PacketSetRecipe(Map<Integer, ItemStack> map) {
 		this.map.putAll(map);
 	}
 
@@ -30,8 +29,8 @@ public class PacketSetRecipe implements ISelfHandleMessage<IMessage> {
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeByte(map.size());
-		for(Int2ObjectMap.Entry<ItemStack> entry : map.int2ObjectEntrySet()) {
-			buf.writeByte(entry.getIntKey());
+		for(Map.Entry<Integer, ItemStack> entry : map.entrySet()) {
+			buf.writeByte(entry.getKey());
 			ByteBufUtils.writeItemStack(buf, entry.getValue());
 		}
 	}
@@ -47,16 +46,12 @@ public class PacketSetRecipe implements ISelfHandleMessage<IMessage> {
 		}
 	}
 
-	@Override
-	public IMessage onMessage(MessageContext ctx) {
-		EntityPlayerMP player = ctx.getServerHandler().player;
-		WorldServer world = player.getServerWorld();
-		world.addScheduledTask(()->{
-			if(player.openContainer instanceof ContainerEncoder) {
-				ContainerEncoder container = (ContainerEncoder)player.openContainer;
-				container.patternInventory.setRecipe(map);
-			}
-		});
+	public IMessage handle(MessageContext ctx) {
+		EntityPlayerMP player = ctx.getServerHandler().playerEntity;
+		if(player.openContainer instanceof ContainerEncoder) {
+			ContainerEncoder container = (ContainerEncoder)player.openContainer;
+			container.patternInventory.setRecipe(map);
+		}
 		return null;
 	}
 }

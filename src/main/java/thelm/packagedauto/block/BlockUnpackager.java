@@ -2,21 +2,18 @@ package thelm.packagedauto.block;
 
 import java.util.List;
 
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.inventory.InventoryHelper;
+import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.IIcon;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.tile.TileBase;
@@ -26,16 +23,19 @@ import thelm.packagedauto.tile.TileUnpackager.PackageTracker;
 public class BlockUnpackager extends BlockBase {
 
 	public static final BlockUnpackager INSTANCE = new BlockUnpackager();
-	public static final Item ITEM_INSTANCE = new ItemBlock(INSTANCE).setRegistryName("packagedauto:unpackager");
-	public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation("packagedauto:unpackager#normal");
+	public static final Item ITEM_INSTANCE = new ItemBlock(INSTANCE);
+
+	@SideOnly(Side.CLIENT)
+	protected IIcon topIcon;
+	@SideOnly(Side.CLIENT)
+	protected IIcon bottomIcon;
 
 	protected BlockUnpackager() {
-		super(Material.IRON);
+		super(Material.iron);
 		setHardness(15F);
 		setResistance(25F);
-		setSoundType(SoundType.METAL);
-		setTranslationKey("packagedauto.unpackager");
-		setRegistryName("packagedauto:unpackager");
+		setStepSound(soundTypeMetal);
+		setBlockName("packagedauto.unpackager");
 		setCreativeTab(PackagedAuto.CREATIVE_TAB);
 	}
 
@@ -45,35 +45,33 @@ public class BlockUnpackager extends BlockBase {
 	}
 
 	@Override
-	public void breakBlock(World worldIn, BlockPos pos, IBlockState state) {
-		TileEntity tileentity = worldIn.getTileEntity(pos);
+	public void breakBlock(World world, int x, int y, int z, Block block, int meta) {
+		TileEntity tileentity = world.getTileEntity(x, y, z);
 		if(tileentity instanceof TileUnpackager) {
 			for(PackageTracker tracker : ((TileUnpackager)tileentity).trackers) {
 				if(!tracker.isEmpty()) {
 					if(!tracker.toSend.isEmpty()) {
 						for(ItemStack stack : tracker.toSend) {
-							if(!stack.isEmpty()) {
-								InventoryHelper.spawnItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), stack);
-							}
+							spawnItemStack(world, x, y, z, stack);
 						}
 					}
 					else {
 						List<IPackagePattern> patterns = tracker.recipe.getPatterns();
 						for(int i = 0; i < tracker.received.size() && i < patterns.size(); ++i) {
-							if(tracker.received.getBoolean(i)) {
-								InventoryHelper.spawnItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), patterns.get(i).getOutput());
+							if(tracker.received.get(i)) {
+								spawnItemStack(world, x, y, z, patterns.get(i).getOutput());
 							}
 						}
 					}
 				}
 			}
 		}
-		super.breakBlock(worldIn, pos, state);
+		super.breakBlock(world, x, y, z, block, meta);
 	}
 
 	@Override
-	public void neighborChanged(IBlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos) {
-		TileEntity tileentity = worldIn.getTileEntity(pos);
+	public void onNeighborChange(IBlockAccess world, int x, int y, int z, int tileX, int tileY, int tileZ) {
+		TileEntity tileentity = world.getTileEntity(x, y, z);
 		if(tileentity instanceof TileUnpackager) {
 			((TileUnpackager)tileentity).updatePowered();
 		}
@@ -81,7 +79,19 @@ public class BlockUnpackager extends BlockBase {
 
 	@SideOnly(Side.CLIENT)
 	@Override
-	public void registerModels() {
-		ModelLoader.setCustomModelResourceLocation(ITEM_INSTANCE, 0, MODEL_LOCATION);
+	public void registerBlockIcons(IIconRegister reg) {
+		blockIcon = reg.registerIcon("packagedauto:unpackager_side");
+		topIcon = reg.registerIcon("packagedauto:unpackager_top");
+		bottomIcon = reg.registerIcon("packagedauto:machine_bottom");
+	}
+
+	@SideOnly(Side.CLIENT)
+	@Override
+	public IIcon getIcon(int side, int meta) {
+		switch(side) {
+		case 0: return bottomIcon;
+		case 1: return topIcon;
+		default: return blockIcon;
+		}
 	}
 }

@@ -1,10 +1,10 @@
 package thelm.packagedauto.inventory;
 
 import net.minecraft.item.ItemStack;
-import thelm.packagedauto.api.IRecipeListItem;
+import thelm.packagedauto.api.IPackageRecipeListItem;
 import thelm.packagedauto.tile.TileEncoder;
 
-public class InventoryEncoder extends InventoryTileBase {
+public class InventoryEncoder extends InventoryBase {
 
 	public final TileEncoder tile;
 
@@ -15,6 +15,6 @@ public class InventoryEncoder extends InventoryTileBase {
 
 	@Override
 	public boolean isItemValidForSlot(int index, ItemStack stack) {
-		return stack.getItem() instanceof IRecipeListItem;
+		return stack != null && stack.getItem() instanceof IPackageRecipeListItem;
 	}
 }

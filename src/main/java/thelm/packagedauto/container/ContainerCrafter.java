@@ -6,7 +6,7 @@ import thelm.packagedauto.slot.SlotCrafterRemoveOnly;
 import thelm.packagedauto.slot.SlotRemoveOnly;
 import thelm.packagedauto.tile.TileCrafter;
 
-public class ContainerCrafter extends ContainerTileBase<TileCrafter> {
+public class ContainerCrafter extends ContainerBase<TileCrafter> {
 
 	public ContainerCrafter(InventoryPlayer playerInventory, TileCrafter tile) {
 		super(playerInventory, tile);

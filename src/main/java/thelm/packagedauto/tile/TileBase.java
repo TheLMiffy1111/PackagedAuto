@@ -1,40 +1,30 @@
 package thelm.packagedauto.tile;
 
-import java.util.EnumMap;
-
-import net.minecraft.block.state.IBlockState;
+import cofh.api.energy.IEnergyReceiver;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SPacketUpdateTileEntity;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.world.IWorldNameable;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
+import net.minecraftforge.common.util.ForgeDirection;
 import thelm.packagedauto.client.gui.IGuiProvider;
 import thelm.packagedauto.energy.EnergyStorage;
-import thelm.packagedauto.inventory.InventoryTileBase;
+import thelm.packagedauto.inventory.InventoryBase;
 
-public abstract class TileBase extends TileEntity implements IWorldNameable, IGuiProvider {
+public abstract class TileBase extends TileEntity implements ISidedInventory, IEnergyReceiver, IGuiProvider {
 
-	protected InventoryTileBase inventory = new InventoryTileBase(this, 0);
+	protected InventoryBase inventory = new InventoryBase(this, 0);
 	protected EnergyStorage energyStorage = new EnergyStorage(this, 0);
 	public String customName = "";
 	protected int placerID = -1;
 
-	public InventoryTileBase getInventory() {
+	public InventoryBase getInventory() {
 		return inventory;
 	}
 
-	public void setInventory(InventoryTileBase inventory) {
+	public void setInventory(InventoryBase inventory) {
 		this.inventory = inventory;
 	}
 
@@ -55,17 +45,12 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 	protected abstract String getLocalizedName();
 
 	@Override
-	public String getName() {
+	public String getInventoryName() {
 		return customName.isEmpty() ? getLocalizedName() : customName;
 	}
 
 	@Override
-	public ITextComponent getDisplayName() {
-		return new TextComponentString(getName());
-	}
-
-	@Override
-	public boolean hasCustomName() {
+	public boolean hasCustomInventoryName() {
 		return !customName.isEmpty();
 	}
 
@@ -83,11 +68,10 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 	}
 
 	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
 		writeSyncNBT(nbt);
 		inventory.writeToNBT(nbt);
-		return nbt;
 	}
 
 	public void readSyncNBT(NBTTagCompound nbt) {
@@ -106,67 +90,99 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 	}
 
 	@Override
-	public void onDataPacket(NetworkManager net, SPacketUpdateTileEntity pkt) {
-		readSyncNBT(pkt.getNbtCompound());
+	public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt) {
+		readSyncNBT(pkt.func_148857_g());
 	}
 
 	@Override
-	public SPacketUpdateTileEntity getUpdatePacket() {
-		return new SPacketUpdateTileEntity(pos, -10, getUpdateTag());
+	public S35PacketUpdateTileEntity getDescriptionPacket() {
+		return new S35PacketUpdateTileEntity(xCoord, yCoord, zCoord, -10, writeSyncNBT(new NBTTagCompound()));
 	}
 
-	@Override
-	public void handleUpdateTag(NBTTagCompound tag) {
-		readSyncNBT(tag);
-	}
-
-	@Override
-	public NBTTagCompound getUpdateTag() {
-		NBTTagCompound nbt = super.getUpdateTag();
-		nbt.removeTag("ForgeData");
-		nbt.removeTag("ForgeCaps");
-		writeSyncNBT(nbt);
-		return nbt;
-	}
-
-	public void syncTile(boolean rerender) {
-		if(world != null && world.isBlockLoaded(pos)) {
-			IBlockState state = world.getBlockState(pos);
-			world.notifyBlockUpdate(pos, state, state, 2 + (rerender ? 4 : 0));
+	public void syncTile() {
+		if(worldObj != null && worldObj.blockExists(xCoord, yCoord, zCoord)) {
+			worldObj.markBlockForUpdate(xCoord, yCoord, zCoord);
 		}
 	}
 
 	@Override
-	public boolean hasCapability(Capability<?> capability, EnumFacing from) {
-		return capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY ||
-				capability == CapabilityEnergy.ENERGY && energyStorage.getMaxEnergyStored() > 0 ||
-				super.hasCapability(capability, from);
+	public int getSizeInventory() {
+		return inventory.getSizeInventory();
 	}
 
-	protected IItemHandler unsidedItemHandler = null;
-	protected EnumMap<EnumFacing, IItemHandler> sidedItemHandlers = new EnumMap<>(EnumFacing.class);
+	@Override
+	public ItemStack getStackInSlot(int index) {
+		return inventory.getStackInSlot(index);
+	}
 
 	@Override
-	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
-		if(capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-			if(inventory instanceof ISidedInventory && facing != null) {
-				if(sidedItemHandlers.containsKey(facing)) {
-					return (T)sidedItemHandlers.get(facing);
-				}
-				IItemHandler handler = new SidedInvWrapper(inventory, facing);
-				sidedItemHandlers.put(facing, handler);
-				return (T)handler;
-			}
-			else {
-				if(unsidedItemHandler != null) {
-					return (T)unsidedItemHandler;
-				}
-				return (T)(unsidedItemHandler = new InvWrapper(inventory));
-			}
-		}
-		else if(capability == CapabilityEnergy.ENERGY && energyStorage.getMaxEnergyStored() > 0) {
-			return (T)energyStorage;
-		}
-		return super.getCapability(capability, facing);
+	public ItemStack decrStackSize(int index, int count) {
+		return inventory.decrStackSize(index, count);
+	}
+
+	@Override
+	public ItemStack getStackInSlotOnClosing(int index) {
+		return inventory.getStackInSlotOnClosing(index);
+	}
+
+	@Override
+	public void setInventorySlotContents(int index, ItemStack stack) {
+		inventory.setInventorySlotContents(index, stack);		
+	}
+
+	@Override
+	public int getInventoryStackLimit() {
+		return inventory.getInventoryStackLimit();
+	}
+
+	@Override
+	public boolean isUseableByPlayer(EntityPlayer player) {
+		return inventory.isUseableByPlayer(player);
+	}
+
+	@Override
+	public void openInventory() {}
+
+	@Override
+	public void closeInventory() {}
+
+	@Override
+	public boolean isItemValidForSlot(int index, ItemStack stack) {
+		return inventory.isItemValidForSlot(index, stack);
+	}
+
+	@Override
+	public int[] getAccessibleSlotsFromSide(int side) {
+		return inventory.getAccessibleSlotsFromSide(side);
+	}
+
+	@Override
+	public boolean canInsertItem(int index, ItemStack stack, int side) {
+		return inventory.canInsertItem(index, stack, side);
+	}
+
+	@Override
+	public boolean canExtractItem(int index, ItemStack stack, int side) {
+		return inventory.canExtractItem(index, stack, side);
+	}
+
+	@Override
+	public boolean canConnectEnergy(ForgeDirection side) {
+		return energyStorage.getMaxEnergyStored() > 0;
+	}
+
+	@Override
+	public int receiveEnergy(ForgeDirection side, int maxReceive, boolean simulate) {
+		return energyStorage.receiveEnergy(maxReceive, simulate);
+	}
+
+	@Override
+	public int getEnergyStored(ForgeDirection side) {
+		return energyStorage.getEnergyStored();
+	}
+
+	@Override
+	public int getMaxEnergyStored(ForgeDirection side) {
+		return energyStorage.getMaxEnergyStored();
 	}
 }

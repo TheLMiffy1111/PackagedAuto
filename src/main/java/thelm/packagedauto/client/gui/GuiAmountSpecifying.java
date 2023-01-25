@@ -1,33 +1,31 @@
 package thelm.packagedauto.client.gui;
 
-import java.io.IOException;
-
 import org.lwjgl.input.Keyboard;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.MathHelper;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.StatCollector;
 import thelm.packagedauto.container.ContainerAmountSpecifying;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.PacketSetItemStack;
 
 // Code from Refined Storage
-public class GuiAmountSpecifying extends GuiContainerTileBase<ContainerAmountSpecifying> {
+public class GuiAmountSpecifying extends GuiBase<ContainerAmountSpecifying> {
 
 	public static final ResourceLocation BACKGROUND = new ResourceLocation("packagedauto:textures/gui/amount_specifying.png");
 
-	private GuiContainerTileBase<?> parent;
+	private GuiBase<?> parent;
 	private int containerSlot;
 	private ItemStack stack;
 	private int maxAmount;
 
 	protected GuiTextField amountField;
 
-	public GuiAmountSpecifying(GuiContainerTileBase<?> parent, InventoryPlayer playerInventory, int containerSlot, ItemStack stack, int maxAmount) {
+	public GuiAmountSpecifying(GuiBase<?> parent, InventoryPlayer playerInventory, int containerSlot, ItemStack stack, int maxAmount) {
 		super(new ContainerAmountSpecifying(playerInventory, stack));
 		xSize = 172;
 		ySize = 99;
@@ -38,7 +36,7 @@ public class GuiAmountSpecifying extends GuiContainerTileBase<ContainerAmountSpe
 	}
 
 	protected int getDefaultAmount() {
-		return stack.getCount();
+		return stack.stackSize;
 	}
 
 	protected int getMaxAmount() {
@@ -61,25 +59,13 @@ public class GuiAmountSpecifying extends GuiContainerTileBase<ContainerAmountSpe
 		buttonList.clear();
 		super.initGui();
 
-		addButton(new ButtonSet(0, guiLeft+114, guiTop+22, I18n.translateToLocal("misc.packagedauto.set")));
-		addButton(new ButtonCancel(0, guiLeft+114, guiTop+22+24, I18n.translateToLocal("gui.cancel")));
+		buttonList.add(new ButtonSet(0, guiLeft+114, guiTop+22, StatCollector.translateToLocal("misc.packagedauto.set")));
+		buttonList.add(new ButtonCancel(0, guiLeft+114, guiTop+22+24, StatCollector.translateToLocal("gui.cancel")));
 
-		amountField = new GuiTextField(0, fontRenderer, guiLeft+9, guiTop+51, 63, fontRenderer.FONT_HEIGHT);
+		amountField = new GuiTextField(fontRendererObj, guiLeft+9, guiTop+51, 63, fontRendererObj.FONT_HEIGHT);
 		amountField.setEnableBackgroundDrawing(false);
 		amountField.setText(String.valueOf(getDefaultAmount()));
 		amountField.setTextColor(0xFFFFFF);
-		amountField.setValidator(s->{
-			if(s.isEmpty()) {
-				return true;
-			}
-			try {
-				int amount = Integer.parseInt(s);
-				return amount >= 0 && amount <= getMaxAmount();
-			}
-			catch(NumberFormatException e) {
-				return false;
-			}
-		});
 		amountField.setFocused(true);
 
 		int[] increments = getIncrements();
@@ -87,14 +73,14 @@ public class GuiAmountSpecifying extends GuiContainerTileBase<ContainerAmountSpe
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "+" + increment;
-			addButton(new ButtonIncrement(i, guiLeft+xx, guiTop+20, text));
+			buttonList.add(new ButtonIncrement(i, guiLeft+xx, guiTop+20, text));
 			xx += 34;
 		}
 		xx = 7;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "-" + increment;
-			addButton(new ButtonIncrement(i+3, guiLeft+xx, guiTop+ySize-20-7, text));
+			buttonList.add(new ButtonIncrement(i+3, guiLeft+xx, guiTop+ySize-20-7, text));
 			xx += 34;
 		}
 	}
@@ -107,11 +93,11 @@ public class GuiAmountSpecifying extends GuiContainerTileBase<ContainerAmountSpe
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int x, int y) {
-		fontRenderer.drawString(I18n.translateToLocal("gui.packagedauto.amount_specifying"), 7, 7, 0x404040);
+		fontRendererObj.drawString(StatCollector.translateToLocal("gui.packagedauto.amount_specifying"), 7, 7, 0x404040);
 	}
 
 	@Override
-	protected void keyTyped(char typedChar, int keyCode) throws IOException {
+	protected void keyTyped(char typedChar, int keyCode) {
 		if(keyCode == Keyboard.KEY_ESCAPE) {
 			close();
 			return;
@@ -123,14 +109,14 @@ public class GuiAmountSpecifying extends GuiContainerTileBase<ContainerAmountSpe
 		if(amountField.textboxKeyTyped(typedChar, keyCode)) {
 			return;
 		}
-		if(mc.gameSettings.keyBindInventory.isActiveAndMatches(keyCode) && amountField.isFocused()) {
+		if(mc.gameSettings.keyBindInventory.getIsKeyPressed() && amountField.isFocused()) {
 			return;
 		}
 		super.keyTyped(typedChar, keyCode);
 	}
 
 	@Override
-	protected void actionPerformed(GuiButton button) throws IOException {
+	protected void actionPerformed(GuiButton button) {
 		if(button instanceof ButtonSet) {
 			onOkButtonPressed(isShiftKeyDown());
 		}
@@ -151,15 +137,21 @@ public class GuiAmountSpecifying extends GuiContainerTileBase<ContainerAmountSpe
 		catch(NumberFormatException e) {
 			// NO OP
 		}
-		int newAmount = MathHelper.clamp(oldAmount+increment, 0, getMaxAmount());
+		int newAmount = MathHelper.clamp_int(oldAmount+increment, 0, getMaxAmount());
 		amountField.setText(String.valueOf(newAmount));
 	}
 
 	protected void onOkButtonPressed(boolean shiftDown) {
 		try {
-			int amount = MathHelper.clamp(Integer.parseInt(amountField.getText()), 0, maxAmount);
-			ItemStack newStack = stack.copy();
-			newStack.setCount(amount);
+			int amount = MathHelper.clamp_int(Integer.parseInt(amountField.getText()), 0, maxAmount);
+			ItemStack newStack;
+			if(amount > 0) {
+				newStack = stack.copy();
+				newStack.stackSize = amount;
+			}
+			else {
+				newStack = null;
+			}
 			PacketHandler.INSTANCE.sendToServer(new PacketSetItemStack((short)containerSlot, newStack));
 			close();
 		}
@@ -172,7 +164,7 @@ public class GuiAmountSpecifying extends GuiContainerTileBase<ContainerAmountSpe
 		mc.displayGuiScreen(parent);
 	}
 
-	public GuiContainerTileBase<?> getParent() {
+	public GuiBase<?> getParent() {
 		return parent;
 	}
 

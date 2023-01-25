@@ -1,14 +1,12 @@
 package thelm.packagedauto.network.packet;
 
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import thelm.packagedauto.container.ContainerEncoder;
-import thelm.packagedauto.network.ISelfHandleMessage;
 
-public class PacketCycleRecipeType implements ISelfHandleMessage<IMessage> {
+public class PacketCycleRecipeType implements IMessage {
 
 	private boolean reverse;
 
@@ -28,17 +26,13 @@ public class PacketCycleRecipeType implements ISelfHandleMessage<IMessage> {
 		reverse = buf.readBoolean();
 	}
 
-	@Override
-	public IMessage onMessage(MessageContext ctx) {
-		EntityPlayerMP player = ctx.getServerHandler().player;
-		WorldServer world = player.getServerWorld();
-		world.addScheduledTask(()->{
-			if(player.openContainer instanceof ContainerEncoder) {
-				ContainerEncoder container = (ContainerEncoder)player.openContainer;
-				container.patternInventory.cycleRecipeType(reverse);
-				container.setupSlots();
-			}
-		});
+	public IMessage handle(MessageContext ctx) {
+		EntityPlayerMP player = ctx.getServerHandler().playerEntity;
+		if(player.openContainer instanceof ContainerEncoder) {
+			ContainerEncoder container = (ContainerEncoder)player.openContainer;
+			container.patternInventory.cycleRecipeType(reverse);
+			container.setupSlots();
+		}
 		return null;
 	}
 }

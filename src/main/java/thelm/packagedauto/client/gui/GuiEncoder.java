@@ -1,29 +1,41 @@
 package thelm.packagedauto.client.gui;
 
 import java.awt.Color;
-import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL12;
+
+import codechicken.nei.VisiblityData;
+import codechicken.nei.api.INEIGuiHandler;
+import codechicken.nei.api.TaggedInventoryArea;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.renderer.GlStateManager;
+import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureMap;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.fml.common.Loader;
-import thelm.packagedauto.api.IRecipeType;
-import thelm.packagedauto.api.MiscUtil;
+import net.minecraft.util.StatCollector;
+import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.container.ContainerEncoder;
-import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
+import thelm.packagedauto.integration.nei.NEIHandler;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.PacketCycleRecipeType;
 import thelm.packagedauto.network.packet.PacketLoadRecipeList;
 import thelm.packagedauto.network.packet.PacketSaveRecipeList;
+import thelm.packagedauto.network.packet.PacketSetItemStack;
 import thelm.packagedauto.network.packet.PacketSetPatternIndex;
+import thelm.packagedauto.slot.SlotFalseCopy;
+import thelm.packagedauto.util.MiscHelper;
 
-public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
+public class GuiEncoder extends GuiBase<ContainerEncoder> {
 
 	public static final ResourceLocation BACKGROUND = new ResourceLocation("packagedauto:textures/gui/encoder.png");
 
@@ -44,55 +56,55 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		super.initGui();
 		int patternSlots = container.tile.patternInventories.length;
 		for(int i = 0; i < patternSlots; ++i) {
-			addButton(new GuiButtonPatternSlot(i, guiLeft+29+(i%10)*18, guiTop+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
+			buttonList.add(new GuiButtonPatternSlot(i, guiLeft+29+(i%10)*18, guiTop+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
 		}
-		addButton(new GuiButtonRecipeType(0, guiLeft+204, guiTop+74));
-		addButton(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+16, I18n.translateToLocal("tile.packagedauto.encoder.save")));
-		addButton(new GuiButtonLoadPatterns(0, guiLeft+213, guiTop+34, I18n.translateToLocal("tile.packagedauto.encoder.load")));
-		if(Loader.isModLoaded("jei")) {
-			addButton(new GuiButtonShowRecipesJEI(0, guiLeft+172, guiTop+129));
+		buttonList.add(new GuiButtonRecipeType(0, guiLeft+204, guiTop+74));
+		buttonList.add(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+16, StatCollector.translateToLocal("tile.packagedauto.encoder.save")));
+		buttonList.add(new GuiButtonLoadPatterns(0, guiLeft+213, guiTop+34, StatCollector.translateToLocal("tile.packagedauto.encoder.load")));
+		if(Loader.isModLoaded("NotEnoughItems")) {
+			buttonList.add(new GuiButtonShowRecipesNEI(0, guiLeft+172, guiTop+129));
 		}
 	}
 
 	@Override
 	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY) {
 		super.drawGuiContainerBackgroundLayer(partialTicks, mouseX, mouseY);
-		IRecipeType recipeType = container.patternInventory.recipeType;
+		IPackageRecipeType recipeType = container.patternInventory.recipeType;
 		for(int i = 0; i < 9; ++i) {
 			for(int j = 0; j < 9; ++j) {
 				Color color = recipeType.getSlotColor(i*9+j);
-				GlStateManager.color(color.getRed()/255F, color.getGreen()/255F, color.getBlue()/255F, color.getAlpha()/255F);
-				drawModalRectWithCustomSizedTexture(guiLeft+8+j*18, guiTop+56+i*18, 258, 0, 16, 16, 512, 512);
+				GL11.glColor4f(color.getRed()/255F, color.getGreen()/255F, color.getBlue()/255F, color.getAlpha()/255F);
+				func_146110_a(guiLeft+8+j*18, guiTop+56+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
 				Color color = recipeType.getSlotColor(81+i*3+j);
-				GlStateManager.color(color.getRed()/255F, color.getGreen()/255F, color.getBlue()/255F, color.getAlpha()/255F);
-				drawModalRectWithCustomSizedTexture(guiLeft+198+j*18, guiTop+110+i*18, 258, 0, 16, 16, 512, 512);
+				GL11.glColor4f(color.getRed()/255F, color.getGreen()/255F, color.getBlue()/255F, color.getAlpha()/255F);
+				func_146110_a(guiLeft+198+j*18, guiTop+110+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
-		GlStateManager.color(1, 1, 1, 1);
+		GL11.glColor4f(1, 1, 1, 1);
 	}
 
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
-		String s = container.inventory.getDisplayName().getUnformattedText();
-		fontRenderer.drawString(s, xSize/2 - fontRenderer.getStringWidth(s)/2, 6, 0x404040);
-		fontRenderer.drawString(container.playerInventory.getDisplayName().getUnformattedText(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
-		String str = fontRenderer.trimStringToWidth(container.patternInventory.recipeType.getLocalizedNameShort(), 86);
-		fontRenderer.drawString(str, 212 - fontRenderer.getStringWidth(str)/2, 64, 0x404040);
-		for(GuiButton guibutton : buttonList) {
-			if(guibutton.isMouseOver()) {
-				guibutton.drawButtonForegroundLayer(mouseX-guiLeft, mouseY-guiTop);
+		String s = container.inventory.getInventoryName();
+		fontRendererObj.drawString(s, xSize/2 - fontRendererObj.getStringWidth(s)/2, 6, 0x404040);
+		fontRendererObj.drawString(StatCollector.translateToLocal(container.playerInventory.getInventoryName()), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
+		String str = fontRendererObj.trimStringToWidth(container.patternInventory.recipeType.getLocalizedNameShort(), 86);
+		fontRendererObj.drawString(str, 212 - fontRendererObj.getStringWidth(str)/2, 64, 0x404040);
+		for(GuiButton guibutton : (List<GuiButton>)buttonList) {
+			if(guibutton.func_146115_a()) {
+				guibutton.func_146111_b(mouseX-guiLeft, mouseY-guiTop);
 				break;
 			}
 		}
 	}
 
 	@Override
-	protected void actionPerformed(GuiButton button) throws IOException {
+	protected void actionPerformed(GuiButton button) {
 		if(button instanceof GuiButtonPatternSlot) {
 			PacketHandler.INSTANCE.sendToServer(new PacketSetPatternIndex(button.id));
 			container.tile.setPatternIndex(button.id);
@@ -113,11 +125,11 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 			container.tile.loadRecipeList();
 			container.setupSlots();
 		}
-		if(button instanceof GuiButtonShowRecipesJEI) {
-			MiscUtil.conditionalSupplier(()->true, ()->()->{
-				IRecipeType recipeType = container.patternInventory.recipeType;
+		if(button instanceof GuiButtonShowRecipesNEI) {
+			MiscHelper.INSTANCE.conditionalSupplier(()->true, ()->()->{
+				IPackageRecipeType recipeType = container.patternInventory.recipeType;
 				if(recipeType != null) {
-					PackagedAutoJEIPlugin.showCategories(recipeType.getJEICategories());
+					NEIHandler.INSTANCE.showCategories(recipeType.getNEICategories());
 				}
 				return null;
 			}, null).get();
@@ -131,7 +143,7 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		}
 
 		@Override
-		protected int getHoverState(boolean mouseOver) {
+		public int getHoverState(boolean mouseOver) {
 			if(container.tile.patternIndex == id) {
 				return 2;
 			}
@@ -139,23 +151,25 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		}
 
 		@Override
-		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-			super.drawButton(mc, mouseX, mouseY, partialTicks);
+		public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+			super.drawButton(mc, mouseX, mouseY);
 			for(int i = 81; i < 90; ++i) {
 				ItemStack stack = container.tile.patternInventories[id].stacks.get(i);
-				if(!stack.isEmpty()) {
+				if(stack != null) {
 					RenderHelper.enableGUIStandardItemLighting();
-					GlStateManager.color(1, 1, 1, 1);
-					mc.getRenderItem().renderItemIntoGUI(stack, x+1, y+1);
+					GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+					GL11.glColor4f(1, 1, 1, 1);
+					itemRender.renderItemAndEffectIntoGUI(fontRendererObj, mc.getTextureManager(), stack, xPosition+1, yPosition+1);
 					RenderHelper.disableStandardItemLighting();
+					GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 					break;
 				}
 			}
 		}
 
 		@Override
-		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
-			drawHoveringText(I18n.translateToLocalFormatted("tile.packagedauto.encoder.pattern_slot", String.format("%02d", id)), mouseX, mouseY);
+		public void func_146111_b(int mouseX, int mouseY) {
+			drawCreativeTabHoveringText(StatCollector.translateToLocalFormatted("tile.packagedauto.encoder.pattern_slot", String.format("%02d", id)), mouseX, mouseY);
 		}
 	}
 
@@ -166,28 +180,30 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		}
 
 		@Override
-		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-			super.drawButton(mc, mouseX, mouseY, partialTicks);
-			IRecipeType recipeType = container.patternInventory.recipeType;
+		public void drawButton(Minecraft mc, int mouseX, int mouseY) {
+			super.drawButton(mc, mouseX, mouseY);
+			IPackageRecipeType recipeType = container.patternInventory.recipeType;
 			if(recipeType != null) {
 				Object rep = recipeType.getRepresentation();
-				if(rep instanceof TextureAtlasSprite) {
-					GlStateManager.color(1, 1, 1, 1);
-					mc.renderEngine.bindTexture(TextureMap.LOCATION_BLOCKS_TEXTURE);
-					drawTexturedModalRect(x+1, y+1, (TextureAtlasSprite)rep, 16, 16);
+				if(rep instanceof IIcon) {
+					GL11.glColor4f(1, 1, 1, 1);
+					mc.renderEngine.bindTexture(TextureMap.locationItemsTexture);
+					drawTexturedModelRectFromIcon(xPosition+1, yPosition+1, (IIcon)rep, 16, 16);
 				}
 				if(rep instanceof ItemStack) {
 					RenderHelper.enableGUIStandardItemLighting();
-					GlStateManager.color(1, 1, 1, 1);
-					mc.getRenderItem().renderItemIntoGUI((ItemStack)rep, x+1, y+1);
+					GL11.glEnable(GL12.GL_RESCALE_NORMAL);
+					GL11.glColor4f(1, 1, 1, 1);
+					itemRender.renderItemAndEffectIntoGUI(fontRendererObj, mc.getTextureManager(), (ItemStack)rep, xPosition+1, yPosition+1);
 					RenderHelper.disableStandardItemLighting();
+					GL11.glDisable(GL12.GL_RESCALE_NORMAL);
 				}
 			}
 		}
 
 		@Override
-		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
-			drawHoveringText(I18n.translateToLocal("tile.packagedauto.encoder.change_recipe_type"), mouseX, mouseY);
+		public void func_146111_b(int mouseX, int mouseY) {
+			drawCreativeTabHoveringText(StatCollector.translateToLocal("tile.packagedauto.encoder.change_recipe_type"), mouseX, mouseY);
 		}
 	}
 
@@ -198,9 +214,9 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		}
 
 		@Override
-		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
+		public void func_146111_b(int mouseX, int mouseY) {
 			if(isShiftKeyDown()) {
-				drawHoveringText(I18n.translateToLocal("tile.packagedauto.encoder.save_single"), mouseX, mouseY);
+				drawCreativeTabHoveringText(StatCollector.translateToLocal("tile.packagedauto.encoder.save_single"), mouseX, mouseY);
 			}
 		}
 	}
@@ -212,25 +228,25 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 		}
 	}
 
-	class GuiButtonShowRecipesJEI extends GuiButton {
+	class GuiButtonShowRecipesNEI extends GuiButton {
 
-		GuiButtonShowRecipesJEI(int buttonId, int x, int y) {
+		GuiButtonShowRecipesNEI(int buttonId, int x, int y) {
 			super(buttonId, x, y, 22, 16, "");
 		}
 
 		@Override
-		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+		public void drawButton(Minecraft mc, int mouseX, int mouseY) {
 			if(visible) {
-				hovered = mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
+				field_146123_n = mouseX >= xPosition && mouseY >= yPosition && mouseX < xPosition+width && mouseY < yPosition+height;
 				mouseDragged(mc, mouseX, mouseY);
 			}
 		}
 
 		@Override
-		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
-			IRecipeType recipeType = container.patternInventory.recipeType;
-			if(recipeType != null && !recipeType.getJEICategories().isEmpty()) {
-				drawHoveringText(I18n.translateToLocal("jei.tooltip.show.recipes"), mouseX, mouseY);
+		public void func_146111_b(int mouseX, int mouseY) {
+			IPackageRecipeType recipeType = container.patternInventory.recipeType;
+			if(recipeType != null && !recipeType.getNEICategories().isEmpty()) {
+				drawCreativeTabHoveringText(StatCollector.translateToLocal("nei.recipe.tooltip"), mouseX, mouseY);
 			}
 		}
 	}

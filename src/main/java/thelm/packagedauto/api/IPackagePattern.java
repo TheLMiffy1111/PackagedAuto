@@ -6,7 +6,7 @@ import net.minecraft.item.ItemStack;
 
 public interface IPackagePattern {
 
-	IRecipeInfo getRecipeInfo();
+	IPackageRecipeInfo getRecipeInfo();
 
 	int getIndex();
 

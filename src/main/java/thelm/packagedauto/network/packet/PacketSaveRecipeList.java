@@ -1,14 +1,12 @@
 package thelm.packagedauto.network.packet;
 
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import thelm.packagedauto.container.ContainerEncoder;
-import thelm.packagedauto.network.ISelfHandleMessage;
 
-public class PacketSaveRecipeList implements ISelfHandleMessage<IMessage> {
+public class PacketSaveRecipeList implements IMessage {
 
 	private boolean single;
 
@@ -28,16 +26,12 @@ public class PacketSaveRecipeList implements ISelfHandleMessage<IMessage> {
 		single = buf.readBoolean();
 	}
 
-	@Override
-	public IMessage onMessage(MessageContext ctx) {
-		EntityPlayerMP player = ctx.getServerHandler().player;
-		WorldServer world = player.getServerWorld();
-		world.addScheduledTask(()->{
-			if(player.openContainer instanceof ContainerEncoder) {
-				ContainerEncoder container = (ContainerEncoder)player.openContainer;
-				container.tile.saveRecipeList(single);
-			}
-		});
+	public IMessage handle(MessageContext ctx) {
+		EntityPlayerMP player = ctx.getServerHandler().playerEntity;
+		if(player.openContainer instanceof ContainerEncoder) {
+			ContainerEncoder container = (ContainerEncoder)player.openContainer;
+			container.tile.saveRecipeList(single);
+		}
 		return null;
 	}
 }

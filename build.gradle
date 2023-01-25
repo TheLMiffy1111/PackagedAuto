@@ -7,17 +7,20 @@ buildscript {
             url = "https://plugins.gradle.org/m2/"
         }
         maven {
+            url = "http://jenkins.usrv.eu:8081/nexus/content/groups/public/"
+        }
+        maven {
             url = "https://jitpack.io/"
         }
         mavenCentral()
         jcenter()
     }
     dependencies {
-        classpath "net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT"
+        classpath "net.minecraftforge.gradle:ForgeGradle:1.2.13"
     }
 }
 
-apply plugin: "net.minecraftforge.gradle.forge"
+apply plugin: "forge"
 apply plugin: "eclipse"
 apply plugin: "maven-publish"
 
@@ -27,10 +30,13 @@ repositories {
         dirs "libs"
     }
     maven {
-        url = "https://dvs1.progwml6.com/files/maven/"
+        url = "https://chickenbones.net/maven/"
     }
     maven {
-        url = "https://maven.blamejared.com/"
+        url = "https://maven.mcmoddev.com/"
+    }
+    maven {
+        url = "http://jenkins.usrv.eu:8081/nexus/content/groups/public/"
     }
     maven {
         url = "https://maven.covers1624.net/"
@@ -46,7 +52,7 @@ repositories {
     }
 }
 
-version = "1.12.2-1.0.6.23"
+version = "1.7.10-W.0.0.0"
 group = "thelm.packagedauto"
 archivesBaseName = "PackagedAuto"
 
@@ -57,29 +63,22 @@ compileJava {
 compileJava.options.encoding = "UTF-8"
 
 minecraft {
-    version = "1.12.2-14.23.5.2847"
-    runDir = "run"
-    mappings = "stable_39"
-    clientRunArgs.add("--username=Dev")
-    makeObfSourceJar = false
+    version = "1.7.10-10.13.4.1614-1.7.10"
 }
 
 dependencies {
-    deobfCompile "mezz.jei:jei_1.12.2:4.16.1.302"
-    deobfCompile "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
-    deobfCompile "CraftTweaker2:CraftTweaker2-API:4.1.20.675"
-    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.675"
-    deobfCompile("morph.avaritia:Avaritia:1.12.2-3.3.0.33:universal") {
+    implementation "com.github.GTNewHorizons:NotEnoughItems:2.3.20-GTNH:dev"
+    implementation "com.github.GTNewHorizons:CodeChickenCore:1.1.7:dev"
+    implementation "com.github.GTNewHorizons:CodeChickenLib:1.1.5.7:dev"
+    implementation("com.github.GTNewHorizons:Applied-Energistics-2-Unofficial:rv3-beta-144-GTNH:dev") {
         transitive = false
     }
+    implementation "com.github.GTNewHorizons:Avaritia:1.31:dev"
 
-    deobfCompile "curse.maven:applied-energistics-2-223794:2747063"
-    deobfCompile "curse.maven:redstone-flux-270789:2920436"
-    deobfCompile "curse.maven:cofh-core-69162:2920433"
-    deobfCompile "curse.maven:cofh-world-271384:2920434"
-    deobfCompile "curse.maven:thermal-foundation-222880:2926428"
-    deobfCompile "curse.maven:thermal-expansion-69163:2926431"
-    deobfCompile "curse.maven:thermal-dynamics-227443:2920505"
+    implementation "curse.maven:cofh-core-69162:2388751"
+    implementation "curse.maven:thermal-foundation-222880:2388753"
+    implementation "curse.maven:thermal-expansion-69163:2388759"
+    implementation "curse.maven:thermal-dynamics-227443:2388757"
 }
 
 jar {
@@ -87,11 +86,20 @@ jar {
         attributes([
                 "Specification-Title": "PackagedAuto",
                 "Specification-Vendor": "thelm",
-                "Specification-Version": "1",
+                "Specification-Version": "W",
                 "Implementation-Title": "${archivesBaseName}",
                 "Implementation-Version": "${version}",
                 "Implementation-Vendor": "thelm"
                 //"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ],)
     }
+}
+
+task devJar(type: Jar) {
+    from sourceSets.main.output
+    classifier = "dev"
+}
+
+artifacts {
+    archives devJar
 }

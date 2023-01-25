@@ -1,11 +1,8 @@
 package thelm.packagedauto.network;
 
-import net.minecraftforge.fml.common.network.NetworkRegistry;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessageHandler;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
-import net.minecraftforge.fml.relauncher.Side;
+import cpw.mods.fml.common.network.NetworkRegistry;
+import cpw.mods.fml.common.network.simpleimpl.SimpleNetworkWrapper;
+import cpw.mods.fml.relauncher.Side;
 import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.network.packet.PacketChangeBlocking;
 import thelm.packagedauto.network.packet.PacketChangePackaging;
@@ -17,29 +14,20 @@ import thelm.packagedauto.network.packet.PacketSetPatternIndex;
 import thelm.packagedauto.network.packet.PacketSetRecipe;
 import thelm.packagedauto.network.packet.PacketSyncEnergy;
 
-public class PacketHandler<REQ extends ISelfHandleMessage<? extends IMessage>> implements IMessageHandler<REQ, IMessage> {
+public class PacketHandler {
 
 	public static final SimpleNetworkWrapper INSTANCE = NetworkRegistry.INSTANCE.newSimpleChannel(PackagedAuto.MOD_ID);
 
 	public static void registerPackets() {
 		int id = 0;
-		INSTANCE.registerMessage(get(), PacketSyncEnergy.class, id++, Side.CLIENT);
-		INSTANCE.registerMessage(get(), PacketSetPatternIndex.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketCycleRecipeType.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketSaveRecipeList.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketSetRecipe.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketLoadRecipeList.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketChangeBlocking.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketSetItemStack.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketChangePackaging.class, id++, Side.SERVER);
-	}
-
-	public static <REQ extends ISelfHandleMessage<? extends IMessage>> PacketHandler<REQ> get() {
-		return new PacketHandler<>();
-	}
-
-	@Override
-	public IMessage onMessage(REQ message, MessageContext ctx) {
-		return message.onMessage(ctx);
+		INSTANCE.registerMessage(PacketSyncEnergy::handle, PacketSyncEnergy.class, id++, Side.CLIENT);
+		INSTANCE.registerMessage(PacketSetPatternIndex::handle, PacketSetPatternIndex.class, id++, Side.SERVER);
+		INSTANCE.registerMessage(PacketCycleRecipeType::handle, PacketCycleRecipeType.class, id++, Side.SERVER);
+		INSTANCE.registerMessage(PacketSaveRecipeList::handle, PacketSaveRecipeList.class, id++, Side.SERVER);
+		INSTANCE.registerMessage(PacketSetRecipe::handle, PacketSetRecipe.class, id++, Side.SERVER);
+		INSTANCE.registerMessage(PacketLoadRecipeList::handle, PacketLoadRecipeList.class, id++, Side.SERVER);
+		INSTANCE.registerMessage(PacketChangeBlocking::handle, PacketChangeBlocking.class, id++, Side.SERVER);
+		INSTANCE.registerMessage(PacketSetItemStack::handle, PacketSetItemStack.class, id++, Side.SERVER);
+		INSTANCE.registerMessage(PacketChangePackaging::handle, PacketChangePackaging.class, id++, Side.SERVER);
 	}
 }

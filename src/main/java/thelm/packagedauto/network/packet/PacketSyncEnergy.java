@@ -1,51 +1,52 @@
 package thelm.packagedauto.network.packet;
 
+import cpw.mods.fml.common.network.NetworkRegistry.TargetPoint;
+import cpw.mods.fml.common.network.simpleimpl.IMessage;
+import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.fml.common.network.NetworkRegistry.TargetPoint;
-import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
-import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import thelm.packagedauto.network.ISelfHandleMessage;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.tile.TileBase;
 
-public class PacketSyncEnergy implements ISelfHandleMessage<IMessage> {
+public class PacketSyncEnergy implements IMessage {
 
-	private long pos;
+	private int x;
+	private int y;
+	private int z;
 	private int energy;
 
 	public PacketSyncEnergy() {}
 
-	public PacketSyncEnergy(BlockPos pos, int energy) {
-		this.pos = pos.toLong();
+	public PacketSyncEnergy(int x, int y, int z, int energy) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
 		this.energy = energy;
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
-		buf.writeLong(pos);
+		buf.writeInt(x);
+		buf.writeInt(y);
+		buf.writeInt(z);
 		buf.writeInt(energy);
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		pos = buf.readLong();
+		x = buf.readInt();
+		y = buf.readInt();
+		z = buf.readInt();
 		energy = buf.readInt();
 	}
 
-	@SideOnly(Side.CLIENT)
-	@Override
-	public IMessage onMessage(MessageContext ctx) {
-		Minecraft.getMinecraft().addScheduledTask(()->{
-			WorldClient world = Minecraft.getMinecraft().world;
-			BlockPos pos = BlockPos.fromLong(this.pos);
-			if(world.isBlockLoaded(pos)) {
-				TileEntity te = world.getTileEntity(pos);
+	public IMessage handle(MessageContext ctx) {
+		Minecraft.getMinecraft().func_152344_a(()->{
+			WorldClient world = Minecraft.getMinecraft().theWorld;
+			if(world.blockExists(x, y, z)) {
+				TileEntity te = world.getTileEntity(x, y, z);
 				if(te instanceof TileBase) {
 					((TileBase)te).getEnergyStorage().setEnergyStored(energy);
 				}
@@ -54,7 +55,7 @@ public class PacketSyncEnergy implements ISelfHandleMessage<IMessage> {
 		return null;
 	}
 
-	public static void syncEnergy(BlockPos pos, int energy, int dimension, double range) {
-		PacketHandler.INSTANCE.sendToAllAround(new PacketSyncEnergy(pos, energy), new TargetPoint(dimension, pos.getX()+0.5D, pos.getY()+0.5D, pos.getZ()+0.5D, range));
+	public static void syncEnergy(int x, int y, int z, int energy, int dimension, double range) {
+		PacketHandler.INSTANCE.sendToAllAround(new PacketSyncEnergy(x, y, z, energy), new TargetPoint(dimension, x+0.5, y+0.5, z+0.5, range));
 	}
 }

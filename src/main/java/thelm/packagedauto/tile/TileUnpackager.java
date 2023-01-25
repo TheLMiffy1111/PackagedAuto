@@ -3,6 +3,7 @@ package thelm.packagedauto.tile;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
@@ -15,56 +16,50 @@ import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.networking.crafting.ICraftingProviderHelper;
 import appeng.api.networking.security.IActionHost;
 import appeng.api.util.AECableType;
-import appeng.api.util.AEPartLocation;
-import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
-import it.unimi.dsi.fastutil.booleans.BooleanList;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
+import cofh.api.energy.IEnergyContainerItem;
+import cpw.mods.fml.common.Loader;
+import cpw.mods.fml.common.Optional;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.text.translation.I18n;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.Optional;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.util.StatCollector;
+import net.minecraftforge.common.util.ForgeDirection;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
-import thelm.packagedauto.api.IRecipeInfo;
-import thelm.packagedauto.api.MiscUtil;
+import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.client.gui.GuiUnpackager;
 import thelm.packagedauto.container.ContainerUnpackager;
 import thelm.packagedauto.energy.EnergyStorage;
-import thelm.packagedauto.integration.appeng.AppEngUtil;
-import thelm.packagedauto.integration.appeng.networking.HostHelperTileUnpackager;
-import thelm.packagedauto.integration.appeng.recipe.RecipeCraftingPatternHelper;
+import thelm.packagedauto.integration.appeng.AppEngHelper;
+import thelm.packagedauto.integration.appeng.networking.HostHelperUnpackager;
+import thelm.packagedauto.integration.appeng.recipe.RecipeCraftingPatternDetails;
 import thelm.packagedauto.inventory.InventoryUnpackager;
+import thelm.packagedauto.util.MiscHelper;
 
 @Optional.InterfaceList({
 	@Optional.Interface(iface="appeng.api.networking.IGridHost", modid="appliedenergistics2"),
 	@Optional.Interface(iface="appeng.api.networking.security.IActionHost", modid="appliedenergistics2"),
 	@Optional.Interface(iface="appeng.api.networking.crafting.ICraftingProvider", modid="appliedenergistics2")
 })
-public class TileUnpackager extends TileBase implements ITickable, IGridHost, IActionHost, ICraftingProvider {
+public class TileUnpackager extends TileBase implements IGridHost, IActionHost, ICraftingProvider {
 
 	public static int energyCapacity = 5000;
 	public static int energyUsage = 50;
 	public static boolean drawMEEnergy = true;
 
 	public final PackageTracker[] trackers = new PackageTracker[10];
-	public List<IRecipeInfo> recipeList = new ArrayList<>();
+	public List<IPackageRecipeInfo> recipeList = new ArrayList<>();
 	public boolean powered = false;
 	public boolean blocking = false;
+	public boolean firstTick = true;
 
 	public TileUnpackager() {
 		setInventory(new InventoryUnpackager(this));
@@ -73,25 +68,24 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			trackers[i] = new PackageTracker();
 		}
 		if(Loader.isModLoaded("appliedenergistics2")) {
-			hostHelper = new HostHelperTileUnpackager(this);
+			hostHelper = new HostHelperUnpackager(this);
 		}
 	}
 
 	@Override
 	protected String getLocalizedName() {
-		return I18n.translateToLocal("tile.packagedauto.unpackager.name");
+		return StatCollector.translateToLocal("tile.packagedauto.unpackager.name");
 	}
 
 	@Override
-	public void onLoad() {
-		updatePowered();
-	}
-
-	@Override
-	public void update() {
-		if(!world.isRemote) {
+	public void updateEntity() {
+		if(firstTick) {
+			firstTick = false;
+			updatePowered();
+		}
+		if(!worldObj.isRemote) {
 			chargeEnergy();
-			if(world.getTotalWorldTime() % 8 == 0) {
+			if(worldObj.getTotalWorldTime() % 8 == 0) {
 				fillTrackers();
 				emptyTrackers();
 				if(drawMEEnergy && hostHelper != null && hostHelper.isActive()) {
@@ -108,15 +102,15 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 		for(int i = 0; i < 9; ++i) {
 			if(energyStorage.getEnergyStored() >= energyUsage) {
 				ItemStack stack = inventory.getStackInSlot(i);
-				if(!stack.isEmpty() && stack.getItem() instanceof IPackageItem) {
+				if(stack != null && stack.getItem() instanceof IPackageItem) {
 					IPackageItem packageItem = (IPackageItem)stack.getItem();
 					boolean flag = false;
 					for(PackageTracker tracker : nonEmptyTrackers) {
 						if(tracker.tryAcceptPackage(packageItem, stack, i)) {
 							flag = true;
-							stack.shrink(1);
-							if(stack.isEmpty()) {
-								inventory.setInventorySlotContents(i, ItemStack.EMPTY);
+							stack.stackSize -= 1;
+							if(stack.stackSize <= 0) {
+								inventory.setInventorySlotContents(i, null);
 							}
 							else {
 								tracker.setRejectedIndex(i, true);
@@ -131,9 +125,9 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 					if(!flag) {
 						for(PackageTracker tracker : emptyTrackers) {
 							if(tracker.tryAcceptPackage(packageItem, stack, i)) {
-								stack.shrink(1);
-								if(stack.isEmpty()) {
-									inventory.setInventorySlotContents(i, ItemStack.EMPTY);
+								stack.stackSize -= 1;
+								if(stack.stackSize <= 0) {
+									inventory.setInventorySlotContents(i, null);
 								}
 								else {
 									tracker.setRejectedIndex(i, true);
@@ -152,15 +146,15 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	}
 
 	protected void emptyTrackers() {
-		for(EnumFacing facing : EnumFacing.VALUES) {
-			TileEntity tile = world.getTileEntity(pos.offset(facing));
+		for(ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
+			TileEntity tile = worldObj.getTileEntity(xCoord+side.offsetX, yCoord+side.offsetY, zCoord+side.offsetZ);
 			if(tile instanceof IPackageCraftingMachine) {
 				IPackageCraftingMachine machine = (IPackageCraftingMachine)tile;
 				for(PackageTracker tracker : trackers) {
 					if(tracker.isFilled() && tracker.recipe != null && tracker.recipe.getRecipeType().hasMachine()) {
-						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), facing.getOpposite())) {
+						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), side.getOpposite())) {
 							tracker.clearRecipe();
-							syncTile(false);
+							syncTile();
 							markDirty();
 							break;
 						}
@@ -169,9 +163,9 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 				continue;
 			}
 		}
-		for(EnumFacing facing : EnumFacing.VALUES) {
-			TileEntity tile = world.getTileEntity(pos.offset(facing));
-			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.facing == facing).findFirst().orElse(null);
+		for(ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
+			TileEntity tile = worldObj.getTileEntity(xCoord+side.offsetX, yCoord+side.offsetY, zCoord+side.offsetZ);
+			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.facing == side).findFirst().orElse(null);
 			if(trackerToEmpty == null) {
 				continue;
 			}
@@ -182,37 +176,37 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 				trackerToEmpty.facing = null;
 				continue;
 			}
-			if(tile == null || tile instanceof TilePackager || tile instanceof TileUnpackager || isInterface(tile, facing.getOpposite()) || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
+			if(tile == null || tile instanceof TilePackager || tile instanceof TileUnpackager || isInterface(tile, side.getOpposite()) || !(tile instanceof IInventory)) {
 				trackerToEmpty.facing = null;
 				continue;
 			}
-			IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
+			IInventory inv = (IInventory)tile;
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
-				for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-					ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-					if(stackRem.getCount() < stack.getCount()) {
+				for(int slot : MiscHelper.INSTANCE.getSlots(inv, side.getOpposite())) {
+					ItemStack stackRem = MiscHelper.INSTANCE.insertItem(inv, slot, side.getOpposite(), stack, false);
+					if(stackRem == null || stackRem.stackSize < stack.stackSize) {
 						stack = stackRem;
 					}
-					if(stack.isEmpty()) {
+					if(stack == null) {
 						break;
 					}
 				}
 				trackerToEmpty.toSend.set(i, stack);
 			}
-			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
+			trackerToEmpty.toSend.removeIf(Objects::isNull);
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.clearRecipe();
 			}
 			markDirty();
 		}
-		for(EnumFacing facing : EnumFacing.VALUES) {
-			TileEntity tile = world.getTileEntity(pos.offset(facing));
-			if(tile == null || tile instanceof TilePackager || tile instanceof TileUnpackager || isInterface(tile, facing.getOpposite()) || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
+		for(ForgeDirection side : ForgeDirection.VALID_DIRECTIONS) {
+			TileEntity tile = worldObj.getTileEntity(xCoord+side.offsetX, yCoord+side.offsetY, zCoord+side.offsetZ);
+			if(tile == null || tile instanceof TilePackager || tile instanceof TileUnpackager || isInterface(tile, side.getOpposite()) || !(tile instanceof IInventory)) {
 				continue;
 			}
-			IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
-			if(powered || blocking && !MiscUtil.isEmpty(itemHandler)) {
+			IInventory inv = (IInventory)tile;
+			if(powered || blocking && !MiscHelper.INSTANCE.isEmpty(inv, side.getOpposite())) {
 				continue;
 			}
 			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.isFilled()).filter(t->t.facing == null).findFirst().orElse(null);
@@ -228,21 +222,21 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			boolean inserted = false;
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
-				for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-					ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-					if(stackRem.getCount() < stack.getCount()) {
+				for(int slot : MiscHelper.INSTANCE.getSlots(inv, side.getOpposite())) {
+					ItemStack stackRem = MiscHelper.INSTANCE.insertItem(inv, slot, side.getOpposite(), stack, false);
+					if(stackRem == null || stackRem.stackSize < stack.stackSize) {
 						stack = stackRem;
 						inserted = true;
 					}
-					if(stack.isEmpty()) {
+					if(stack == null) {
 						break;
 					}
 				}
 				trackerToEmpty.toSend.set(i, stack);
 			}
-			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
+			trackerToEmpty.toSend.removeIf(Objects::isNull);
 			if(inserted) {
-				trackerToEmpty.facing = facing;
+				trackerToEmpty.facing = side;
 				if(trackerToEmpty.toSend.isEmpty()) {
 					trackerToEmpty.clearRecipe();
 				}
@@ -254,24 +248,24 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	protected void chargeEnergy() {
 		int prevStored = energyStorage.getEnergyStored();
 		ItemStack energyStack = inventory.getStackInSlot(10);
-		if(energyStack.hasCapability(CapabilityEnergy.ENERGY, null)) {
+		if(energyStack != null && energyStack.getItem() instanceof IEnergyContainerItem) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(energyStack.getCapability(CapabilityEnergy.ENERGY, null).extractEnergy(energyRequest, false), false);
-			if(energyStack.getCount() <= 0) {
-				inventory.setInventorySlotContents(10, ItemStack.EMPTY);
+			energyStorage.receiveEnergy(((IEnergyContainerItem)energyStack.getItem()).extractEnergy(energyStack, energyRequest, false), false);
+			if(energyStack.stackSize <= 0) {
+				inventory.setInventorySlotContents(10, null);
 			}
 		}
 	}
 
 	public void updatePowered() {
-		if(world.getRedstonePowerFromNeighbors(pos) > 0 != powered) {
+		if(worldObj.getStrongestIndirectPower(xCoord, yCoord, zCoord) > 0 != powered) {
 			powered = !powered;
-			syncTile(false);
+			syncTile();
 			markDirty();
 		}
 	}
 
-	public HostHelperTileUnpackager hostHelper;
+	public HostHelperUnpackager hostHelper;
 
 	@Override
 	public void invalidate() {
@@ -289,20 +283,20 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
-	public IGridNode getGridNode(AEPartLocation dir) {
+	public IGridNode getGridNode(ForgeDirection dir) {
 		return getActionableNode();
 	}
 
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
-	public AECableType getCableConnectionType(AEPartLocation dir) {
+	public AECableType getCableConnectionType(ForgeDirection dir) {
 		return AECableType.SMART;
 	}
 
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public void securityBreak() {
-		world.destroyBlock(pos, true);
+		worldObj.func_147480_a(xCoord, yCoord, zCoord, true);
 	}
 
 	@Optional.Method(modid="appliedenergistics2")
@@ -314,16 +308,16 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public boolean pushPattern(ICraftingPatternDetails patternDetails, InventoryCrafting table) {
-		if(!isBusy() && patternDetails instanceof RecipeCraftingPatternHelper) {
-			IntList emptySlots = new IntArrayList();
+		if(!isBusy() && patternDetails instanceof RecipeCraftingPatternDetails) {
+			List<Integer> emptySlots = new ArrayList<>();
 			for(int i = 0; i < 9; ++i) {
-				if(inventory.getStackInSlot(i).isEmpty()) {
+				if(inventory.getStackInSlot(i) == null) {
 					emptySlots.add(i);
 				}
 			}
-			IntList requiredSlots = new IntArrayList();
+			List<Integer> requiredSlots = new ArrayList<>();
 			for(int i = 0; i < table.getSizeInventory(); ++i) {
-				if(!table.getStackInSlot(i).isEmpty()) {
+				if(table.getStackInSlot(i) != null) {
 					requiredSlots.add(i);
 				}
 			}
@@ -331,7 +325,8 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 				return false;
 			}
 			for(int i = 0; i < requiredSlots.size(); ++i) {
-				inventory.setInventorySlotContents(emptySlots.getInt(i), table.getStackInSlot(requiredSlots.getInt(i)).copy());
+				ItemStack stack = table.getStackInSlot(requiredSlots.get(i));
+				inventory.setInventorySlotContents(emptySlots.get(i), stack == null ? null : stack.copy());
 			}
 			return true;
 		}
@@ -348,16 +343,16 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Override
 	public void provideCrafting(ICraftingProviderHelper craftingTracker) {
 		ItemStack patternStack = inventory.getStackInSlot(9);
-		for(IRecipeInfo pattern : recipeList) {
+		for(IPackageRecipeInfo pattern : recipeList) {
 			if(!pattern.getOutputs().isEmpty()) {
-				craftingTracker.addCraftingOption(this, new RecipeCraftingPatternHelper(patternStack, pattern));
+				craftingTracker.addCraftingOption(this, new RecipeCraftingPatternDetails(patternStack, pattern));
 			}
 		}
 	}
 
-	protected boolean isInterface(TileEntity tile, EnumFacing facing) {
+	protected boolean isInterface(TileEntity tile, ForgeDirection side) {
 		if(Loader.isModLoaded("appliedenergistics2")) {
-			return AppEngUtil.isInterface(tile, facing);
+			return AppEngHelper.INSTANCE.isInterface(tile, side);
 		}
 		return false;
 	}
@@ -378,12 +373,11 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	}
 
 	@Override
-	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
+	public void writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
 		if(hostHelper != null) {
 			hostHelper.writeToNBT(nbt);
 		}
-		return nbt;
 	}
 
 	@Override
@@ -428,13 +422,13 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	public class PackageTracker {
 
 		public boolean[] rejectedIndexes = new boolean[9];
-		public IRecipeInfo recipe;
+		public IPackageRecipeInfo recipe;
 		public int amount;
-		public BooleanList received = new BooleanArrayList();
+		public List<Boolean> received = new ArrayList<>();
 		public List<ItemStack> toSend = new ArrayList<>();
-		public EnumFacing facing;
+		public ForgeDirection facing;
 
-		public void setRecipe(IRecipeInfo recipe) {
+		public void setRecipe(IPackageRecipeInfo recipe) {
 			this.recipe = recipe;
 		}
 
@@ -444,8 +438,8 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			amount = 0;
 			received.clear();
 			facing = null;
-			if(world != null && !world.isRemote) {
-				syncTile(false);
+			if(worldObj != null && !worldObj.isRemote) {
+				syncTile();
 				markDirty();
 			}
 		}
@@ -454,14 +448,16 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			if(rejectedIndexes[invIndex]) {
 				return false;
 			}
-			IRecipeInfo recipe = packageItem.getRecipeInfo(stack);
+			IPackageRecipeInfo recipe = packageItem.getRecipeInfo(stack);
 			if(recipe != null) {
 				if(this.recipe == null) {
 					this.recipe = recipe;
 					amount = recipe.getPatterns().size();
-					received.size(amount);
+					while(received.size() < amount) {
+						received.add(false);
+					}
 					received.set(packageItem.getIndex(stack), true);
-					syncTile(false);
+					syncTile();
 					markDirty();
 					return true;
 				}
@@ -469,7 +465,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 					int index = packageItem.getIndex(stack);
 					if(!received.get(index)) {
 						received.set(index, true);
-						syncTile(false);
+						syncTile();
 						markDirty();
 						return true;
 					}
@@ -515,36 +511,38 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 		public void readFromNBT(NBTTagCompound nbt) {
 			clearRecipe();
 			NBTTagCompound tag = nbt.getCompoundTag("Recipe");
-			IRecipeInfo recipe = MiscUtil.readRecipeFromNBT(tag);
+			IPackageRecipeInfo recipe = MiscHelper.INSTANCE.readRecipeFromNBT(tag);
 			if(recipe != null) {
 				this.recipe = recipe;
 				amount = nbt.getByte("Amount");
-				received.size(amount);
+				while(received.size() < amount) {
+					received.add(false);
+				}
 				byte[] receivedArray = nbt.getByteArray("Received");
 				for(int i = 0; i < received.size(); ++i) {
 					received.set(i, receivedArray[i] != 0);
 				}
 			}
-			MiscUtil.loadAllItems(nbt.getTagList("ToSend", 10), toSend);
+			MiscHelper.INSTANCE.loadAllItems(nbt.getTagList("ToSend", 10), toSend);
 			if(nbt.hasKey("Facing")) {
-				facing = EnumFacing.byIndex(nbt.getByte("Facing"));
+				facing = ForgeDirection.getOrientation(nbt.getByte("Facing"));
 			}
 		}
 
 		public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 			if(recipe != null) {
-				NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), recipe);
+				NBTTagCompound tag = MiscHelper.INSTANCE.writeRecipeToNBT(new NBTTagCompound(), recipe);
 				nbt.setTag("Recipe", tag);
 				nbt.setByte("Amount", (byte)amount);
 				byte[] receivedArray = new byte[received.size()];
 				for(int i = 0; i < received.size(); ++i) {
-					receivedArray[i] = (byte)(received.getBoolean(i) ? 1 : 0);
+					receivedArray[i] = (byte)(received.get(i) ? 1 : 0);
 				}
 				nbt.setByteArray("Received", receivedArray);
 			}
-			nbt.setTag("ToSend", MiscUtil.saveAllItems(new NBTTagList(), toSend));
+			nbt.setTag("ToSend", MiscHelper.INSTANCE.saveAllItems(new NBTTagList(), toSend));
 			if(facing != null) {
-				nbt.setByte("Facing", (byte)facing.getIndex());
+				nbt.setByte("Facing", (byte)facing.ordinal());
 			}
 			return nbt;
 		}

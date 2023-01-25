@@ -1,26 +1,25 @@
 package thelm.packagedauto.inventory;
 
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ResourceLocation;
 import thelm.packagedauto.api.IPackagePattern;
-import thelm.packagedauto.api.IRecipeInfo;
-import thelm.packagedauto.api.IRecipeType;
-import thelm.packagedauto.api.RecipeTypeRegistry;
-import thelm.packagedauto.recipe.RecipeTypeProcessing;
+import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.IPackageRecipeType;
+import thelm.packagedauto.recipe.PackageRecipeTypeProcessing;
 import thelm.packagedauto.tile.TileEncoder;
+import thelm.packagedauto.util.ApiImpl;
 
-public class InventoryEncoderPattern extends InventoryTileBase {
+public class InventoryEncoderPattern extends InventoryBase {
 
 	public final TileEncoder tile;
-	public IRecipeType recipeType;
-	public IRecipeInfo recipeInfo;
+	public IPackageRecipeType recipeType;
+	public IPackageRecipeInfo recipeInfo;
 
 	public InventoryEncoderPattern(TileEncoder tile) {
 		super(tile, 99);
@@ -38,7 +37,7 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
-		recipeType = RecipeTypeRegistry.getRecipeType(new ResourceLocation(nbt.getString("RecipeType")));
+		recipeType = ApiImpl.INSTANCE.getRecipeType(nbt.getString("RecipeType"));
 		validateRecipeType();
 		updateRecipeInfo();
 	}
@@ -62,32 +61,20 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 
 	public void validateRecipeType() {
 		if(recipeType == null) {
-			recipeType = RecipeTypeProcessing.INSTANCE;
+			recipeType = PackageRecipeTypeProcessing.INSTANCE;
 		}
 	}
 
 	public void updateRecipeInfo() {
 		validateRecipeType();
-		IRecipeInfo info = recipeType.getNewRecipeInfo();
-		try {
-			info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), tile.getWorld());
-		}
-		catch(AbstractMethodError error) {
-			try {
-				Method oldGenerateFromStacksMethod = info.getClass().getMethod("generateFromStacks", List.class, List.class);
-				oldGenerateFromStacksMethod.invoke(info, stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList());
-			}
-			catch(Exception exception) {
-				exception.addSuppressed(error);
-				exception.printStackTrace();
-			}
-		}
+		IPackageRecipeInfo info = recipeType.getNewRecipeInfo();
+		info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), tile.getWorldObj());
 		if(info.isValid()) {
 			if(recipeInfo == null || !recipeInfo.equals(info)) {
 				recipeInfo = info;
 				if(!recipeType.canSetOutput()) {
 					for(int i = 81; i < 90; ++i) {
-						stacks.set(i, ItemStack.EMPTY);
+						stacks.set(i, null);
 					}
 					List<ItemStack> outputs = info.getOutputs();
 					int size = outputs.size();
@@ -102,13 +89,13 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 					}
 				}
 				for(int i = 90; i < 99; ++i) {
-					stacks.set(i, ItemStack.EMPTY);
+					stacks.set(i, null);
 				}
 				List<IPackagePattern> patterns = info.getPatterns();
 				for(int i = 0; i < patterns.size() && i < 9; ++i) {
 					stacks.set(90+i, patterns.get(i).getOutput().copy());
 				}
-				syncTile(false);
+				syncTile();
 				markDirty();
 			}
 		}
@@ -116,25 +103,25 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 			recipeInfo = null;
 			if(!recipeType.canSetOutput()) {
 				for(int i = 81; i < 90; ++i) {
-					stacks.set(i, ItemStack.EMPTY);
+					stacks.set(i, null);
 				}
 			}
 			for(int i = 90; i < 99; ++i) {
-				stacks.set(i, ItemStack.EMPTY);
+				stacks.set(i, null);
 			}
-			syncTile(false);
+			syncTile();
 			markDirty();
 		}
 	}
 
 	public void cycleRecipeType(boolean reverse) {
 		validateRecipeType();
-		recipeType = RecipeTypeRegistry.getNextRecipeType(recipeType, reverse);
+		recipeType = ApiImpl.INSTANCE.getNextRecipeType(recipeType, reverse);
 		validateRecipeType();
-		IntSet enabledSlots = recipeType.getEnabledSlots();
+		Set<Integer> enabledSlots = recipeType.getEnabledSlots();
 		for(int i = 0; i < 90; ++i) {
 			if(!enabledSlots.contains(i)) {
-				stacks.set(i, ItemStack.EMPTY);
+				stacks.set(i, null);
 			}
 		}
 		updateRecipeInfo();
@@ -145,26 +132,26 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 		}
 	}
 
-	public void setRecipeTypeIfEmpty(IRecipeType recipeType) {
-		if(stacks.stream().allMatch(ItemStack::isEmpty)) {
+	public void setRecipeTypeIfEmpty(IPackageRecipeType recipeType) {
+		if(stacks.stream().allMatch(Objects::isNull)) {
 			this.recipeType = recipeType;
 			validateRecipeType();
 			updateRecipeInfo();
 		}
 	}
 
-	public void setRecipe(Int2ObjectMap<ItemStack> map) {
+	public void setRecipe(Map<Integer, ItemStack> map) {
 		if(recipeType.canSetOutput()) {
-			stacks.clear();
+			Collections.fill(stacks, null);
 		}
 		else {
 			for(int i = 0; i < 81; ++i) {
-				stacks.set(i, ItemStack.EMPTY);
+				stacks.set(i, null);
 			}
 		}
 		if(map != null) {
-			for(Int2ObjectMap.Entry<ItemStack> entry : map.int2ObjectEntrySet()) {
-				stacks.set(entry.getIntKey(), entry.getValue());
+			for(Map.Entry<Integer, ItemStack> entry : map.entrySet()) {
+				stacks.set(entry.getKey(), entry.getValue());
 			}
 		}
 		updateRecipeInfo();

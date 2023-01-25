@@ -6,7 +6,7 @@ import thelm.packagedauto.slot.SlotPreview;
 import thelm.packagedauto.slot.SlotRemoveOnly;
 import thelm.packagedauto.tile.TilePackagerExtension;
 
-public class ContainerPackagerExtension extends ContainerTileBase<TilePackagerExtension> {
+public class ContainerPackagerExtension extends ContainerBase<TilePackagerExtension> {
 
 	public ContainerPackagerExtension(InventoryPlayer player, TilePackagerExtension tile) {
 		super(player, tile);

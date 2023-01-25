@@ -2,16 +2,15 @@ package thelm.packagedauto.inventory;
 
 import java.util.Arrays;
 
+import cofh.api.energy.IEnergyContainerItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumFacing;
-import net.minecraftforge.energy.CapabilityEnergy;
 import thelm.packagedauto.api.IPackageItem;
-import thelm.packagedauto.api.IRecipeListItem;
+import thelm.packagedauto.api.IPackageRecipeListItem;
 import thelm.packagedauto.tile.TileUnpackager;
 import thelm.packagedauto.tile.TileUnpackager.PackageTracker;
 
-public class InventoryUnpackager extends InventoryTileBase {
+public class InventoryUnpackager extends InventoryBase {
 
 	public static final int[] SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 	public final TileUnpackager tile;
@@ -47,9 +46,9 @@ public class InventoryUnpackager extends InventoryTileBase {
 	@Override
 	public boolean isItemValidForSlot(int index, ItemStack stack) {
 		switch(index) {
-		case 9: return stack.getItem() instanceof IRecipeListItem;
-		case 10: return stack.hasCapability(CapabilityEnergy.ENERGY, null);
-		default: return stack.getItem() instanceof IPackageItem;
+		case 9: return stack != null && stack.getItem() instanceof IPackageRecipeListItem;
+		case 10: return stack != null && stack.getItem() instanceof IEnergyContainerItem;
+		default: return stack != null && stack.getItem() instanceof IPackageItem;
 		}
 	}
 
@@ -60,27 +59,27 @@ public class InventoryUnpackager extends InventoryTileBase {
 	}
 
 	@Override
-	public int[] getSlotsForFace(EnumFacing side) {
+	public int[] getAccessibleSlotsFromSide(int side) {
 		return SLOTS;
 	}
 
 	@Override
-	public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
+	public boolean canInsertItem(int index, ItemStack stack, int side) {
 		return index != 9 && index != 10;
 	}
 
 	@Override
-	public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
-		return index != 9 && index != 10 && direction == EnumFacing.UP && !Arrays.stream(tile.trackers).anyMatch(t->t.isEmpty());
+	public boolean canExtractItem(int index, ItemStack stack, int side) {
+		return index != 9 && index != 10 && side == 1 && !Arrays.stream(tile.trackers).anyMatch(t->t.isEmpty());
 	}
 
 	public void updateRecipeList() {
 		tile.recipeList.clear();
 		ItemStack listStack = getStackInSlot(9);
-		if(listStack.getItem() instanceof IRecipeListItem) {
-			tile.recipeList.addAll(((IRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList());
+		if(listStack != null && listStack.getItem() instanceof IPackageRecipeListItem) {
+			tile.recipeList.addAll(((IPackageRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList());
 		}
-		if(tile.getWorld() != null && !tile.getWorld().isRemote && tile.hostHelper != null) {
+		if(tile.getWorldObj() != null && !tile.getWorldObj().isRemote && tile.hostHelper != null) {
 			tile.hostHelper.postPatternChange();
 		}
 	}

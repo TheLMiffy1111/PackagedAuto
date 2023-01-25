@@ -5,7 +5,7 @@ import thelm.packagedauto.slot.SlotBase;
 import thelm.packagedauto.slot.SlotSingleStack;
 import thelm.packagedauto.tile.TileUnpackager;
 
-public class ContainerUnpackager extends ContainerTileBase<TileUnpackager> {
+public class ContainerUnpackager extends ContainerBase<TileUnpackager> {
 
 	public ContainerUnpackager(InventoryPlayer playerInventory, TileUnpackager tile) {
 		super(playerInventory, tile);

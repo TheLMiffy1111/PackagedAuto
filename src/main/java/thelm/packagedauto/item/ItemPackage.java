@@ -2,52 +2,42 @@ package thelm.packagedauto.item;
 
 import java.util.List;
 
-import net.minecraft.client.renderer.block.model.ModelResourceLocation;
-import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.text.translation.I18n;
+import net.minecraft.util.StatCollector;
 import net.minecraft.world.World;
-import net.minecraftforge.client.model.ModelLoader;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
-import thelm.packagedauto.api.IRecipeInfo;
-import thelm.packagedauto.api.MiscUtil;
-import thelm.packagedauto.client.IModelRegister;
+import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.util.MiscHelper;
 
-public class ItemPackage extends Item implements IPackageItem, IModelRegister {
+public class ItemPackage extends Item implements IPackageItem {
 
 	public static final ItemPackage INSTANCE = new ItemPackage();
-	public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation("packagedauto:package#inventory");
 
 	protected ItemPackage() {
-		setRegistryName("packagedauto:package");
-		setTranslationKey("packagedauto.package");
+		setUnlocalizedName("packagedauto.package");
+		setTextureName("packagedauto:package");
 		setCreativeTab(null);
 	}
 
-	public static ItemStack makePackage(IRecipeInfo recipeInfo, int index) {
+	public static ItemStack makePackage(IPackageRecipeInfo recipeInfo, int index) {
 		ItemStack stack = new ItemStack(INSTANCE);
-		NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), recipeInfo);
+		NBTTagCompound tag = MiscHelper.INSTANCE.writeRecipeToNBT(new NBTTagCompound(), recipeInfo);
 		tag.setByte("Index", (byte)index);
 		stack.setTagCompound(tag);
 		return stack;
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-		if(!worldIn.isRemote && playerIn.isSneaking()) {
-			ItemStack stack = playerIn.getHeldItem(handIn).copy();
+	public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player) {
+		if(!world.isRemote && player.isSneaking()) {
+			ItemStack stack = itemStack.copy();
 			ItemStack stack1 = stack.splitStack(1);
-			IRecipeInfo recipeInfo = getRecipeInfo(stack1);
+			IPackageRecipeInfo recipeInfo = getRecipeInfo(stack1);
 			if(recipeInfo != null) {
 				List<IPackagePattern> patterns = recipeInfo.getPatterns();
 				int index = getIndex(stack1);
@@ -56,44 +46,44 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister {
 					List<ItemStack> inputs = pattern.getInputs();
 					for(int i = 0; i < inputs.size(); ++i) {
 						ItemStack input = inputs.get(i).copy();
-						if(!playerIn.inventory.addItemStackToInventory(input)) {
-							EntityItem item = new EntityItem(worldIn, playerIn.posX, playerIn.posY, playerIn.posZ, input);
-							item.setThrower(playerIn.getName());
-							worldIn.spawnEntity(item);
+						if(!player.inventory.addItemStackToInventory(input)) {
+							EntityItem item = new EntityItem(world, player.posX, player.posY, player.posZ, input);
+							item.func_145799_b(player.getCommandSenderName());
+							world.spawnEntityInWorld(item);
 						}
 					}
 				}
 			}
-			return new ActionResult<>(EnumActionResult.SUCCESS, stack);
+			return stack;
 		}
-		return new ActionResult<>(EnumActionResult.PASS, playerIn.getHeldItem(handIn));
+		return itemStack;
 	}
 
 	@Override
-	public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
-		IRecipeInfo recipe = getRecipeInfo(stack);
+	public void addInformation(ItemStack stack, EntityPlayer player, List tooltip, boolean isAdvanced) {
+		IPackageRecipeInfo recipe = getRecipeInfo(stack);
 		if(recipe != null) {
 			tooltip.add(recipe.getRecipeType().getLocalizedName()+": ");
 			for(ItemStack is : recipe.getOutputs()) {
-				tooltip.add(is.getCount()+" "+is.getDisplayName());
+				tooltip.add(is.stackSize+" "+is.getDisplayName());
 			}
 			int index = getIndex(stack);
-			tooltip.add(I18n.translateToLocalFormatted("item.packagedauto.package.index", index));
-			tooltip.add(I18n.translateToLocal("item.packagedauto.package.items"));
+			tooltip.add(StatCollector.translateToLocalFormatted("item.packagedauto.package.index", index));
+			tooltip.add(StatCollector.translateToLocal("item.packagedauto.package.items"));
 			List<ItemStack> recipeInputs = recipe.getInputs();
 			List<ItemStack> packageItems = recipeInputs.subList(9*index, Math.min(9*index+9, recipeInputs.size()));
 			for(ItemStack is : packageItems) {
-				tooltip.add(is.getCount()+" "+is.getDisplayName());
+				tooltip.add(is.stackSize+" "+is.getDisplayName());
 			}
 		}
-		super.addInformation(stack, worldIn, tooltip, flagIn);
+		super.addInformation(stack, player, tooltip, isAdvanced);
 	}
 
 	@Override
-	public IRecipeInfo getRecipeInfo(ItemStack stack) {
+	public IPackageRecipeInfo getRecipeInfo(ItemStack stack) {
 		if(stack.hasTagCompound()) {
 			NBTTagCompound tag = stack.getTagCompound();
-			return MiscUtil.readRecipeFromNBT(tag);
+			return MiscHelper.INSTANCE.readRecipeFromNBT(tag);
 		}
 		return null;
 	}
@@ -104,11 +94,5 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister {
 			return stack.getTagCompound().getByte("Index");
 		}
 		return -1;
-	}
-
-	@SideOnly(Side.CLIENT)
-	@Override
-	public void registerModels() {
-		ModelLoader.setCustomModelResourceLocation(this, 0, MODEL_LOCATION);
 	}
 }

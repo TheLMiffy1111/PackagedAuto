@@ -1,15 +1,16 @@
 package thelm.packagedauto;
 
+import cpw.mods.fml.common.Mod;
+import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.Mod.Instance;
+import cpw.mods.fml.common.ModMetadata;
+import cpw.mods.fml.common.SidedProxy;
+import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+import cpw.mods.fml.relauncher.Side;
+import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.creativetab.CreativeTabs;
-import net.minecraft.item.ItemStack;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.Mod.Instance;
-import net.minecraftforge.fml.common.ModMetadata;
-import net.minecraftforge.fml.common.SidedProxy;
-import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.item.Item;
 import thelm.packagedauto.item.ItemPackage;
 import thelm.packagedauto.proxy.CommonProxy;
 
@@ -24,14 +25,14 @@ public class PackagedAuto {
 
 	public static final String MOD_ID = "packagedauto";
 	public static final String NAME = "PackagedAuto";
-	public static final String VERSION = "1.12.2-1.0.6.23";
-	public static final String DEPENDENCIES = "";
+	public static final String VERSION = "1.7.10-W.0.0.0";
+	public static final String DEPENDENCIES = "after:nei@[2.3.7-GTNH,)";
 	public static final String GUI_FACTORY = "thelm.packagedauto.client.gui.GuiPackagedAutoConfigFactory";
 	public static final CreativeTabs CREATIVE_TAB = new CreativeTabs("packagedauto") {
 		@SideOnly(Side.CLIENT)
 		@Override
-		public ItemStack createIcon() {
-			return new ItemStack(ItemPackage.INSTANCE);
+		public Item getTabIconItem() {
+			return ItemPackage.INSTANCE;
 		}
 	};
 	@Instance
@@ -48,6 +49,11 @@ public class PackagedAuto {
 		metadata.authorList.add("TheLMiffy1111");
 		metadata.description = "An Applied Energistics 2 addon that uses \"packages\" to allow autocrafting with more than 9 items.";
 
+		proxy.register(event);
+	}
+
+	@EventHandler
+	public void secondMovement(FMLInitializationEvent event) {
 		proxy.register(event);
 	}
 }

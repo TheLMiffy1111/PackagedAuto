@@ -2,9 +2,9 @@ package thelm.packagedauto.client.gui;
 
 import java.util.Set;
 
+import cpw.mods.fml.client.IModGuiFactory;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiScreen;
-import net.minecraftforge.fml.client.IModGuiFactory;
 
 public class GuiPackagedAutoConfigFactory implements IModGuiFactory {
 
@@ -19,12 +19,12 @@ public class GuiPackagedAutoConfigFactory implements IModGuiFactory {
 	}
 
 	@Override
-	public boolean hasConfigGui() {
-		return true;
+	public Class<? extends GuiScreen> mainConfigGuiClass() {
+		return GuiPackagedAutoConfig.class;
 	}
 
 	@Override
-	public GuiScreen createConfigGui(GuiScreen parent) {
-		return new GuiPackagedAutoConfig(parent);
+	public RuntimeOptionGuiHandler getHandlerFor(RuntimeOptionCategoryElement element) {
+		return null;
 	}
 }

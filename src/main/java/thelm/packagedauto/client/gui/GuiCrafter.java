@@ -1,9 +1,10 @@
 package thelm.packagedauto.client.gui;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.StatCollector;
 import thelm.packagedauto.container.ContainerCrafter;
 
-public class GuiCrafter extends GuiContainerTileBase<ContainerCrafter> {
+public class GuiCrafter extends GuiBase<ContainerCrafter> {
 
 	public static final ResourceLocation BACKGROUND = new ResourceLocation("packagedauto:textures/gui/crafter.png");
 
@@ -27,11 +28,11 @@ public class GuiCrafter extends GuiContainerTileBase<ContainerCrafter> {
 	@Override
 	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY) {
 		super.drawGuiContainerForegroundLayer(mouseX, mouseY);
-		String s = container.inventory.getDisplayName().getUnformattedText();
-		fontRenderer.drawString(s, xSize/2 - fontRenderer.getStringWidth(s)/2, 6, 0x404040);
-		fontRenderer.drawString(container.playerInventory.getDisplayName().getUnformattedText(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
+		String s = container.inventory.getInventoryName();
+		fontRendererObj.drawString(s, xSize/2 - fontRendererObj.getStringWidth(s)/2, 6, 0x404040);
+		fontRendererObj.drawString(StatCollector.translateToLocal(container.playerInventory.getInventoryName()), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
 		if(mouseX-guiLeft >= 10 && mouseY-guiTop >= 10 && mouseX-guiLeft <= 21 && mouseY-guiTop <= 49) {
-			drawHoveringText(container.tile.getEnergyStorage().getEnergyStored()+" / "+container.tile.getEnergyStorage().getMaxEnergyStored()+" FE", mouseX-guiLeft, mouseY-guiTop);
+			drawCreativeTabHoveringText(container.tile.getEnergyStorage().getEnergyStored()+" / "+container.tile.getEnergyStorage().getMaxEnergyStored()+" RF", mouseX-guiLeft, mouseY-guiTop);
 		}
 	}
 }
