@@ -67,7 +67,7 @@ sourceSets {
     main
 }
 
-version = "3.1.2.15"
+version = "3.1.2.16"
 group = "thelm.packagedauto"
 archivesBaseName = "PackagedAuto-1.18.2"
 
@@ -96,16 +96,16 @@ minecraft {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.18.2-40.1.85"
+    minecraft "net.minecraftforge:forge:1.18.2-40.2.1"
 
     implementation fg.deobf("appeng:appliedenergistics2-forge:11.7.0")
-    implementation fg.deobf("mezz.jei:jei-1.18.2:9.7.2.281")
+    implementation fg.deobf("mezz.jei:jei-1.18.2:9.7.2.1001")
     implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.18.2:9.1.197")
     implementation fg.deobf("vazkii.patchouli:Patchouli:1.18.2-71.1")
-    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-1.18.2:0.6.5-91")
-    implementation fg.deobf("com.simibubi.create:create-1.18.2:0.5.0.e-196:all")
+    implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-1.18.2:0.6.8.a-99")
+    implementation fg.deobf("com.simibubi.create:create-1.18.2:0.5.0.h-243:all")
     implementation fg.deobf("mekanism:Mekanism:1.18.2-10.2.5.465")
-    implementation fg.deobf("codechicken:CodeChickenLib:1.18.2-4.1.2.479:universal")
+    implementation fg.deobf("codechicken:CodeChickenLib:1.18.2-4.1.2.475:universal")
 
     //JitPack
 
