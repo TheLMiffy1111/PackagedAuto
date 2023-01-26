@@ -37,9 +37,8 @@ public class FluidRenderer {
 	}
 
 	private static TextureAtlasSprite getStillFluidSprite(FluidStack fluidStack) {
-		Minecraft minecraft = Minecraft.getInstance();
 		ResourceLocation fluidStill = IClientFluidTypeExtensions.of(fluidStack.getFluid()).getStillTexture(fluidStack);
-		return minecraft.getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidStill);
+		return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidStill);
 	}
 
 	private static void setGLColorFromInt(int color) {
@@ -80,13 +79,10 @@ public class FluidRenderer {
 	}
 
 	private void drawFluid(PoseStack poseStack, int xPosition, int yPosition, FluidStack fluidStack, int capacity) {
-		if(capacity <= 0 || fluidStack == null) {
+		if(capacity <= 0 || fluidStack == null || fluidStack.isEmpty()) {
 			return;
 		}
 		Fluid fluid = fluidStack.getFluid();
-		if(fluid == null) {
-			return;
-		}
 		TextureAtlasSprite fluidStillSprite = getStillFluidSprite(fluidStack);
 		int fluidColor = IClientFluidTypeExtensions.of(fluid).getTintColor(fluidStack);
 		int amount = fluidStack.getAmount();
