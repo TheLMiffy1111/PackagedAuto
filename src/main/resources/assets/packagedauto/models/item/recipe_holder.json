@@ -1,7 +1,7 @@
 {
     "parent": "item/generated",
     "textures": {
-        "layer0": "packagedauto:items/recipe_holder"
+        "layer0": "packagedauto:item/recipe_holder"
     },
     "overrides": [
         {

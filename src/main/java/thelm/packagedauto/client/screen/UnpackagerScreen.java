@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -59,19 +59,22 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		if(mouseX-leftPos >= 10 && mouseY-topPos >= 10 && mouseX-leftPos <= 21 && mouseY-topPos <= 49) {
 			renderTooltip(poseStack, Component.literal(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
 		}
-		for(GuiEventListener child : children()) {
-			if(child.isMouseOver(mouseX, mouseY) && child instanceof AbstractWidget button) {
-				button.renderToolTip(poseStack, mouseX-leftPos, mouseY-topPos);
-				break;
-			}
-		}
 		super.renderLabels(poseStack, mouseX, mouseY);
 	}
 
 	class ButtonChangeBlocking extends AbstractWidget {
 
+		private static final Tooltip TRUE_TOOLTIP = Tooltip.create(Component.translatable("block.packagedauto.unpackager.blocking.true"));
+		private static final Tooltip FALSE_TOOLTIP = Tooltip.create(Component.translatable("block.packagedauto.unpackager.blocking.false"));
+
 		public ButtonChangeBlocking(int x, int y) {
 			super(x, y, 16, 18, Component.empty());
+		}
+
+		@Override
+		public void render(PoseStack pPoseStack, int pMouseX, int pMouseY, float pPartialTick) {
+			setTooltip(menu.blockEntity.blocking ? TRUE_TOOLTIP : FALSE_TOOLTIP);
+			super.render(pPoseStack, pMouseX, pMouseY, pPartialTick);
 		}
 
 		@Override
@@ -79,12 +82,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, BACKGROUND);
-			blit(poseStack, x+1, y+2, 176, menu.blockEntity.blocking ? 64 : 50, 14, 14);
-		}
-
-		@Override
-		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
-			renderTooltip(poseStack, Component.translatable("block.packagedauto.unpackager.blocking."+menu.blockEntity.blocking), mouseX, mouseY);
+			blit(poseStack, getX()+1, getY()+2, 176, menu.blockEntity.blocking ? 64 : 50, 14, 14);
 		}
 
 		@Override
@@ -94,7 +92,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 
 		}
 	}

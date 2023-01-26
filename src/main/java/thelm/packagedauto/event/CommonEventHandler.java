@@ -1,11 +1,15 @@
 package thelm.packagedauto.event;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -58,7 +62,7 @@ public class CommonEventHandler {
 		MinecraftForge.EVENT_BUS.addListener(this::onServerAboutToStart);
 		PackagedAutoConfig.registerConfig();
 
-		DeferredRegister<Block> blockRegister = DeferredRegister.create(Registry.BLOCK_REGISTRY, "packagedauto");
+		DeferredRegister<Block> blockRegister = DeferredRegister.create(Registries.BLOCK, "packagedauto");
 		blockRegister.register(modEventBus);
 		blockRegister.register("encoder", ()->EncoderBlock.INSTANCE);
 		blockRegister.register("packager", ()->PackagerBlock.INSTANCE);
@@ -67,7 +71,7 @@ public class CommonEventHandler {
 		blockRegister.register("crafter", ()->CrafterBlock.INSTANCE);
 		blockRegister.register("fluid_package_filler", ()->FluidPackageFillerBlock.INSTANCE);
 
-		DeferredRegister<Item> itemRegister = DeferredRegister.create(Registry.ITEM_REGISTRY, "packagedauto");
+		DeferredRegister<Item> itemRegister = DeferredRegister.create(Registries.ITEM, "packagedauto");
 		itemRegister.register(modEventBus);
 		itemRegister.register("encoder", ()->EncoderBlock.ITEM_INSTANCE);
 		itemRegister.register("packager", ()->PackagerBlock.ITEM_INSTANCE);
@@ -81,7 +85,7 @@ public class CommonEventHandler {
 		itemRegister.register("package_component", ()->MiscItem.PACKAGE_COMPONENT);
 		itemRegister.register("me_package_component", ()->MiscItem.ME_PACKAGE_COMPONENT);
 
-		DeferredRegister<BlockEntityType<?>> blockEntityRegister = DeferredRegister.create(Registry.BLOCK_ENTITY_TYPE_REGISTRY, "packagedauto");
+		DeferredRegister<BlockEntityType<?>> blockEntityRegister = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, "packagedauto");
 		blockEntityRegister.register(modEventBus);
 		blockEntityRegister.register("encoder", ()->EncoderBlockEntity.TYPE_INSTANCE);
 		blockEntityRegister.register("packager", ()->PackagerBlockEntity.TYPE_INSTANCE);
@@ -90,7 +94,7 @@ public class CommonEventHandler {
 		blockEntityRegister.register("crafter", ()->CrafterBlockEntity.TYPE_INSTANCE);
 		blockEntityRegister.register("fluid_package_filler", ()->FluidPackageFillerBlockEntity.TYPE_INSTANCE);
 
-		DeferredRegister<MenuType<?>> menuRegister = DeferredRegister.create(Registry.MENU_REGISTRY, "packagedauto");
+		DeferredRegister<MenuType<?>> menuRegister = DeferredRegister.create(Registries.MENU, "packagedauto");
 		menuRegister.register(modEventBus);
 		menuRegister.register("encoder", ()->EncoderMenu.TYPE_INSTANCE);
 		menuRegister.register("packager", ()->PackagerMenu.TYPE_INSTANCE);
@@ -109,6 +113,27 @@ public class CommonEventHandler {
 		ApiImpl.INSTANCE.registerRecipeType(CraftingPackageRecipeType.INSTANCE);
 
 		PacketHandler.registerPackets();
+	}
+
+	@SubscribeEvent
+	public void onCreativeModeTabRegister(CreativeModeTabEvent.Register event) {
+		event.registerCreativeModeTab(new ResourceLocation("packagedauto:tab"), builder->{
+			builder.
+			title(Component.translatable("itemGroup.packagedauto")).
+			icon(()->new ItemStack(PackageItem.INSTANCE)).
+			displayItems((enabledFeatures, output, displayOperatorCreativeTab)->{
+				output.accept(EncoderBlock.ITEM_INSTANCE);
+				output.accept(PackagerBlock.ITEM_INSTANCE);
+				output.accept(PackagerExtensionBlock.ITEM_INSTANCE);
+				output.accept(UnpackagerBlock.ITEM_INSTANCE);
+				output.accept(CrafterBlock.ITEM_INSTANCE);
+				output.accept(FluidPackageFillerBlock.ITEM_INSTANCE);
+				output.accept(RecipeHolderItem.INSTANCE);
+				output.accept(MiscItem.PACKAGE_COMPONENT);
+				output.accept(MiscItem.ME_PACKAGE_COMPONENT);
+			}).
+			build();
+		});
 	}
 
 	@SubscribeEvent

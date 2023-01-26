@@ -4,11 +4,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import thelm.packagedauto.block.entity.PackagerBlockEntity;
 import thelm.packagedauto.menu.PackagerExtensionMenu;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.ChangePackagingPacket;
@@ -48,19 +49,23 @@ public class PackagerExtensionScreen extends BaseScreen<PackagerExtensionMenu> {
 		if(mouseX-leftPos >= 10 && mouseY-topPos >= 10 && mouseX-leftPos <= 21 && mouseY-topPos <= 49) {
 			renderTooltip(poseStack, Component.literal(menu.blockEntity.getEnergyStorage().getEnergyStored()+" / "+menu.blockEntity.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
 		}
-		for(GuiEventListener child : children()) {
-			if(child.isMouseOver(mouseX, mouseY) && child instanceof AbstractWidget button) {
-				button.renderToolTip(poseStack, mouseX-leftPos, mouseY-topPos);
-				break;
-			}
-		}
 		super.renderLabels(poseStack, mouseX, mouseY);
 	}
 
 	class ButtonChangePackaging extends AbstractWidget {
 
+		private static final Tooltip EXACT_TOOLTIP = Tooltip.create(PackagerBlockEntity.Mode.EXACT.getTooltip());
+		private static final Tooltip DISJOINT_TOOLTIP = Tooltip.create(PackagerBlockEntity.Mode.DISJOINT.getTooltip());
+		private static final Tooltip FIRST_TOOLTIP = Tooltip.create(PackagerBlockEntity.Mode.FIRST.getTooltip());
+
 		public ButtonChangePackaging(int x, int y) {
 			super(x, y, 16, 18, Component.empty());
+		}
+
+		@Override
+		public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+			setTooltip(getTooltip());
+			super.render(poseStack, mouseX, mouseY, partialTick);
 		}
 
 		@Override
@@ -68,12 +73,7 @@ public class PackagerExtensionScreen extends BaseScreen<PackagerExtensionMenu> {
 			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, BACKGROUND);
-			blit(poseStack, x+1, y+2, 176, 56+14*menu.blockEntity.mode.ordinal(), 14, 14);
-		}
-
-		@Override
-		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
-			renderTooltip(poseStack, menu.blockEntity.mode.getTooltip(), mouseX, mouseY);
+			blit(poseStack, getX()+1, getY()+2, 176, 56+14*menu.blockEntity.mode.ordinal(), 14, 14);
 		}
 
 		@Override
@@ -83,8 +83,16 @@ public class PackagerExtensionScreen extends BaseScreen<PackagerExtensionMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 
+		}
+
+		private Tooltip getTooltip() {
+			return switch(menu.blockEntity.mode) {
+			case EXACT -> EXACT_TOOLTIP;
+			case DISJOINT -> DISJOINT_TOOLTIP;
+			case FIRST -> FIRST_TOOLTIP;
+			};
 		}
 	}
 }

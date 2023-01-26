@@ -4,7 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Vec3i;
@@ -78,12 +78,6 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		String str = menu.patternItemHandler.recipeType.getShortDisplayName().getString();
 		font.draw(poseStack, str, 212 - font.width(str)/2, 64, 0x404040);
 		super.renderLabels(poseStack, mouseX, mouseY);
-		for(GuiEventListener child : children()) {
-			if(child.isMouseOver(mouseX, mouseY) && child instanceof AbstractWidget button) {
-				button.renderToolTip(poseStack, mouseX-leftPos, mouseY-topPos);
-				break;
-			}
-		}
 	}
 
 	class ButtonPatternSlot extends AbstractWidget {
@@ -93,6 +87,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		ButtonPatternSlot(int id, int x, int y) {
 			super(x, y, 18, 18, Component.empty());
 			this.id = id;
+			setTooltip(Tooltip.create(Component.translatable("block.packagedauto.encoder.pattern_slot", String.format("%02d", id))));
 		}
 
 		@Override
@@ -110,15 +105,10 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 				ItemStack stack = menu.blockEntity.patternItemHandlers[id].getStackInSlot(i);
 				if(!stack.isEmpty()) {
 					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-					minecraft.getItemRenderer().renderGuiItem(stack, x+1, y+1);
+					minecraft.getItemRenderer().renderGuiItem(stack, getX()+1, getY()+1);
 					break;
 				}
 			}
-		}
-
-		@Override
-		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
-			renderTooltip(poseStack, Component.translatable("block.packagedauto.encoder.pattern_slot", String.format("%02d", id)), mouseX, mouseY);
 		}
 
 		@Override
@@ -129,7 +119,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 
 		}
 	}
@@ -138,6 +128,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
 		ButtonRecipeType(int x, int y) {
 			super(x, y, 18, 18, Component.empty());
+			setTooltip(Tooltip.create(Component.translatable("block.packagedauto.encoder.change_recipe_type")));
 		}
 
 		@Override
@@ -149,18 +140,13 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 				if(rep instanceof TextureAtlasSprite sprite) {
 					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 					RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-					blit(poseStack, x+1, y+1, 0, 16, 16, sprite);
+					blit(poseStack, getX()+1, getY()+1, 0, 16, 16, sprite);
 				}
 				if(rep instanceof ItemStack stack) {
 					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-					minecraft.getItemRenderer().renderGuiItem(stack, x+1, y+1);
+					minecraft.getItemRenderer().renderGuiItem(stack, getX()+1, getY()+1);
 				}
 			}
-		}
-
-		@Override
-		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
-			renderTooltip(poseStack, Component.translatable("block.packagedauto.encoder.change_recipe_type"), mouseX, mouseY);
 		}
 
 		@Override
@@ -172,22 +158,23 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 
 		}
 	}
 
 	class ButtonSavePatterns extends AbstractWidget {
 
+		private static final Tooltip TOOLTIP = Tooltip.create(Component.translatable("block.packagedauto.encoder.save_single"));
+
 		ButtonSavePatterns(int x, int y, Component text) {
 			super(x, y, 38, 18, text);
 		}
 
 		@Override
-		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
-			if(hasShiftDown()) {
-				renderTooltip(poseStack, Component.translatable("block.packagedauto.encoder.save_single"), mouseX, mouseY);
-			}
+		public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTick) {
+			setTooltip(hasShiftDown() ? TOOLTIP : null);
+			super.render(poseStack, mouseX, mouseY, partialTick);
 		}
 
 		@Override
@@ -197,7 +184,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 
 		}
 	}
@@ -216,7 +203,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
 
 		}
 	}

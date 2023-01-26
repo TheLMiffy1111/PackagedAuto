@@ -17,7 +17,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
-import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
@@ -26,7 +25,7 @@ import thelm.packagedauto.block.entity.UnpackagerBlockEntity.PackageTracker;
 public class UnpackagerBlock extends BaseBlock {
 
 	public static final UnpackagerBlock INSTANCE = new UnpackagerBlock();
-	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.CREATIVE_TAB));
+	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties());
 
 	protected UnpackagerBlock() {
 		super(BlockBehaviour.Properties.of(Material.METAL).strength(15F, 25F).sound(SoundType.METAL));

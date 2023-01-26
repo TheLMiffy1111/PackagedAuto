@@ -1,8 +1,8 @@
 {
     "parent": "block/cube_bottom_top",
     "textures": {
-        "side": "packagedauto:blocks/unpackager_side",
-        "top": "packagedauto:blocks/unpackager_top",
-        "bottom": "packagedauto:blocks/machine_bottom"
+        "side": "packagedauto:block/unpackager_side",
+        "top": "packagedauto:block/unpackager_top",
+        "bottom": "packagedauto:block/machine_bottom"
     }
 }

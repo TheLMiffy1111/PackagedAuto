@@ -12,14 +12,13 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Material;
-import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 import thelm.packagedauto.block.entity.FluidPackageFillerBlockEntity;
 
 public class FluidPackageFillerBlock extends BaseBlock {
 
 	public static final FluidPackageFillerBlock INSTANCE = new FluidPackageFillerBlock();
-	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.CREATIVE_TAB));
+	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties());
 
 	protected FluidPackageFillerBlock() {
 		super(BlockBehaviour.Properties.of(Material.METAL).strength(15F, 25F).sound(SoundType.METAL));

@@ -12,7 +12,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
-import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeList;
 import thelm.packagedauto.api.IPackageRecipeListItem;
@@ -25,7 +24,7 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 	public static final RecipeHolderItem INSTANCE = new RecipeHolderItem();
 
 	protected RecipeHolderItem() {
-		super(new Item.Properties().tab(PackagedAuto.CREATIVE_TAB));
+		super(new Item.Properties());
 	}
 
 	@Override
