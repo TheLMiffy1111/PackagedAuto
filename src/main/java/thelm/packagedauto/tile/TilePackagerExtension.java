@@ -92,7 +92,6 @@ public class TilePackagerExtension extends TileBase implements IGridHost, IActio
 			if(isWorking) {
 				tickProcess();
 				if(remainingProgress <= 0 && isInputValid()) {
-					energyStorage.receiveEnergy(Math.abs(remainingProgress), false);
 					finishProcess();
 					if(hostHelper != null && hostHelper.isActive() && inventory.getStackInSlot(9) != null) {
 						hostHelper.ejectItem();
@@ -246,7 +245,7 @@ public class TilePackagerExtension extends TileBase implements IGridHost, IActio
 	}
 
 	protected void tickProcess() {
-		int energy = energyStorage.extractEnergy(energyUsage, false);
+		int energy = energyStorage.extractEnergy(Math.min(energyUsage, remainingProgress), false);
 		remainingProgress -= energy;
 	}
 
