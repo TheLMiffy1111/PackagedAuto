@@ -46,7 +46,7 @@ repositories {
     }
 }
 
-version = "1.12.2-1.0.6.23"
+version = "1.12.2-1.0.6.24"
 group = "thelm.packagedauto"
 archivesBaseName = "PackagedAuto"
 
@@ -67,8 +67,8 @@ minecraft {
 dependencies {
     deobfCompile "mezz.jei:jei_1.12.2:4.16.1.302"
     deobfCompile "codechicken:CodeChickenLib:1.12.2-3.2.3.358:universal"
-    deobfCompile "CraftTweaker2:CraftTweaker2-API:4.1.20.675"
-    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.675"
+    deobfCompile "CraftTweaker2:CraftTweaker2-API:4.1.20.683"
+    deobfCompile "CraftTweaker2:CraftTweaker2-MC1120-Main:1.12-4.1.20.683"
     deobfCompile("morph.avaritia:Avaritia:1.12.2-3.3.0.33:universal") {
         transitive = false
     }

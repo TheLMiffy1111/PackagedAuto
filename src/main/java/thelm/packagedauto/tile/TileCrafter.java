@@ -70,7 +70,6 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 			if(isWorking) {
 				tickProcess();
 				if(remainingProgress <= 0) {
-					energyStorage.receiveEnergy(Math.abs(remainingProgress), false);
 					finishProcess();
 					if(hostHelper != null && hostHelper.isActive()) {
 						hostHelper.ejectItem();
@@ -122,7 +121,7 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 	}
 
 	protected void tickProcess() {
-		int energy = energyStorage.extractEnergy(energyUsage, false);
+		int energy = energyStorage.extractEnergy(Math.min(energyUsage, remainingProgress), false);
 		remainingProgress -= energy;
 	}
 
