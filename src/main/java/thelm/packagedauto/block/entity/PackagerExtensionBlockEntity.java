@@ -79,7 +79,6 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 			if(isWorking) {
 				tickProcess();
 				if(remainingProgress <= 0 && isInputValid()) {
-					energyStorage.receiveEnergy(Math.abs(remainingProgress), false);
 					finishProcess();
 					if(!itemHandler.getStackInSlot(9).isEmpty()) {
 						ejectItem();
@@ -213,7 +212,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	}
 
 	protected void tickProcess() {
-		int energy = energyStorage.extractEnergy(energyUsage, false);
+		int energy = energyStorage.extractEnergy(Math.min(energyUsage, remainingProgress), false);
 		remainingProgress -= energy;
 	}
 

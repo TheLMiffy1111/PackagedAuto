@@ -63,7 +63,6 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 			if(isWorking) {
 				tickProcess();
 				if(remainingProgress <= 0 && isTemplateValid()) {
-					energyStorage.receiveEnergy(Math.abs(remainingProgress), false);
 					finishProcess();
 					if(!itemHandler.getStackInSlot(1).isEmpty()) {
 						ejectItem();
@@ -144,8 +143,8 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 				}
 			}
 		}
-		else {
-			int energy = energyStorage.extractEnergy(energyUsage, false);
+		if(amount >= requiredAmount) {
+			int energy = energyStorage.extractEnergy(Math.min(energyUsage, remainingProgress), false);
 			remainingProgress -= energy;
 		}
 	}
