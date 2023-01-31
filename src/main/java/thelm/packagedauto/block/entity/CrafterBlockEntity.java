@@ -63,7 +63,6 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 			if(isWorking) {
 				tickProcess();
 				if(remainingProgress <= 0) {
-					energyStorage.receiveEnergy(Math.abs(remainingProgress), false);
 					finishProcess();
 					ejectItems();
 				}
@@ -101,7 +100,7 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 	}
 
 	protected void tickProcess() {
-		int energy = energyStorage.extractEnergy(energyUsage, false);
+		int energy = energyStorage.extractEnergy(Math.min(energyUsage, remainingProgress), false);
 		remainingProgress -= energy;
 	}
 
