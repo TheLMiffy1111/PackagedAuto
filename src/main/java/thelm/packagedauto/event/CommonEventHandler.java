@@ -117,23 +117,22 @@ public class CommonEventHandler {
 
 	@SubscribeEvent
 	public void onCreativeModeTabRegister(CreativeModeTabEvent.Register event) {
-		event.registerCreativeModeTab(new ResourceLocation("packagedauto:tab"), builder->{
-			builder.
-			title(Component.translatable("itemGroup.packagedauto")).
-			icon(()->new ItemStack(PackageItem.INSTANCE)).
-			displayItems((enabledFeatures, output, displayOperatorCreativeTab)->{
-				output.accept(EncoderBlock.ITEM_INSTANCE);
-				output.accept(PackagerBlock.ITEM_INSTANCE);
-				output.accept(PackagerExtensionBlock.ITEM_INSTANCE);
-				output.accept(UnpackagerBlock.ITEM_INSTANCE);
-				output.accept(CrafterBlock.ITEM_INSTANCE);
-				output.accept(FluidPackageFillerBlock.ITEM_INSTANCE);
-				output.accept(RecipeHolderItem.INSTANCE);
-				output.accept(MiscItem.PACKAGE_COMPONENT);
-				output.accept(MiscItem.ME_PACKAGE_COMPONENT);
-			}).
-			build();
-		});
+		event.registerCreativeModeTab(new ResourceLocation("packagedauto:tab"),
+				builder->builder.
+				title(Component.translatable("itemGroup.packagedauto")).
+				icon(()->new ItemStack(PackageItem.INSTANCE)).
+				displayItems((enabledFeatures, output, displayOperatorCreativeTab)->{
+					output.accept(EncoderBlock.ITEM_INSTANCE);
+					output.accept(PackagerBlock.ITEM_INSTANCE);
+					output.accept(PackagerExtensionBlock.ITEM_INSTANCE);
+					output.accept(UnpackagerBlock.ITEM_INSTANCE);
+					output.accept(CrafterBlock.ITEM_INSTANCE);
+					output.accept(FluidPackageFillerBlock.ITEM_INSTANCE);
+					output.accept(RecipeHolderItem.INSTANCE);
+					output.accept(MiscItem.PACKAGE_COMPONENT);
+					output.accept(MiscItem.ME_PACKAGE_COMPONENT);
+				}).
+				build());
 	}
 
 	@SubscribeEvent

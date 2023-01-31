@@ -25,9 +25,9 @@ buildscript {
 }
 
 apply plugin: "net.minecraftforge.gradle"
+apply plugin: "org.parchmentmc.librarian.forgegradle"
 apply plugin: "eclipse"
 apply plugin: "maven-publish"
-apply plugin: "org.parchmentmc.librarian.forgegradle"
 
 repositories {
     jcenter()
@@ -64,7 +64,7 @@ sourceSets {
     main
 }
 
-version = "3.3.0.0"
+version = "3.3.0.1"
 group = "thelm.packagedauto"
 archivesBaseName = "PackagedAuto-1.19.3"
 
