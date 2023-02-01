@@ -9,6 +9,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.translation.I18n;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import thelm.packagedauto.api.IRecipeInfo;
@@ -37,6 +38,14 @@ public class TileEncoder extends TileBase {
 	@Override
 	protected String getLocalizedName() {
 		return I18n.translateToLocal("tile.packagedauto.encoder.name");
+	}
+
+	@Override
+	public void setWorld(World world) {
+		super.setWorld(world);
+		for(InventoryEncoderPattern inv : patternInventories) {
+			inv.updateRecipeInfo();
+		}
 	}
 
 	@Override
