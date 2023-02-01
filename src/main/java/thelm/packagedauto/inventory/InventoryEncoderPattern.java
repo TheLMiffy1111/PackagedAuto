@@ -31,7 +31,7 @@ public class InventoryEncoderPattern extends InventoryBase {
 	public void setInventorySlotContents(int index, ItemStack stack) {
 		super.setInventorySlotContents(index, stack);
 		//maybe add check to see where this is called
-		updateRecipeInfo();
+		updateRecipeInfo(true);
 	}
 
 	@Override
@@ -39,7 +39,7 @@ public class InventoryEncoderPattern extends InventoryBase {
 		super.readFromNBT(nbt);
 		recipeType = ApiImpl.INSTANCE.getRecipeType(nbt.getString("RecipeType"));
 		validateRecipeType();
-		updateRecipeInfo();
+		updateRecipeInfo(false);
 	}
 
 	@Override
@@ -65,7 +65,7 @@ public class InventoryEncoderPattern extends InventoryBase {
 		}
 	}
 
-	public void updateRecipeInfo() {
+	public void updateRecipeInfo(boolean mark) {
 		validateRecipeType();
 		IPackageRecipeInfo info = recipeType.getNewRecipeInfo();
 		info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), tile.getWorldObj());
@@ -95,8 +95,10 @@ public class InventoryEncoderPattern extends InventoryBase {
 				for(int i = 0; i < patterns.size() && i < 9; ++i) {
 					stacks.set(90+i, patterns.get(i).getOutput().copy());
 				}
-				syncTile();
-				markDirty();
+				if(mark) {
+					syncTile();
+					markDirty();
+				}
 			}
 		}
 		else if(recipeInfo != null) {
@@ -109,8 +111,10 @@ public class InventoryEncoderPattern extends InventoryBase {
 			for(int i = 90; i < 99; ++i) {
 				stacks.set(i, null);
 			}
-			syncTile();
-			markDirty();
+			if(mark) {
+				syncTile();
+				markDirty();
+			}
 		}
 	}
 
@@ -124,7 +128,7 @@ public class InventoryEncoderPattern extends InventoryBase {
 				stacks.set(i, null);
 			}
 		}
-		updateRecipeInfo();
+		updateRecipeInfo(true);
 		for(InventoryEncoderPattern patternInventory : tile.patternInventories) {
 			if(patternInventory != this) {
 				patternInventory.setRecipeTypeIfEmpty(recipeType);
@@ -136,7 +140,7 @@ public class InventoryEncoderPattern extends InventoryBase {
 		if(stacks.stream().allMatch(Objects::isNull)) {
 			this.recipeType = recipeType;
 			validateRecipeType();
-			updateRecipeInfo();
+			updateRecipeInfo(true);
 		}
 	}
 
@@ -154,6 +158,6 @@ public class InventoryEncoderPattern extends InventoryBase {
 				stacks.set(entry.getKey(), entry.getValue());
 			}
 		}
-		updateRecipeInfo();
+		updateRecipeInfo(true);
 	}
 }

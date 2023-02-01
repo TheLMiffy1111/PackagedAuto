@@ -49,7 +49,7 @@ public class TileEncoder extends TileBase {
 	public void setWorldObj(World world) {
 		super.setWorldObj(world);
 		for(InventoryEncoderPattern inv : patternInventories) {
-			inv.updateRecipeInfo();
+			inv.updateRecipeInfo(false);
 		}
 	}
 

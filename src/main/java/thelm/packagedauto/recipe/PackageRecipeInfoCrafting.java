@@ -102,24 +102,26 @@ public class PackageRecipeInfoCrafting implements IPackageRecipeInfoCrafting {
 		recipe = null;
 		this.input.clear();
 		patterns.clear();
-		int[] slotArray = PackageRecipeTypeCrafting.SLOTS.stream().mapToInt(Integer::intValue).toArray();
-		for(int i = 0; i < 9; ++i) {
-			ItemStack toSet = input.get(slotArray[i]);
-			if(toSet != null) {
-				toSet.stackSize = 1;
-				matrix.setInventorySlotContents(i, toSet.copy());
+		if(world != null) {
+			int[] slotArray = PackageRecipeTypeCrafting.SLOTS.stream().mapToInt(Integer::intValue).toArray();
+			for(int i = 0; i < 9; ++i) {
+				ItemStack toSet = input.get(slotArray[i]);
+				if(toSet != null) {
+					toSet.stackSize = 1;
+					matrix.setInventorySlotContents(i, toSet.copy());
+				}
 			}
-		}
-		IRecipe recipe = ((List<IRecipe>)CraftingManager.getInstance().getRecipeList()).stream().
-				filter(rec->rec.matches(matrix, world)).findFirst().orElse(null);
-		if(recipe != null) {
-			this.recipe = recipe;
-			this.input.addAll(MiscHelper.INSTANCE.condenseStacks(matrix));
-			this.output = recipe.getCraftingResult(matrix).copy();
-			for(int i = 0; i*9 < this.input.size(); ++i) {
-				patterns.add(new PackagePattern(this, i));
+			IRecipe recipe = ((List<IRecipe>)CraftingManager.getInstance().getRecipeList()).stream().
+					filter(rec->rec.matches(matrix, world)).findFirst().orElse(null);
+			if(recipe != null) {
+				this.recipe = recipe;
+				this.input.addAll(MiscHelper.INSTANCE.condenseStacks(matrix));
+				this.output = recipe.getCraftingResult(matrix).copy();
+				for(int i = 0; i*9 < this.input.size(); ++i) {
+					patterns.add(new PackagePattern(this, i));
+				}
+				return;
 			}
-			return;
 		}
 		for(int i = 0; i < 9; ++i) {
 			matrix.setInventorySlotContents(i, null);
