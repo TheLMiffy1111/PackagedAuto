@@ -107,21 +107,23 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 		recipe = null;
 		this.input.clear();
 		patterns.clear();
-		int[] slotArray = CraftingPackageRecipeType.SLOTS.toIntArray();
-		for(int i = 0; i < 9; ++i) {
-			ItemStack toSet = input.get(slotArray[i]);
-			toSet.setCount(1);
-			matrix.setItem(i, toSet.copy());
-		}
-		Recipe recipe = MiscHelper.INSTANCE.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, matrix, level).orElse(null);
-		if(recipe != null) {
-			this.recipe = recipe;
-			this.input.addAll(MiscHelper.INSTANCE.condenseStacks(matrix));
-			this.output = recipe.assemble(matrix).copy();
-			for(int i = 0; i*9 < this.input.size(); ++i) {
-				patterns.add(new PackagePattern(this, i));
+		if(level != null) {
+			int[] slotArray = CraftingPackageRecipeType.SLOTS.toIntArray();
+			for(int i = 0; i < 9; ++i) {
+				ItemStack toSet = input.get(slotArray[i]);
+				toSet.setCount(1);
+				matrix.setItem(i, toSet.copy());
 			}
-			return;
+			Recipe recipe = MiscHelper.INSTANCE.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, matrix, level).orElse(null);
+			if(recipe != null) {
+				this.recipe = recipe;
+				this.input.addAll(MiscHelper.INSTANCE.condenseStacks(matrix));
+				this.output = recipe.assemble(matrix).copy();
+				for(int i = 0; i*9 < this.input.size(); ++i) {
+					patterns.add(new PackagePattern(this, i));
+				}
+				return;
+			}
 		}
 		matrix.clearContent();
 	}
