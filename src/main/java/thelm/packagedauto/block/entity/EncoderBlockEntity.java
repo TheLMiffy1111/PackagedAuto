@@ -51,7 +51,7 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 	public void setLevel(Level level) {
 		super.setLevel(level);
 		for(EncoderPatternItemHandler inv : patternItemHandlers) {
-			inv.updateRecipeInfo();
+			inv.updateRecipeInfo(false);
 		}
 	}
 
