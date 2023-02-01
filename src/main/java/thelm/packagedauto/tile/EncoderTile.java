@@ -50,7 +50,7 @@ public class EncoderTile extends BaseTile {
 	public void setWorldAndPos(World world, BlockPos pos) {
 		super.setWorldAndPos(world, pos);
 		for(EncoderPatternItemHandler inv : patternItemHandlers) {
-			inv.updateRecipeInfo();
+			inv.updateRecipeInfo(false);
 		}
 	}
 
