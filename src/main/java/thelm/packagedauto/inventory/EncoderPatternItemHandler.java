@@ -29,7 +29,7 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 	@Override
 	public void onContentsChanged(int slot) {
 		//maybe add check to see where this is called
-		updateRecipeInfo();
+		updateRecipeInfo(true);
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 		super.load(nbt);
 		recipeType = ApiImpl.INSTANCE.getRecipeType(new ResourceLocation(nbt.getString("RecipeType")));
 		validateRecipeType();
-		updateRecipeInfo();
+		updateRecipeInfo(false);
 	}
 
 	@Override
@@ -62,7 +62,7 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 		}
 	}
 
-	public void updateRecipeInfo() {
+	public void updateRecipeInfo(boolean mark) {
 		validateRecipeType();
 		IPackageRecipeInfo info = recipeType.getNewRecipeInfo();
 		info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : List.of(), blockEntity.getLevel());
@@ -86,8 +86,10 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 				for(int i = 0; i < patterns.size() && i < 9; ++i) {
 					stacks.set(90+i, patterns.get(i).getOutput().copy());
 				}
-				sync(false);
-				setChanged();
+				if(mark) {
+					sync(false);
+					setChanged();
+				}
 			}
 		}
 		else if(recipeInfo != null) {
@@ -100,8 +102,10 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 			for(int i = 90; i < 99; ++i) {
 				stacks.set(i, ItemStack.EMPTY);
 			}
-			sync(false);
-			setChanged();
+			if(mark) {
+				sync(false);
+				setChanged();
+			}
 		}
 	}
 
@@ -115,7 +119,7 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 				stacks.set(i, ItemStack.EMPTY);
 			}
 		}
-		updateRecipeInfo();
+		updateRecipeInfo(true);
 		for(EncoderPatternItemHandler patternItemHandler : blockEntity.patternItemHandlers) {
 			if(patternItemHandler != this) {
 				patternItemHandler.setRecipeTypeIfEmpty(recipeType);
@@ -127,7 +131,7 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 		if(stacks.stream().allMatch(ItemStack::isEmpty)) {
 			this.recipeType = recipeType;
 			validateRecipeType();
-			updateRecipeInfo();
+			updateRecipeInfo(true);
 		}
 	}
 
@@ -147,6 +151,6 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 				stacks.set(entry.getIntKey(), entry.getValue());
 			}
 		}
-		updateRecipeInfo();
+		updateRecipeInfo(true);
 	}
 }
