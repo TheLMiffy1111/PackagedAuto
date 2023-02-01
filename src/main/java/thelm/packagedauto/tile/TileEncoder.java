@@ -44,7 +44,7 @@ public class TileEncoder extends TileBase {
 	public void setWorld(World world) {
 		super.setWorld(world);
 		for(InventoryEncoderPattern inv : patternInventories) {
-			inv.updateRecipeInfo();
+			inv.updateRecipeInfo(false);
 		}
 	}
 

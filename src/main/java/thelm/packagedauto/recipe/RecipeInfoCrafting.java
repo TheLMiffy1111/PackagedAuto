@@ -108,21 +108,23 @@ public class RecipeInfoCrafting implements IRecipeInfoCrafting {
 		recipe = null;
 		this.input.clear();
 		patterns.clear();
-		int[] slotArray = RecipeTypeCrafting.SLOTS.toIntArray();
-		for(int i = 0; i < 9; ++i) {
-			ItemStack toSet = input.get(slotArray[i]);
-			toSet.setCount(1);
-			matrix.setInventorySlotContents(i, toSet.copy());
-		}
-		IRecipe recipe = CraftingManager.findMatchingRecipe(matrix, world);
-		if(recipe != null) {
-			this.recipe = recipe;
-			this.input.addAll(MiscUtil.condenseStacks(matrix));
-			this.output = recipe.getCraftingResult(matrix).copy();
-			for(int i = 0; i*9 < this.input.size(); ++i) {
-				patterns.add(new PatternHelper(this, i));
+		if(world != null) {
+			int[] slotArray = RecipeTypeCrafting.SLOTS.toIntArray();
+			for(int i = 0; i < 9; ++i) {
+				ItemStack toSet = input.get(slotArray[i]);
+				toSet.setCount(1);
+				matrix.setInventorySlotContents(i, toSet.copy());
 			}
-			return;
+			IRecipe recipe = CraftingManager.findMatchingRecipe(matrix, world);
+			if(recipe != null) {
+				this.recipe = recipe;
+				this.input.addAll(MiscUtil.condenseStacks(matrix));
+				this.output = recipe.getCraftingResult(matrix).copy();
+				for(int i = 0; i*9 < this.input.size(); ++i) {
+					patterns.add(new PatternHelper(this, i));
+				}
+				return;
+			}
 		}
 		matrix.clear();
 	}
