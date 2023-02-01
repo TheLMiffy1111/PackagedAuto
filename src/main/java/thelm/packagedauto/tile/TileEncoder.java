@@ -11,6 +11,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.StatCollector;
+import net.minecraft.world.World;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeList;
 import thelm.packagedauto.api.IPackageRecipeListItem;
@@ -42,6 +43,14 @@ public class TileEncoder extends TileBase {
 	@Override
 	public boolean canUpdate() {
 		return false;
+	}
+
+	@Override
+	public void setWorldObj(World world) {
+		super.setWorldObj(world);
+		for(InventoryEncoderPattern inv : patternInventories) {
+			inv.updateRecipeInfo();
+		}
 	}
 
 	@Override
