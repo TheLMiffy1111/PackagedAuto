@@ -9,8 +9,10 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeList;
 import thelm.packagedauto.api.IPackageRecipeListItem;
@@ -42,6 +44,14 @@ public class EncoderTile extends BaseTile {
 	@Override
 	protected ITextComponent getDefaultName() {
 		return new TranslationTextComponent("block.packagedauto.encoder");
+	}
+
+	@Override
+	public void setWorldAndPos(World world, BlockPos pos) {
+		super.setWorldAndPos(world, pos);
+		for(EncoderPatternItemHandler inv : patternItemHandlers) {
+			inv.updateRecipeInfo();
+		}
 	}
 
 	@Override
