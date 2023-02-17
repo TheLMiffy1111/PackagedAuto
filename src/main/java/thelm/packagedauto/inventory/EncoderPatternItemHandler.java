@@ -145,7 +145,9 @@ public class EncoderPatternItemHandler extends BaseItemHandler {
 
 	public void setRecipe(Int2ObjectMap<ItemStack> map) {
 		if(recipeType.canSetOutput()) {
-			stacks.clear();
+			for(int i = 0; i < 90; ++i) {
+				stacks.set(i, ItemStack.EMPTY);
+			}
 		}
 		else {
 			for(int i = 0; i < 81; ++i) {
