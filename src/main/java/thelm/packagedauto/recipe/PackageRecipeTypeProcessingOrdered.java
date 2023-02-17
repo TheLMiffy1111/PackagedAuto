@@ -1,9 +1,5 @@
 package thelm.packagedauto.recipe;
 
-import cpw.mods.fml.relauncher.Side;
-import cpw.mods.fml.relauncher.SideOnly;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 

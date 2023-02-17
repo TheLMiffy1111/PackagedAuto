@@ -13,13 +13,13 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import codechicken.nei.PositionedStack;
 import codechicken.nei.recipe.IRecipeHandler;
-import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Optional;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.StatCollector;
+import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.integration.nei.NEIHandler;
@@ -75,7 +75,7 @@ public class PackageRecipeTypeProcessing implements IPackageRecipeType {
 
 	@Override
 	public List<String> getNEICategories() {
-		return MiscHelper.INSTANCE.conditionalSupplier(()->Loader.isModLoaded("NotEnoughItems"),
+		return MiscHelper.INSTANCE.conditionalSupplier(()->PackagedAuto.proxy.neiLoaded,
 				()->()->NEIHandler.INSTANCE.getAllRecipeCategories(), ()->ArrayList<String>::new).get();
 	}
 

@@ -7,7 +7,6 @@ import java.util.TreeMap;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
-import net.minecraft.util.ResourceLocation;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.api.PackagedAutoApi;
 

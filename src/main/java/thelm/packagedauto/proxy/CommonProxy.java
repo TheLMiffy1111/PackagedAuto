@@ -17,7 +17,6 @@ import thelm.packagedauto.block.BlockPackager;
 import thelm.packagedauto.block.BlockPackagerExtension;
 import thelm.packagedauto.block.BlockUnpackager;
 import thelm.packagedauto.config.PackagedAutoConfig;
-import thelm.packagedauto.integration.nei.NEIHandler;
 import thelm.packagedauto.item.ItemMisc;
 import thelm.packagedauto.item.ItemPackage;
 import thelm.packagedauto.item.ItemRecipeHolder;
@@ -32,9 +31,10 @@ import thelm.packagedauto.tile.TilePackager;
 import thelm.packagedauto.tile.TilePackagerExtension;
 import thelm.packagedauto.tile.TileUnpackager;
 import thelm.packagedauto.util.ApiImpl;
-import thelm.packagedauto.util.MiscHelper;
 
 public class CommonProxy {
+
+	public boolean neiLoaded = false;
 
 	public void register(FMLPreInitializationEvent event) {
 		registerConfig(event);

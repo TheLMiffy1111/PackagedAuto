@@ -2,7 +2,6 @@ package thelm.packagedauto.inventory;
 
 import cofh.api.energy.IEnergyContainerItem;
 import net.minecraft.item.ItemStack;
-import net.minecraftforge.common.util.ForgeDirection;
 import thelm.packagedauto.tile.TileCrafter;
 
 public class InventoryCrafter extends InventoryBase {

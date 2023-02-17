@@ -1,28 +1,20 @@
 package thelm.packagedauto.client.gui;
 
 import java.awt.Color;
-import java.util.Collections;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
-import codechicken.nei.VisiblityData;
-import codechicken.nei.api.INEIGuiHandler;
-import codechicken.nei.api.TaggedInventoryArea;
-import cpw.mods.fml.common.Loader;
-import cpw.mods.fml.common.Optional;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.inventory.GuiContainer;
-import net.minecraft.client.renderer.OpenGlHelper;
 import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.texture.TextureMap;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
+import thelm.packagedauto.PackagedAuto;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.container.ContainerEncoder;
 import thelm.packagedauto.integration.nei.NEIHandler;
@@ -30,9 +22,7 @@ import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.PacketCycleRecipeType;
 import thelm.packagedauto.network.packet.PacketLoadRecipeList;
 import thelm.packagedauto.network.packet.PacketSaveRecipeList;
-import thelm.packagedauto.network.packet.PacketSetItemStack;
 import thelm.packagedauto.network.packet.PacketSetPatternIndex;
-import thelm.packagedauto.slot.SlotFalseCopy;
 import thelm.packagedauto.util.MiscHelper;
 
 public class GuiEncoder extends GuiBase<ContainerEncoder> {
@@ -61,7 +51,7 @@ public class GuiEncoder extends GuiBase<ContainerEncoder> {
 		buttonList.add(new GuiButtonRecipeType(0, guiLeft+204, guiTop+74));
 		buttonList.add(new GuiButtonSavePatterns(0, guiLeft+213, guiTop+16, StatCollector.translateToLocal("tile.packagedauto.encoder.save")));
 		buttonList.add(new GuiButtonLoadPatterns(0, guiLeft+213, guiTop+34, StatCollector.translateToLocal("tile.packagedauto.encoder.load")));
-		if(Loader.isModLoaded("NotEnoughItems")) {
+		if(PackagedAuto.proxy.neiLoaded) {
 			buttonList.add(new GuiButtonShowRecipesNEI(0, guiLeft+172, guiTop+129));
 		}
 	}
