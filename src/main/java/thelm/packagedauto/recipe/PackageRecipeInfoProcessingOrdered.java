@@ -108,9 +108,15 @@ public class PackageRecipeInfoProcessingOrdered implements IPackageRecipeInfo {
 				if(!ItemStack.areItemStacksEqual(input.get(i), other.input.get(i))) {
 					return false;
 				}
+				if(!ItemStack.areItemStackTagsEqual(input.get(i), other.input.get(i))) {
+					return false;
+				}
 			}
 			for(int i = 0; i < output.size(); ++i) {
 				if(!ItemStack.areItemStacksEqual(output.get(i), other.output.get(i))) {
+					return false;
+				}
+				if(!ItemStack.areItemStackTagsEqual(output.get(i), other.output.get(i))) {
 					return false;
 				}
 			}

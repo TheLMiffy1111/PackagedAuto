@@ -146,6 +146,9 @@ public class PackageRecipeInfoCrafting implements IPackageRecipeInfoCrafting {
 				if(!ItemStack.areItemStacksEqual(input.get(i), other.input.get(i))) {
 					return false;
 				}
+				if(!ItemStack.areItemStackTagsEqual(input.get(i), other.input.get(i))) {
+					return false;
+				}
 			}
 			return recipe.equals(other.recipe);
 		}

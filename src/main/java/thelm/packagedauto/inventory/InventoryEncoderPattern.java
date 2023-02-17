@@ -146,7 +146,9 @@ public class InventoryEncoderPattern extends InventoryBase {
 
 	public void setRecipe(Map<Integer, ItemStack> map) {
 		if(recipeType.canSetOutput()) {
-			Collections.fill(stacks, null);
+			for(int i = 0; i < 90; ++i) {
+				stacks.set(i, null);
+			}
 		}
 		else {
 			for(int i = 0; i < 81; ++i) {
