@@ -47,7 +47,7 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 	@Override
 	public void tick() {
 		super.tick();
-		if(drawMEEnergy && !world.isRemote && world.getGameTime() % 8 == 0 && getActionableNode().isActive()) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0 && getActionableNode().isActive()) {
 			chargeMEEnergy();
 		}
 	}
@@ -69,12 +69,12 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 
 	@Override
 	public void securityBreak() {
-		world.destroyBlock(pos, true);
+		level.destroyBlock(worldPosition, true);
 	}
 
 	@Override
 	public IGridNode getActionableNode() {
-		if(gridNode == null && world != null && !world.isRemote) {
+		if(gridNode == null && level != null && !level.isClientSide) {
 			gridNode = Api.instance().grid().createGridNode(gridBlock);
 			gridNode.setPlayerID(placerID);
 			gridNode.updateState();
@@ -87,25 +87,25 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 		if(!isBusy() && patternDetails instanceof PackageCraftingPatternDetails) {
 			PackageCraftingPatternDetails pattern = (PackageCraftingPatternDetails)patternDetails;
 			ItemStack slotStack = itemHandler.getStackInSlot(9);
-			ItemStack outputStack = pattern.pattern.getOutput();
-			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.areItemStackTagsEqual(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
+			ItemStack outset = pattern.pattern.getOutput();
+			if(slotStack.isEmpty() || slotStack.getItem() == outset.getItem() && ItemStack.tagMatches(slotStack, outset) && slotStack.getCount()+1 <= outset.getMaxStackSize()) {
 				currentPattern = pattern.pattern;
 				lockPattern = true;
-				for(int i = 0; i < table.getSizeInventory() && i < 9; ++i) {
-					itemHandler.setStackInSlot(i, table.getStackInSlot(i).copy());
+				for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
+					itemHandler.setStackInSlot(i, table.getItem(i).copy());
 				}
 				return true;
 			}
 		}
 		else if(!isBusy()) {
 			ItemStack slotStack = itemHandler.getStackInSlot(9);
-			ItemStack outputStack = patternDetails.getOutputs().get(0).createItemStack();
-			if(outputStack.getItem() instanceof IPackageItem && (slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.areItemStackTagsEqual(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize())) {
-				IPackageItem packageItem = (IPackageItem)outputStack.getItem();
-				currentPattern = packageItem.getRecipeInfo(outputStack).getPatterns().get(packageItem.getIndex(outputStack));
+			ItemStack outset = patternDetails.getOutputs().get(0).createItemStack();
+			if(outset.getItem() instanceof IPackageItem && (slotStack.isEmpty() || slotStack.getItem() == outset.getItem() && ItemStack.tagMatches(slotStack, outset) && slotStack.getCount()+1 <= outset.getMaxStackSize())) {
+				IPackageItem packageItem = (IPackageItem)outset.getItem();
+				currentPattern = packageItem.getRecipeInfo(outset).getPatterns().get(packageItem.getIndex(outset));
 				lockPattern = true;
-				for(int i = 0; i < table.getSizeInventory() && i < 9; ++i) {
-					itemHandler.setStackInSlot(i, table.getStackInSlot(i).copy());
+				for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
+					itemHandler.setStackInSlot(i, table.getItem(i).copy());
 				}
 				return true;
 			}
@@ -122,7 +122,7 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 	public void provideCrafting(ICraftingProviderHelper craftingTracker) {
 		ItemStack listStack = itemHandler.getStackInSlot(10);
 		for(IPackagePattern pattern : patternList) {
-			craftingTracker.addCraftingOption(this, new PackageCraftingPatternDetails(listStack, pattern).toAEInternal(world));
+			craftingTracker.addCraftingOption(this, new PackageCraftingPatternDetails(listStack, pattern).toAEInternal(level));
 		}
 	}
 
@@ -184,16 +184,16 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 	}
 
 	@Override
-	public void read(BlockState blockState, CompoundNBT nbt) {
-		super.read(blockState, nbt);
-		if(world != null && nbt.contains("Node")) {
+	public void load(BlockState blockState, CompoundNBT nbt) {
+		super.load(blockState, nbt);
+		if(level != null && nbt.contains("Node")) {
 			getActionableNode().loadFromNBT("Node", nbt);
 		}
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT nbt) {
-		super.write(nbt);
+	public CompoundNBT save(CompoundNBT nbt) {
+		super.save(nbt);
 		if(gridNode != null) {
 			gridNode.saveToNBT("Node", nbt);
 		}

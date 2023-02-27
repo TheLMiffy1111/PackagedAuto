@@ -26,8 +26,8 @@ public class CycleRecipeTypePacket {
 	public static void handle(CycleRecipeTypePacket pkt, Supplier<NetworkEvent.Context> ctx) {
 		ServerPlayerEntity player = ctx.get().getSender();
 		ctx.get().enqueueWork(()->{
-			if(player.openContainer instanceof EncoderContainer) {
-				EncoderContainer container = (EncoderContainer)player.openContainer;
+			if(player.containerMenu instanceof EncoderContainer) {
+				EncoderContainer container = (EncoderContainer)player.containerMenu;
 				container.patternItemHandler.cycleRecipeType(pkt.reverse);
 				container.setupSlots();
 			}

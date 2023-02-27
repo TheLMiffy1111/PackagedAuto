@@ -16,15 +16,15 @@ public class FalseCopySlot extends SlotItemHandler {
 	}
 
 	@Override
-	public boolean canTakeStack(PlayerEntity player) {
+	public boolean mayPickup(PlayerEntity player) {
 		return false;
 	}
 
 	@Override
-	public void putStack(ItemStack stack) {
-		if(!stack.isEmpty() && !isItemValid(stack)) {
+	public void set(ItemStack stack) {
+		if(!stack.isEmpty() && !mayPlace(stack)) {
 			return;
 		}
-		super.putStack(stack);
+		super.set(stack);
 	}
 }

@@ -25,36 +25,36 @@ public abstract class BaseScreen<C extends BaseContainer<?>> extends ContainerSc
 	public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		renderBackground(matrixStack);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
-		renderHoveredTooltip(matrixStack, mouseX, mouseY);
+		renderTooltip(matrixStack, mouseX, mouseY);
 	}
 
 	protected abstract ResourceLocation getBackgroundTexture();
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
+	protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
 		RenderSystem.color4f(1F, 1F, 1F, 1F);
-		minecraft.getTextureManager().bindTexture(getBackgroundTexture());
-		if(xSize > 256 || ySize > 256) {
-			blit(matrixStack, guiLeft, guiTop, 0, 0, xSize, ySize, 512, 512);
+		minecraft.getTextureManager().bind(getBackgroundTexture());
+		if(imageWidth > 256 || imageHeight > 256) {
+			blit(matrixStack, leftPos, topPos, 0, 0, imageWidth, imageHeight, 512, 512);
 		}
 		else {
-			blit(matrixStack, guiLeft, guiTop, 0, 0, xSize, ySize);
+			blit(matrixStack, leftPos, topPos, 0, 0, imageWidth, imageHeight);
 		}
 	}
 
 	@Override
-	protected void handleMouseClick(Slot slot, int slotId, int mouseButton, ClickType type) {
-		boolean valid = type != ClickType.QUICK_MOVE && minecraft.player.inventory.getItemStack().isEmpty();
-		if(valid && slot instanceof FalseCopySlot && slot.isEnabled()) {
-			if(!slot.getStack().isEmpty()) {
-				minecraft.displayGuiScreen(new AmountSpecifyingScreen(
+	protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type) {
+		boolean valid = type != ClickType.QUICK_MOVE && minecraft.player.inventory.getCarried().isEmpty();
+		if(valid && slot instanceof FalseCopySlot && slot.isActive()) {
+			if(!slot.getItem().isEmpty()) {
+				minecraft.setScreen(new AmountSpecifyingScreen(
 						this, minecraft.player.inventory,
-						slot.slotNumber, slot.getStack(),
-						Math.min(slot.getSlotStackLimit(), slot.getStack().getMaxStackSize())));
+						slot.index, slot.getItem(),
+						Math.min(slot.getMaxStackSize(), slot.getItem().getMaxStackSize())));
 			}
 		}
 		else {
-			super.handleMouseClick(slot, slotId, mouseButton, type);
+			super.slotClicked(slot, slotId, mouseButton, type);
 		}
 	}
 }

@@ -122,7 +122,7 @@ public class PackageCraftingPatternDetails implements ICraftingPatternDetails {
 	private static INBT createItemTag(ItemStack i) {
 		CompoundNBT c = new CompoundNBT();
 		if(!i.isEmpty()) {
-			i.write(c);
+			i.save(c);
 		}
 		return c;
 	}

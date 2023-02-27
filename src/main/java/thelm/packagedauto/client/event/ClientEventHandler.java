@@ -32,14 +32,14 @@ public class ClientEventHandler {
 
 	@SubscribeEvent
 	public void onClientSetup(FMLClientSetupEvent event) {
-		ScreenManager.registerFactory(EncoderContainer.TYPE_INSTANCE, EncoderScreen::new);
-		ScreenManager.registerFactory(PackagerContainer.TYPE_INSTANCE, PackagerScreen::new);
-		ScreenManager.registerFactory(PackagerExtensionContainer.TYPE_INSTANCE, PackagerExtensionScreen::new);
-		ScreenManager.registerFactory(UnpackagerContainer.TYPE_INSTANCE, UnpackagerScreen::new);
-		ScreenManager.registerFactory(CrafterContainer.TYPE_INSTANCE, CrafterScreen::new);
+		ScreenManager.register(EncoderContainer.TYPE_INSTANCE, EncoderScreen::new);
+		ScreenManager.register(PackagerContainer.TYPE_INSTANCE, PackagerScreen::new);
+		ScreenManager.register(PackagerExtensionContainer.TYPE_INSTANCE, PackagerExtensionScreen::new);
+		ScreenManager.register(UnpackagerContainer.TYPE_INSTANCE, UnpackagerScreen::new);
+		ScreenManager.register(CrafterContainer.TYPE_INSTANCE, CrafterScreen::new);
 
 		event.enqueueWork(()->{
-			ItemModelsProperties.registerProperty(RecipeHolderItem.INSTANCE,
+			ItemModelsProperties.register(RecipeHolderItem.INSTANCE,
 					new ResourceLocation("packagedauto", "filled"), (stack, world, living)->{
 						return stack.hasTag() ? 1F : 0F;
 					});

@@ -27,7 +27,7 @@ public class SetRecipePacket {
 		buf.writeByte(pkt.map.size());
 		for(Int2ObjectMap.Entry<ItemStack> entry : pkt.map.int2ObjectEntrySet()) {
 			buf.writeByte(entry.getIntKey());
-			buf.writeItemStack(entry.getValue());
+			buf.writeItem(entry.getValue());
 		}
 	}
 
@@ -36,7 +36,7 @@ public class SetRecipePacket {
 		int size = buf.readByte();
 		for(int i = 0; i < size; ++i) {
 			int index = buf.readByte();
-			ItemStack stack = buf.readItemStack();
+			ItemStack stack = buf.readItem();
 			map.put(index, stack);
 		}
 		return new SetRecipePacket(map);
@@ -45,9 +45,9 @@ public class SetRecipePacket {
 	public static void handle(SetRecipePacket pkt, Supplier<NetworkEvent.Context> ctx) {
 		ServerPlayerEntity player = ctx.get().getSender();
 		ctx.get().enqueueWork(()->{
-			if(player.openContainer instanceof EncoderContainer) {
-				if(player.openContainer instanceof EncoderContainer) {
-					EncoderContainer container = (EncoderContainer)player.openContainer;
+			if(player.containerMenu instanceof EncoderContainer) {
+				if(player.containerMenu instanceof EncoderContainer) {
+					EncoderContainer container = (EncoderContainer)player.containerMenu;
 					container.patternItemHandler.setRecipe(pkt.map);
 				}
 			}

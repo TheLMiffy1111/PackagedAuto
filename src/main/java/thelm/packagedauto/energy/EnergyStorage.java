@@ -75,7 +75,7 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 	}
 
 	public void setEnergyStored(int energy) {
-		boolean flag = !tile.getWorld().isRemote && this.energy != energy;
+		boolean flag = !tile.getLevel().isClientSide && this.energy != energy;
 		this.energy = energy;
 		if(this.energy > capacity) {
 			this.energy = capacity;
@@ -97,9 +97,9 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 
 	public void updateIfChanged() {
 		int currentEnergy = getEnergyStored();
-		if(!tile.getWorld().isRemote && prevEnergy != currentEnergy) {
-			SyncEnergyPacket.syncEnergy(tile.getPos(), currentEnergy, tile.getWorld().getDimensionKey(), 8);
-			tile.markDirty();
+		if(!tile.getLevel().isClientSide && prevEnergy != currentEnergy) {
+			SyncEnergyPacket.syncEnergy(tile.getBlockPos(), currentEnergy, tile.getLevel().dimension(), 8);
+			tile.setChanged();
 		}
 		prevEnergy = currentEnergy;
 	}

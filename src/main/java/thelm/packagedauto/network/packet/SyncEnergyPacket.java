@@ -36,9 +36,9 @@ public class SyncEnergyPacket {
 
 	public static void handle(SyncEnergyPacket pkt, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(()->{
-			ClientWorld world = Minecraft.getInstance().world;
-			if(world.isBlockLoaded(pkt.pos)) {
-				TileEntity te = world.getTileEntity(pkt.pos);
+			ClientWorld world = Minecraft.getInstance().level;
+			if(world.isLoaded(pkt.pos)) {
+				TileEntity te = world.getBlockEntity(pkt.pos);
 				if(te instanceof BaseTile) {
 					((BaseTile)te).getEnergyStorage().setEnergyStored(pkt.energy);
 				}

@@ -23,12 +23,12 @@ public class ChangePackagingPacket {
 	public static void handle(ChangePackagingPacket pkt, Supplier<NetworkEvent.Context> ctx) {
 		ServerPlayerEntity player = ctx.get().getSender();
 		ctx.get().enqueueWork(()->{
-			if(player.openContainer instanceof PackagerContainer) {
-				PackagerContainer container = (PackagerContainer)player.openContainer;
+			if(player.containerMenu instanceof PackagerContainer) {
+				PackagerContainer container = (PackagerContainer)player.containerMenu;
 				container.tile.changePackagingMode();
 			}
-			if(player.openContainer instanceof PackagerExtensionContainer) {
-				PackagerExtensionContainer container = (PackagerExtensionContainer)player.openContainer;
+			if(player.containerMenu instanceof PackagerExtensionContainer) {
+				PackagerExtensionContainer container = (PackagerExtensionContainer)player.containerMenu;
 				container.tile.changePackagingMode();
 			}
 		});

@@ -50,9 +50,9 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerTile> {
 		tile.recipeList.clear();
 		ItemStack listStack = getStackInSlot(9);
 		if(listStack.getItem() instanceof IPackageRecipeListItem) {
-			tile.recipeList.addAll(((IPackageRecipeListItem)listStack.getItem()).getRecipeList(tile.getWorld(), listStack).getRecipeList());
+			tile.recipeList.addAll(((IPackageRecipeListItem)listStack.getItem()).getRecipeList(tile.getLevel(), listStack).getRecipeList());
 		}
-		if(tile.getWorld() != null && !tile.getWorld().isRemote) {
+		if(tile.getLevel() != null && !tile.getLevel().isClientSide) {
 			tile.postPatternChange();
 		}
 	}

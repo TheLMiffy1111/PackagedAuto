@@ -23,19 +23,19 @@ public class SetItemStackPacket {
 
 	public static void encode(SetItemStackPacket pkt, PacketBuffer buf) {
 		buf.writeShort(pkt.containerSlot);
-		buf.writeItemStack(pkt.stack);
+		buf.writeItem(pkt.stack);
 	}
 
 	public static SetItemStackPacket decode(PacketBuffer buf) {
-		return new SetItemStackPacket(buf.readShort(), buf.readItemStack());
+		return new SetItemStackPacket(buf.readShort(), buf.readItem());
 	}
 
 	public static void handle(SetItemStackPacket pkt, Supplier<NetworkEvent.Context> ctx) {
 		ServerPlayerEntity player = ctx.get().getSender();
 		ctx.get().enqueueWork(()->{
-			Container container = player.openContainer;
+			Container container = player.containerMenu;
 			if(container != null) {
-				if(pkt.containerSlot >= 0 && pkt.containerSlot < container.inventorySlots.size()) {
+				if(pkt.containerSlot >= 0 && pkt.containerSlot < container.slots.size()) {
 					Slot slot = container.getSlot(pkt.containerSlot);
 					if(slot instanceof FalseCopySlot) {
 						ItemStackHandler handler = (ItemStackHandler)((FalseCopySlot)slot).getItemHandler();

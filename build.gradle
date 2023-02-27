@@ -12,15 +12,20 @@ buildscript {
         maven {
             url = "https://repo.spongepowered.org/maven/"
         }
+        maven {
+            url = "https://maven.parchmentmc.org/"
+        }
         jcenter()
         mavenCentral()
     }
     dependencies {
         classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.1.+", changing: true
+        classpath "org.parchmentmc:librarian:1.+"
     }
 }
 
 apply plugin: "net.minecraftforge.gradle"
+apply plugin: "org.parchmentmc.librarian.forgegradle"
 apply plugin: "eclipse"
 apply plugin: "maven-publish"
 
@@ -56,14 +61,14 @@ sourceSets {
     main
 }
 
-version = "2.0.1.13"
+version = "2.0.1.14"
 group = "thelm.packagedauto"
 archivesBaseName = "PackagedAuto-1.16.5"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = "1.8"
 
 minecraft {
-    mappings channel: "snapshot", version: "20210309-1.16.5"
+    mappings channel: "parchment", version: "2022.03.06-1.16.5"
     runs {
         client = {
             properties "forge.logging.markers": "SCAN,REGISTRIES,REGISTRYDUMP"

@@ -20,7 +20,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<En
 	public <I> List<Target<I>> getTargets(EncoderScreen gui, I ingredient, boolean doStart) {
 		ItemStack stack = wrapStack(ingredient);
 		if(!stack.isEmpty()) {
-			return gui.container.inventorySlots.stream().filter(s->s instanceof FalseCopySlot).
+			return gui.container.slots.stream().filter(s->s instanceof FalseCopySlot).
 					<Target<I>>map(s->new SlotTarget<>(gui, s)).collect(Collectors.toList());
 		}
 		return Collections.emptyList();
@@ -45,7 +45,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<En
 
 		public SlotTarget(BaseScreen<?> screen, Slot slot) {
 			this.slot = slot;
-			this.area = new Rectangle2d(screen.getGuiLeft()+slot.xPos-1, screen.getGuiTop()+slot.yPos-1, 18, 18);
+			this.area = new Rectangle2d(screen.getGuiLeft()+slot.x-1, screen.getGuiTop()+slot.y-1, 18, 18);
 		}
 
 		@Override
@@ -57,7 +57,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<En
 		public void accept(I ingredient) {
 			ItemStack stack = wrapStack(ingredient);
 			if(!stack.isEmpty()) {
-				PacketHandler.INSTANCE.sendToServer(new SetItemStackPacket((short)slot.slotNumber, stack));
+				PacketHandler.INSTANCE.sendToServer(new SetItemStackPacket((short)slot.index, stack));
 			}
 		}
 	}

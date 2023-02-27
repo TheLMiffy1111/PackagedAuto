@@ -13,10 +13,10 @@ import thelm.packagedauto.tile.CrafterTile;
 public class CrafterBlock extends BaseBlock {
 
 	public static final CrafterBlock INSTANCE = new CrafterBlock();
-	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().group(PackagedAuto.ITEM_GROUP)).setRegistryName("packagedauto:crafter");
+	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.ITEM_GROUP)).setRegistryName("packagedauto:crafter");
 
 	protected CrafterBlock() {
-		super(AbstractBlock.Properties.create(Material.IRON).hardnessAndResistance(15F, 25F).sound(SoundType.METAL));
+		super(AbstractBlock.Properties.of(Material.METAL).strength(15F, 25F).sound(SoundType.METAL));
 		setRegistryName("packagedauto:crafter");
 	}
 

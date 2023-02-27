@@ -38,7 +38,7 @@ import thelm.packagedauto.util.MiscHelper;
 public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 
 	public static final TileEntityType<UnpackagerTile> TYPE_INSTANCE = (TileEntityType<UnpackagerTile>)TileEntityType.Builder.
-			create(MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("appliedenergistics2"),
+			of(MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("appliedenergistics2"),
 					()->AEUnpackagerTile::new, ()->UnpackagerTile::new), UnpackagerBlock.INSTANCE).
 			build(null).setRegistryName("packagedauto:unpackager");
 
@@ -70,14 +70,14 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 	public void tick() {
 		if(firstTick) {
 			firstTick = false;
-			if(!world.isRemote) {
+			if(!level.isClientSide) {
 				postPatternChange();
 			}
 			updatePowered();
 		}
-		if(!world.isRemote) {
+		if(!level.isClientSide) {
 			chargeEnergy();
-			if(world.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % 8 == 0) {
 				fillTrackers();
 				emptyTrackers();
 			}
@@ -136,7 +136,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 
 	protected void emptyTrackers() {
 		for(Direction direction : Direction.values()) {
-			TileEntity tile = world.getTileEntity(pos.offset(direction));
+			TileEntity tile = level.getBlockEntity(worldPosition.relative(direction));
 			if(tile instanceof IPackageCraftingMachine) {
 				IPackageCraftingMachine machine = (IPackageCraftingMachine)tile;
 				for(PackageTracker tracker : trackers) {
@@ -144,7 +144,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), direction.getOpposite())) {
 							tracker.clearRecipe();
 							syncTile(false);
-							markDirty();
+							setChanged();
 							break;
 						}
 					}
@@ -153,7 +153,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			}
 		}
 		for(Direction direction : Direction.values()) {
-			TileEntity tile = world.getTileEntity(pos.offset(direction));
+			TileEntity tile = level.getBlockEntity(worldPosition.relative(direction));
 			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.direction == direction).findFirst().orElse(null);
 			if(trackerToEmpty == null) {
 				continue;
@@ -187,10 +187,10 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.clearRecipe();
 			}
-			markDirty();
+			setChanged();
 		}
 		for(Direction direction : Direction.values()) {
-			TileEntity tile = world.getTileEntity(pos.offset(direction));
+			TileEntity tile = level.getBlockEntity(worldPosition.relative(direction));
 			if(tile == null || tile instanceof PackagerTile || tile instanceof UnpackagerTile || isInterface(tile, direction.getOpposite()) || !tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
 				continue;
 			}
@@ -226,7 +226,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 				if(trackerToEmpty.toSend.isEmpty()) {
 					trackerToEmpty.clearRecipe();
 				}
-				markDirty();
+				setChanged();
 			}
 		}
 	}
@@ -244,10 +244,10 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 	}
 
 	public void updatePowered() {
-		if(world.getRedstonePowerFromNeighbors(pos) > 0 != powered) {
+		if(level.getBestNeighborSignal(worldPosition) > 0 != powered) {
 			powered = !powered;
 			syncTile(false);
-			markDirty();
+			setChanged();
 		}
 	}
 
@@ -291,7 +291,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 
 	public void changeBlockingMode() {
 		blocking = !blocking;
-		markDirty();
+		setChanged();
 	}
 
 	@Override
@@ -319,9 +319,9 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			amount = 0;
 			received.clear();
 			direction = null;
-			if(world != null && !world.isRemote) {
+			if(level != null && !level.isClientSide) {
 				syncTile(false);
-				markDirty();
+				setChanged();
 			}
 		}
 
@@ -337,7 +337,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 					received.size(amount);
 					received.set(packageItem.getIndex(stack), true);
 					syncTile(false);
-					markDirty();
+					setChanged();
 					return true;
 				}
 				else if(this.recipe.equals(recipe)) {
@@ -345,7 +345,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 					if(!received.get(index)) {
 						received.set(index, true);
 						syncTile(false);
-						markDirty();
+						setChanged();
 						return true;
 					}
 				}
@@ -402,7 +402,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			}
 			MiscHelper.INSTANCE.loadAllItems(nbt.getList("ToSend", 10), toSend);
 			if(nbt.contains("Direction")) {
-				direction = Direction.byIndex(nbt.getByte("Direction"));
+				direction = Direction.from3DDataValue(nbt.getByte("Direction"));
 			}
 		}
 
@@ -419,7 +419,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			}
 			nbt.put("ToSend", MiscHelper.INSTANCE.saveAllItems(new ListNBT(), toSend));
 			if(direction != null) {
-				nbt.putByte("Facing", (byte)direction.getIndex());
+				nbt.putByte("Facing", (byte)direction.get3DDataValue());
 			}
 			return nbt;
 		}

@@ -63,8 +63,8 @@ public class BaseGridBlock<T extends BaseTile & IGridHost> implements IGridBlock
 
 	@Override
 	public void gridChanged() {
-		if(tile.getWorld() != null) {
-			tile.getWorld().notifyNeighborsOfStateChange(tile.getPos(), Blocks.AIR);
+		if(tile.getLevel() != null) {
+			tile.getLevel().updateNeighborsAt(tile.getBlockPos(), Blocks.AIR);
 		}
 	}
 

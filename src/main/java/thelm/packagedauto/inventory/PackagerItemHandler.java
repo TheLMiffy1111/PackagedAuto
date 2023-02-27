@@ -20,7 +20,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 
 	@Override
 	protected void onContentsChanged(int slot) {
-		if(slot < 9 && !tile.getWorld().isRemote) {
+		if(slot < 9 && !tile.getLevel().isClientSide) {
 			if(tile.isWorking && !getStackInSlot(slot).isEmpty() && !tile.isInputValid()) {
 				tile.endProcess();
 			}
@@ -67,7 +67,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 	}
 
 	@Override
-	public int size() {
+	public int getCount() {
 		return 2;
 	}
 
@@ -81,7 +81,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 		tile.patternList.clear();
 		ItemStack listStack = getStackInSlot(10);
 		if(listStack.getItem() instanceof IPackageRecipeListItem) {
-			((IPackageRecipeListItem)listStack.getItem()).getRecipeList(tile.getWorld(), listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(tile.patternList::add));
+			((IPackageRecipeListItem)listStack.getItem()).getRecipeList(tile.getLevel(), listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(tile.patternList::add));
 		}
 		else if(listStack.getItem() instanceof IPackageItem) {
 			IPackageItem packageItem = (IPackageItem)listStack.getItem();
@@ -93,12 +93,12 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 		else if(tile.mode == PackagerTile.Mode.DISJOINT) {
 			tile.disjoint = MiscHelper.INSTANCE.arePatternsDisjoint(tile.patternList);
 		}
-		if(tile.getWorld() != null && !tile.getWorld().isRemote) {
+		if(tile.getLevel() != null && !tile.getLevel().isClientSide) {
 			tile.postPatternChange();
 		}
-		if(tile.getWorld() != null) {
-			BlockPos.getAllInBox(tile.getPos().add(-1, -1, -1), tile.getPos().add(1, 1, 1)).
-			map(tile.getWorld()::getTileEntity).filter(t->t instanceof PackagerExtensionTile).
+		if(tile.getLevel() != null) {
+			BlockPos.betweenClosedStream(tile.getBlockPos().offset(-1, -1, -1), tile.getBlockPos().offset(1, 1, 1)).
+			map(tile.getLevel()::getBlockEntity).filter(t->t instanceof PackagerExtensionTile).
 			map(t->(PackagerExtensionTile)t).forEach(t->t.updatePatternList());
 		}
 	}

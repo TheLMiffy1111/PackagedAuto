@@ -26,8 +26,8 @@ public class SaveRecipeListPacket {
 	public static void handle(SaveRecipeListPacket pkt, Supplier<NetworkEvent.Context> ctx) {
 		ServerPlayerEntity player = ctx.get().getSender();
 		ctx.get().enqueueWork(()->{
-			if(player.openContainer instanceof EncoderContainer) {
-				EncoderContainer container = (EncoderContainer)player.openContainer;
+			if(player.containerMenu instanceof EncoderContainer) {
+				EncoderContainer container = (EncoderContainer)player.containerMenu;
 				container.tile.saveRecipeList(pkt.single);
 			}
 		});

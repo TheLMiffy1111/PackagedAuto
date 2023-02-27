@@ -17,7 +17,7 @@ public class PackagedAuto {
 	public static final ItemGroup ITEM_GROUP = new ItemGroup("packagedauto") {
 		@OnlyIn(Dist.CLIENT)
 		@Override
-		public ItemStack createIcon() {
+		public ItemStack makeIcon() {
 			return new ItemStack(PackageItem.INSTANCE);
 		}
 	};

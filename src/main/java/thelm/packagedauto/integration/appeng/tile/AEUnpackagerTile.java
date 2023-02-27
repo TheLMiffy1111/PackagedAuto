@@ -47,14 +47,14 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 	@Override
 	public void tick() {
 		super.tick();
-		if(drawMEEnergy && !world.isRemote && world.getGameTime() % 8 == 0 && getActionableNode().isActive()) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0 && getActionableNode().isActive()) {
 			chargeMEEnergy();
 		}
 	}
 
 	@Override
-	public void remove() {
-		super.remove();
+	public void setRemoved() {
+		super.setRemoved();
 		if(gridNode != null) {
 			gridNode.destroy();
 		}
@@ -77,12 +77,12 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 
 	@Override
 	public void securityBreak() {
-		world.destroyBlock(pos, true);
+		level.destroyBlock(worldPosition, true);
 	}
 
 	@Override
 	public IGridNode getActionableNode() {
-		if(gridNode == null && world != null && !world.isRemote) {
+		if(gridNode == null && level != null && !level.isClientSide) {
 			gridNode = Api.instance().grid().createGridNode(gridBlock);
 			gridNode.setPlayerID(placerID);
 			gridNode.updateState();
@@ -100,8 +100,8 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 				}
 			}
 			IntList requiredSlots = new IntArrayList();
-			for(int i = 0; i < table.getSizeInventory(); ++i) {
-				if(!table.getStackInSlot(i).isEmpty()) {
+			for(int i = 0; i < table.getContainerSize(); ++i) {
+				if(!table.getItem(i).isEmpty()) {
 					requiredSlots.add(i);
 				}
 			}
@@ -109,7 +109,7 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 				return false;
 			}
 			for(int i = 0; i < requiredSlots.size(); ++i) {
-				itemHandler.setStackInSlot(emptySlots.getInt(i), table.getStackInSlot(requiredSlots.getInt(i)).copy());
+				itemHandler.setStackInSlot(emptySlots.getInt(i), table.getItem(requiredSlots.getInt(i)).copy());
 			}
 			return true;
 		}
@@ -126,7 +126,7 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 		ItemStack patternStack = itemHandler.getStackInSlot(9);
 		for(IPackageRecipeInfo pattern : recipeList) {
 			if(!pattern.getOutputs().isEmpty()) {
-				craftingTracker.addCraftingOption(this, new RecipeCraftingPatternDetails(patternStack, pattern).toAEInternal(world));
+				craftingTracker.addCraftingOption(this, new RecipeCraftingPatternDetails(patternStack, pattern).toAEInternal(level));
 			}
 		}
 	}
@@ -161,16 +161,16 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 	}
 
 	@Override
-	public void read(BlockState blockState, CompoundNBT nbt) {
-		super.read(blockState, nbt);
-		if(world != null && nbt.contains("Node")) {
+	public void load(BlockState blockState, CompoundNBT nbt) {
+		super.load(blockState, nbt);
+		if(level != null && nbt.contains("Node")) {
 			getActionableNode().loadFromNBT("Node", nbt);
 		}
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT nbt) {
-		super.write(nbt);
+	public CompoundNBT save(CompoundNBT nbt) {
+		super.save(nbt);
 		if(gridNode != null) {
 			gridNode.saveToNBT("Node", nbt);
 		}

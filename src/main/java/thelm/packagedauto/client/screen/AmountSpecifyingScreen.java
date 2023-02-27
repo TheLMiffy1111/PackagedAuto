@@ -32,8 +32,8 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 
 	public AmountSpecifyingScreen(BaseScreen<?> parent, PlayerInventory playerInventory, int containerSlot, ItemStack stack, int maxAmount) {
 		super(new AmountSpecifyingContainer(playerInventory, stack), playerInventory, new TranslationTextComponent("gui.packagedauto.amount_specifying"));
-		xSize = 172;
-		ySize = 99;
+		imageWidth = 172;
+		imageHeight = 99;
 		this.parent = parent;
 		this.containerSlot = containerSlot;
 		this.stack = stack;
@@ -64,14 +64,14 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 		buttons.clear();
 		super.init();
 
-		addButton(new ButtonSet(guiLeft+114, guiTop+22, new TranslationTextComponent("misc.packagedauto.set")));
-		addButton(new ButtonCancel(guiLeft+114, guiTop+22+24, new TranslationTextComponent("gui.cancel")));
+		addButton(new ButtonSet(leftPos+114, topPos+22, new TranslationTextComponent("misc.packagedauto.set")));
+		addButton(new ButtonCancel(leftPos+114, topPos+22+24, new TranslationTextComponent("gui.cancel")));
 
-		amountField = new TextFieldWidget(font, guiLeft+9, guiTop+51, 63, font.FONT_HEIGHT, StringTextComponent.EMPTY);
-		amountField.setEnableBackgroundDrawing(false);
-		amountField.setText(String.valueOf(getDefaultAmount()));
+		amountField = new TextFieldWidget(font, leftPos+9, topPos+51, 63, font.lineHeight, StringTextComponent.EMPTY);
+		amountField.setBordered(false);
+		amountField.setValue(String.valueOf(getDefaultAmount()));
 		amountField.setTextColor(0xFFFFFF);
-		amountField.setValidator(s->{
+		amountField.setFilter(s->{
 			if(s.isEmpty()) {
 				return true;
 			}
@@ -85,34 +85,34 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 		});
 		amountField.changeFocus(true);
 		addButton(amountField);
-		setListener(amountField);
+		setFocused(amountField);
 
 		int[] increments = getIncrements();
 		int xx = 7;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "+" + increment;
-			addButton(new ButtonIncrement(increment, guiLeft+xx, guiTop+20, new StringTextComponent(text)));
+			addButton(new ButtonIncrement(increment, leftPos+xx, topPos+20, new StringTextComponent(text)));
 			xx += 34;
 		}
 		xx = 7;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
 			String text = "-" + increment;
-			addButton(new ButtonIncrement(-increment, guiLeft+xx, guiTop+ySize-20-7, new StringTextComponent(text)));
+			addButton(new ButtonIncrement(-increment, leftPos+xx, topPos+imageHeight-20-7, new StringTextComponent(text)));
 			xx += 34;
 		}
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
-		super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
-		amountField.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
+	protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
+		super.renderBg(matrixStack, partialTicks, mouseX, mouseY);
+		amountField.renderButton(matrixStack, mouseX, mouseY, partialTicks);
 	}
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int x, int y) {
-		font.drawString(matrixStack, getTitle().getString(), 7, 7, 0x404040);
+	protected void renderLabels(MatrixStack matrixStack, int x, int y) {
+		font.draw(matrixStack, getTitle().getString(), 7, 7, 0x404040);
 	}
 
 	@Override
@@ -128,8 +128,8 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 		if(amountField.keyPressed(key, scanCode, modifiers)) {
 			return true;
 		}
-		InputMappings.Input mouseKey = InputMappings.getInputByCode(key, scanCode);
-		if(minecraft.gameSettings.keyBindInventory.isActiveAndMatches(mouseKey) && amountField.isFocused()) {
+		InputMappings.Input mouseKey = InputMappings.getKey(key, scanCode);
+		if(minecraft.options.keyInventory.isActiveAndMatches(mouseKey) && amountField.isFocused()) {
 			return true;
 		}
 		return super.keyPressed(key, scanCode, modifiers);
@@ -138,18 +138,18 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 	protected void onIncrementButtonClicked(int increment) {
 		int oldAmount = 0;
 		try {
-			oldAmount = Integer.parseInt(amountField.getText());
+			oldAmount = Integer.parseInt(amountField.getValue());
 		}
 		catch(NumberFormatException e) {
 			// NO OP
 		}
 		int newAmount = MathHelper.clamp(oldAmount+increment, 0, getMaxAmount());
-		amountField.setText(String.valueOf(newAmount));
+		amountField.setValue(String.valueOf(newAmount));
 	}
 
 	protected void onOkButtonPressed(boolean shiftDown) {
 		try {
-			int amount = MathHelper.clamp(Integer.parseInt(amountField.getText()), 0, maxAmount);
+			int amount = MathHelper.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
 			ItemStack newStack = stack.copy();
 			newStack.setCount(amount);
 			PacketHandler.INSTANCE.sendToServer(new SetItemStackPacket((short)containerSlot, newStack));
@@ -161,7 +161,7 @@ public class AmountSpecifyingScreen extends BaseScreen<AmountSpecifyingContainer
 	}
 
 	public void close() {
-		minecraft.displayGuiScreen(parent);
+		minecraft.setScreen(parent);
 	}
 
 	public BaseScreen<?> getParent() {

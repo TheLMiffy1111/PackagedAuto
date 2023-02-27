@@ -7,7 +7,7 @@ import thelm.packagedauto.PackagedAuto;
 public class MiscItem extends Item {
 
 	protected MiscItem(String registryName, ItemGroup itemGroup) {
-		super(new Item.Properties().group(itemGroup));
+		super(new Item.Properties().tab(itemGroup));
 		setRegistryName(registryName);
 	}
 

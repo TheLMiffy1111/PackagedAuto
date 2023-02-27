@@ -54,9 +54,9 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public List<ItemStack> condenseStacks(IInventory inventory) {
-		List<ItemStack> stacks = new ArrayList<>(inventory.getSizeInventory());
-		for(int i = 0; i < inventory.getSizeInventory(); ++i) {
-			stacks.add(inventory.getStackInSlot(i));
+		List<ItemStack> stacks = new ArrayList<>(inventory.getContainerSize());
+		for(int i = 0; i < inventory.getContainerSize(); ++i) {
+			stacks.add(inventory.getItem(i));
 		}
 		return condenseStacks(stacks);
 	}
@@ -140,7 +140,7 @@ public class MiscHelper implements IMiscHelper {
 				}
 				CompoundNBT nbt = new CompoundNBT();
 				nbt.putByte("Index", (byte)i);
-				stack.write(nbt);
+				stack.save(nbt);
 				tagList.add(nbt);
 			}
 		}
@@ -157,7 +157,7 @@ public class MiscHelper implements IMiscHelper {
 				list.add(ItemStack.EMPTY);
 			}
 			if(j >= 0)  {
-				ItemStack stack = ItemStack.read(nbt);
+				ItemStack stack = ItemStack.of(nbt);
 				list.set(j, stack.isEmpty() ? ItemStack.EMPTY : stack);
 			}
 		}
@@ -170,12 +170,12 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public List<ItemStack> getRemainingItems(IInventory inventory) {
-		return getRemainingItems(IntStream.range(0, inventory.getSizeInventory()).mapToObj(inventory::getStackInSlot).collect(Collectors.toList()));
+		return getRemainingItems(IntStream.range(0, inventory.getContainerSize()).mapToObj(inventory::getItem).collect(Collectors.toList()));
 	}
 
 	@Override
 	public List<ItemStack> getRemainingItems(IInventory inventory, int minInclusive, int maxExclusive) {
-		return getRemainingItems(IntStream.range(minInclusive, maxExclusive).mapToObj(inventory::getStackInSlot).collect(Collectors.toList()));
+		return getRemainingItems(IntStream.range(minInclusive, maxExclusive).mapToObj(inventory::getItem).collect(Collectors.toList()));
 	}
 
 	@Override
@@ -199,7 +199,7 @@ public class MiscHelper implements IMiscHelper {
 		}
 		if(stack.getItem().hasContainerItem(stack)) {
 			stack = stack.getItem().getContainerItem(stack);
-			if(!stack.isEmpty() && stack.isDamageable() && stack.getDamage() > stack.getMaxDamage()) {
+			if(!stack.isEmpty() && stack.isDamageableItem() && stack.getDamageValue() > stack.getMaxDamage()) {
 				return ItemStack.EMPTY;
 			}
 			return stack;
@@ -273,7 +273,7 @@ public class MiscHelper implements IMiscHelper {
 		f:for(ItemStack req : condensedRequired) {
 			for(ItemStack offer : condensedOffered) {
 				if(req.getCount() <= offer.getCount() && req.getItem() == offer.getItem() &&
-						(!req.hasTag() || ItemStack.areItemStackTagsEqual(req, offer))) {
+						(!req.hasTag() || ItemStack.tagMatches(req, offer))) {
 					continue f;
 				}
 			}
@@ -287,7 +287,7 @@ public class MiscHelper implements IMiscHelper {
 			for(ItemStack offer : offered) {
 				if(!offer.isEmpty()) {
 					if(req.getItem() == offer.getItem() &&
-							(!req.hasTag() || ItemStack.areItemStackTagsEqual(req, offer))) {
+							(!req.hasTag() || ItemStack.tagMatches(req, offer))) {
 						int toRemove = Math.min(count, offer.getCount());
 						offer.shrink(toRemove);
 						count -= toRemove;
@@ -331,6 +331,6 @@ public class MiscHelper implements IMiscHelper {
 	@Override
 	public RecipeManager getRecipeManager() {
 		return server != null ? server.getRecipeManager() :
-			DistExecutor.callWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().world.getRecipeManager());
+			DistExecutor.callWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().level.getRecipeManager());
 	}
 }

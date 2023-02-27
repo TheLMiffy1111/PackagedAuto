@@ -17,10 +17,10 @@ import thelm.packagedauto.tile.PackagerTile;
 public class PackagerBlock extends BaseBlock {
 
 	public static final PackagerBlock INSTANCE = new PackagerBlock();
-	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().group(PackagedAuto.ITEM_GROUP)).setRegistryName("packagedauto:packager");
+	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.ITEM_GROUP)).setRegistryName("packagedauto:packager");
 
 	protected PackagerBlock() {
-		super(AbstractBlock.Properties.create(Material.IRON).hardnessAndResistance(15F, 25F).sound(SoundType.METAL));
+		super(AbstractBlock.Properties.of(Material.METAL).strength(15F, 25F).sound(SoundType.METAL));
 		setRegistryName("packagedauto:packager");
 	}
 
@@ -31,7 +31,7 @@ public class PackagerBlock extends BaseBlock {
 
 	@Override
 	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
-		TileEntity tileentity = worldIn.getTileEntity(pos);
+		TileEntity tileentity = worldIn.getBlockEntity(pos);
 		if(tileentity instanceof PackagerTile) {
 			((PackagerTile)tileentity).updatePowered();
 		}

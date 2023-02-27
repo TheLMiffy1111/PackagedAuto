@@ -24,7 +24,7 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 	public static final RecipeHolderItem INSTANCE = new RecipeHolderItem();
 
 	protected RecipeHolderItem() {
-		super(new Item.Properties().group(PackagedAuto.ITEM_GROUP));
+		super(new Item.Properties().tab(PackagedAuto.ITEM_GROUP));
 		setRegistryName("packagedauto:recipe_holder");
 	}
 
@@ -34,30 +34,30 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-		if(!worldIn.isRemote && playerIn.isSneaking()) {
-			return new ActionResult<>(ActionResultType.SUCCESS, new ItemStack(INSTANCE, playerIn.getHeldItem(handIn).getCount()));
+	public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
+		if(!worldIn.isClientSide && playerIn.isShiftKeyDown()) {
+			return new ActionResult<>(ActionResultType.SUCCESS, new ItemStack(INSTANCE, playerIn.getItemInHand(handIn).getCount()));
 		}
-		return new ActionResult<>(ActionResultType.PASS, playerIn.getHeldItem(handIn));
+		return new ActionResult<>(ActionResultType.PASS, playerIn.getItemInHand(handIn));
 	}
 
 	@Override
-	public void addInformation(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+	public void appendHoverText(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		if(stack.hasTag()) {
 			List<IPackageRecipeInfo> recipeList = getRecipeList(worldIn, stack).getRecipeList();
 			tooltip.add(new TranslationTextComponent("item.packagedauto.recipe_holder.recipes"));
 			for(IPackageRecipeInfo recipe : recipeList) {
-				IFormattableTextComponent component = recipe.getRecipeType().getDisplayName().appendString(": ");
+				IFormattableTextComponent component = recipe.getRecipeType().getDisplayName().append(": ");
 				for(int i = 0; i < recipe.getOutputs().size(); ++i) {
 					if(i != 0) {
-						component.appendString(", ");
+						component.append(", ");
 					}
 					ItemStack is = recipe.getOutputs().get(i);
-					component.appendString(is.getCount()+" ").appendSibling(is.getDisplayName());
+					component.append(is.getCount()+" ").append(is.getDisplayName());
 				}
 				tooltip.add(component);
 			}
 		}
-		super.addInformation(stack, worldIn, tooltip, flagIn);
+		super.appendHoverText(stack, worldIn, tooltip, flagIn);
 	}
 }

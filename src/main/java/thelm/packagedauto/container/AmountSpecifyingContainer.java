@@ -27,7 +27,7 @@ public class AmountSpecifyingContainer extends BaseContainer<BaseTile> {
 	}
 
 	@Override
-	public int getSizeInventory() {
+	public int getContainerSize() {
 		return 0;
 	}
 }

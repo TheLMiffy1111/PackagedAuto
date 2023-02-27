@@ -14,7 +14,7 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 
 	@Override
 	protected void onContentsChanged(int slot) {
-		if(slot < 9 && !tile.getWorld().isRemote) {
+		if(slot < 9 && !tile.getLevel().isClientSide) {
 			if(tile.isWorking && !getStackInSlot(slot).isEmpty() && !tile.isInputValid()) {
 				tile.endProcess();
 			}
@@ -57,7 +57,7 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 	}
 
 	@Override
-	public int size() {
+	public int getCount() {
 		return 2;
 	}
 }

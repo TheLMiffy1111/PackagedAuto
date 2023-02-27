@@ -30,7 +30,7 @@ public class BaseItemHandler<T extends BaseTile> extends ItemStackHandler implem
 
 	@Override
 	protected void onContentsChanged(int slot) {
-		tile.markDirty();
+		tile.setChanged();
 	}
 
 	public void read(CompoundNBT nbt) {
@@ -43,7 +43,7 @@ public class BaseItemHandler<T extends BaseTile> extends ItemStackHandler implem
 	}
 
 	public void markDirty() {
-		tile.markDirty();
+		tile.setChanged();
 	}
 
 	public void syncTile(boolean rerender) {
@@ -65,7 +65,7 @@ public class BaseItemHandler<T extends BaseTile> extends ItemStackHandler implem
 	}
 
 	@Override
-	public int size() {
+	public int getCount() {
 		return 0;
 	}
 }

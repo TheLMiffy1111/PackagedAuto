@@ -31,19 +31,19 @@ public abstract class BaseBlock extends Block {
 	}
 
 	@Override
-	public boolean eventReceived(BlockState state, World worldIn, BlockPos pos, int id, int param) {
-		super.eventReceived(state, worldIn, pos, id, param);
-		TileEntity tileentity = worldIn.getTileEntity(pos);
-		return tileentity == null ? false : tileentity.receiveClientEvent(id, param);
+	public boolean triggerEvent(BlockState state, World worldIn, BlockPos pos, int id, int param) {
+		super.triggerEvent(state, worldIn, pos, id, param);
+		TileEntity tileentity = worldIn.getBlockEntity(pos);
+		return tileentity == null ? false : tileentity.triggerEvent(id, param);
 	}
 
 	@Override
-	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity playerIn, Hand hand, BlockRayTraceResult rayTraceResult) {
-		if(playerIn.isSneaking()) {
+	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity playerIn, Hand hand, BlockRayTraceResult rayTraceResult) {
+		if(playerIn.isShiftKeyDown()) {
 			return ActionResultType.PASS;
 		}
-		if(!worldIn.isRemote) {
-			TileEntity tile = worldIn.getTileEntity(pos);
+		if(!worldIn.isClientSide) {
+			TileEntity tile = worldIn.getBlockEntity(pos);
 			if(tile instanceof INamedContainerProvider) {
 				NetworkHooks.openGui((ServerPlayerEntity)playerIn, (INamedContainerProvider)tile, pos);
 			}
@@ -52,11 +52,11 @@ public abstract class BaseBlock extends Block {
 	}
 
 	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-		if(!worldIn.isRemote) {
-			TileEntity tileentity = worldIn.getTileEntity(pos);
+	public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
+		if(!worldIn.isClientSide) {
+			TileEntity tileentity = worldIn.getBlockEntity(pos);
 			if(tileentity instanceof BaseTile) {
-				if(stack.hasDisplayName()) {
+				if(stack.hasCustomHoverName()) {
 					((BaseTile)tileentity).setCustomName(stack.getDisplayName());
 				}
 				if(placer instanceof PlayerEntity) {
@@ -67,28 +67,28 @@ public abstract class BaseBlock extends Block {
 	}
 
 	@Override
-	public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
-		TileEntity tileentity = worldIn.getTileEntity(pos);
+	public void onPlace(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+		TileEntity tileentity = worldIn.getBlockEntity(pos);
 		if(tileentity instanceof BaseTile) {
 			IItemHandler handler = ((BaseTile)tileentity).getItemHandler();
 			for(int i = 0; i < handler.getSlots(); ++i) {
 				ItemStack stack = handler.getStackInSlot(i);
 				if(!stack.isEmpty()) {
-					InventoryHelper.spawnItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), stack);
+					InventoryHelper.dropItemStack(worldIn, pos.getX(), pos.getY(), pos.getZ(), stack);
 				}
 			}
 		}
-		super.onReplaced(state, worldIn, pos, newState, isMoving);
+		super.onPlace(state, worldIn, pos, newState, isMoving);
 	}
 
 	@Override
-	public boolean hasComparatorInputOverride(BlockState state) {
+	public boolean hasAnalogOutputSignal(BlockState state) {
 		return true;
 	}
 
 	@Override
-	public int getComparatorInputOverride(BlockState blockState, World worldIn, BlockPos pos) {
-		TileEntity tileentity = worldIn.getTileEntity(pos);
+	public int getAnalogOutputSignal(BlockState blockState, World worldIn, BlockPos pos) {
+		TileEntity tileentity = worldIn.getBlockEntity(pos);
 		if(tileentity instanceof BaseTile) {
 			return ItemHandlerHelper.calcRedstoneFromInventory(((BaseTile)tileentity).getItemHandler());
 		}

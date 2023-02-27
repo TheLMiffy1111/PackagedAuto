@@ -39,7 +39,7 @@ import thelm.packagedauto.util.MiscHelper;
 public class PackagerExtensionTile extends BaseTile implements ITickableTileEntity {
 
 	public static final TileEntityType<PackagerExtensionTile> TYPE_INSTANCE = (TileEntityType<PackagerExtensionTile>)TileEntityType.Builder.
-			create(MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("appliedenergistics2"),
+			of(MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("appliedenergistics2"),
 					()->AEPackagerExtensionTile::new, ()->PackagerExtensionTile::new), PackagerExtensionBlock.INSTANCE).
 			build(null).setRegistryName("packagedauto:packager_extension");
 
@@ -77,7 +77,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 			updatePatternList();
 			updatePowered();
 		}
-		if(!world.isRemote) {
+		if(!level.isClientSide) {
 			if(isWorking) {
 				tickProcess();
 				if(remainingProgress <= 0 && isInputValid()) {
@@ -93,7 +93,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 					}
 				}
 			}
-			else if(world.getGameTime() % 8 == 0) {
+			else if(level.getGameTime() % 8 == 0) {
 				if(canStart()) {
 					startProcess();
 					tickProcess();
@@ -101,7 +101,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 				}
 			}
 			chargeEnergy();
-			if(world.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % 8 == 0) {
 				if(!itemHandler.getStackInSlot(9).isEmpty()) {
 					ejectItem();
 				}
@@ -146,8 +146,8 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 			return false;
 		}
 		ItemStack slotStack = itemHandler.getStackInSlot(9);
-		ItemStack outputStack = currentPattern.getOutput();
-		return slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.areItemStackTagsEqual(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
+		ItemStack outset = currentPattern.getOutput();
+		return slotStack.isEmpty() || slotStack.getItem() == outset.getItem() && ItemStack.tagMatches(slotStack, outset) && slotStack.getCount()+1 <= outset.getMaxStackSize();
 	}
 
 	protected boolean canFinish() {
@@ -187,15 +187,15 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 
 	public void updatePatternList() {
 		patternList.clear();
-		if(world != null) {
-			for(BlockPos posP : BlockPos.getAllInBoxMutable(pos.add(-1, -1, -1), pos.add(1, 1, 1))) {
-				TileEntity te = world.getTileEntity(posP);
+		if(level != null) {
+			for(BlockPos posP : BlockPos.betweenClosed(worldPosition.offset(-1, -1, -1), worldPosition.offset(1, 1, 1))) {
+				TileEntity te = level.getBlockEntity(posP);
 				if(te instanceof PackagerTile) {
 					PackagerTile packager = (PackagerTile)te;
 					ItemStack listStack = packager.itemHandler.getStackInSlot(10);
 					listStackItemHandler.setStackInSlot(0, listStack);
 					if(listStack.getItem() instanceof IPackageRecipeListItem) {
-						((IPackageRecipeListItem)listStack.getItem()).getRecipeList(world, listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(patternList::add));
+						((IPackageRecipeListItem)listStack.getItem()).getRecipeList(level, listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(patternList::add));
 					}
 					else if(listStack.getItem() instanceof IPackageItem) {
 						IPackageItem packageItem = (IPackageItem)listStack.getItem();
@@ -210,7 +210,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 					break;
 				}
 			}
-			if(!world.isRemote) {
+			if(!level.isClientSide) {
 				postPatternChange();
 			}
 		}
@@ -281,19 +281,19 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 
 	protected void startProcess() {
 		remainingProgress = energyReq;
-		markDirty();
+		setChanged();
 	}
 
 	public void endProcess() {
 		remainingProgress = 0;
 		isWorking = false;
 		lockPattern = false;
-		markDirty();
+		setChanged();
 	}
 
 	protected void ejectItem() {
 		for(Direction direction : Direction.values()) {
-			TileEntity te = world.getTileEntity(pos.offset(direction));
+			TileEntity te = level.getBlockEntity(worldPosition.relative(direction));
 			if(te instanceof UnpackagerTile) {
 				UnpackagerTile tile = (UnpackagerTile)te;
 				ItemStack stack = itemHandler.getStackInSlot(9);
@@ -326,10 +326,10 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 	}
 
 	public void updatePowered() {
-		if(world.getRedstonePowerFromNeighbors(pos) > 0 != powered) {
+		if(level.getBestNeighborSignal(worldPosition) > 0 != powered) {
 			powered = !powered;
 			syncTile(false);
-			markDirty();
+			setChanged();
 		}
 	}
 
@@ -338,8 +338,8 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 	}
 
 	@Override
-	public void read(BlockState blockState, CompoundNBT nbt) {
-		super.read(blockState, nbt);
+	public void load(BlockState blockState, CompoundNBT nbt) {
+		super.load(blockState, nbt);
 		updatePatternList();
 		lockPattern = false;
 		currentPattern = null;
@@ -358,8 +358,8 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT nbt) {
-		super.write(nbt);
+	public CompoundNBT save(CompoundNBT nbt) {
+		super.save(nbt);
 		if(lockPattern) {
 			CompoundNBT tag = MiscHelper.INSTANCE.writeRecipe(new CompoundNBT(), currentPattern.getRecipeInfo());
 			tag.putByte("Index", (byte)currentPattern.getIndex());
@@ -389,15 +389,15 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 
 	public void changePackagingMode() {
 		mode = PackagerTile.Mode.values()[((mode.ordinal()+1) % 3)];
-		markDirty();
+		setChanged();
 	}
 
 	@Override
-	public void markDirty() {
+	public void setChanged() {
 		if(isWorking && !isInputValid()) {
 			endProcess();
 		}
-		super.markDirty();
+		super.setChanged();
 	}
 
 	public int getScaledEnergy(int scale) {

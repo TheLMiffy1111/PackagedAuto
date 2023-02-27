@@ -24,7 +24,7 @@ public class EncoderContainer extends BaseContainer<EncoderTile> {
 	}
 
 	public void setupSlots() {
-		inventorySlots.clear();
+		slots.clear();
 		patternItemHandler = tile.patternItemHandlers[tile.patternIndex];
 		addSlot(new SlotItemHandler(itemHandler, 0, 8, 26));
 		for(int i = 0; i < 9; ++i) {
@@ -65,7 +65,7 @@ public class EncoderContainer extends BaseContainer<EncoderTile> {
 	}
 
 	@Override
-	public int getSizeInventory() {
+	public int getContainerSize() {
 		return 91;
 	}
 }

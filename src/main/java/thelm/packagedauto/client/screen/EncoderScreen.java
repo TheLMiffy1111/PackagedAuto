@@ -28,8 +28,8 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 
 	public EncoderScreen(EncoderContainer container, PlayerInventory playerInventory, ITextComponent title) {
 		super(container, playerInventory, title);
-		xSize = 258;
-		ySize = 314;
+		imageWidth = 258;
+		imageHeight = 314;
 	}
 
 	@Override
@@ -43,44 +43,44 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		super.init();
 		int patternSlots = container.tile.patternItemHandlers.length;
 		for(int i = 0; i < patternSlots; ++i) {
-			addButton(new ButtonPatternSlot(i, guiLeft+29+(i%10)*18, guiTop+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
+			addButton(new ButtonPatternSlot(i, leftPos+29+(i%10)*18, topPos+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
 		}
-		addButton(new ButtonRecipeType(guiLeft+204, guiTop+74));
-		addButton(new ButtonSavePatterns(guiLeft+213, guiTop+16, new TranslationTextComponent("block.packagedauto.encoder.save")));
-		addButton(new ButtonLoadPatterns(guiLeft+213, guiTop+34, new TranslationTextComponent("block.packagedauto.encoder.load")));
+		addButton(new ButtonRecipeType(leftPos+204, topPos+74));
+		addButton(new ButtonSavePatterns(leftPos+213, topPos+16, new TranslationTextComponent("block.packagedauto.encoder.save")));
+		addButton(new ButtonLoadPatterns(leftPos+213, topPos+34, new TranslationTextComponent("block.packagedauto.encoder.load")));
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
-		super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
+	protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
+		super.renderBg(matrixStack, partialTicks, mouseX, mouseY);
 		IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
 		for(int i = 0; i < 9; ++i) {
 			for(int j = 0; j < 9; ++j) {
 				Vector3i color = recipeType.getSlotColor(i*9+j);
 				RenderSystem.color4f(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
-				blit(matrixStack, guiLeft+8+j*18, guiTop+56+i*18, 258, 0, 16, 16, 512, 512);
+				blit(matrixStack, leftPos+8+j*18, topPos+56+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
 				Vector3i color = recipeType.getSlotColor(81+i*3+j);
 				RenderSystem.color4f(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
-				blit(matrixStack, guiLeft+198+j*18, guiTop+110+i*18, 258, 0, 16, 16, 512, 512);
+				blit(matrixStack, leftPos+198+j*18, topPos+110+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		RenderSystem.color4f(1F, 1F, 1F, 1F);
 	}
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
+	protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY) {
 		String s = container.tile.getDisplayName().getString();
-		font.drawString(matrixStack, s, xSize/2 - font.getStringWidth(s)/2, 6, 0x404040);
-		font.drawString(matrixStack, container.playerInventory.getDisplayName().getString(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
+		font.draw(matrixStack, s, imageWidth/2 - font.width(s)/2, 6, 0x404040);
+		font.draw(matrixStack, container.playerInventory.getDisplayName().getString(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
 		String str = container.patternItemHandler.recipeType.getShortDisplayName().getString();
-		font.drawString(matrixStack, str, 212 - font.getStringWidth(str)/2, 64, 0x404040);
+		font.draw(matrixStack, str, 212 - font.width(str)/2, 64, 0x404040);
 		for(Widget button : buttons) {
 			if(button.isMouseOver(mouseX, mouseY)) {
-				button.renderToolTip(matrixStack, mouseX-guiLeft, mouseY-guiTop);
+				button.renderToolTip(matrixStack, mouseX-leftPos, mouseY-topPos);
 				break;
 			}
 		}
@@ -104,15 +104,15 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		}
 
 		@Override
-		public void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
+		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
 			for(int i = 81; i < 90; ++i) {
 				ItemStack stack = container.tile.patternItemHandlers[id].getStackInSlot(i);
 				if(!stack.isEmpty()) {
-					RenderHelper.enableStandardItemLighting();
+					RenderHelper.turnBackOn();
 					RenderSystem.color4f(1F, 1F, 1F, 1F);
-					minecraft.getItemRenderer().renderItemIntoGUI(stack, x+1, y+1);
-					RenderHelper.disableStandardItemLighting();
+					minecraft.getItemRenderer().renderGuiItem(stack, x+1, y+1);
+					RenderHelper.turnOff();
 					break;
 				}
 			}
@@ -138,21 +138,21 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		}
 
 		@Override
-		public void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
+		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
 			IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
 			if(recipeType != null) {
 				Object rep = recipeType.getRepresentation();
 				if(rep instanceof TextureAtlasSprite) {
 					RenderSystem.color4f(1F, 1F, 1F, 1F);
-					minecraft.getTextureManager().bindTexture(PlayerContainer.LOCATION_BLOCKS_TEXTURE);
+					minecraft.getTextureManager().bind(PlayerContainer.BLOCK_ATLAS);
 					blit(matrixStack, x+1, y+1, 0, 16, 16, (TextureAtlasSprite)rep);
 				}
 				if(rep instanceof ItemStack) {
-					RenderHelper.enableStandardItemLighting();
+					RenderHelper.turnBackOn();
 					RenderSystem.color4f(1F, 1F, 1F, 1F);
-					minecraft.getItemRenderer().renderItemIntoGUI((ItemStack)rep, x+1, y+1);
-					RenderHelper.disableStandardItemLighting();
+					minecraft.getItemRenderer().renderGuiItem((ItemStack)rep, x+1, y+1);
+					RenderHelper.turnOff();
 				}
 			}
 		}

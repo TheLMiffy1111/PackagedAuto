@@ -24,10 +24,10 @@ import thelm.packagedauto.tile.UnpackagerTile.PackageTracker;
 public class UnpackagerBlock extends BaseBlock {
 
 	public static final UnpackagerBlock INSTANCE = new UnpackagerBlock();
-	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().group(PackagedAuto.ITEM_GROUP)).setRegistryName("packagedauto:unpackager");
+	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(PackagedAuto.ITEM_GROUP)).setRegistryName("packagedauto:unpackager");
 
 	protected UnpackagerBlock() {
-		super(AbstractBlock.Properties.create(Material.IRON).hardnessAndResistance(15F, 25F).sound(SoundType.METAL));
+		super(AbstractBlock.Properties.of(Material.METAL).strength(15F, 25F).sound(SoundType.METAL));
 		setRegistryName("packagedauto:unpackager");
 	}
 
@@ -37,15 +37,15 @@ public class UnpackagerBlock extends BaseBlock {
 	}
 
 	@Override
-	public void onPlayerDestroy(IWorld worldIn, BlockPos pos, BlockState state) {
-		TileEntity tileentity = worldIn.getTileEntity(pos);
+	public void destroy(IWorld worldIn, BlockPos pos, BlockState state) {
+		TileEntity tileentity = worldIn.getBlockEntity(pos);
 		if(tileentity instanceof UnpackagerTile) {
 			for(PackageTracker tracker : ((UnpackagerTile)tileentity).trackers) {
 				if(!tracker.isEmpty()) {
 					if(!tracker.toSend.isEmpty()) {
 						for(ItemStack stack : tracker.toSend) {
 							if(!stack.isEmpty()) {
-								InventoryHelper.spawnItemStack((World)worldIn, pos.getX(), pos.getY(), pos.getZ(), stack);
+								InventoryHelper.dropItemStack((World)worldIn, pos.getX(), pos.getY(), pos.getZ(), stack);
 							}
 						}
 					}
@@ -53,19 +53,19 @@ public class UnpackagerBlock extends BaseBlock {
 						List<IPackagePattern> patterns = tracker.recipe.getPatterns();
 						for(int i = 0; i < tracker.received.size() && i < patterns.size(); ++i) {
 							if(tracker.received.getBoolean(i)) {
-								InventoryHelper.spawnItemStack((World)worldIn, pos.getX(), pos.getY(), pos.getZ(), patterns.get(i).getOutput());
+								InventoryHelper.dropItemStack((World)worldIn, pos.getX(), pos.getY(), pos.getZ(), patterns.get(i).getOutput());
 							}
 						}
 					}
 				}
 			}
 		}
-		super.onPlayerDestroy(worldIn, pos, state);
+		super.destroy(worldIn, pos, state);
 	}
 
 	@Override
 	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving) {
-		TileEntity tileentity = worldIn.getTileEntity(pos);
+		TileEntity tileentity = worldIn.getBlockEntity(pos);
 		if(tileentity instanceof UnpackagerTile) {
 			((UnpackagerTile)tileentity).updatePowered();
 		}

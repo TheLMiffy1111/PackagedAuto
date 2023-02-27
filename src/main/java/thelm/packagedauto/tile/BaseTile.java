@@ -70,15 +70,15 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 	protected abstract ITextComponent getDefaultName();
 
 	@Override
-	public void read(BlockState blockState, CompoundNBT nbt) {
-		super.read(blockState, nbt);
+	public void load(BlockState blockState, CompoundNBT nbt) {
+		super.load(blockState, nbt);
 		readSync(nbt);
 		itemHandler.read(nbt);
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT nbt) {
-		super.write(nbt);
+	public CompoundNBT save(CompoundNBT nbt) {
+		super.save(nbt);
 		writeSync(nbt);
 		itemHandler.write(nbt);
 		return nbt;
@@ -86,7 +86,7 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 
 	public void readSync(CompoundNBT nbt) {
 		if(nbt.contains("Name")) {
-			customName = ITextComponent.Serializer.getComponentFromJson(nbt.getString("Name"));
+			customName = ITextComponent.Serializer.fromJson(nbt.getString("Name"));
 		}
 		energyStorage.read(nbt);
 	}
@@ -101,12 +101,12 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-		readSync(pkt.getNbtCompound());
+		readSync(pkt.getTag());
 	}
 
 	@Override
 	public SUpdateTileEntityPacket getUpdatePacket() {
-		return new SUpdateTileEntityPacket(pos, -10, getUpdateTag());
+		return new SUpdateTileEntityPacket(worldPosition, -10, getUpdateTag());
 	}
 
 	@Override
@@ -124,9 +124,9 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 	}
 
 	public void syncTile(boolean rerender) {
-		if(world != null && world.isBlockLoaded(pos)) {
-			BlockState state = world.getBlockState(pos);
-			world.notifyBlockUpdate(pos, state, state, 2 + (rerender ? 4 : 0));
+		if(level != null && level.isLoaded(worldPosition)) {
+			BlockState state = level.getBlockState(worldPosition);
+			level.sendBlockUpdated(worldPosition, state, state, 2 + (rerender ? 4 : 0));
 		}
 	}
 

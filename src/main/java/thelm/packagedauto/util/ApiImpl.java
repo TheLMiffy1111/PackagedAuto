@@ -47,7 +47,7 @@ public class ApiImpl extends PackagedAutoApi {
 	@Override
 	public IPackageRecipeType getRecipeType(int id) {
 		computeIds();
-		return IDS.getByValue(id);
+		return IDS.byId(id);
 	}
 
 	@Override

@@ -25,7 +25,7 @@ import thelm.packagedauto.recipe.ProcessingPackageRecipeType;
 public class EncoderTile extends BaseTile {
 
 	public static final TileEntityType<EncoderTile> TYPE_INSTANCE = (TileEntityType<EncoderTile>)TileEntityType.Builder.
-			create(EncoderTile::new, EncoderBlock.INSTANCE).
+			of(EncoderTile::new, EncoderBlock.INSTANCE).
 			build(null).setRegistryName("packagedauto:encoder");
 
 	public static int patternSlots = 20;
@@ -47,8 +47,8 @@ public class EncoderTile extends BaseTile {
 	}
 
 	@Override
-	public void setWorldAndPos(World world, BlockPos pos) {
-		super.setWorldAndPos(world, pos);
+	public void setLevelAndPosition(World world, BlockPos pos) {
+		super.setLevelAndPosition(world, pos);
 		for(EncoderPatternItemHandler inv : patternItemHandlers) {
 			inv.updateRecipeInfo(false);
 		}
@@ -78,7 +78,7 @@ public class EncoderTile extends BaseTile {
 	public void setPatternIndex(int patternIndex) {
 		this.patternIndex = patternIndex;
 		syncTile(false);
-		markDirty();
+		setChanged();
 	}
 
 	public void saveRecipeList(boolean single) {
@@ -98,7 +98,7 @@ public class EncoderTile extends BaseTile {
 					recipeList.add(inv.recipeInfo);
 				}
 			}
-			IPackageRecipeList recipeListItem = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(world, stack);
+			IPackageRecipeList recipeListItem = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(level, stack);
 			recipeListItem.setRecipeList(recipeList);
 			CompoundNBT nbt = recipeListItem.write(new CompoundNBT());
 			itemHandler.getStackInSlot(0).setTag(nbt);
@@ -108,7 +108,7 @@ public class EncoderTile extends BaseTile {
 	public void loadRecipeList() {
 		ItemStack stack = itemHandler.getStackInSlot(0);
 		if(stack.getItem() instanceof IPackageRecipeListItem) {
-			IPackageRecipeList recipeListItem = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(world, stack);
+			IPackageRecipeList recipeListItem = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(level, stack);
 			List<IPackageRecipeInfo> recipeList = recipeListItem.getRecipeList();
 			for(int i = 0; i < patternItemHandlers.length; ++i) {
 				EncoderPatternItemHandler inv = patternItemHandlers[i];

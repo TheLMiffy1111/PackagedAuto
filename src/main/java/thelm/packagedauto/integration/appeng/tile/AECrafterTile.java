@@ -39,14 +39,14 @@ public class AECrafterTile extends CrafterTile implements IGridHost, IActionHost
 	@Override
 	public void tick() {
 		super.tick();
-		if(drawMEEnergy && !world.isRemote && world.getGameTime() % 8 == 0 && getActionableNode().isActive()) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0 && getActionableNode().isActive()) {
 			chargeMEEnergy();
 		}
 	}
 
 	@Override
-	public void remove() {
-		super.remove();
+	public void setRemoved() {
+		super.setRemoved();
 		if(gridNode != null) {
 			gridNode.destroy();
 		}
@@ -69,12 +69,12 @@ public class AECrafterTile extends CrafterTile implements IGridHost, IActionHost
 
 	@Override
 	public void securityBreak() {
-		world.destroyBlock(pos, true);
+		level.destroyBlock(worldPosition, true);
 	}
 
 	@Override
 	public IGridNode getActionableNode() {
-		if(gridNode == null && world != null && !world.isRemote) {
+		if(gridNode == null && level != null && !level.isClientSide) {
 			gridNode = Api.instance().grid().createGridNode(gridBlock);
 			gridNode.setPlayerID(placerID);
 			gridNode.updateState();
@@ -134,16 +134,16 @@ public class AECrafterTile extends CrafterTile implements IGridHost, IActionHost
 	}
 
 	@Override
-	public void read(BlockState blockState, CompoundNBT nbt) {
-		super.read(blockState, nbt);
-		if(world != null && nbt.contains("Node")) {
+	public void load(BlockState blockState, CompoundNBT nbt) {
+		super.load(blockState, nbt);
+		if(level != null && nbt.contains("Node")) {
 			getActionableNode().loadFromNBT("Node", nbt);
 		}
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT nbt) {
-		super.write(nbt);
+	public CompoundNBT save(CompoundNBT nbt) {
+		super.save(nbt);
 		if(gridNode != null) {
 			gridNode.saveToNBT("Node", nbt);
 		}

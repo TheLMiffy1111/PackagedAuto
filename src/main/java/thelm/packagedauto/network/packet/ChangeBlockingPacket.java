@@ -22,8 +22,8 @@ public class ChangeBlockingPacket {
 	public static void handle(ChangeBlockingPacket pkt, Supplier<NetworkEvent.Context> ctx) {
 		ServerPlayerEntity player = ctx.get().getSender();
 		ctx.get().enqueueWork(()->{
-			if(player.openContainer instanceof UnpackagerContainer) {
-				UnpackagerContainer container = (UnpackagerContainer)player.openContainer;
+			if(player.containerMenu instanceof UnpackagerContainer) {
+				UnpackagerContainer container = (UnpackagerContainer)player.containerMenu;
 				container.tile.changeBlockingMode();
 			}
 		});

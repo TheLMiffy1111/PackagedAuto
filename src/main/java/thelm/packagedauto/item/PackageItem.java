@@ -38,9 +38,9 @@ public class PackageItem extends Item implements IPackageItem {
 	}
 
 	@Override
-	public ActionResult<ItemStack> onItemRightClick(World worldIn, PlayerEntity playerIn, Hand handIn) {
-		if(!worldIn.isRemote && playerIn.isSneaking()) {
-			ItemStack stack = playerIn.getHeldItem(handIn).copy();
+	public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
+		if(!worldIn.isClientSide && playerIn.isShiftKeyDown()) {
+			ItemStack stack = playerIn.getItemInHand(handIn).copy();
 			ItemStack stack1 = stack.split(1);
 			IPackageRecipeInfo recipeInfo = getRecipeInfo(stack1);
 			if(recipeInfo != null) {
@@ -51,26 +51,26 @@ public class PackageItem extends Item implements IPackageItem {
 					List<ItemStack> inputs = pattern.getInputs();
 					for(int i = 0; i < inputs.size(); ++i) {
 						ItemStack input = inputs.get(i).copy();
-						if(!playerIn.inventory.addItemStackToInventory(input)) {
-							ItemEntity item = new ItemEntity(worldIn, playerIn.getPosX(), playerIn.getPosY(), playerIn.getPosZ(), input);
-							item.setThrowerId(playerIn.getUniqueID());
-							worldIn.addEntity(item);
+						if(!playerIn.inventory.add(input)) {
+							ItemEntity item = new ItemEntity(worldIn, playerIn.getX(), playerIn.getY(), playerIn.getZ(), input);
+							item.setThrower(playerIn.getUUID());
+							worldIn.addFreshEntity(item);
 						}
 					}
 				}
 			}
 			return new ActionResult<>(ActionResultType.SUCCESS, stack);
 		}
-		return new ActionResult<>(ActionResultType.PASS, playerIn.getHeldItem(handIn));
+		return new ActionResult<>(ActionResultType.PASS, playerIn.getItemInHand(handIn));
 	}
 
 	@Override
-	public void addInformation(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+	public void appendHoverText(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		IPackageRecipeInfo recipe = getRecipeInfo(stack);
 		if(recipe != null) {
-			tooltip.add(recipe.getRecipeType().getDisplayName().appendString(": "));
+			tooltip.add(recipe.getRecipeType().getDisplayName().append(": "));
 			for(ItemStack is : recipe.getOutputs()) {
-				tooltip.add(new StringTextComponent(is.getCount()+" ").appendSibling(is.getDisplayName()));
+				tooltip.add(new StringTextComponent(is.getCount()+" ").append(is.getDisplayName()));
 			}
 			int index = getIndex(stack);
 			tooltip.add(new TranslationTextComponent("item.packagedauto.package.index", index));
@@ -78,10 +78,10 @@ public class PackageItem extends Item implements IPackageItem {
 			List<ItemStack> recipeInputs = recipe.getInputs();
 			List<ItemStack> packageItems = recipeInputs.subList(9*index, Math.min(9*index+9, recipeInputs.size()));
 			for(ItemStack is : packageItems) {
-				tooltip.add(new StringTextComponent(is.getCount()+" ").appendSibling(is.getDisplayName()));
+				tooltip.add(new StringTextComponent(is.getCount()+" ").append(is.getDisplayName()));
 			}
 		}
-		super.addInformation(stack, worldIn, tooltip, flagIn);
+		super.appendHoverText(stack, worldIn, tooltip, flagIn);
 	}
 
 	@Override

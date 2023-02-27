@@ -31,38 +31,38 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 	public void init() {
 		buttons.clear();
 		super.init();
-		addButton(new ButtonChangeBlocking(guiLeft+98, guiTop+16));
+		addButton(new ButtonChangeBlocking(leftPos+98, topPos+16));
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
-		super.drawGuiContainerBackgroundLayer(matrixStack, partialTicks, mouseX, mouseY);
+	protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
+		super.renderBg(matrixStack, partialTicks, mouseX, mouseY);
 		int scaledEnergy = container.tile.getScaledEnergy(40);
-		blit(matrixStack, guiLeft+10, guiTop+10+40-scaledEnergy, 176, 40-scaledEnergy, 12, scaledEnergy);
+		blit(matrixStack, leftPos+10, topPos+10+40-scaledEnergy, 176, 40-scaledEnergy, 12, scaledEnergy);
 		for(int i = 0; i < container.tile.trackers.length; ++i) {
 			PackageTracker tracker = container.tile.trackers[i];
 			for(int j = 0; j < tracker.amount; ++j) {
 				if(tracker.received.getBoolean(j)) {
-					blit(matrixStack, guiLeft+115+6*j, guiTop+16+6*i, 176, 45, 6, 5);
+					blit(matrixStack, leftPos+115+6*j, topPos+16+6*i, 176, 45, 6, 5);
 				}
 				else {
-					blit(matrixStack, guiLeft+115+6*j, guiTop+16+6*i, 176, 40, 6, 5);
+					blit(matrixStack, leftPos+115+6*j, topPos+16+6*i, 176, 40, 6, 5);
 				}
 			}
 		}
 	}
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(MatrixStack matrixStack, int mouseX, int mouseY) {
+	protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY) {
 		String s = container.tile.getDisplayName().getString();
-		font.drawString(matrixStack, s, xSize/2 - font.getStringWidth(s)/2, 6, 0x404040);
-		font.drawString(matrixStack, container.playerInventory.getDisplayName().getString(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
-		if(mouseX-guiLeft >= 10 && mouseY-guiTop >= 10 && mouseX-guiLeft <= 21 && mouseY-guiTop <= 49) {
-			renderTooltip(matrixStack, new StringTextComponent(container.tile.getEnergyStorage().getEnergyStored()+" / "+container.tile.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-guiLeft, mouseY-guiTop);
+		font.draw(matrixStack, s, imageWidth/2 - font.width(s)/2, 6, 0x404040);
+		font.draw(matrixStack, container.playerInventory.getDisplayName().getString(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
+		if(mouseX-leftPos >= 10 && mouseY-topPos >= 10 && mouseX-leftPos <= 21 && mouseY-topPos <= 49) {
+			renderTooltip(matrixStack, new StringTextComponent(container.tile.getEnergyStorage().getEnergyStored()+" / "+container.tile.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
 		}
 		for(Widget button : buttons) {
 			if(button.isMouseOver(mouseX, mouseY)) {
-				button.renderToolTip(matrixStack, mouseX-guiLeft, mouseY-guiTop);
+				button.renderToolTip(matrixStack, mouseX-leftPos, mouseY-topPos);
 				break;
 			}
 		}
@@ -75,10 +75,10 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 		}
 
 		@Override
-		public void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderWidget(matrixStack, mouseX, mouseY, partialTicks);
+		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
-			minecraft.getTextureManager().bindTexture(BACKGROUND);
+			minecraft.getTextureManager().bind(BACKGROUND);
 			blit(matrixStack, x+1, y+2, 176, container.tile.blocking ? 64 : 50, 14, 14);
 		}
 
