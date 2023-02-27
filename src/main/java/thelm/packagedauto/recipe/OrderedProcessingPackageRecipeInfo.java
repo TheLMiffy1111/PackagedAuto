@@ -102,12 +102,12 @@ public class OrderedProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 				return false;
 			}
 			for(int i = 0; i < input.size(); ++i) {
-				if(!ItemStack.isSameItemSameTags(input.get(i), other.input.get(i))) {
+				if(!ItemStack.matches(input.get(i), other.input.get(i))) {
 					return false;
 				}
 			}
 			for(int i = 0; i < output.size(); ++i) {
-				if(!ItemStack.isSameItemSameTags(output.get(i), other.output.get(i))) {
+				if(!ItemStack.matches(output.get(i), other.output.get(i))) {
 					return false;
 				}
 			}

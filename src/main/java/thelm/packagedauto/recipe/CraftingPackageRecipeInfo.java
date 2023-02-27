@@ -145,7 +145,7 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 				return false;
 			}
 			for(int i = 0; i < input.size(); ++i) {
-				if(!ItemStack.isSameItemSameTags(input.get(i), other.input.get(i))) {
+				if(!ItemStack.matches(input.get(i), other.input.get(i))) {
 					return false;
 				}
 			}

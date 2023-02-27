@@ -116,7 +116,7 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 		if(!isBusy() && patternDetails instanceof PackageCraftingPatternDetails pattern) {
 			ItemStack slotStack = itemHandler.getStackInSlot(9);
 			ItemStack outputStack = pattern.pattern.getOutput();
-			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
+			if(slotStack.isEmpty() || ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
 				currentPattern = pattern.pattern;
 				lockPattern = true;
 				List<ItemStack> inputs = pattern.pattern.getInputs();
