@@ -150,9 +150,6 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 				if(!ItemStack.matches(input.get(i), other.input.get(i))) {
 					return false;
 				}
-				if(!ItemStack.tagMatches(input.get(i), other.input.get(i))) {
-					return false;
-				}
 			}
 			return recipe.equals(other.recipe);
 		}

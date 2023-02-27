@@ -17,7 +17,7 @@ public class EncoderGuiHandler implements IGuiContainerHandler<EncoderScreen> {
 	@Override
 	public Collection<IGuiClickableArea> getGuiClickableAreas(EncoderScreen containerScreen, double mouseX, double mouseY) {
 		Rectangle2d area = new Rectangle2d(172, 129, 22, 16);
-		List<ResourceLocation> categories = containerScreen.container.patternItemHandler.recipeType.getJEICategories();
+		List<ResourceLocation> categories = containerScreen.menu.patternItemHandler.recipeType.getJEICategories();
 		if(!categories.isEmpty()) {
 			return Collections.singleton(new IGuiClickableArea() {
 				@Override

@@ -41,7 +41,7 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 	public void init() {
 		buttons.clear();
 		super.init();
-		int patternSlots = container.tile.patternItemHandlers.length;
+		int patternSlots = menu.tile.patternItemHandlers.length;
 		for(int i = 0; i < patternSlots; ++i) {
 			addButton(new ButtonPatternSlot(i, leftPos+29+(i%10)*18, topPos+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
 		}
@@ -53,7 +53,7 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 	@Override
 	protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
 		super.renderBg(matrixStack, partialTicks, mouseX, mouseY);
-		IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
+		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
 		for(int i = 0; i < 9; ++i) {
 			for(int j = 0; j < 9; ++j) {
 				Vector3i color = recipeType.getSlotColor(i*9+j);
@@ -73,10 +73,10 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 
 	@Override
 	protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY) {
-		String s = container.tile.getDisplayName().getString();
+		String s = menu.tile.getDisplayName().getString();
 		font.draw(matrixStack, s, imageWidth/2 - font.width(s)/2, 6, 0x404040);
-		font.draw(matrixStack, container.playerInventory.getDisplayName().getString(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
-		String str = container.patternItemHandler.recipeType.getShortDisplayName().getString();
+		font.draw(matrixStack, menu.playerInventory.getDisplayName().getString(), menu.getPlayerInvX(), menu.getPlayerInvY()-11, 0x404040);
+		String str = menu.patternItemHandler.recipeType.getShortDisplayName().getString();
 		font.draw(matrixStack, str, 212 - font.width(str)/2, 64, 0x404040);
 		for(Widget button : buttons) {
 			if(button.isMouseOver(mouseX, mouseY)) {
@@ -97,7 +97,7 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 
 		@Override
 		protected int getYImage(boolean mouseOver) {
-			if(container.tile.patternIndex == id) {
+			if(menu.tile.patternIndex == id) {
 				return 2;
 			}
 			return super.getYImage(mouseOver);
@@ -107,7 +107,7 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
 			for(int i = 81; i < 90; ++i) {
-				ItemStack stack = container.tile.patternItemHandlers[id].getStackInSlot(i);
+				ItemStack stack = menu.tile.patternItemHandlers[id].getStackInSlot(i);
 				if(!stack.isEmpty()) {
 					RenderHelper.turnBackOn();
 					RenderSystem.color4f(1F, 1F, 1F, 1F);
@@ -126,8 +126,8 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new SetPatternIndexPacket(id));
-			container.tile.setPatternIndex(id);
-			container.setupSlots();
+			menu.tile.setPatternIndex(id);
+			menu.setupSlots();
 		}
 	}
 
@@ -140,7 +140,7 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		@Override
 		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
-			IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
+			IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
 			if(recipeType != null) {
 				Object rep = recipeType.getRepresentation();
 				if(rep instanceof TextureAtlasSprite) {
@@ -166,8 +166,8 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		public void onClick(double mouseX, double mouseY) {
 			boolean reverse = hasShiftDown();
 			PacketHandler.INSTANCE.sendToServer(new CycleRecipeTypePacket(reverse));
-			container.patternItemHandler.cycleRecipeType(reverse);
-			container.setupSlots();
+			menu.patternItemHandler.cycleRecipeType(reverse);
+			menu.setupSlots();
 		}
 	}
 
@@ -200,8 +200,8 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new LoadRecipeListPacket());
-			container.tile.loadRecipeList();
-			container.setupSlots();
+			menu.tile.loadRecipeList();
+			menu.setupSlots();
 		}
 	}
 }

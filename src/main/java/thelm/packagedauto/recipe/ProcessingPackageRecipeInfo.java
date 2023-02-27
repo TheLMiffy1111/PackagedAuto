@@ -106,15 +106,9 @@ public class ProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 				if(!ItemStack.matches(input.get(i), other.input.get(i))) {
 					return false;
 				}
-				if(!ItemStack.tagMatches(input.get(i), other.input.get(i))) {
-					return false;
-				}
 			}
 			for(int i = 0; i < output.size(); ++i) {
 				if(!ItemStack.matches(output.get(i), other.output.get(i))) {
-					return false;
-				}
-				if(!ItemStack.tagMatches(output.get(i), other.output.get(i))) {
 					return false;
 				}
 			}

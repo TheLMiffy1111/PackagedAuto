@@ -35,18 +35,18 @@ public class PackagerScreen extends BaseScreen<PackagerContainer> {
 	@Override
 	protected void renderBg(MatrixStack matrixStack, float partialTicks, int mouseX, int mouseY) {
 		super.renderBg(matrixStack, partialTicks, mouseX, mouseY);
-		blit(matrixStack, leftPos+102, topPos+53, 176, 0, container.tile.getScaledProgress(22), 16);
-		int scaledEnergy = container.tile.getScaledEnergy(40);
+		blit(matrixStack, leftPos+102, topPos+53, 176, 0, menu.tile.getScaledProgress(22), 16);
+		int scaledEnergy = menu.tile.getScaledEnergy(40);
 		blit(matrixStack, leftPos+10, topPos+10+40-scaledEnergy, 176, 16+40-scaledEnergy, 12, scaledEnergy);
 	}
 
 	@Override
 	protected void renderLabels(MatrixStack matrixStack, int mouseX, int mouseY) {
-		String s = container.tile.getDisplayName().getString();
+		String s = menu.tile.getDisplayName().getString();
 		font.draw(matrixStack, s, imageWidth/2 - font.width(s)/2, 6, 0x404040);
-		font.draw(matrixStack, container.playerInventory.getDisplayName().getString(), container.getPlayerInvX(), container.getPlayerInvY()-11, 0x404040);
+		font.draw(matrixStack, menu.playerInventory.getDisplayName().getString(), menu.getPlayerInvX(), menu.getPlayerInvY()-11, 0x404040);
 		if(mouseX-leftPos >= 10 && mouseY-topPos >= 10 && mouseX-leftPos <= 21 && mouseY-topPos <= 49) {
-			renderTooltip(matrixStack, new StringTextComponent(container.tile.getEnergyStorage().getEnergyStored()+" / "+container.tile.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
+			renderTooltip(matrixStack, new StringTextComponent(menu.tile.getEnergyStorage().getEnergyStored()+" / "+menu.tile.getEnergyStorage().getMaxEnergyStored()+" FE"), mouseX-leftPos, mouseY-topPos);
 		}
 		for(Widget button : buttons) {
 			if(button.isMouseOver(mouseX, mouseY)) {
@@ -67,18 +67,18 @@ public class PackagerScreen extends BaseScreen<PackagerContainer> {
 			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
 			minecraft.getTextureManager().bind(BACKGROUND);
-			blit(matrixStack, x+1, y+2, 176, 56+14*container.tile.mode.ordinal(), 14, 14);
+			blit(matrixStack, x+1, y+2, 176, 56+14*menu.tile.mode.ordinal(), 14, 14);
 		}
 
 		@Override
 		public void renderToolTip(MatrixStack matrixStack, int mouseX, int mouseY) {
-			renderTooltip(matrixStack, container.tile.mode.getTooltip(), mouseX, mouseY);
+			renderTooltip(matrixStack, menu.tile.mode.getTooltip(), mouseX, mouseY);
 		}
 
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new ChangePackagingPacket());
-			container.tile.changePackagingMode();
+			menu.tile.changePackagingMode();
 		}
 	}
 }

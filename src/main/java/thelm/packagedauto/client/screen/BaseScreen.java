@@ -14,11 +14,11 @@ import thelm.packagedauto.slot.FalseCopySlot;
 
 public abstract class BaseScreen<C extends BaseContainer<?>> extends ContainerScreen<C> {
 
-	public final C container;
+	public final C menu;
 
 	public BaseScreen(C container, PlayerInventory playerInventory, ITextComponent title) {
 		super(container, playerInventory, title);
-		this.container = container;
+		this.menu = container;
 	}
 
 	@Override
