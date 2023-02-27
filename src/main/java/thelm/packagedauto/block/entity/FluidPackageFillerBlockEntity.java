@@ -113,7 +113,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 		}
 		ItemStack slotStack = itemHandler.getStackInSlot(1);
 		ItemStack outputStack = VolumePackageItem.tryMakeVolumePackage(currentFluid);
-		return slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
+		return slotStack.isEmpty() || ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
 	}
 
 	protected boolean canFinish() {

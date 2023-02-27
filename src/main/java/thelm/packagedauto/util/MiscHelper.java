@@ -280,7 +280,7 @@ public class MiscHelper implements IMiscHelper {
 		f:for(ItemStack req : condensedRequired) {
 			for(ItemStack offer : condensedOffered) {
 				if(req.getCount() <= offer.getCount() && req.getItem() == offer.getItem() &&
-						(!req.hasTag() || ItemStack.isSameItemSameTags(req, offer))) {
+						(!req.hasTag() || ItemStack.tagMatches(req, offer))) {
 					continue f;
 				}
 			}
@@ -294,7 +294,7 @@ public class MiscHelper implements IMiscHelper {
 			for(ItemStack offer : offered) {
 				if(!offer.isEmpty()) {
 					if(req.getItem() == offer.getItem() &&
-							(!req.hasTag() || ItemStack.isSameItemSameTags(req, offer))) {
+							(!req.hasTag() || ItemStack.tagMatches(req, offer))) {
 						int toRemove = Math.min(count, offer.getCount());
 						offer.shrink(toRemove);
 						count -= toRemove;
