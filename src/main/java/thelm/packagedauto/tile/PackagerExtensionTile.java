@@ -146,8 +146,8 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 			return false;
 		}
 		ItemStack slotStack = itemHandler.getStackInSlot(9);
-		ItemStack outset = currentPattern.getOutput();
-		return slotStack.isEmpty() || slotStack.getItem() == outset.getItem() && ItemStack.tagMatches(slotStack, outset) && slotStack.getCount()+1 <= outset.getMaxStackSize();
+		ItemStack outputStack = currentPattern.getOutput();
+		return slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
 	}
 
 	protected boolean canFinish() {

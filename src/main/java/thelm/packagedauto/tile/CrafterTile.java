@@ -78,8 +78,8 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 		if(!isBusy() && recipeInfo instanceof ICraftingPackageRecipeInfo) {
 			ICraftingPackageRecipeInfo recipe = (ICraftingPackageRecipeInfo)recipeInfo;
 			ItemStack slotStack = itemHandler.getStackInSlot(9);
-			ItemStack outset = recipe.getOutput();
-			if(slotStack.isEmpty() || slotStack.getItem() == outset.getItem() && ItemStack.tagMatches(slotStack, outset) && slotStack.getCount()+outset.getCount() <= outset.getMaxStackSize()) {
+			ItemStack outputStack = recipe.getOutput();
+			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+outputStack.getCount() <= outputStack.getMaxStackSize()) {
 				currentRecipe = recipe;
 				isWorking = true;
 				remainingProgress = energyReq;

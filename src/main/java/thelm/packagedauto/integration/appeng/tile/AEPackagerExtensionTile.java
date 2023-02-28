@@ -87,8 +87,8 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 		if(!isBusy() && patternDetails instanceof PackageCraftingPatternDetails) {
 			PackageCraftingPatternDetails pattern = (PackageCraftingPatternDetails)patternDetails;
 			ItemStack slotStack = itemHandler.getStackInSlot(9);
-			ItemStack outset = pattern.pattern.getOutput();
-			if(slotStack.isEmpty() || slotStack.getItem() == outset.getItem() && ItemStack.tagMatches(slotStack, outset) && slotStack.getCount()+1 <= outset.getMaxStackSize()) {
+			ItemStack outputStack = pattern.pattern.getOutput();
+			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
 				currentPattern = pattern.pattern;
 				lockPattern = true;
 				for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
@@ -99,10 +99,10 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 		}
 		else if(!isBusy()) {
 			ItemStack slotStack = itemHandler.getStackInSlot(9);
-			ItemStack outset = patternDetails.getOutputs().get(0).createItemStack();
-			if(outset.getItem() instanceof IPackageItem && (slotStack.isEmpty() || slotStack.getItem() == outset.getItem() && ItemStack.tagMatches(slotStack, outset) && slotStack.getCount()+1 <= outset.getMaxStackSize())) {
-				IPackageItem packageItem = (IPackageItem)outset.getItem();
-				currentPattern = packageItem.getRecipeInfo(outset).getPatterns().get(packageItem.getIndex(outset));
+			ItemStack outputStack = patternDetails.getOutputs().get(0).createItemStack();
+			if(outputStack.getItem() instanceof IPackageItem && (slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize())) {
+				IPackageItem packageItem = (IPackageItem)outputStack.getItem();
+				currentPattern = packageItem.getRecipeInfo(outputStack).getPatterns().get(packageItem.getIndex(outputStack));
 				lockPattern = true;
 				for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
 					itemHandler.setStackInSlot(i, table.getItem(i).copy());
