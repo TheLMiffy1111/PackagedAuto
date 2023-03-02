@@ -93,12 +93,12 @@ minecraft {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.19.3-44.1.8"
+    minecraft "net.minecraftforge:forge:1.19.3-44.1.20"
 
     implementation fg.deobf("appeng:appliedenergistics2-forge:13.0.9-beta")
     implementation fg.deobf("mezz.jei:jei-1.19.3-forge:12.1.1.9")
     //implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.19.2:10.0.29")
-    //implementation fg.deobf("vazkii.patchouli:Patchouli:1.19.2-77")
+    implementation fg.deobf("vazkii.patchouli:Patchouli:1.19.3-78")
     //implementation fg.deobf("com.simibubi.create:create-1.19.2:0.5.0.h-21:all")
     //implementation fg.deobf("mekanism:Mekanism:1.19.2-10.3.5.474")
     //implementation fg.deobf("mekanism:Mekanism:1.19.2-10.3.5.474:generators")
