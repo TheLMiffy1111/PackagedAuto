@@ -74,6 +74,8 @@ dependencies {
     }
 
     deobfCompile "curse.maven:applied-energistics-2-223794:2747063"
+    deobfCompile "curse.maven:cucumber-272335:2645867"
+    deobfCompile "curse.maven:extended-crafting-268387:2777071"
     deobfCompile "curse.maven:redstone-flux-270789:2920436"
     deobfCompile "curse.maven:cofh-core-69162:2920433"
     deobfCompile "curse.maven:cofh-world-271384:2920434"
