@@ -100,10 +100,10 @@ dependencies {
 
     implementation fg.deobf("appeng:appliedenergistics2-forge:11.7.0")
     implementation fg.deobf("mezz.jei:jei-1.18.2:9.7.2.1001")
-    implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.18.2:9.1.197")
+    implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.18.2:9.1.205")
     implementation fg.deobf("vazkii.patchouli:Patchouli:1.18.2-71.1")
     implementation fg.deobf("com.jozufozu.flywheel:flywheel-forge-1.18.2:0.6.8.a-99")
-    implementation fg.deobf("com.simibubi.create:create-1.18.2:0.5.0.h-243:all")
+    implementation fg.deobf("com.simibubi.create:create-1.18.2:0.5.0.i-250:all")
     implementation fg.deobf("mekanism:Mekanism:1.18.2-10.2.5.465")
     implementation fg.deobf("mekanism:Mekanism:1.18.2-10.2.5.465:generators")
     implementation fg.deobf("codechicken:CodeChickenLib:1.18.2-4.1.3.480:universal")
