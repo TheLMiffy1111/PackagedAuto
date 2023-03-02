@@ -97,11 +97,11 @@ dependencies {
 
     implementation fg.deobf("appeng:appliedenergistics2-forge:12.9.2")
     implementation fg.deobf("mezz.jei:jei-1.19.2-forge:11.5.2.1007")
-    implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.19.2:10.0.29")
+    implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.19.2:10.1.35")
     implementation fg.deobf("vazkii.patchouli:Patchouli:1.19.2-77")
-    implementation fg.deobf("com.simibubi.create:create-1.19.2:0.5.0.h-21:all")
-    implementation fg.deobf("mekanism:Mekanism:1.19.2-10.3.5.474")
-    implementation fg.deobf("mekanism:Mekanism:1.19.2-10.3.5.474:generators")
+    implementation fg.deobf("com.simibubi.create:create-1.19.2:0.5.0.i-23:all")
+    implementation fg.deobf("mekanism:Mekanism:1.19.2-10.3.8.477")
+    implementation fg.deobf("mekanism:Mekanism:1.19.2-10.3.8.477:generators")
 
     //JitPack
 
