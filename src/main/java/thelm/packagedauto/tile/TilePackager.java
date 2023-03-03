@@ -456,6 +456,7 @@ public class TilePackager extends TileBase implements IGridHost, IActionHost, IC
 
 	public void changePackagingMode() {
 		mode = Mode.values()[((mode.ordinal()+1) % 3)];
+		((InventoryPackager)inventory).updatePatternList();
 		markDirty();
 	}
 
