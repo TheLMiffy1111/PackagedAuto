@@ -360,6 +360,7 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 
 	public void changePackagingMode() {
 		mode = Mode.values()[((mode.ordinal()+1) % 3)];
+		((PackagerItemHandler)itemHandler).updatePatternList();
 		setChanged();
 	}
 
