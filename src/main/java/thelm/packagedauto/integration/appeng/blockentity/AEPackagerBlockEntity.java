@@ -65,13 +65,6 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 	}
 
 	@Override
-	public void setPlacer(Player placer) {
-		if(placer instanceof ServerPlayer serverPlacer) {
-			placerID = IPlayerRegistry.getPlayerId(serverPlacer);
-		}
-	}
-
-	@Override
 	public IGridNode getGridNode(Direction dir) {
 		return getActionableNode();
 	}
@@ -101,7 +94,9 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 			gridNode.addService(ICraftingProvider.class, this);
 			gridNode.setIdlePowerUsage(1);
 			gridNode.setInWorldNode(true);
-			gridNode.setOwningPlayerId(placerID);
+			if(ownerUUID != null) {
+				gridNode.setOwningPlayerId(IPlayerRegistry.getMapping(level).getPlayerId(ownerUUID));
+			}
 		}
 		return gridNode;
 	}
