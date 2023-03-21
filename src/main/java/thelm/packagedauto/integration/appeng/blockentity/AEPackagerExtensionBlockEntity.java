@@ -56,6 +56,22 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 	}
 
 	@Override
+	public void setRemoved() {
+		super.setRemoved();
+		if(gridNode != null) {
+			gridNode.destroy();
+		}
+	}
+
+	@Override
+	public void onChunkUnloaded() {
+		super.onChunkUnloaded();
+		if(gridNode != null) {
+			gridNode.destroy();
+		}
+	}
+
+	@Override
 	public IGridNode getGridNode(Direction dir) {
 		return getActionableNode();
 	}
