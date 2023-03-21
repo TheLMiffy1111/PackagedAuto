@@ -1,5 +1,8 @@
 package thelm.packagedauto.integration.appeng.tile;
 
+import com.mojang.authlib.GameProfile;
+
+import appeng.api.IAppEngApi;
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
 import appeng.api.networking.GridFlags;
@@ -53,11 +56,6 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 	}
 
 	@Override
-	public void setPlacer(PlayerEntity placer) {
-		placerID = Api.instance().registries().players().getID(placer);
-	}
-
-	@Override
 	public IGridNode getGridNode(AEPartLocation dir) {
 		return getActionableNode();
 	}
@@ -75,8 +73,11 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 	@Override
 	public IGridNode getActionableNode() {
 		if(gridNode == null && level != null && !level.isClientSide) {
-			gridNode = Api.instance().grid().createGridNode(gridBlock);
-			gridNode.setPlayerID(placerID);
+			IAppEngApi api = Api.instance();
+			gridNode = api.grid().createGridNode(gridBlock);
+			if(ownerUUID != null) {
+				gridNode.setPlayerID(api.registries().players().getID(new GameProfile(ownerUUID, "[UNKNOWN]")));
+			}
 			gridNode.updateState();
 		}
 		return gridNode;

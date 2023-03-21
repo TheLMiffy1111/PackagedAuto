@@ -60,14 +60,14 @@ public abstract class BaseBlock extends Block {
 					((BaseTile)tileentity).setCustomName(stack.getDisplayName());
 				}
 				if(placer instanceof PlayerEntity) {
-					((BaseTile)tileentity).setPlacer((PlayerEntity)placer);
+					((BaseTile)tileentity).setOwner((PlayerEntity)placer);
 				}
 			}
 		}
 	}
 
 	@Override
-	public void onPlace(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+	public void onRemove(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
 		TileEntity tileentity = worldIn.getBlockEntity(pos);
 		if(tileentity instanceof BaseTile) {
 			IItemHandler handler = ((BaseTile)tileentity).getItemHandler();
@@ -78,7 +78,7 @@ public abstract class BaseBlock extends Block {
 				}
 			}
 		}
-		super.onPlace(state, worldIn, pos, newState, isMoving);
+		super.onRemove(state, worldIn, pos, newState, isMoving);
 	}
 
 	@Override

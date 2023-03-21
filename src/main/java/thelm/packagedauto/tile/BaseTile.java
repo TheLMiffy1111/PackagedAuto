@@ -1,5 +1,7 @@
 package thelm.packagedauto.tile;
 
+import java.util.UUID;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.INamedContainerProvider;
@@ -23,6 +25,8 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 	protected BaseItemHandler<?> itemHandler = new BaseItemHandler<>(this, 0);
 	protected EnergyStorage energyStorage = new EnergyStorage(this, 0);
 	public ITextComponent customName = null;
+	protected UUID ownerUUID = null;
+	@Deprecated
 	protected int placerID = -1;
 
 	public BaseTile(TileEntityType<?> tileEntityType) {
@@ -45,12 +49,8 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 		this.energyStorage = energyStorage;
 	}
 
-	public void setPlacer(PlayerEntity placer) {
-
-	}
-
-	public int getPlacerID() {
-		return placerID;
+	public void setOwner(PlayerEntity owner) {
+		ownerUUID = owner.getUUID();
 	}
 
 	@Override
@@ -74,6 +74,10 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 		super.load(blockState, nbt);
 		readSync(nbt);
 		itemHandler.read(nbt);
+		ownerUUID = null;
+		if(nbt.hasUUID("OwnerUUID")) {
+			ownerUUID = nbt.getUUID("OwnerUUID");
+		}
 	}
 
 	@Override
@@ -81,6 +85,9 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 		super.save(nbt);
 		writeSync(nbt);
 		itemHandler.write(nbt);
+		if(ownerUUID != null) {
+			nbt.putUUID("OwnerUUID", ownerUUID);
+		}
 		return nbt;
 	}
 

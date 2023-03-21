@@ -1,5 +1,8 @@
 package thelm.packagedauto.integration.appeng.tile;
 
+import com.mojang.authlib.GameProfile;
+
+import appeng.api.IAppEngApi;
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
 import appeng.api.networking.IGrid;
@@ -20,7 +23,6 @@ import appeng.api.util.AEPartLocation;
 import appeng.core.Api;
 import appeng.me.helpers.MachineSource;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -59,11 +61,6 @@ public class AEPackagerTile extends PackagerTile implements IGridHost, IActionHo
 	}
 
 	@Override
-	public void setPlacer(PlayerEntity placer) {
-		placerID = Api.instance().registries().players().getID(placer);
-	}
-
-	@Override
 	public IGridNode getGridNode(AEPartLocation dir) {
 		return getActionableNode();
 	}
@@ -81,8 +78,11 @@ public class AEPackagerTile extends PackagerTile implements IGridHost, IActionHo
 	@Override
 	public IGridNode getActionableNode() {
 		if(gridNode == null && level != null) {
-			gridNode = Api.instance().grid().createGridNode(gridBlock);
-			gridNode.setPlayerID(placerID);
+			IAppEngApi api = Api.instance();
+			gridNode = api.grid().createGridNode(gridBlock);
+			if(ownerUUID != null) {
+				gridNode.setPlayerID(api.registries().players().getID(new GameProfile(ownerUUID, "[UNKNOWN]")));
+			}
 			gridNode.updateState();
 		}
 		return gridNode;
