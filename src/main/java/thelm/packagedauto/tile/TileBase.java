@@ -1,6 +1,10 @@
 package thelm.packagedauto.tile;
 
 import java.util.EnumMap;
+import java.util.Optional;
+import java.util.UUID;
+
+import com.mojang.authlib.GameProfile;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -28,6 +32,8 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 	protected InventoryTileBase inventory = new InventoryTileBase(this, 0);
 	protected EnergyStorage energyStorage = new EnergyStorage(this, 0);
 	public String customName = "";
+	protected UUID ownerUUID = null;
+	@Deprecated
 	protected int placerID = -1;
 
 	public InventoryTileBase getInventory() {
@@ -46,10 +52,12 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 		this.energyStorage = energyStorage;
 	}
 
-	public void setPlacer(EntityPlayer placer) {}
+	public void setOwner(EntityPlayer owner) {
+		ownerUUID = owner.getUniqueID();
+	}
 
-	public int getPlacerID() {
-		return placerID;
+	public UUID getOwnerUUID() {
+		return ownerUUID;
 	}
 
 	protected abstract String getLocalizedName();
@@ -80,6 +88,10 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 		super.readFromNBT(nbt);
 		readSyncNBT(nbt);
 		inventory.readFromNBT(nbt);
+		ownerUUID = null;
+		if(nbt.hasUniqueId("OwnerUUID")) {
+			ownerUUID = nbt.getUniqueId("OwnerUUID");
+		}
 	}
 
 	@Override
@@ -87,6 +99,9 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 		super.writeToNBT(nbt);
 		writeSyncNBT(nbt);
 		inventory.writeToNBT(nbt);
+		if(ownerUUID != null) {
+			nbt.setUniqueId("OwnerUUID", ownerUUID);
+		}
 		return nbt;
 	}
 

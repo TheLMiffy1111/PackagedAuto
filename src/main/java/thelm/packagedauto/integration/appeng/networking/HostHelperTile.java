@@ -1,6 +1,9 @@
 package thelm.packagedauto.integration.appeng.networking;
 
+import com.mojang.authlib.GameProfile;
+
 import appeng.api.AEApi;
+import appeng.api.IAppEngApi;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.IActionHost;
@@ -24,8 +27,11 @@ public class HostHelperTile<TILE extends TileBase & IGridHost & IActionHost> {
 
 	public IGridNode getNode() {
 		if(gridNode == null && tile.hasWorld() && !tile.getWorld().isRemote) {
-			gridNode = AEApi.instance().grid().createGridNode(gridBlock);
-			gridNode.setPlayerID(tile.getPlacerID());
+			IAppEngApi api = AEApi.instance();
+			gridNode = api.grid().createGridNode(gridBlock);
+			if(tile.getOwnerUUID() != null) {
+				gridNode.setPlayerID(api.registries().players().getID(new GameProfile(tile.getOwnerUUID(), "[UNKNOWN]")));
+			}
 			gridNode.updateState();
 		}
 		return gridNode;

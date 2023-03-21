@@ -341,12 +341,6 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
-	public void setPlacer(EntityPlayer placer) {
-		placerID = AEApi.instance().registries().players().getID(placer);
-	}
-
-	@Optional.Method(modid="appliedenergistics2")
-	@Override
 	public IGridNode getGridNode(AEPartLocation dir) {
 		return getActionableNode();
 	}

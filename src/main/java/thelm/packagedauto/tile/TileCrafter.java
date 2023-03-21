@@ -205,12 +205,6 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
-	public void setPlacer(EntityPlayer placer) {
-		placerID = AEApi.instance().registries().players().getID(placer);
-	}
-
-	@Optional.Method(modid="appliedenergistics2")
-	@Override
 	public IGridNode getGridNode(AEPartLocation dir) {
 		return getActionableNode();
 	}

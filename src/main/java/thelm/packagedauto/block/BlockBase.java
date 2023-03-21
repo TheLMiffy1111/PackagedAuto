@@ -89,7 +89,7 @@ public abstract class BlockBase extends Block implements ITileEntityProvider, IM
 					((TileBase)tileentity).setCustomName(stack.getDisplayName());
 				}
 				if(placer instanceof EntityPlayer) {
-					((TileBase)tileentity).setPlacer((EntityPlayer)placer);
+					((TileBase)tileentity).setOwner((EntityPlayer)placer);
 				}
 			}
 		}
