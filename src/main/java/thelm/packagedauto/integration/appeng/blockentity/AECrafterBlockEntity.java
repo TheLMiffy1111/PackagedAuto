@@ -58,6 +58,14 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 	}
 
 	@Override
+	public void onChunkUnloaded() {
+		super.onChunkUnloaded();
+		if(gridNode != null) {
+			gridNode.destroy();
+		}
+	}
+
+	@Override
 	public IGridNode getGridNode(Direction dir) {
 		return getActionableNode();
 	}

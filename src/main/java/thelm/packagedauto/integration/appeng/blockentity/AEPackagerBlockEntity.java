@@ -65,6 +65,14 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 	}
 
 	@Override
+	public void onChunkUnloaded() {
+		super.onChunkUnloaded();
+		if(gridNode != null) {
+			gridNode.destroy();
+		}
+	}
+
+	@Override
 	public IGridNode getGridNode(Direction dir) {
 		return getActionableNode();
 	}
