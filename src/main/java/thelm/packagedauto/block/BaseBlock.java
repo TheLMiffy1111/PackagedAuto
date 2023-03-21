@@ -68,6 +68,9 @@ public abstract class BaseBlock extends Block {
 
 	@Override
 	public void onRemove(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving) {
+		if(state.getBlock() == newState.getBlock()) {
+			return;
+		}
 		TileEntity tileentity = worldIn.getBlockEntity(pos);
 		if(tileentity instanceof BaseTile) {
 			IItemHandler handler = ((BaseTile)tileentity).getItemHandler();
