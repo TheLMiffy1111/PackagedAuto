@@ -64,6 +64,9 @@ public abstract class BaseBlock extends Block implements EntityBlock {
 
 	@Override
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
+		if(state.getBlock() == newState.getBlock()) {
+			return;
+		}
 		BlockEntity blockEntity = level.getBlockEntity(pos);
 		if(blockEntity instanceof BaseBlockEntity baseBlockEntity) {
 			IItemHandler handler = baseBlockEntity.getItemHandler();
