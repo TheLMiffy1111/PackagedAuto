@@ -335,6 +335,14 @@ public class TilePackager extends TileBase implements IGridHost, IActionHost, IC
 		}
 	}
 
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		if(hostHelper != null) {
+			hostHelper.invalidate();
+		}
+	}
+
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public IGridNode getGridNode(ForgeDirection dir) {
