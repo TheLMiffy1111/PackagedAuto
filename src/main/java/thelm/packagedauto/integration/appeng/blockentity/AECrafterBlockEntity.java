@@ -21,8 +21,6 @@ import appeng.me.helpers.MachineSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import thelm.packagedauto.block.CrafterBlock;
@@ -60,13 +58,6 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 	}
 
 	@Override
-	public void setPlacer(Player placer) {
-		if(placer instanceof ServerPlayer serverPlacer) {
-			placerID = IPlayerRegistry.getPlayerId(serverPlacer);
-		}
-	}
-
-	@Override
 	public IGridNode getGridNode(Direction dir) {
 		return getActionableNode();
 	}
@@ -94,7 +85,9 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 			gridNode.setGridColor(AEColor.TRANSPARENT);
 			gridNode.setIdlePowerUsage(1);
 			gridNode.setInWorldNode(true);
-			gridNode.setOwningPlayerId(placerID);
+			if(ownerUUID != null) {
+				gridNode.setOwningPlayerId(IPlayerRegistry.getMapping(level).getPlayerId(ownerUUID));
+			}
 		}
 		return gridNode;
 	}

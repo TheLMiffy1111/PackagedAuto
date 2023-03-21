@@ -56,7 +56,7 @@ public abstract class BaseBlock extends Block implements EntityBlock {
 					baseBlockEntity.setCustomName(stack.getDisplayName());
 				}
 				if(placer instanceof Player player) {
-					baseBlockEntity.setPlacer(player);
+					baseBlockEntity.setOwner(player);
 				}
 			}
 		}
