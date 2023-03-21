@@ -1,5 +1,7 @@
 package thelm.packagedauto.tile;
 
+import java.util.UUID;
+
 import cofh.api.energy.IEnergyReceiver;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.ISidedInventory;
@@ -18,7 +20,7 @@ public abstract class TileBase extends TileEntity implements ISidedInventory, IE
 	protected InventoryBase inventory = new InventoryBase(this, 0);
 	protected EnergyStorage energyStorage = new EnergyStorage(this, 0);
 	public String customName = "";
-	protected int placerID = -1;
+	protected UUID ownerUUID = null;
 
 	public InventoryBase getInventory() {
 		return inventory;
@@ -36,10 +38,12 @@ public abstract class TileBase extends TileEntity implements ISidedInventory, IE
 		this.energyStorage = energyStorage;
 	}
 
-	public void setPlacer(EntityPlayer placer) {}
+	public void setOwner(EntityPlayer owner) {
+		ownerUUID = owner.getUniqueID();
+	}
 
-	public int getPlacerID() {
-		return placerID;
+	public UUID getOwnerUUID() {
+		return ownerUUID;
 	}
 
 	protected abstract String getLocalizedName();
@@ -65,6 +69,10 @@ public abstract class TileBase extends TileEntity implements ISidedInventory, IE
 		super.readFromNBT(nbt);
 		readSyncNBT(nbt);
 		inventory.readFromNBT(nbt);
+		ownerUUID = null;
+		if(nbt.hasKey("OwnerUUIDMost") && nbt.hasKey("OwnerUUIDLeast")) {
+			ownerUUID = new UUID(nbt.getLong("OwnerUUIDMost"), nbt.getLong("OwnerUUIDLeast"));
+		}
 	}
 
 	@Override
@@ -72,6 +80,10 @@ public abstract class TileBase extends TileEntity implements ISidedInventory, IE
 		super.writeToNBT(nbt);
 		writeSyncNBT(nbt);
 		inventory.writeToNBT(nbt);
+		if(ownerUUID != null) {
+			nbt.setLong("OwnerUUIDMost", ownerUUID.getMostSignificantBits());
+			nbt.setLong("OwnerUUIDLeast", ownerUUID.getLeastSignificantBits());
+		}
 	}
 
 	public void readSyncNBT(NBTTagCompound nbt) {
