@@ -281,6 +281,14 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 		}
 	}
 
+	@Override
+	public void onChunkUnload() {
+		super.onChunkUnload();
+		if(hostHelper != null) {
+			hostHelper.invalidate();
+		}
+	}
+
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public IGridNode getGridNode(AEPartLocation dir) {
