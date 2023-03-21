@@ -1,5 +1,7 @@
 package thelm.packagedauto.block.entity;
 
+import java.util.UUID;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -26,6 +28,8 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 	protected BaseItemHandler<?> itemHandler = new BaseItemHandler<>(this, 0);
 	protected EnergyStorage energyStorage = new EnergyStorage(this, 0);
 	public Component customName = null;
+	protected UUID ownerUUID = null;
+	@Deprecated
 	protected int placerID = -1;
 
 	public BaseBlockEntity(BlockEntityType<?> blockEntityType, BlockPos pos, BlockState state) {
@@ -48,12 +52,8 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 		this.energyStorage = energyStorage;
 	}
 
-	public void setPlacer(Player placer) {
-
-	}
-
-	public int getPlacerID() {
-		return placerID;
+	public void setOwner(Player owner) {
+		ownerUUID = owner.getUUID();
 	}
 
 	@Override
@@ -81,6 +81,10 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 		super.load(nbt);
 		loadSync(nbt);
 		itemHandler.load(nbt);
+		ownerUUID = null;
+		if(nbt.hasUUID("OwnerUUID")) {
+			ownerUUID = nbt.getUUID("OwnerUUID");
+		}
 	}
 
 	@Override
@@ -88,6 +92,9 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 		super.saveAdditional(nbt);
 		saveSync(nbt);
 		itemHandler.save(nbt);
+		if(ownerUUID != null) {
+			nbt.putUUID("OwnerUUID", ownerUUID);
+		}
 	}
 
 	public void loadSync(CompoundTag nbt) {

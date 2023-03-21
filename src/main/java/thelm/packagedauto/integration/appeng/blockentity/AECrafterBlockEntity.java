@@ -60,13 +60,6 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 	}
 
 	@Override
-	public void setPlacer(Player placer) {
-		if(placer instanceof ServerPlayer serverPlacer) {
-			placerID = IPlayerRegistry.getPlayerId(serverPlacer);
-		}
-	}
-
-	@Override
 	public IGridNode getGridNode(Direction dir) {
 		return getActionableNode();
 	}
@@ -94,7 +87,9 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 			gridNode.setGridColor(AEColor.TRANSPARENT);
 			gridNode.setIdlePowerUsage(1);
 			gridNode.setInWorldNode(true);
-			gridNode.setOwningPlayerId(placerID);
+			if(ownerUUID != null) {
+				gridNode.setOwningPlayerId(IPlayerRegistry.getMapping(level).getPlayerId(ownerUUID));
+			}
 		}
 		return gridNode;
 	}
