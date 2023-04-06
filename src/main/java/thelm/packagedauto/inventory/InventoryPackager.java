@@ -1,5 +1,7 @@
 package thelm.packagedauto.inventory;
 
+import java.util.stream.IntStream;
+
 import com.google.common.collect.Streams;
 
 import net.minecraft.item.ItemStack;
@@ -15,12 +17,12 @@ import thelm.packagedauto.tile.TilePackagerExtension;
 
 public class InventoryPackager extends InventoryTileBase {
 
-	public static final int[] SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 	public final TilePackager tile;
 
 	public InventoryPackager(TilePackager tile) {
 		super(tile, 12);
 		this.tile = tile;
+		slots = IntStream.rangeClosed(0, 9).toArray();
 	}
 
 	@Override
@@ -86,11 +88,6 @@ public class InventoryPackager extends InventoryTileBase {
 	@Override
 	public int getFieldCount() {
 		return 2;
-	}
-
-	@Override
-	public int[] getSlotsForFace(EnumFacing side) {
-		return SLOTS;
 	}
 
 	@Override

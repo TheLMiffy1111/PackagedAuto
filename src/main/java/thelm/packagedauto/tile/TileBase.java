@@ -1,14 +1,9 @@
 package thelm.packagedauto.tile;
 
-import java.util.EnumMap;
-import java.util.Optional;
 import java.util.UUID;
-
-import com.mojang.authlib.GameProfile;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SPacketUpdateTileEntity;
@@ -20,9 +15,7 @@ import net.minecraft.world.IWorldNameable;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.wrapper.InvWrapper;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
+import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.client.gui.IGuiProvider;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.InventoryTileBase;
@@ -81,6 +74,10 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 		if(!name.isEmpty()) {
 			customName = name;
 		}
+	}
+
+	public int getComparatorSignal() {
+		return ItemHandlerHelper.calcRedstoneFromInventory(inventory.getWrapperForDirection(null));
 	}
 
 	@Override
@@ -158,26 +155,10 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 				super.hasCapability(capability, from);
 	}
 
-	protected IItemHandler unsidedItemHandler = null;
-	protected EnumMap<EnumFacing, IItemHandler> sidedItemHandlers = new EnumMap<>(EnumFacing.class);
-
 	@Override
 	public <T> T getCapability(Capability<T> capability, EnumFacing facing) {
 		if(capability == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY) {
-			if(inventory instanceof ISidedInventory && facing != null) {
-				if(sidedItemHandlers.containsKey(facing)) {
-					return (T)sidedItemHandlers.get(facing);
-				}
-				IItemHandler handler = new SidedInvWrapper(inventory, facing);
-				sidedItemHandlers.put(facing, handler);
-				return (T)handler;
-			}
-			else {
-				if(unsidedItemHandler != null) {
-					return (T)unsidedItemHandler;
-				}
-				return (T)(unsidedItemHandler = new InvWrapper(inventory));
-			}
+			return (T)inventory.getWrapperForDirection(facing);
 		}
 		else if(capability == CapabilityEnergy.ENERGY && energyStorage.getMaxEnergyStored() > 0) {
 			return (T)energyStorage;

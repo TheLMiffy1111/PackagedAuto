@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 
-import appeng.api.AEApi;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.crafting.ICraftingPatternDetails;
@@ -269,6 +268,11 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			syncTile(false);
 			markDirty();
 		}
+	}
+
+	@Override
+	public int getComparatorSignal() {
+		return Math.min((int)Arrays.stream(trackers).filter(t->t.isFilled()).count(), 15);
 	}
 
 	public HostHelperTileUnpackager hostHelper;

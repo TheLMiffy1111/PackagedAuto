@@ -1,5 +1,7 @@
 package thelm.packagedauto.inventory;
 
+import java.util.IdentityHashMap;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import net.minecraft.entity.player.EntityPlayer;
@@ -11,6 +13,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import thelm.packagedauto.tile.TileBase;
 
 public class InventoryTileBase implements ISidedInventory {
@@ -18,6 +22,7 @@ public class InventoryTileBase implements ISidedInventory {
 	public final NonNullList<ItemStack> stacks;
 	public final TileBase tile;
 	public int[] slots;
+	protected Map<EnumFacing, IItemHandlerModifiable> wrapperMap = new IdentityHashMap<>(7);
 
 	public InventoryTileBase(TileBase tile, int size) {
 		this.tile = tile;
@@ -156,5 +161,9 @@ public class InventoryTileBase implements ISidedInventory {
 
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		return ItemStackHelper.saveAllItems(nbt, stacks);
+	}
+
+	public IItemHandlerModifiable getWrapperForDirection(EnumFacing direction) {
+		return wrapperMap.computeIfAbsent(direction, f->new SidedInvWrapper(this, f));
 	}
 }

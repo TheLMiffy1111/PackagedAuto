@@ -1,5 +1,7 @@
 package thelm.packagedauto.inventory;
 
+import java.util.stream.IntStream;
+
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.energy.CapabilityEnergy;
@@ -12,6 +14,7 @@ public class InventoryCrafter extends InventoryTileBase {
 	public InventoryCrafter(TileCrafter tile) {
 		super(tile, 11);
 		this.tile = tile;
+		slots = IntStream.rangeClosed(0, 9).toArray();
 	}
 
 	@Override

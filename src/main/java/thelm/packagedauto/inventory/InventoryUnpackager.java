@@ -1,6 +1,7 @@
 package thelm.packagedauto.inventory;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -13,12 +14,12 @@ import thelm.packagedauto.tile.TileUnpackager.PackageTracker;
 
 public class InventoryUnpackager extends InventoryTileBase {
 
-	public static final int[] SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 	public final TileUnpackager tile;
 
 	public InventoryUnpackager(TileUnpackager tile) {
 		super(tile, 11);
 		this.tile = tile;
+		slots = IntStream.rangeClosed(0, 8).toArray();
 	}
 
 	@Override
@@ -57,11 +58,6 @@ public class InventoryUnpackager extends InventoryTileBase {
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		updateRecipeList();
-	}
-
-	@Override
-	public int[] getSlotsForFace(EnumFacing side) {
-		return SLOTS;
 	}
 
 	@Override

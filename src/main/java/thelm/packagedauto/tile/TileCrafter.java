@@ -2,7 +2,6 @@ package thelm.packagedauto.tile;
 
 import java.util.List;
 
-import appeng.api.AEApi;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.IActionHost;
@@ -191,6 +190,17 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 				inventory.setInventorySlotContents(10, ItemStack.EMPTY);
 			}
 		}
+	}
+
+	@Override
+	public int getComparatorSignal() {
+		if(isWorking) {
+			return 1;
+		}
+		if(!inventory.stacks.subList(0, 9).stream().allMatch(ItemStack::isEmpty)) {
+			return 15;
+		}
+		return 0;
 	}
 
 	public HostHelperTileCrafter hostHelper;
