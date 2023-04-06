@@ -17,6 +17,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.BaseItemHandler;
 
@@ -68,6 +69,10 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 	}
 
 	protected abstract ITextComponent getDefaultName();
+
+	public int getComparatorSignal() {
+		return ItemHandlerHelper.calcRedstoneFromInventory(itemHandler.getWrapperForDirection(null));
+	}
 
 	@Override
 	public void load(BlockState blockState, CompoundNBT nbt) {

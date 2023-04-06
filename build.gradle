@@ -61,7 +61,7 @@ sourceSets {
     main
 }
 
-version = "2.0.2.17"
+version = "2.0.3.18"
 group = "thelm.packagedauto"
 archivesBaseName = "PackagedAuto-1.16.5"
 

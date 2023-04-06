@@ -251,6 +251,11 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 		}
 	}
 
+	@Override
+	public int getComparatorSignal() {
+		return Math.min((int)Arrays.stream(trackers).filter(t->t.isFilled()).count(), 15);
+	}
+
 	protected boolean isInterface(TileEntity tile, Direction facing) {
 		return false;
 	}

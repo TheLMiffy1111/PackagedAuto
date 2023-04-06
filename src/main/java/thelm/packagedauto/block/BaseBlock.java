@@ -93,7 +93,7 @@ public abstract class BaseBlock extends Block {
 	public int getAnalogOutputSignal(BlockState blockState, World worldIn, BlockPos pos) {
 		TileEntity tileentity = worldIn.getBlockEntity(pos);
 		if(tileentity instanceof BaseTile) {
-			return ItemHandlerHelper.calcRedstoneFromInventory(((BaseTile)tileentity).getItemHandler());
+			return ((BaseTile)tileentity).getComparatorSignal();
 		}
 		return 0;
 	}

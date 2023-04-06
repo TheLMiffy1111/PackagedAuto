@@ -333,6 +333,17 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 		}
 	}
 
+	@Override
+	public int getComparatorSignal() {
+		if(isWorking) {
+			return 1;
+		}
+		if(!itemHandler.getStackInSlot(9).isEmpty()) {
+			return 15;
+		}
+		return 0;
+	}
+
 	protected void postPatternChange() {
 
 	}
