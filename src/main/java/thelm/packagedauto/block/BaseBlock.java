@@ -89,7 +89,7 @@ public abstract class BaseBlock extends Block implements EntityBlock {
 	public int getAnalogOutputSignal(BlockState pState, Level level, BlockPos pos) {
 		BlockEntity blockEntity = level.getBlockEntity(pos);
 		if(blockEntity instanceof BaseBlockEntity baseBlockEntity) {
-			return ItemHandlerHelper.calcRedstoneFromInventory(baseBlockEntity.getItemHandler());
+			return baseBlockEntity.getComparatorSignal();
 		}
 		return 0;
 	}

@@ -1,11 +1,13 @@
 package thelm.packagedauto.inventory;
 
+import java.util.stream.IntStream;
+
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 
 public class PackagerExtensionItemHandlerWrapper extends SidedItemHandlerWrapper<PackagerExtensionItemHandler> {
 
-	public static final int[] SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+	public static final int[] SLOTS = IntStream.rangeClosed(0, 9).toArray();
 
 	public PackagerExtensionItemHandlerWrapper(PackagerExtensionItemHandler itemHandler, Direction direction) {
 		super(itemHandler, direction);

@@ -173,6 +173,17 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 	}
 
 	@Override
+	public int getComparatorSignal() {
+		if(isWorking) {
+			return 1;
+		}
+		if(!itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty)) {
+			return 15;
+		}
+		return 0;
+	}
+
+	@Override
 	public void load(CompoundTag nbt) {
 		super.load(nbt);
 		currentRecipe = null;

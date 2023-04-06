@@ -311,6 +311,11 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 		}
 	}
 
+	@Override
+	public int getComparatorSignal() {
+		return Math.min((int)Arrays.stream(trackers).filter(t->t.isFilled()).count(), 15);
+	}
+
 	protected boolean isPatternProvider(BlockEntity blockEntity, Direction facing) {
 		return false;
 	}

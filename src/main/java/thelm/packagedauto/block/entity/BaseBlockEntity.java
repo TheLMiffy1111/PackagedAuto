@@ -21,6 +21,7 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.BaseItemHandler;
 
@@ -75,6 +76,10 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 
 	public void tick() {
 
+	}
+
+	public int getComparatorSignal() {
+		return ItemHandlerHelper.calcRedstoneFromInventory(itemHandler.getWrapperForDirection(null));
 	}
 
 	@Override

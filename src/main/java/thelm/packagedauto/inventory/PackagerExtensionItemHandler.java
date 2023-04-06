@@ -19,6 +19,7 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 				blockEntity.endProcess();
 			}
 		}
+		super.onContentsChanged(slot);
 	}
 
 	@Override
