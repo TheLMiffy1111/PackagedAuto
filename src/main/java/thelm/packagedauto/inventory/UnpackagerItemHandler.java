@@ -24,6 +24,7 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerBlockEntity
 		else if(slot != 10) {
 			clearRejectedIndexes();
 		}
+		super.onContentsChanged(slot);
 	}
 
 	@Override

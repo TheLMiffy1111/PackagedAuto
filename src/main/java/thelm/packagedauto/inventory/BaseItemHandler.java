@@ -11,13 +11,14 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.items.ItemStackHandler;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 
 public class BaseItemHandler<T extends BaseBlockEntity> extends ItemStackHandler implements ContainerData {
 
 	public final T blockEntity;
-	protected Map<Direction, IItemHandlerModifiable> wrapperMap = new IdentityHashMap<>();
+	protected Map<Direction, IItemHandlerModifiable> wrapperMap = new IdentityHashMap<>(7);
 
 	public BaseItemHandler(T blockEntity, int size) {
 		super(size);

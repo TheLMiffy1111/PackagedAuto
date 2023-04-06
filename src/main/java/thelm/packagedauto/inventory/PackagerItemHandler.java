@@ -28,6 +28,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 		if(slot == 10) {
 			updatePatternList();
 		}
+		super.onContentsChanged(slot);
 	}
 
 	@Override
