@@ -59,7 +59,7 @@ repositories {
     }
 }
 
-version = "1.7.10-W.0.1.7"
+version = "1.7.10-W.0.2.8"
 group = "thelm.packagedauto"
 archivesBaseName = "PackagedAuto"
 

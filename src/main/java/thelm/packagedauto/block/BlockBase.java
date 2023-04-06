@@ -9,7 +9,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.stats.StatList;
@@ -109,7 +108,7 @@ public abstract class BlockBase extends Block implements ITileEntityProvider {
 	public int getComparatorInputOverride(World world, int x, int y, int z, int side) {
 		TileEntity tileentity = world.getTileEntity(x, y, z);
 		if(tileentity instanceof TileBase) {
-			return Container.calcRedstoneFromInventory((TileBase)tileentity);
+			return ((TileBase)tileentity).getComparatorSignal();
 		}
 		return 0;
 	}

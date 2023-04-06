@@ -3,7 +3,6 @@ package thelm.packagedauto.tile;
 import java.util.List;
 import java.util.Objects;
 
-import appeng.api.AEApi;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.IActionHost;
@@ -189,6 +188,17 @@ public class TileCrafter extends TileBase implements IPackageCraftingMachine, IG
 				inventory.setInventorySlotContents(10, null);
 			}
 		}
+	}
+
+	@Override
+	public int getComparatorSignal() {
+		if(isWorking) {
+			return 1;
+		}
+		if(inventory.stacks.subList(0, 9).stream().anyMatch(Objects::nonNull)) {
+			return 15;
+		}
+		return 0;
 	}
 
 	public HostHelperCrafter hostHelper;

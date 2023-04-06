@@ -265,6 +265,11 @@ public class TileUnpackager extends TileBase implements IGridHost, IActionHost, 
 		}
 	}
 
+	@Override
+	public int getComparatorSignal() {
+		return Math.min((int)Arrays.stream(trackers).filter(t->t.isFilled()).count(), 15);
+	}
+
 	public HostHelperUnpackager hostHelper;
 
 	@Override

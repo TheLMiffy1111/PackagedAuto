@@ -1,6 +1,7 @@
 package thelm.packagedauto.inventory;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import cofh.api.energy.IEnergyContainerItem;
 import net.minecraft.item.ItemStack;
@@ -12,12 +13,12 @@ import thelm.packagedauto.tile.TileUnpackager.PackageTracker;
 
 public class InventoryUnpackager extends InventoryBase {
 
-	public static final int[] SLOTS = {0, 1, 2, 3, 4, 5, 6, 7, 8};
 	public final TileUnpackager tile;
 
 	public InventoryUnpackager(TileUnpackager tile) {
 		super(tile, 11);
 		this.tile = tile;
+		slots = IntStream.rangeClosed(0, 8).toArray();
 	}
 
 	@Override
@@ -56,11 +57,6 @@ public class InventoryUnpackager extends InventoryBase {
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		updateRecipeList();
-	}
-
-	@Override
-	public int[] getAccessibleSlotsFromSide(int side) {
-		return SLOTS;
 	}
 
 	@Override

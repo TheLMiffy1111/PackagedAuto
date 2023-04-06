@@ -10,6 +10,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
 import net.minecraftforge.common.util.ForgeDirection;
 import thelm.packagedauto.client.gui.IGuiProvider;
 import thelm.packagedauto.energy.EnergyStorage;
@@ -62,6 +63,21 @@ public abstract class TileBase extends TileEntity implements ISidedInventory, IE
 		if(!name.isEmpty()) {
 			customName = name;
 		}
+	}
+
+	public int getComparatorSignal() {
+		int itemsFound = 0;
+		float proportion = 0;
+		int[] slots = inventory.getAccessibleSlotsFromSide(-1);
+		for(int slot : slots) {
+			ItemStack itemstack = inventory.getStackInSlot(slot);
+			if(itemstack != null) {
+				proportion += (float)itemstack.stackSize / (float)Math.min(inventory.getInventoryStackLimit(), itemstack.getMaxStackSize());
+				++itemsFound;
+			}
+		}
+		proportion /= slots.length;
+		return MathHelper.floor_float(proportion*14) + (itemsFound > 0 ? 1 : 0);
 	}
 
 	@Override

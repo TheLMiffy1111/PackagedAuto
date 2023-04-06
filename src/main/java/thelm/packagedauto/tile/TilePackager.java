@@ -325,6 +325,17 @@ public class TilePackager extends TileBase implements IGridHost, IActionHost, IC
 		}
 	}
 
+	@Override
+	public int getComparatorSignal() {
+		if(isWorking) {
+			return 1;
+		}
+		if(inventory.getStackInSlot(9) != null) {
+			return 15;
+		}
+		return 0;
+	}
+
 	public HostHelperPackager hostHelper;
 
 	@Override
