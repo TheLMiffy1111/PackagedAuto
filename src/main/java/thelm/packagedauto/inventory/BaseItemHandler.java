@@ -17,7 +17,7 @@ import thelm.packagedauto.block.entity.BaseBlockEntity;
 public class BaseItemHandler<T extends BaseBlockEntity> extends ItemStackHandler implements ContainerData {
 
 	public final T blockEntity;
-	protected Map<Direction, IItemHandlerModifiable> wrapperMap = new IdentityHashMap<>();
+	protected Map<Direction, IItemHandlerModifiable> wrapperMap = new IdentityHashMap<>(7);
 
 	public BaseItemHandler(T blockEntity, int size) {
 		super(size);
