@@ -228,6 +228,17 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	}
 
 	@Override
+	public int getComparatorSignal() {
+		if(isWorking) {
+			return 1;
+		}
+		if(!itemHandler.getStackInSlot(1).isEmpty()) {
+			return 15;
+		}
+		return 0;
+	}
+
+	@Override
 	public void loadSync(CompoundTag nbt) {
 		super.loadSync(nbt);
 		isWorking = nbt.getBoolean("Working");
