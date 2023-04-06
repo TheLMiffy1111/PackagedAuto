@@ -17,7 +17,7 @@ import thelm.packagedauto.tile.BaseTile;
 public class BaseItemHandler<T extends BaseTile> extends ItemStackHandler implements IIntArray {
 
 	public final T tile;
-	protected Map<Direction, IItemHandlerModifiable> wrapperMap = new IdentityHashMap<>();
+	protected Map<Direction, IItemHandlerModifiable> wrapperMap = new IdentityHashMap<>(7);
 
 	public BaseItemHandler(T tile, int size) {
 		super(size);
