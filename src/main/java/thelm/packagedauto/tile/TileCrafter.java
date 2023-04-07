@@ -197,7 +197,7 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 		if(isWorking) {
 			return 1;
 		}
-		if(!inventory.stacks.subList(0, 9).stream().allMatch(ItemStack::isEmpty)) {
+		if(!inventory.stacks.subList(0, 10).stream().allMatch(ItemStack::isEmpty)) {
 			return 15;
 		}
 		return 0;
