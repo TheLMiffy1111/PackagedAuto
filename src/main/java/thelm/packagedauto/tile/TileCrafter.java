@@ -195,7 +195,7 @@ public class TileCrafter extends TileBase implements IPackageCraftingMachine, IG
 		if(isWorking) {
 			return 1;
 		}
-		if(inventory.stacks.subList(0, 9).stream().anyMatch(Objects::nonNull)) {
+		if(inventory.stacks.subList(0, 10).stream().anyMatch(Objects::nonNull)) {
 			return 15;
 		}
 		return 0;
