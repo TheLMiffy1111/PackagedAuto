@@ -176,7 +176,7 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 		if(isWorking) {
 			return 1;
 		}
-		if(!itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty)) {
+		if(!itemHandler.getStacks().subList(0, 10).stream().allMatch(ItemStack::isEmpty)) {
 			return 15;
 		}
 		return 0;
