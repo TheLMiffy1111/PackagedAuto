@@ -83,11 +83,6 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 	}
 
 	@Override
-	public void onSecurityBreak(AEPackagerBlockEntity nodeOwner, IGridNode node) {
-		level.destroyBlock(worldPosition, true);
-	}
-
-	@Override
 	public void onSaveChanges(AEPackagerBlockEntity nodeOwner, IGridNode node) {
 		setChanged();
 	}

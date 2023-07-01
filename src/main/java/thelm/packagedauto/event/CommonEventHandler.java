@@ -2,14 +2,13 @@ package thelm.packagedauto.event;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.MenuType;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.CreativeModeTabEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -102,26 +101,13 @@ public class CommonEventHandler {
 		menuRegister.register("unpackager", ()->UnpackagerMenu.TYPE_INSTANCE);
 		menuRegister.register("crafter", ()->CrafterMenu.TYPE_INSTANCE);
 		menuRegister.register("fluid_package_filler", ()->FluidPackageFillerMenu.TYPE_INSTANCE);
-	}
 
-	@SubscribeEvent
-	public void onCommonSetup(FMLCommonSetupEvent event) {
-		ApiImpl.INSTANCE.registerVolumeType(FluidVolumeType.INSTANCE);
-
-		ApiImpl.INSTANCE.registerRecipeType(ProcessingPackageRecipeType.INSTANCE);
-		ApiImpl.INSTANCE.registerRecipeType(OrderedProcessingPackageRecipeType.INSTANCE);
-		ApiImpl.INSTANCE.registerRecipeType(CraftingPackageRecipeType.INSTANCE);
-
-		PacketHandler.registerPackets();
-	}
-
-	@SubscribeEvent
-	public void onCreativeModeTabRegister(CreativeModeTabEvent.Register event) {
-		event.registerCreativeModeTab(new ResourceLocation("packagedauto:tab"),
-				builder->builder.
+		DeferredRegister<CreativeModeTab> creativeTabRegister = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, "packagedauto");
+		creativeTabRegister.register(modEventBus);
+		creativeTabRegister.register("tab", ()->CreativeModeTab.builder().
 				title(Component.translatable("itemGroup.packagedauto")).
 				icon(()->new ItemStack(PackageItem.INSTANCE)).
-				displayItems((enabledFeatures, output, displayOperatorCreativeTab)->{
+				displayItems((parameters, output)->{
 					output.accept(EncoderBlock.ITEM_INSTANCE);
 					output.accept(PackagerBlock.ITEM_INSTANCE);
 					output.accept(PackagerExtensionBlock.ITEM_INSTANCE);
@@ -133,6 +119,17 @@ public class CommonEventHandler {
 					output.accept(MiscItem.ME_PACKAGE_COMPONENT);
 				}).
 				build());
+	}
+
+	@SubscribeEvent
+	public void onCommonSetup(FMLCommonSetupEvent event) {
+		ApiImpl.INSTANCE.registerVolumeType(FluidVolumeType.INSTANCE);
+
+		ApiImpl.INSTANCE.registerRecipeType(ProcessingPackageRecipeType.INSTANCE);
+		ApiImpl.INSTANCE.registerRecipeType(OrderedProcessingPackageRecipeType.INSTANCE);
+		ApiImpl.INSTANCE.registerRecipeType(CraftingPackageRecipeType.INSTANCE);
+
+		PacketHandler.registerPackets();
 	}
 
 	@SubscribeEvent

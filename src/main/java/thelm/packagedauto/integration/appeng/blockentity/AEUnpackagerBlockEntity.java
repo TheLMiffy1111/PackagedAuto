@@ -85,11 +85,6 @@ public class AEUnpackagerBlockEntity extends UnpackagerBlockEntity implements II
 	}
 
 	@Override
-	public void onSecurityBreak(AEUnpackagerBlockEntity nodeOwner, IGridNode node) {
-		level.destroyBlock(worldPosition, true);
-	}
-
-	@Override
 	public void onSaveChanges(AEUnpackagerBlockEntity nodeOwner, IGridNode node) {
 		setChanged();
 	}

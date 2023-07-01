@@ -82,11 +82,6 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 	}
 
 	@Override
-	public void onSecurityBreak(AEPackagerExtensionBlockEntity nodeOwner, IGridNode node) {
-		level.destroyBlock(worldPosition, true);
-	}
-
-	@Override
 	public void onSaveChanges(AEPackagerExtensionBlockEntity nodeOwner, IGridNode node) {
 		setChanged();
 	}

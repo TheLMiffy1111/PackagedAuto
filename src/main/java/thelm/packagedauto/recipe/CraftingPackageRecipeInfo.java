@@ -11,6 +11,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -25,7 +26,7 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 
 	Recipe recipe;
 	List<ItemStack> input = new ArrayList<>();
-	CraftingContainer matrix = new CraftingContainer(new EmptyMenu(), 3, 3);
+	CraftingContainer matrix = new TransientCraftingContainer(new EmptyMenu(), 3, 3);
 	ItemStack output;
 	List<IPackagePattern> patterns = new ArrayList<>();
 
@@ -42,7 +43,7 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 		}
 		if(recipe != null) {
 			input.addAll(MiscHelper.INSTANCE.condenseStacks(matrix));
-			output = recipe.assemble(matrix).copy();
+			output = recipe.assemble(matrix, MiscHelper.INSTANCE.getRegistryAccess()).copy();
 			for(int i = 0; i*9 < input.size(); ++i) {
 				patterns.add(new PackagePattern(this, i));
 			}
@@ -118,7 +119,7 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 			if(recipe != null) {
 				this.recipe = recipe;
 				this.input.addAll(MiscHelper.INSTANCE.condenseStacks(matrix));
-				this.output = recipe.assemble(matrix).copy();
+				this.output = recipe.assemble(matrix, level.registryAccess()).copy();
 				for(int i = 0; i*9 < this.input.size(); ++i) {
 					patterns.add(new PackagePattern(this, i));
 				}

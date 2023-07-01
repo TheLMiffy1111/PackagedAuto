@@ -3,6 +3,8 @@ package thelm.packagedauto.integration.jei;
 import java.util.List;
 
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
+import mezz.jei.api.gui.handlers.IGhostIngredientHandler.Target;
+import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -18,7 +20,7 @@ import thelm.packagedauto.util.ApiImpl;
 public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<EncoderScreen> {
 
 	@Override
-	public <I> List<Target<I>> getTargets(EncoderScreen gui, I ingredient, boolean doStart) {
+	public <I> List<Target<I>> getTargetsTyped(EncoderScreen gui, ITypedIngredient<I> ingredient, boolean doStart) {
 		ItemStack stack = wrapStack(ingredient);
 		if(!stack.isEmpty()) {
 			return gui.menu.slots.stream().filter(s->s instanceof FalseCopySlot).

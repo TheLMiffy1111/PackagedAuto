@@ -2,8 +2,7 @@ package thelm.packagedauto.volume;
 
 import java.util.Optional;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -132,9 +131,9 @@ public class FluidVolumeType implements IVolumeType {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int i, int j, IVolumeStackWrapper stack) {
+	public void render(GuiGraphics graphics, int i, int j, IVolumeStackWrapper stack) {
 		if(stack instanceof FluidStackWrapper fluidStack) {
-			FluidRenderer.INSTANCE.render(poseStack, i, j, fluidStack.stack());
+			FluidRenderer.INSTANCE.render(graphics, i, j, fluidStack.stack());
 		}
 	}
 }

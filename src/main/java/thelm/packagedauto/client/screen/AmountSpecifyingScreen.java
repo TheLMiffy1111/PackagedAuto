@@ -3,9 +3,9 @@ package thelm.packagedauto.client.screen;
 import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
@@ -55,7 +55,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 				return false;
 			}
 		});
-		amountField.changeFocus(true);
+		amountField.setFocused(true);
 
 		addRenderableWidget(amountField);
 		setFocused(amountField);
@@ -81,14 +81,14 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 	}
 
 	@Override
-	protected void renderBgAdditional(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
-		amountField.renderButton(poseStack, mouseX, mouseY, partialTicks);
+	protected void renderBgAdditional(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
+		amountField.renderWidget(graphics, mouseX, mouseY, partialTicks);
 	}
 
 	@Override
-	protected void renderLabels(PoseStack poseStack, int mouseX, int mouseY) {
-		font.draw(poseStack, getTitle().getString(), 7, 7, 0x404040);
-		super.renderLabels(poseStack, mouseX, mouseY);
+	protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+		graphics.drawString(font, getTitle().getString(), 7, 7, 0x404040, false);
+		super.renderLabels(graphics, mouseX, mouseY);
 	}
 
 	@Override
@@ -133,41 +133,41 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		return parent;
 	}
 
-	class ButtonSet extends AbstractWidget {
+	class ButtonSet extends AbstractButton {
 
 		public ButtonSet(int x, int y, Component text) {
 			super(x, y, 50, 20, text);
 		}
 
 		@Override
-		public void onClick(double mouseX, double mouseY) {
-			onOkButtonPressed(hasShiftDown());
-		}
-
-		@Override
 		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
 
 		}
+
+		@Override
+		public void onPress() {
+			onOkButtonPressed(hasShiftDown());
+		}
 	}
 
-	class ButtonCancel extends AbstractWidget {
+	class ButtonCancel extends AbstractButton {
 
 		public ButtonCancel(int x, int y, Component text) {
 			super(x, y, 50, 20, text);
 		}
 
 		@Override
-		public void onClick(double mouseX, double mouseY) {
-			close();
-		}
-
-		@Override
 		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
 
 		}
+
+		@Override
+		public void onPress() {
+			close();
+		}
 	}
 
-	class ButtonIncrement extends AbstractWidget {
+	class ButtonIncrement extends AbstractButton {
 
 		int increment;
 
@@ -177,13 +177,13 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
-		public void onClick(double mouseX, double mouseY) {
-			onIncrementButtonClicked(increment);
+		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
+
 		}
 
 		@Override
-		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
-
+		public void onPress() {
+			onIncrementButtonClicked(increment);
 		}
 	}
 }

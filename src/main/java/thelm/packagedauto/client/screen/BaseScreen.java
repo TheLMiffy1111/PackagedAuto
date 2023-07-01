@@ -1,8 +1,8 @@
 package thelm.packagedauto.client.screen;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -26,58 +26,57 @@ public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContaine
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-		renderBackground(poseStack);
-		super.render(poseStack, mouseX, mouseY, partialTicks);
-		renderTooltip(poseStack, mouseX, mouseY);
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		renderBackground(graphics);
+		super.render(graphics, mouseX, mouseY, partialTicks);
+		renderTooltip(graphics, mouseX, mouseY);
 	}
 
 	protected abstract ResourceLocation getBackgroundTexture();
 
 	@Override
-	protected void renderBg(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
+	protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-		RenderSystem.setShaderTexture(0, getBackgroundTexture());
 		if(imageWidth > 256 || imageHeight > 256) {
-			blit(poseStack, leftPos, topPos, 0, 0, imageWidth, imageHeight, 512, 512);
+			graphics.blit(getBackgroundTexture(), leftPos, topPos, 0, 0, imageWidth, imageHeight, 512, 512);
 		}
 		else {
-			blit(poseStack, leftPos, topPos, 0, 0, imageWidth, imageHeight);
+			graphics.blit(getBackgroundTexture(), leftPos, topPos, 0, 0, imageWidth, imageHeight);
 		}
-		renderBgAdditional(poseStack, partialTicks, mouseX, mouseY);
+		renderBgAdditional(graphics, partialTicks, mouseX, mouseY);
 		for(int i = 0; i < menu.slots.size(); ++i) {
 			Slot slot = menu.slots.get(i);
 			if(slot.isActive()) {
 				if(slot instanceof FalseCopyVolumeSlot vSlot) {
 					IVolumeStackWrapper stack = vSlot.volumeInventory.getStackInSlot(slot.getSlotIndex());
 					if(!stack.isEmpty()) {
-						stack.getVolumeType().render(poseStack, leftPos+slot.x, topPos+slot.y, stack);
-						renderQuantity(poseStack, leftPos+slot.x, topPos+slot.y, String.valueOf(stack.getAmount()), 0xFFFFFF);
+						stack.getVolumeType().render(graphics, leftPos+slot.x, topPos+slot.y, stack);
+						renderQuantity(graphics, leftPos+slot.x, topPos+slot.y, String.valueOf(stack.getAmount()), 0xFFFFFF);
 					}
 				}
 				else if((slot instanceof FalseCopySlot || slot instanceof PreviewSlot)
 						&& slot.getItem().getItem() instanceof IVolumePackageItem vPackage) {
 					IVolumeStackWrapper stack = vPackage.getVolumeStack(slot.getItem());
 					if(!stack.isEmpty()) {
-						stack.getVolumeType().render(poseStack, leftPos+slot.x, topPos+slot.y, stack);
+						stack.getVolumeType().render(graphics, leftPos+slot.x, topPos+slot.y, stack);
 					}
 				}
 			}
 		}
 	}
 
-	protected void renderBgAdditional(PoseStack poseStack, float partialTicks, int mouseX, int mouseY) {
+	protected void renderBgAdditional(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
 
 	}
 
 	@Override
-	protected void renderLabels(PoseStack poseStack, int mouseX, int mouseY) {
+	protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
 		for(int i = 0; i < menu.slots.size(); ++i) {
 			Slot slot = menu.slots.get(i);
 			if(slot.isActive() && slot instanceof FalseCopyVolumeSlot vSlot) {
 				IVolumeStackWrapper stack = vSlot.volumeInventory.getStackInSlot(slot.getSlotIndex());
 				if(!stack.isEmpty() && inBounds(slot.x, slot.y, 17, 17, mouseX-leftPos, mouseY-topPos)) {
-					renderComponentTooltip(poseStack, stack.getTooltip(), mouseX-leftPos, mouseY-topPos);
+					graphics.renderComponentTooltip(font, stack.getTooltip(), mouseX-leftPos, mouseY-topPos);
 				}
 			}
 		}
@@ -111,14 +110,14 @@ public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContaine
 		return ox >= x && ox <= x + w && oy >= y && oy <= y + h;
 	}
 
-	public void renderQuantity(PoseStack poseStack, int x, int y, String qty, int color) {
+	public void renderQuantity(GuiGraphics graphics, int x, int y, String qty, int color) {
 		boolean large = minecraft.isEnforceUnicode();
-		poseStack.pushPose();
-		poseStack.translate(x, y, 300);
+		graphics.pose().pushPose();
+		graphics.pose().translate(x, y, 300);
 		if(!large) {
-			poseStack.scale(0.5F, 0.5F, 1);
+			graphics.pose().scale(0.5F, 0.5F, 1);
 		}
-		font.drawShadow(poseStack, qty, (large ? 16 : 30) - font.width(qty), large ? 8 : 22, color);
-		poseStack.popPose();
+		graphics.drawString(font, qty, (large ? 16 : 30) - font.width(qty), large ? 8 : 22, color, true);
+		graphics.pose().popPose();
 	}
 }

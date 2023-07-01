@@ -78,11 +78,6 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 	}
 
 	@Override
-	public void onSecurityBreak(AECrafterBlockEntity nodeOwner, IGridNode node) {
-		level.destroyBlock(worldPosition, true);
-	}
-
-	@Override
 	public void onSaveChanges(AECrafterBlockEntity nodeOwner, IGridNode node) {
 		setChanged();
 	}

@@ -30,8 +30,6 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 	protected EnergyStorage energyStorage = new EnergyStorage(this, 0);
 	public Component customName = null;
 	protected UUID ownerUUID = null;
-	@Deprecated
-	protected int placerID = -1;
 
 	public BaseBlockEntity(BlockEntityType<?> blockEntityType, BlockPos pos, BlockState state) {
 		super(blockEntityType, pos, state);

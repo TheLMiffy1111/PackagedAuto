@@ -24,6 +24,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -279,7 +280,7 @@ public class MiscHelper implements IMiscHelper {
 		f:for(ItemStack req : condensedRequired) {
 			for(ItemStack offer : condensedOffered) {
 				if(req.getCount() <= offer.getCount() && req.getItem() == offer.getItem() &&
-						(!req.hasTag() || ItemStack.tagMatches(req, offer))) {
+						(!req.hasTag() || ItemStack.isSameItemSameTags(req, offer))) {
 					continue f;
 				}
 			}
@@ -293,7 +294,7 @@ public class MiscHelper implements IMiscHelper {
 			for(ItemStack offer : offered) {
 				if(!offer.isEmpty()) {
 					if(req.getItem() == offer.getItem() &&
-							(!req.hasTag() || ItemStack.tagMatches(req, offer))) {
+							(!req.hasTag() || ItemStack.isSameItemSameTags(req, offer))) {
 						int toRemove = Math.min(count, offer.getCount());
 						offer.shrink(toRemove);
 						count -= toRemove;
@@ -338,5 +339,11 @@ public class MiscHelper implements IMiscHelper {
 	public RecipeManager getRecipeManager() {
 		return server != null ? server.getRecipeManager() :
 			DistExecutor.callWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().level.getRecipeManager());
+	}
+
+	@Override
+	public RegistryAccess getRegistryAccess() {
+		return server != null ? server.registryAccess() :
+			DistExecutor.callWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().level.registryAccess());
 	}
 }

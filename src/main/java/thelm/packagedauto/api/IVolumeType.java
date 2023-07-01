@@ -2,8 +2,7 @@ package thelm.packagedauto.api;
 
 import java.util.Optional;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
@@ -48,5 +47,5 @@ public interface IVolumeType {
 
 	IVolumeStackWrapper drain(ICapabilityProvider capProvider, Direction direction, IVolumeStackWrapper resource, boolean simulate);
 
-	void render(PoseStack poseStack, int i, int j, IVolumeStackWrapper stack);
+	void render(GuiGraphics graphics, int i, int j, IVolumeStackWrapper stack);
 }

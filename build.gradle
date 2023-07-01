@@ -4,9 +4,6 @@ buildscript {
             url = "https://maven.minecraftforge.net/"
         }
         maven {
-            url = "https://libraries.minecraft.net/"
-        }
-        maven {
             url = "https://plugins.gradle.org/m2/"
         }
         maven {
@@ -19,7 +16,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.1.+", changing: true
+	    classpath "org.gradle.toolchains:foojay-resolver:0.5.0"
+        classpath "net.minecraftforge.gradle:ForgeGradle:6.+"
         classpath "org.parchmentmc:librarian:1.+"
     }
 }
@@ -64,14 +62,14 @@ sourceSets {
     main
 }
 
-version = "3.3.2.8"
+version = "3.4.0.0"
 group = "thelm.packagedauto"
-archivesBaseName = "PackagedAuto-1.19.3"
+archivesBaseName = "PackagedAuto-1.20.1"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-    mappings channel: "parchment", version: "2022.12.18-1.19.3"
+    mappings channel: "parchment", version: "1.19.3-2023.06.25-1.20.1"
     runs {
         client = {
             properties "forge.logging.markers": "SCAN,REGISTRIES,REGISTRYDUMP"
@@ -93,12 +91,12 @@ minecraft {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.19.3-44.1.20"
+    minecraft "net.minecraftforge:forge:1.20.1-47.0.35"
 
-    implementation fg.deobf("appeng:appliedenergistics2-forge:13.0.9-beta")
-    implementation fg.deobf("mezz.jei:jei-1.19.3-forge:12.1.1.9")
-    //implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.19.2:10.1.35")
-    implementation fg.deobf("vazkii.patchouli:Patchouli:1.19.3-78")
+    implementation fg.deobf("appeng:appliedenergistics2-forge:15.0.3-alpha")
+    implementation fg.deobf("mezz.jei:jei-1.20.1-forge:15.2.0.22")
+    implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.20.1:14.0.6")
+    //implementation fg.deobf("vazkii.patchouli:Patchouli:1.19.3-78")
     //implementation fg.deobf("com.simibubi.create:create-1.19.2:0.5.0.i-23:all")
     //implementation fg.deobf("mekanism:Mekanism:1.19.2-10.3.8.477")
     //implementation fg.deobf("mekanism:Mekanism:1.19.2-10.3.8.477:generators")
@@ -106,10 +104,10 @@ dependencies {
     //JitPack
 
     //CurseMaven
-    implementation fg.deobf("curse.maven:shutup-experimental-settings-407174:3759881")
+    //implementation fg.deobf("curse.maven:shutup-experimental-settings-407174:3759881")
     //implementation fg.deobf("curse.maven:applied-mekanistics-574300:4058235")
-    implementation fg.deobf("curse.maven:cucumber-272335:4284311")
-    implementation fg.deobf("curse.maven:extended-crafting-268387:4344021")
+    implementation fg.deobf("curse.maven:cucumber-272335:4602089")
+    implementation fg.deobf("curse.maven:extended-crafting-268387:4602095")
     //implementation fg.deobf("curse.maven:ato-405593:4046926")
 }
 

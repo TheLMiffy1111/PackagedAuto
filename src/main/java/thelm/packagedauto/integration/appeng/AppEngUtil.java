@@ -11,7 +11,7 @@ import com.google.common.base.Functions;
 import appeng.api.crafting.IPatternDetails.IInput;
 import appeng.api.parts.IPartHost;
 import appeng.api.stacks.GenericStack;
-import appeng.helpers.iface.PatternProviderLogicHost;
+import appeng.helpers.patternprovider.PatternProviderLogicHost;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import thelm.packagedauto.api.IPackageRecipeInfo;

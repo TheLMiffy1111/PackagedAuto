@@ -22,7 +22,7 @@ public class PositionalBlockEntityMenuFactory<C extends AbstractContainerMenu, T
 	@Override
 	public C create(int windowId, Inventory inv, FriendlyByteBuf data) {
 		BlockPos pos = data.readBlockPos();
-		T blockEntity = (T)inv.player.level.getBlockEntity(pos);
+		T blockEntity = (T)inv.player.level().getBlockEntity(pos);
 		return factory.create(windowId, inv, blockEntity);
 	}
 }
