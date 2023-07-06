@@ -32,6 +32,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
@@ -146,7 +147,8 @@ public class MiscHelper implements IMiscHelper {
 			if(!empty || i == list.size()-1) {
 				if(empty) {
 					// Ensure that the end-of-list stack if empty is always the default empty stack
-					stack = new ItemStack((Item)null);
+					// Have to use air now
+					stack = new ItemStack(Items.AIR);
 				}
 				CompoundTag nbt = new CompoundTag();
 				nbt.putByte("Index", (byte)i);
