@@ -30,6 +30,7 @@ public class CrafterItemHandler extends BaseItemHandler<CrafterBlockEntity> {
 		return switch(id) {
 		case 0 -> blockEntity.remainingProgress;
 		case 1 -> blockEntity.isWorking ? 1 : 0;
+		case 2 -> blockEntity.getEnergyStorage().getEnergyStored();
 		default -> 0;
 		};
 	}
@@ -39,11 +40,12 @@ public class CrafterItemHandler extends BaseItemHandler<CrafterBlockEntity> {
 		switch(id) {
 		case 0 -> blockEntity.remainingProgress = value;
 		case 1 -> blockEntity.isWorking = value != 0;
+		case 2 -> blockEntity.getEnergyStorage().setEnergyStored(value);
 		}
 	}
 
 	@Override
 	public int getCount() {
-		return 2;
+		return 3;
 	}
 }

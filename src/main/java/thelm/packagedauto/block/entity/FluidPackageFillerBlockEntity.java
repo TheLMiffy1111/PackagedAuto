@@ -93,7 +93,6 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 					ejectItem();
 				}
 			}
-			energyStorage.updateIfChanged();
 		}
 	}
 

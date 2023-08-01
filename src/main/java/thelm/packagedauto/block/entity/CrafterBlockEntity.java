@@ -71,7 +71,6 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 			if(level.getGameTime() % 8 == 0) {
 				ejectItems();
 			}
-			energyStorage.updateIfChanged();
 		}
 	}
 

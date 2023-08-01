@@ -106,7 +106,6 @@ public class PackagerBlockEntity extends BaseBlockEntity {
 					ejectItem();
 				}
 			}
-			energyStorage.updateIfChanged();
 		}
 	}
 
