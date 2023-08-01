@@ -21,6 +21,9 @@ repositories {
 		url = "https://maven.su5ed.dev/releases/"
 	}
 	maven {
+		url = "https://dvs1.progwml6.com/files/maven/"
+	}
+	maven {
 		url = "https://maven.blamejared.com/"
 	}
 	maven {
@@ -43,9 +46,13 @@ repositories {
 	}
 }
 
-version = "1.12.2-1.0.8.32"
+sourceSets {
+	main
+}
+
+version = "1.0.8.32"
 group = "thelm.packagedauto"
-archivesBaseName = "PackagedAuto"
+archivesBaseName = "PackagedAuto-1.12.2"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
@@ -102,8 +109,6 @@ dependencies {
 
 	//CurseMaven
 	implementation fg.deobf("curse.maven:applied-energistics-2-223794:2747063")
-	implementation fg.deobf("curse.maven:cucumber-272335:2645867")
-	implementation fg.deobf("curse.maven:extended-crafting-268387:2777071")
 	implementation fg.deobf("curse.maven:redstone-flux-270789:2920436")
 	implementation fg.deobf("curse.maven:cofh-core-69162:2920433")
 	implementation fg.deobf("curse.maven:cofh-world-271384:2920434")
