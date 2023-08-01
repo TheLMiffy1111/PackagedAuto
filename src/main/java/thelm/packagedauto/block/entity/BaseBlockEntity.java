@@ -86,6 +86,7 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 		super.load(nbt);
 		loadSync(nbt);
 		itemHandler.load(nbt);
+		energyStorage.read(nbt);
 		ownerUUID = null;
 		if(nbt.hasUUID("OwnerUUID")) {
 			ownerUUID = nbt.getUUID("OwnerUUID");
@@ -97,6 +98,7 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 		super.saveAdditional(nbt);
 		saveSync(nbt);
 		itemHandler.save(nbt);
+		energyStorage.save(nbt);
 		if(ownerUUID != null) {
 			nbt.putUUID("OwnerUUID", ownerUUID);
 		}
@@ -106,14 +108,12 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 		if(nbt.contains("Name")) {
 			customName = Component.Serializer.fromJson(nbt.getString("Name"));
 		}
-		energyStorage.read(nbt);
 	}
 
 	public CompoundTag saveSync(CompoundTag nbt) {
 		if(customName != null) {
 			nbt.putString("Name", Component.Serializer.toJson(customName));
 		}
-		energyStorage.save(nbt);
 		return nbt;
 	}
 

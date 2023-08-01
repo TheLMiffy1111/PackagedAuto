@@ -74,7 +74,6 @@ public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
 	}
 
 	public void setEnergyStored(int energy) {
-		boolean flag = !blockEntity.getLevel().isClientSide && this.energy != energy;
 		this.energy = energy;
 		if(this.energy > capacity) {
 			this.energy = capacity;
