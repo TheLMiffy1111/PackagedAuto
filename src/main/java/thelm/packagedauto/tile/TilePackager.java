@@ -127,7 +127,6 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 					ejectItem();
 				}
 			}
-			energyStorage.updateIfChanged();
 		}
 	}
 

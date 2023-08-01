@@ -136,7 +136,6 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 					ejectItem();
 				}
 			}
-			energyStorage.updateIfChanged();
 		}
 	}
 

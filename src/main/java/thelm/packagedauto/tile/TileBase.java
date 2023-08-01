@@ -85,6 +85,7 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 		super.readFromNBT(nbt);
 		readSyncNBT(nbt);
 		inventory.readFromNBT(nbt);
+		energyStorage.readFromNBT(nbt);
 		ownerUUID = null;
 		if(nbt.hasUniqueId("OwnerUUID")) {
 			ownerUUID = nbt.getUniqueId("OwnerUUID");
@@ -96,6 +97,7 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 		super.writeToNBT(nbt);
 		writeSyncNBT(nbt);
 		inventory.writeToNBT(nbt);
+		energyStorage.writeToNBT(nbt);
 		if(ownerUUID != null) {
 			nbt.setUniqueId("OwnerUUID", ownerUUID);
 		}
@@ -106,14 +108,12 @@ public abstract class TileBase extends TileEntity implements IWorldNameable, IGu
 		if(nbt.hasKey("Name")) {
 			customName = nbt.getString("Name");
 		}
-		energyStorage.readFromNBT(nbt);
 	}
 
 	public NBTTagCompound writeSyncNBT(NBTTagCompound nbt) {
 		if(!customName.isEmpty()) {
 			nbt.setString("Name", customName);
 		}
-		energyStorage.writeToNBT(nbt);
 		return nbt;
 	}
 

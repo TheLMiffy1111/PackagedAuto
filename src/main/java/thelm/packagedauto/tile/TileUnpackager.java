@@ -97,7 +97,6 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 					hostHelper.chargeEnergy();
 				}
 			}
-			energyStorage.updateIfChanged();
 		}
 	}
 

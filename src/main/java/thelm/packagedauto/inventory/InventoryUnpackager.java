@@ -55,6 +55,28 @@ public class InventoryUnpackager extends InventoryTileBase {
 	}
 
 	@Override
+	public int getField(int id) {
+		switch(id) {
+		case 0: return tile.getEnergyStorage().getEnergyStored();
+		default: return 0;
+		}
+	}
+
+	@Override
+	public void setField(int id, int value) {
+		switch(id) {
+		case 0:
+			tile.getEnergyStorage().setEnergyStored(value);
+			break;
+		}
+	}
+
+	@Override
+	public int getFieldCount() {
+		return 1;
+	}
+
+	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
 		updateRecipeList();
