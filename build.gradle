@@ -30,9 +30,6 @@ repositories {
 		url = "https://maven.blakesmods.com/releases/"
 	}
 	maven {
-		url = "https://jitpack.io/"
-	}
-	maven {
 		url = "https://cursemaven.com/"
 		content {
 			includeGroup "curse.maven"
@@ -87,21 +84,19 @@ dependencies {
 	implementation fg.deobf("com.blakebr0.cucumber:Cucumber:1.19.3-6.1.4")
 	implementation fg.deobf("com.blakebr0.extendedcrafting:ExtendedCrafting:1.19.3-5.2.5")
 
-	//JitPack
-
 	//CurseMaven
 }
 
 jar {
 	manifest {
 		attributes([
-				"Specification-Title": "PackagedAuto",
-				"Specification-Vendor": "thelm",
-				"Specification-Version": "3",
-				"Implementation-Title": "${archivesBaseName}",
-				"Implementation-Version": "${version}",
-				"Implementation-Vendor": "thelm"
-				//"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+			"Specification-Title": "PackagedAuto",
+			"Specification-Vendor": "thelm",
+			"Specification-Version": "3",
+			"Implementation-Title": "${archivesBaseName}",
+			"Implementation-Version": "${version}",
+			"Implementation-Vendor": "thelm",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
 		],)
 	}
 }
