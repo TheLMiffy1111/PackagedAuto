@@ -47,6 +47,26 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerBlockEntity
 		return wrapperMap.computeIfAbsent(side, s->new UnpackagerItemHandlerWrapper(this, s));
 	}
 
+	@Override
+	public int get(int id) {
+		return switch(id) {
+		case 0 -> blockEntity.getEnergyStorage().getEnergyStored();
+		default -> 0;
+		};
+	}
+
+	@Override
+	public void set(int id, int value) {
+		switch(id) {
+		case 0 -> blockEntity.getEnergyStorage().setEnergyStored(value);
+		}
+	}
+
+	@Override
+	public int getCount() {
+		return 1;
+	}
+
 	public void updateRecipeList() {
 		blockEntity.recipeList.clear();
 		ItemStack listStack = getStackInSlot(9);

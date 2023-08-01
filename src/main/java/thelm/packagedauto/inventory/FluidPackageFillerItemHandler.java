@@ -34,6 +34,7 @@ public class FluidPackageFillerItemHandler extends BaseItemHandler<FluidPackageF
 		case 1 -> blockEntity.amount;
 		case 2 -> blockEntity.remainingProgress;
 		case 3 -> blockEntity.isWorking ? 1 : 0;
+		case 4 -> blockEntity.getEnergyStorage().getEnergyStored();
 		default -> 0;
 		};
 	}
@@ -45,11 +46,12 @@ public class FluidPackageFillerItemHandler extends BaseItemHandler<FluidPackageF
 		case 1 -> blockEntity.amount = value;
 		case 2 -> blockEntity.remainingProgress = value;
 		case 3 -> blockEntity.isWorking = value != 0;
+		case 4 -> blockEntity.getEnergyStorage().setEnergyStored(value);
 		}
 	}
 
 	@Override
 	public int getCount() {
-		return 4;
+		return 5;
 	}
 }

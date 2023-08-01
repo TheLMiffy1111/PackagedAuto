@@ -84,7 +84,6 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				fillTrackers();
 				emptyTrackers();
 			}
-			energyStorage.updateIfChanged();
 		}
 	}
 
