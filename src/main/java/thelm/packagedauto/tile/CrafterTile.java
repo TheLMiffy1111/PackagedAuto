@@ -69,7 +69,6 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 			if(level.getGameTime() % 8 == 0) {
 				ejectItems();
 			}
-			energyStorage.updateIfChanged();
 		}
 	}
 

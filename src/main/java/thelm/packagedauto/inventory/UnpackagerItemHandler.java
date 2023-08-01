@@ -47,6 +47,28 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerTile> {
 		return wrapperMap.computeIfAbsent(side, s->new UnpackagerItemHandlerWrapper(this, s));
 	}
 
+	@Override
+	public int get(int id) {
+		switch(id) {
+		case 0: return tile.getEnergyStorage().getEnergyStored();
+		default: return 0;
+		}
+	}
+
+	@Override
+	public void set(int id, int value) {
+		switch(id) {
+		case 0:
+			tile.getEnergyStorage().setEnergyStored(value);
+			break;
+		}
+	}
+
+	@Override
+	public int getCount() {
+		return 1;
+	}
+
 	public void updateRecipeList() {
 		tile.recipeList.clear();
 		ItemStack listStack = getStackInSlot(9);

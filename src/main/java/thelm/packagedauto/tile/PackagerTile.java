@@ -105,7 +105,6 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 					ejectItem();
 				}
 			}
-			energyStorage.updateIfChanged();
 		}
 	}
 

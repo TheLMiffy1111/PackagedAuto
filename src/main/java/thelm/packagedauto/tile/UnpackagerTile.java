@@ -81,7 +81,6 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 				fillTrackers();
 				emptyTrackers();
 			}
-			energyStorage.updateIfChanged();
 		}
 	}
 

@@ -79,6 +79,7 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 		super.load(blockState, nbt);
 		readSync(nbt);
 		itemHandler.read(nbt);
+		energyStorage.read(nbt);
 		ownerUUID = null;
 		if(nbt.hasUUID("OwnerUUID")) {
 			ownerUUID = nbt.getUUID("OwnerUUID");
@@ -90,6 +91,7 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 		super.save(nbt);
 		writeSync(nbt);
 		itemHandler.write(nbt);
+		energyStorage.write(nbt);
 		if(ownerUUID != null) {
 			nbt.putUUID("OwnerUUID", ownerUUID);
 		}
@@ -100,14 +102,12 @@ public abstract class BaseTile extends TileEntity implements INamedContainerProv
 		if(nbt.contains("Name")) {
 			customName = ITextComponent.Serializer.fromJson(nbt.getString("Name"));
 		}
-		energyStorage.read(nbt);
 	}
 
 	public CompoundNBT writeSync(CompoundNBT nbt) {
 		if(customName != null) {
 			nbt.putString("Name", ITextComponent.Serializer.toJson(customName));
 		}
-		energyStorage.write(nbt);
 		return nbt;
 	}
 

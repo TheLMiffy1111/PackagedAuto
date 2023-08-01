@@ -1,124 +1,109 @@
-buildscript {
-    repositories {
-        maven {
-            url = "https://maven.minecraftforge.net/"
-        }
-        maven {
-            url = "https://libraries.minecraft.net/"
-        }
-        maven {
-            url = "https://plugins.gradle.org/m2/"
-        }
-        maven {
-            url = "https://repo.spongepowered.org/maven/"
-        }
-        maven {
-            url = "https://maven.parchmentmc.org/"
-        }
-        jcenter()
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: "net.minecraftforge.gradle", name: "ForgeGradle", version: "5.1.+", changing: true
-        classpath "org.parchmentmc:librarian:1.+"
-    }
+plugins {
+	id "net.neoforged.gradle" version "[6.0.13,)"
+	id "org.parchmentmc.librarian.forgegradle" version "[1,)"
+	id "eclipse"
+	id "idea"
+	id "maven-publish"
 }
 
-apply plugin: "net.minecraftforge.gradle"
-apply plugin: "org.parchmentmc.librarian.forgegradle"
-apply plugin: "eclipse"
-apply plugin: "maven-publish"
-
 repositories {
-    jcenter()
-    flatDir {
-        dirs "libs"
-    }
-    maven {
-        url = "https://repo.spongepowered.org/maven/"
-    }
-    maven {
-        url = "https://dvs1.progwml6.com/files/maven/"
-    }
-    maven {
-        url = "https://maven.blamejared.com/"
-    }
-    maven {
-        url = "https://jitpack.io/"
-    }
-    maven {
-        url = "https://cursemaven.com/"
+	jcenter()
+	flatDir {
+		dirs "libs"
+	}
+	maven {
+		url = "https://maven.minecraftforge.net/"
+	}
+	maven {
+		url = "https://repo.spongepowered.org/maven/"
+	}
+	maven {
+		url = "https://dvs1.progwml6.com/files/maven/"
+	}
+	maven {
+		url = "https://maven.blamejared.com/"
+	}
+	maven {
+		url = "https://maven.blakesmods.com/releases/"
+	}
+	maven {
+		url = "https://jitpack.io/"
+	}
+	maven {
+		url = "https://cursemaven.com/"
 		content {
-            includeGroup "curse.maven"
-        }
-    }
-    maven {
-        url = "https://modmaven.dev/"
-    }
+			includeGroup "curse.maven"
+		}
+	}
+	maven {
+		url = "https://modmaven.dev/"
+	}
 }
 
 sourceSets {
-    main
+	main
 }
 
-version = "2.0.3.19"
+version = "2.0.3.20"
 group = "thelm.packagedauto"
 archivesBaseName = "PackagedAuto-1.16.5"
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = "1.8"
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+
+tasks.withType(JavaCompile).configureEach {
+	options.encoding = "UTF-8"
+}
 
 minecraft {
-    mappings channel: "parchment", version: "2022.03.06-1.16.5"
-    runs {
-        client = {
-            properties "forge.logging.markers": "SCAN,REGISTRIES,REGISTRYDUMP"
-            properties "forge.logging.console.level": "debug"
-            properties "mixin.env.remapRefMap": "true"
-            properties "mixin.env.refMapRemappingFile": "${projectDir}/build/createSrgToMcp/output.srg".toString()
-            workingDirectory project.file("run").canonicalPath
-            source sourceSets.main
-        }
-        server = {
-            properties "forge.logging.markers": "SCAN,REGISTRIES,REGISTRYDUMP"
-            properties "forge.logging.console.level": "debug"
-            properties "mixin.env.remapRefMap": "true"
-            properties "mixin.env.refMapRemappingFile": "${projectDir}/build/createSrgToMcp/output.srg".toString()
-            workingDirectory project.file("run").canonicalPath
-            source sourceSets.main
-        }
-    }
+	mappings channel: "parchment", version: "2022.03.06-1.16.5"
+	runs {
+		configureEach {
+			workingDirectory project.file("run")
+			property "forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP"
+			property "forge.logging.console.level", "debug"
+			property "mixin.env.remapRefMap", "true"
+			property "mixin.env.refMapRemappingFile", "${buildDir}/createSrgToMcp/output.srg"
+			mods {
+				packagedauto {
+					source sourceSets.main
+				}
+			}
+		}
+		client
+		server
+	}
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:1.16.5-36.2.39"
+	minecraft "net.minecraftforge:forge:1.16.5-36.2.39"
 
-    implementation fg.deobf("appeng:appliedenergistics2:8.4.7")
-    implementation fg.deobf("mezz.jei:jei-1.16.5:7.7.1.1004")
-    implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-1.16.5:7.1.2.516")
-    implementation fg.deobf("vazkii.patchouli:Patchouli:1.16.4-53.3")
-    implementation fg.deobf("com.jozufozu.flywheel:Flywheel:1.16-0.2.5.53")
-    implementation fg.deobf("com.simibubi.create:Create:mc1.16.5_v0.3.2g+480")
-    implementation fg.deobf("mekanism:Mekanism:1.16.5-10.1.2.457")
-    implementation fg.deobf("mekanism:Mekanism:1.16.5-10.1.2.457:generators")
+	implementation fg.deobf("appeng:appliedenergistics2:8.4.7")
+	implementation fg.deobf("mezz.jei:jei-1.16.5:7.8.0.1009")
+	implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-1.16.5:7.1.2.521")
+	implementation fg.deobf("vazkii.patchouli:Patchouli:1.16.4-53.3")
+	implementation fg.deobf("com.jozufozu.flywheel:Flywheel:1.16-0.2.5.53")
+	implementation fg.deobf("com.simibubi.create:Create:mc1.16.5_v0.3.2g+480")
+	implementation fg.deobf("mekanism:Mekanism:1.16.5-10.1.2.457")
+	implementation fg.deobf("mekanism:Mekanism:1.16.5-10.1.2.457:generators")
+	implementation fg.deobf("com.blakebr0.cucumber:Cucumber:1.16.5-4.1.12")
+	implementation fg.deobf("com.blakebr0.extendedcrafting:ExtendedCrafting:1.16.5-3.1.9")
 
-    //JitPack
+	//JitPack
 
-    //CurseMaven
-    implementation fg.deobf("curse.maven:cucumber-272335:3507886")
-    implementation fg.deobf("curse.maven:extended-crafting-268387:3881753")
-    implementation fg.deobf("curse.maven:ato-405593:3405905")
+	//CurseMaven
+	implementation fg.deobf("curse.maven:ato-405593:3405905")
 }
 
 jar {
-    manifest {
-        attributes([
-                "Specification-Title": "PackagedAuto",
-                "Specification-Vendor": "thelm",
-                "Specification-Version": "2",
-                "Implementation-Title": "${archivesBaseName}",
-                "Implementation-Version": "${version}",
-                "Implementation-Vendor": "thelm"
-                //"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ],)
-    }
+	manifest {
+		attributes([
+			"Specification-Title": "PackagedAuto",
+			"Specification-Vendor": "thelm",
+			"Specification-Version": "2",
+			"Implementation-Title": "${archivesBaseName}",
+			"Implementation-Version": "${version}",
+			"Implementation-Vendor": "thelm",
+			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+		],)
+	}
 }
