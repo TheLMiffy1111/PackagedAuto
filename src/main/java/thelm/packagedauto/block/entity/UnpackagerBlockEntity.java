@@ -328,8 +328,8 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 	}
 
 	@Override
-	public void loadSync(CompoundTag nbt) {
-		super.loadSync(nbt);
+	public void load(CompoundTag nbt) {
+		super.load(nbt);
 		blocking = nbt.getBoolean("Blocking");
 		powered = nbt.getBoolean("Powered");
 		for(int i = 0; i < trackers.length; ++i) {
@@ -338,8 +338,8 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 	}
 
 	@Override
-	public CompoundTag saveSync(CompoundTag nbt) {
-		super.saveSync(nbt);
+	public void saveAdditional(CompoundTag nbt) {
+		super.saveAdditional(nbt);
 		nbt.putBoolean("Blocking", blocking);
 		nbt.putBoolean("Powered", powered);
 		for(int i = 0; i < trackers.length; ++i) {
@@ -347,7 +347,6 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			trackers[i].save(subNBT);
 			nbt.put(String.format("Tracker%02d", i), subNBT);
 		}
-		return nbt;
 	}
 
 	public void changeBlockingMode() {
@@ -481,6 +480,27 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			nbt.put("ToSend", MiscHelper.INSTANCE.saveAllItems(new ListTag(), toSend));
 			if(direction != null) {
 				nbt.putByte("Facing", (byte)direction.get3DDataValue());
+			}
+		}
+
+		public int getSyncValue() {
+			int val = 0;
+			for(int i = 0; i < received.size(); ++i) {
+				if(received.getBoolean(i)) {
+					val |= 1 << i;
+				}
+			}
+			val <<= 4;
+			val |= amount;
+			return val;
+		}
+
+		public void setSyncValue(int val) {
+			amount = val & 15;
+			received.size(amount);
+			val >>>= 4;
+			for(int i = 0; i < received.size(); ++i) {
+				received.set(i, ((val >>> i) & 1) != 0);
 			}
 		}
 	}

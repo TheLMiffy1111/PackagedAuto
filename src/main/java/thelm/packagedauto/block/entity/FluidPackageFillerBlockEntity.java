@@ -168,6 +168,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	public void startProcess() {
 		remainingProgress = energyReq;
 		amount = 0;
+		sync(false);
 		setChanged();
 	}
 
@@ -238,25 +239,35 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	}
 
 	@Override
-	public void loadSync(CompoundTag nbt) {
-		super.loadSync(nbt);
+	public void load(CompoundTag nbt) {
+		super.load(nbt);
 		isWorking = nbt.getBoolean("Working");
-		currentFluid = FluidStack.loadFluidStackFromNBT(nbt.getCompound("Fluid"));
-		requiredAmount = nbt.getInt("AmountReq");
 		amount = nbt.getInt("Amount");
 		remainingProgress = nbt.getInt("Progress");
 		powered = nbt.getBoolean("Powered");
 	}
 
 	@Override
-	public CompoundTag saveSync(CompoundTag nbt) {
-		super.saveSync(nbt);
+	public void saveAdditional(CompoundTag nbt) {
+		super.saveAdditional(nbt);
 		nbt.putBoolean("Working", isWorking);
-		nbt.put("Fluid", currentFluid.writeToNBT(new CompoundTag()));
-		nbt.putInt("AmountReq", requiredAmount);
 		nbt.putInt("Amount", amount);
 		nbt.putInt("Progress", remainingProgress);
 		nbt.putBoolean("Powered", powered);
+	}
+
+	@Override
+	public void loadSync(CompoundTag nbt) {
+		super.loadSync(nbt);
+		currentFluid = FluidStack.loadFluidStackFromNBT(nbt.getCompound("Fluid"));
+		requiredAmount = nbt.getInt("AmountReq");
+	}
+
+	@Override
+	public CompoundTag saveSync(CompoundTag nbt) {
+		super.saveSync(nbt);
+		nbt.put("Fluid", currentFluid.writeToNBT(new CompoundTag()));
+		nbt.putInt("AmountReq", requiredAmount);
 		return nbt;
 	}
 

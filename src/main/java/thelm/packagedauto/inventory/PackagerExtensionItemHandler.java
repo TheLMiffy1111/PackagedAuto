@@ -4,6 +4,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.items.IItemHandlerModifiable;
+import thelm.packagedauto.block.entity.PackagerBlockEntity;
 import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 
 public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtensionBlockEntity> {
@@ -41,7 +42,8 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 		return switch(id) {
 		case 0 -> blockEntity.remainingProgress;
 		case 1 -> blockEntity.isWorking ? 1 : 0;
-		case 2 -> blockEntity.getEnergyStorage().getEnergyStored();
+		case 2 -> blockEntity.mode.ordinal();
+		case 3 -> blockEntity.getEnergyStorage().getEnergyStored();
 		default -> 0;
 		};
 	}
@@ -51,12 +53,13 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 		switch(id) {
 		case 0 -> blockEntity.remainingProgress = value;
 		case 1 -> blockEntity.isWorking = value != 0;
-		case 2 -> blockEntity.getEnergyStorage().setEnergyStored(value);
+		case 2 -> blockEntity.mode = PackagerBlockEntity.Mode.values()[value];
+		case 3 -> blockEntity.getEnergyStorage().setEnergyStored(value);
 		}
 	}
 
 	@Override
 	public int getCount() {
-		return 3;
+		return 4;
 	}
 }
