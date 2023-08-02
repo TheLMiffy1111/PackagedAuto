@@ -207,15 +207,14 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 	@Override
 	public void detectAndSendChanges() {
 		super.detectAndSendChanges();
-		for(IContainerListener listener : listeners) {
-			for(int i = 0; i < inventory.getFieldCount(); ++i) {
-				if(!prevSyncValues.containsKey(i) || prevSyncValues.get(i) != inventory.getField(i)) {
-					listener.sendWindowProperty(this, i, inventory.getField(i));
-				}
-			}
-		}
 		for(int i = 0; i < inventory.getFieldCount(); ++i) {
-			prevSyncValues.put(i, inventory.getField(i));
+			int val = inventory.getField(i);
+			if(!prevSyncValues.containsKey(i) || prevSyncValues.get(i) != val) {
+				for(IContainerListener listener : listeners) {
+					listener.sendWindowProperty(this, i, val);
+				}
+				prevSyncValues.put(i, val);
+			}
 		}
 	}
 

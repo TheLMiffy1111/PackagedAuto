@@ -71,7 +71,6 @@ public class GuiUnpackager extends GuiContainerTileBase<ContainerUnpackager> {
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if(button instanceof GuiButtonChangeBlocking) {
 			PacketHandler.INSTANCE.sendToServer(new PacketChangeBlocking());
-			container.tile.changeBlockingMode();
 		}
 	}
 

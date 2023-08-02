@@ -158,7 +158,6 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 					if(tracker.isFilled() && tracker.recipe != null && tracker.recipe.getRecipeType().hasMachine()) {
 						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), facing.getOpposite())) {
 							tracker.clearRecipe();
-							syncTile(false);
 							markDirty();
 							break;
 						}
@@ -264,7 +263,6 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	public void updatePowered() {
 		if(world.getRedstonePowerFromNeighbors(pos) > 0 != powered) {
 			powered = !powered;
-			syncTile(false);
 			markDirty();
 		}
 	}
@@ -377,6 +375,11 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
+		blocking = nbt.getBoolean("Blocking");
+		powered = nbt.getBoolean("Powered");
+		for(int i = 0; i < trackers.length; ++i) {
+			trackers[i].readFromNBT(nbt.getCompoundTag(String.format("Tracker%02d", i)));
+		}
 		if(hostHelper != null) {
 			hostHelper.readFromNBT(nbt);
 		}
@@ -385,31 +388,15 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
-		if(hostHelper != null) {
-			hostHelper.writeToNBT(nbt);
-		}
-		return nbt;
-	}
-
-	@Override
-	public void readSyncNBT(NBTTagCompound nbt) {
-		super.readSyncNBT(nbt);
-		blocking = nbt.getBoolean("Blocking");
-		powered = nbt.getBoolean("Powered");
-		for(int i = 0; i < trackers.length; ++i) {
-			trackers[i].readFromNBT(nbt.getCompoundTag(String.format("Tracker%02d", i)));
-		}
-	}
-
-	@Override
-	public NBTTagCompound writeSyncNBT(NBTTagCompound nbt) {
-		super.writeSyncNBT(nbt);
 		nbt.setBoolean("Blocking", blocking);
 		nbt.setBoolean("Powered", powered);
 		for(int i = 0; i < trackers.length; ++i) {
 			NBTTagCompound subNBT = new NBTTagCompound();
 			trackers[i].writeToNBT(subNBT);
 			nbt.setTag(String.format("Tracker%02d", i), subNBT);
+		}
+		if(hostHelper != null) {
+			hostHelper.writeToNBT(nbt);
 		}
 		return nbt;
 	}
@@ -450,7 +437,6 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			received.clear();
 			facing = null;
 			if(world != null && !world.isRemote) {
-				syncTile(false);
 				markDirty();
 			}
 		}
@@ -466,7 +452,6 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 					amount = recipe.getPatterns().size();
 					received.size(amount);
 					received.set(packageItem.getIndex(stack), true);
-					syncTile(false);
 					markDirty();
 					return true;
 				}
@@ -474,7 +459,6 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 					int index = packageItem.getIndex(stack);
 					if(!received.get(index)) {
 						received.set(index, true);
-						syncTile(false);
 						markDirty();
 						return true;
 					}
@@ -552,6 +536,27 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 				nbt.setByte("Facing", (byte)facing.getIndex());
 			}
 			return nbt;
+		}
+
+		public int getSyncValue() {
+			int val = 0;
+			for(int i = 0; i < received.size(); ++i) {
+				if(received.getBoolean(i)) {
+					val |= 1 << i;
+				}
+			}
+			val <<= 4;
+			val |= amount;
+			return val;
+		}
+
+		public void setSyncValue(int val) {
+			amount = val & 15;
+			received.size(amount);
+			val >>>= 4;
+			for(int i = 0; i < received.size(); ++i) {
+				received.set(i, ((val >>> i) & 1) != 0);
+			}
 		}
 	}
 }

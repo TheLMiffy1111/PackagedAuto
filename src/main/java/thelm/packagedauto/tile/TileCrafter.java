@@ -247,6 +247,8 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
 		super.readFromNBT(nbt);
+		isWorking = nbt.getBoolean("Working");
+		remainingProgress = nbt.getInteger("Progress");
 		currentRecipe = null;
 		if(nbt.hasKey("Recipe")) {
 			NBTTagCompound tag = nbt.getCompoundTag("Recipe");
@@ -263,6 +265,8 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
+		nbt.setBoolean("Working", isWorking);
+		nbt.setInteger("Progress", remainingProgress);
 		if(currentRecipe != null) {
 			NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), currentRecipe);
 			nbt.setTag("Recipe", tag);
@@ -270,21 +274,6 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 		if(hostHelper != null) {
 			hostHelper.writeToNBT(nbt);
 		}
-		return nbt;
-	}
-
-	@Override
-	public void readSyncNBT(NBTTagCompound nbt) {
-		super.readSyncNBT(nbt);
-		isWorking = nbt.getBoolean("Working");
-		remainingProgress = nbt.getInteger("Progress");
-	}
-
-	@Override
-	public NBTTagCompound writeSyncNBT(NBTTagCompound nbt) {
-		super.writeSyncNBT(nbt);
-		nbt.setBoolean("Working", isWorking);
-		nbt.setInteger("Progress", remainingProgress);
 		return nbt;
 	}
 

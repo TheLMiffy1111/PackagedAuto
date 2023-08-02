@@ -322,7 +322,6 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	public void updatePowered() {
 		if(world.getRedstonePowerFromNeighbors(pos) > 0 != powered) {
 			powered = !powered;
-			syncTile(false);
 			markDirty();
 		}
 	}
@@ -416,7 +415,11 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbt) {
+		mode = Mode.values()[nbt.getByte("Mode")];
 		super.readFromNBT(nbt);
+		isWorking = nbt.getBoolean("Working");
+		remainingProgress = nbt.getInteger("Progress");
+		powered = nbt.getBoolean("Powered");
 		lockPattern = false;
 		currentPattern = null;
 		if(nbt.hasKey("Pattern")) {
@@ -439,6 +442,10 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
 		super.writeToNBT(nbt);
+		nbt.setByte("Mode", (byte)mode.ordinal());
+		nbt.setBoolean("Working", isWorking);
+		nbt.setInteger("Progress", remainingProgress);
+		nbt.setBoolean("Powered", powered);
 		if(lockPattern) {
 			NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), currentPattern.getRecipeInfo());
 			tag.setByte("Index", (byte)currentPattern.getIndex());
@@ -447,25 +454,6 @@ public class TilePackager extends TileBase implements ITickable, IGridHost, IAct
 		if(hostHelper != null) {
 			hostHelper.writeToNBT(nbt);
 		}
-		return nbt;
-	}
-
-	@Override
-	public void readSyncNBT(NBTTagCompound nbt) {
-		super.readSyncNBT(nbt);
-		isWorking = nbt.getBoolean("Working");
-		remainingProgress = nbt.getInteger("Progress");
-		powered = nbt.getBoolean("Powered");
-		mode = Mode.values()[nbt.getByte("Mode")];
-	}
-
-	@Override
-	public NBTTagCompound writeSyncNBT(NBTTagCompound nbt) {
-		super.writeSyncNBT(nbt);
-		nbt.setBoolean("Working", isWorking);
-		nbt.setInteger("Progress", remainingProgress);
-		nbt.setBoolean("Powered", powered);
-		nbt.setByte("Mode", (byte)mode.ordinal());
 		return nbt;
 	}
 

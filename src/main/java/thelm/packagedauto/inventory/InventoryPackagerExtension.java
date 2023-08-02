@@ -5,6 +5,7 @@ import java.util.stream.IntStream;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import net.minecraftforge.energy.CapabilityEnergy;
+import thelm.packagedauto.tile.TilePackager;
 import thelm.packagedauto.tile.TilePackagerExtension;
 
 public class InventoryPackagerExtension extends InventoryTileBase {
@@ -54,7 +55,8 @@ public class InventoryPackagerExtension extends InventoryTileBase {
 		switch(id) {
 		case 0: return tile.remainingProgress;
 		case 1: return tile.isWorking ? 1 : 0;
-		case 2: return tile.getEnergyStorage().getEnergyStored();
+		case 2: return tile.mode.ordinal();
+		case 3: return tile.getEnergyStorage().getEnergyStored();
 		default: return 0;
 		}
 	}
@@ -69,6 +71,9 @@ public class InventoryPackagerExtension extends InventoryTileBase {
 			tile.isWorking = value != 0;
 			break;
 		case 2:
+			tile.mode = TilePackager.Mode.values()[value];
+			break;
+		case 3:
 			tile.getEnergyStorage().setEnergyStored(value);
 			break;
 		}
@@ -76,7 +81,7 @@ public class InventoryPackagerExtension extends InventoryTileBase {
 
 	@Override
 	public int getFieldCount() {
-		return 3;
+		return 4;
 	}
 
 	@Override

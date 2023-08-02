@@ -59,7 +59,6 @@ public class GuiPackagerExtension extends GuiContainerTileBase<ContainerPackager
 	protected void actionPerformed(GuiButton button) throws IOException {
 		if(button instanceof ButtonChangePackaging) {
 			PacketHandler.INSTANCE.sendToServer(new PacketChangePackaging());
-			container.tile.changePackagingMode();
 		}
 	}
 

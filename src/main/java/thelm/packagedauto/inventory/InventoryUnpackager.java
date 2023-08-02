@@ -56,16 +56,26 @@ public class InventoryUnpackager extends InventoryTileBase {
 
 	@Override
 	public int getField(int id) {
+		if(id < 10) {
+			return tile.trackers[id].getSyncValue();
+		}
 		switch(id) {
-		case 0: return tile.getEnergyStorage().getEnergyStored();
+		case 10: return tile.blocking ? 1 : 0;
+		case 11: return tile.getEnergyStorage().getEnergyStored();
 		default: return 0;
 		}
 	}
 
 	@Override
 	public void setField(int id, int value) {
+		if(id < 10) {
+			tile.trackers[id].setSyncValue(value);
+		}
 		switch(id) {
-		case 0:
+		case 10:
+			tile.blocking = value != 0;
+			break;
+		case 11:
 			tile.getEnergyStorage().setEnergyStored(value);
 			break;
 		}
@@ -73,7 +83,7 @@ public class InventoryUnpackager extends InventoryTileBase {
 
 	@Override
 	public int getFieldCount() {
-		return 1;
+		return 12;
 	}
 
 	@Override
