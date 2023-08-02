@@ -80,7 +80,6 @@ public class PackagerExtensionScreen extends BaseScreen<PackagerExtensionMenu> {
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new ChangePackagingPacket());
-			menu.blockEntity.changePackagingMode();
 		}
 
 		@Override

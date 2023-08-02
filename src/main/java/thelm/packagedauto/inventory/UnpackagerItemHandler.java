@@ -49,22 +49,30 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerBlockEntity
 
 	@Override
 	public int get(int id) {
+		if(id < 10) {
+			return blockEntity.trackers[id].getSyncValue();
+		}
 		return switch(id) {
-		case 0 -> blockEntity.getEnergyStorage().getEnergyStored();
+		case 10 -> blockEntity.blocking ? 1 : 0;
+		case 11 -> blockEntity.getEnergyStorage().getEnergyStored();
 		default -> 0;
 		};
 	}
 
 	@Override
 	public void set(int id, int value) {
+		if(id < 10) {
+			blockEntity.trackers[id].setSyncValue(value);
+		}
 		switch(id) {
-		case 0 -> blockEntity.getEnergyStorage().setEnergyStored(value);
+		case 10 -> blockEntity.blocking = value != 0;
+		case 11 -> blockEntity.getEnergyStorage().setEnergyStored(value);
 		}
 	}
 
 	@Override
 	public int getCount() {
-		return 1;
+		return 12;
 	}
 
 	public void updateRecipeList() {

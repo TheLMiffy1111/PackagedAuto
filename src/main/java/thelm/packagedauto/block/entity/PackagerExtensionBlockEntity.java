@@ -322,7 +322,6 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	public void updatePowered() {
 		if(level.getBestNeighborSignal(worldPosition) > 0 != powered) {
 			powered = !powered;
-			sync(false);
 			setChanged();
 		}
 	}
@@ -344,8 +343,12 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 
 	@Override
 	public void load(CompoundTag nbt) {
+		mode = PackagerBlockEntity.Mode.values()[nbt.getByte("Mode")];
 		super.load(nbt);
 		updatePatternList();
+		isWorking = nbt.getBoolean("Working");
+		remainingProgress = nbt.getInt("Progress");
+		powered = nbt.getBoolean("Powered");
 		lockPattern = false;
 		currentPattern = null;
 		if(nbt.contains("Pattern")) {
@@ -365,6 +368,10 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	@Override
 	public void saveAdditional(CompoundTag nbt) {
 		super.saveAdditional(nbt);
+		nbt.putByte("Mode", (byte)mode.ordinal());
+		nbt.putBoolean("Working", isWorking);
+		nbt.putInt("Progress", remainingProgress);
+		nbt.putBoolean("Powered", powered);
 		if(lockPattern) {
 			CompoundTag tag = MiscHelper.INSTANCE.saveRecipe(new CompoundTag(), currentPattern.getRecipeInfo());
 			tag.putByte("Index", (byte)currentPattern.getIndex());
@@ -375,19 +382,11 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	@Override
 	public void loadSync(CompoundTag nbt) {
 		super.loadSync(nbt);
-		isWorking = nbt.getBoolean("Working");
-		remainingProgress = nbt.getInt("Progress");
-		powered = nbt.getBoolean("Powered");
-		mode = PackagerBlockEntity.Mode.values()[nbt.getByte("Mode")];
 	}
 
 	@Override
 	public CompoundTag saveSync(CompoundTag nbt) {
 		super.saveSync(nbt);
-		nbt.putBoolean("Working", isWorking);
-		nbt.putInt("Progress", remainingProgress);
-		nbt.putBoolean("Powered", powered);
-		nbt.putByte("Mode", (byte)mode.ordinal());
 		return nbt;
 	}
 
