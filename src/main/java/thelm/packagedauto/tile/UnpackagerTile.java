@@ -9,6 +9,7 @@ import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.booleans.BooleanList;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
@@ -142,7 +143,6 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 					if(tracker.isFilled() && tracker.recipe != null && tracker.recipe.getRecipeType().hasMachine()) {
 						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), direction.getOpposite())) {
 							tracker.clearRecipe();
-							syncTile(false);
 							setChanged();
 							break;
 						}
@@ -245,7 +245,6 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 	public void updatePowered() {
 		if(level.getBestNeighborSignal(worldPosition) > 0 != powered) {
 			powered = !powered;
-			syncTile(false);
 			setChanged();
 		}
 	}
@@ -271,8 +270,8 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 	}
 
 	@Override
-	public void readSync(CompoundNBT nbt) {
-		super.readSync(nbt);
+	public void load(BlockState blockState, CompoundNBT nbt) {
+		super.load(blockState, nbt);
 		blocking = nbt.getBoolean("Blocking");
 		powered = nbt.getBoolean("Powered");
 		for(int i = 0; i < trackers.length; ++i) {
@@ -281,8 +280,8 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 	}
 
 	@Override
-	public CompoundNBT writeSync(CompoundNBT nbt) {
-		super.writeSync(nbt);
+	public CompoundNBT save(CompoundNBT nbt) {
+		super.save(nbt);
 		nbt.putBoolean("Blocking", blocking);
 		nbt.putBoolean("Powered", powered);
 		for(int i = 0; i < trackers.length; ++i) {
@@ -324,7 +323,6 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			received.clear();
 			direction = null;
 			if(level != null && !level.isClientSide) {
-				syncTile(false);
 				setChanged();
 			}
 		}
@@ -340,15 +338,13 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 					amount = recipe.getPatterns().size();
 					received.size(amount);
 					received.set(packageItem.getIndex(stack), true);
-					syncTile(false);
 					setChanged();
 					return true;
 				}
 				else if(this.recipe.equals(recipe)) {
 					int index = packageItem.getIndex(stack);
-					if(!received.get(index)) {
+					if(!received.getBoolean(index)) {
 						received.set(index, true);
-						syncTile(false);
 						setChanged();
 						return true;
 					}
@@ -426,6 +422,27 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 				nbt.putByte("Facing", (byte)direction.get3DDataValue());
 			}
 			return nbt;
+		}
+
+		public int getSyncValue() {
+			int val = 0;
+			for(int i = 0; i < received.size(); ++i) {
+				if(received.getBoolean(i)) {
+					val |= 1 << i;
+				}
+			}
+			val <<= 4;
+			val |= amount;
+			return val;
+		}
+
+		public void setSyncValue(int val) {
+			amount = val & 15;
+			received.size(amount);
+			val >>>= 4;
+			for(int i = 0; i < received.size(); ++i) {
+				received.set(i, ((val >>> i) & 1) != 0);
+			}
 		}
 	}
 }

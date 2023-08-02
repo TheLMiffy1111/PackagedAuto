@@ -78,7 +78,6 @@ public class PackagerScreen extends BaseScreen<PackagerContainer> {
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new ChangePackagingPacket());
-			menu.tile.changePackagingMode();
 		}
 	}
 }

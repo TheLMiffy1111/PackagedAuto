@@ -49,16 +49,26 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerTile> {
 
 	@Override
 	public int get(int id) {
+		if(id < 10) {
+			return tile.trackers[id].getSyncValue();
+		}
 		switch(id) {
-		case 0: return tile.getEnergyStorage().getEnergyStored();
+		case 10: return tile.blocking ? 1 : 0;
+		case 11: return tile.getEnergyStorage().getEnergyStored();
 		default: return 0;
 		}
 	}
 
 	@Override
 	public void set(int id, int value) {
+		if(id < 10) {
+			tile.trackers[id].setSyncValue(value);
+		}
 		switch(id) {
-		case 0:
+		case 10:
+			tile.blocking = value != 0;
+			break;
+		case 11:
 			tile.getEnergyStorage().setEnergyStored(value);
 			break;
 		}
@@ -66,7 +76,7 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerTile> {
 
 	@Override
 	public int getCount() {
-		return 1;
+		return 12;
 	}
 
 	public void updateRecipeList() {

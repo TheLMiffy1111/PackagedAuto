@@ -90,7 +90,6 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(new ChangeBlockingPacket());
-			menu.tile.changeBlockingMode();
 		}
 	}
 }

@@ -5,6 +5,7 @@ import net.minecraft.util.Direction;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.tile.PackagerExtensionTile;
+import thelm.packagedauto.tile.PackagerTile;
 
 public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtensionTile> {
 
@@ -41,7 +42,8 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 		switch(id) {
 		case 0: return tile.remainingProgress;
 		case 1: return tile.isWorking ? 1 : 0;
-		case 2: return tile.getEnergyStorage().getEnergyStored();
+		case 2: return tile.mode.ordinal();
+		case 3: return tile.getEnergyStorage().getEnergyStored();
 		default: return 0;
 		}
 	}
@@ -56,6 +58,9 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 			tile.isWorking = value != 0;
 			break;
 		case 2:
+			tile.mode = PackagerTile.Mode.values()[value];
+			break;
+		case 3:
 			tile.getEnergyStorage().setEnergyStored(value);
 			break;
 		}
@@ -63,6 +68,6 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 
 	@Override
 	public int getCount() {
-		return 3;
+		return 4;
 	}
 }

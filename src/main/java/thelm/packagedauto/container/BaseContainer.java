@@ -20,7 +20,6 @@ public class BaseContainer<T extends BaseTile> extends Container {
 	public final T tile;
 	public final PlayerInventory playerInventory;
 	public final BaseItemHandler itemHandler;
-	public final Int2IntMap prevSyncValues = new Int2IntRBTreeMap();
 
 	public BaseContainer(ContainerType<?> containerType, int windowId, PlayerInventory playerInventory, T tile) {
 		super(containerType, windowId);

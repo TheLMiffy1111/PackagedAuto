@@ -327,7 +327,6 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 	public void updatePowered() {
 		if(level.getBestNeighborSignal(worldPosition) > 0 != powered) {
 			powered = !powered;
-			syncTile(false);
 			setChanged();
 		}
 	}
@@ -349,8 +348,12 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 
 	@Override
 	public void load(BlockState blockState, CompoundNBT nbt) {
+		mode = PackagerTile.Mode.values()[nbt.getByte("Mode")];
 		super.load(blockState, nbt);
 		updatePatternList();
+		isWorking = nbt.getBoolean("Working");
+		remainingProgress = nbt.getInt("Progress");
+		powered = nbt.getBoolean("Powered");
 		lockPattern = false;
 		currentPattern = null;
 		if(nbt.contains("Pattern")) {
@@ -370,30 +373,15 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 	@Override
 	public CompoundNBT save(CompoundNBT nbt) {
 		super.save(nbt);
+		nbt.putByte("Mode", (byte)mode.ordinal());
+		nbt.putBoolean("Working", isWorking);
+		nbt.putInt("Progress", remainingProgress);
+		nbt.putBoolean("Powered", powered);
 		if(lockPattern) {
 			CompoundNBT tag = MiscHelper.INSTANCE.writeRecipe(new CompoundNBT(), currentPattern.getRecipeInfo());
 			tag.putByte("Index", (byte)currentPattern.getIndex());
 			nbt.put("Pattern", tag);
 		}
-		return nbt;
-	}
-
-	@Override
-	public void readSync(CompoundNBT nbt) {
-		super.readSync(nbt);
-		isWorking = nbt.getBoolean("Working");
-		remainingProgress = nbt.getInt("Progress");
-		powered = nbt.getBoolean("Powered");
-		mode = PackagerTile.Mode.values()[nbt.getByte("Mode")];
-	}
-
-	@Override
-	public CompoundNBT writeSync(CompoundNBT nbt) {
-		super.writeSync(nbt);
-		nbt.putBoolean("Working", isWorking);
-		nbt.putInt("Progress", remainingProgress);
-		nbt.putBoolean("Powered", powered);
-		nbt.putByte("Mode", (byte)mode.ordinal());
 		return nbt;
 	}
 
