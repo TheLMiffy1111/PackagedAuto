@@ -51,7 +51,8 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 		return switch(id) {
 		case 0 -> blockEntity.remainingProgress;
 		case 1 -> blockEntity.isWorking ? 1 : 0;
-		case 2 -> blockEntity.getEnergyStorage().getEnergyStored();
+		case 2 -> blockEntity.mode.ordinal();
+		case 3 -> blockEntity.getEnergyStorage().getEnergyStored();
 		default -> 0;
 		};
 	}
@@ -61,13 +62,14 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 		switch(id) {
 		case 0 -> blockEntity.remainingProgress = value;
 		case 1 -> blockEntity.isWorking = value != 0;
-		case 2 -> blockEntity.getEnergyStorage().setEnergyStored(value);
+		case 2 -> blockEntity.mode = PackagerBlockEntity.Mode.values()[value];
+		case 3 -> blockEntity.getEnergyStorage().setEnergyStored(value);
 		}
 	}
 
 	@Override
 	public int getCount() {
-		return 3;
+		return 4;
 	}
 
 	@Override

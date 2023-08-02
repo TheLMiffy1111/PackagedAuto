@@ -83,7 +83,6 @@ public class PackagerExtensionScreen extends BaseScreen<PackagerExtensionMenu> {
 		@Override
 		public void onPress() {
 			PacketHandler.INSTANCE.sendToServer(new ChangePackagingPacket());
-			menu.blockEntity.changePackagingMode();
 		}
 
 		private Tooltip currentTooltip() {
