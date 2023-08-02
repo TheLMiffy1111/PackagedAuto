@@ -20,7 +20,6 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 	public final T blockEntity;
 	public final Inventory inventory;
 	public final BaseItemHandler itemHandler;
-	public final Int2IntMap prevSyncValues = new Int2IntRBTreeMap();
 
 	public BaseMenu(MenuType<?> menuType, int windowId, Inventory inventory, T blockEntity) {
 		super(menuType, windowId);
