@@ -47,11 +47,21 @@ sourceSets {
 	main
 }
 
-version = "1.0.9.33"
-group = "thelm.packagedauto"
-archivesBaseName = "PackagedAuto-1.12.2"
+def mcVersion = "1.12.2"
+def modName = "PackagedAuto"
+def modId = "packagedauto"
+def specVersion = "1"
+def vendor = "thelm"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+group = "thelm.packagedauto"
+version = "1.0.9.33"
+
+archivesBaseName = "${modName}-${mcVersion}"
+
+java {
+	toolchain.languageVersion = JavaLanguageVersion.of(8)
+	withSourcesJar()
+}
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
@@ -59,6 +69,7 @@ tasks.withType(JavaCompile).configureEach {
 
 minecraft {
 	mappings channel: "stable", version: "39-1.12"
+	generateRunFolders = true
 	runs {
 		configureEach {
 			workingDirectory project.file("run")
@@ -66,9 +77,9 @@ minecraft {
 			property "forge.logging.console.level", "debug"
 			property "mixin.env.remapRefMap", "true"
 			property "mixin.env.refMapRemappingFile", "${buildDir}/createSrgToMcp/output.srg"
-			environment "MC_VERSION", "1.12.2"
+			environment "MC_VERSION", mcVersion
 			mods {
-				packagedauto {
+				"${modId}" {
 					source sourceSets.main
 				}
 			}
@@ -120,16 +131,21 @@ configurations.all {
 	}
 }
 
+def manifestAttributes = [
+	"Specification-Title": modName,
+	"Specification-Vendor": vendor,
+	"Specification-Version": specVersion,
+	"Implementation-Title": archivesBaseName,
+	"Implementation-Version": version,
+	"Implementation-Vendor": vendor,
+	"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+]
+
 jar {
-	manifest {
-		attributes([
-			"Specification-Title": "PackagedAuto",
-			"Specification-Vendor": "thelm",
-			"Specification-Version": "1",
-			"Implementation-Title": "${archivesBaseName}",
-			"Implementation-Version": "${version}",
-			"Implementation-Vendor": "thelm",
-			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-		],)
-	}
+	manifest.attributes(manifestAttributes)
+	finalizedBy("reobfJar")
+}
+
+sourcesJar {
+	manifest.attributes(manifestAttributes)
 }
