@@ -38,11 +38,21 @@ sourceSets {
 	main
 }
 
-version = "3.4.1.3"
-group = "thelm.packagedauto"
-archivesBaseName = "PackagedAuto-1.20.1"
+def mcVersion = "1.20.1"
+def modName = "PackagedAuto"
+def modId = "packagedauto"
+def specVersion = "3"
+def vendor = "thelm"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+group = "thelm.packagedauto"
+version = "3.4.1.3"
+
+archivesBaseName = "${modName}-${mcVersion}"
+
+java {
+	toolchain.languageVersion = JavaLanguageVersion.of(17)
+	withSourcesJar()
+}
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
@@ -50,6 +60,7 @@ tasks.withType(JavaCompile).configureEach {
 
 minecraft {
 	mappings channel: "parchment", version: "2023.07.30-1.20.1"
+	generateRunFolders = true
 	runs {
 		configureEach {
 			workingDirectory project.file("run")
@@ -58,7 +69,7 @@ minecraft {
 			property "mixin.env.remapRefMap", "true"
 			property "mixin.env.refMapRemappingFile", "${buildDir}/createSrgToMcp/output.srg"
 			mods {
-				packagedauto {
+				"${modId}" {
 					source sourceSets.main
 				}
 			}
@@ -88,16 +99,21 @@ dependencies {
 	implementation fg.deobf("curse.maven:ato-405593:4590570")
 }
 
+def manifestAttributes = [
+	"Specification-Title": modName,
+	"Specification-Vendor": vendor,
+	"Specification-Version": specVersion,
+	"Implementation-Title": archivesBaseName,
+	"Implementation-Version": version,
+	"Implementation-Vendor": vendor,
+	"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+]
+
 jar {
-	manifest {
-		attributes([
-			"Specification-Title": "PackagedAuto",
-			"Specification-Vendor": "thelm",
-			"Specification-Version": "3",
-			"Implementation-Title": "${archivesBaseName}",
-			"Implementation-Version": "${version}",
-			"Implementation-Vendor": "thelm",
-			"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-		],)
-	}
+	manifest.attributes(manifestAttributes)
+	finalizedBy("reobfJar")
+}
+
+sourcesJar {
+	manifest.attributes(manifestAttributes)
 }
