@@ -21,9 +21,6 @@ repositories {
 		url = "https://maven.su5ed.dev/releases/"
 	}
 	maven {
-		url = "https://dvs1.progwml6.com/files/maven/"
-	}
-	maven {
 		url = "https://maven.blamejared.com/"
 	}
 	maven {
