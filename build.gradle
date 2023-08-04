@@ -66,6 +66,7 @@ tasks.withType(JavaCompile).configureEach {
 
 minecraft {
 	mappings channel: "parchment", version: "2022.11.06-1.18.2"
+	generateRunFolders = true
 	runs {
 		configureEach {
 			workingDirectory project.file("run")
