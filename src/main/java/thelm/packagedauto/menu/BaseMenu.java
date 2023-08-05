@@ -1,11 +1,10 @@
 package thelm.packagedauto.menu;
 
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.ints.Int2IntRBTreeMap;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -13,6 +12,7 @@ import thelm.packagedauto.block.entity.BaseBlockEntity;
 import thelm.packagedauto.inventory.BaseItemHandler;
 import thelm.packagedauto.slot.FalseCopySlot;
 import thelm.packagedauto.util.MiscHelper;
+import thelm.packagedauto.util.OptionalIntDataSlot;
 
 //Large portions of code are taken from CoFHCore
 public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
@@ -47,6 +47,13 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 		}
 		for(int i = 0; i < 9; i++) {
 			addSlot(new Slot(inventory, i, xOffset+i*18, yOffset+58));
+		}
+	}
+
+	@Override
+	protected void addDataSlots(ContainerData array) {
+		for(int i = 0; i < array.getCount(); ++i) {
+			addDataSlot(OptionalIntDataSlot.of(array, i));
 		}
 	}
 
