@@ -1,7 +1,5 @@
 package thelm.packagedauto.container;
 
-import it.unimi.dsi.fastutil.ints.Int2IntMap;
-import it.unimi.dsi.fastutil.ints.Int2IntRBTreeMap;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ClickType;
@@ -9,10 +7,12 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.IIntArray;
 import thelm.packagedauto.inventory.BaseItemHandler;
 import thelm.packagedauto.slot.FalseCopySlot;
 import thelm.packagedauto.tile.BaseTile;
 import thelm.packagedauto.util.MiscHelper;
+import thelm.packagedauto.util.OptionalIntReferenceHolder;
 
 //Large portions of code are taken from CoFHCore
 public class BaseContainer<T extends BaseTile> extends Container {
@@ -47,6 +47,13 @@ public class BaseContainer<T extends BaseTile> extends Container {
 		}
 		for(int i = 0; i < 9; i++) {
 			addSlot(new Slot(playerInventory, i, xOffset+i*18, yOffset+58));
+		}
+	}
+
+	@Override
+	protected void addDataSlots(IIntArray array) {
+		for(int i = 0; i < array.getCount(); ++i) {
+			addDataSlot(OptionalIntReferenceHolder.of(array, i));
 		}
 	}
 
