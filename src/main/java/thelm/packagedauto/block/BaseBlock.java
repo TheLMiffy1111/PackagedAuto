@@ -16,7 +16,6 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.tile.BaseTile;
 
 public abstract class BaseBlock extends Block {

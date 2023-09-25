@@ -5,6 +5,7 @@ import com.mojang.authlib.GameProfile;
 import appeng.api.IAppEngApi;
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
+import appeng.api.config.PowerUnits;
 import appeng.api.networking.GridFlags;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridHost;
@@ -24,7 +25,6 @@ import appeng.api.util.AEPartLocation;
 import appeng.core.Api;
 import appeng.me.helpers.MachineSource;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -50,7 +50,7 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 	@Override
 	public void tick() {
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0 && getActionableNode().isActive()) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -147,17 +147,8 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 	protected void ejectItem() {
 		if(getActionableNode().isActive()) {
 			IGrid grid = getActionableNode().getGrid();
-			if(grid == null) {
-				return;
-			}
 			IStorageGrid storageGrid = grid.getCache(IStorageGrid.class);
-			if(storageGrid == null) {
-				return;
-			}
 			IEnergyGrid energyGrid = grid.getCache(IEnergyGrid.class);
-			if(energyGrid == null) {
-				return;
-			}
 			IItemStorageChannel storageChannel = Api.instance().storage().getStorageChannel(IItemStorageChannel.class);
 			IMEMonitor<IAEItemStack> inventory = storageGrid.getInventory(storageChannel);
 			IAEItemStack stack = storageChannel.createStack(itemHandler.getStackInSlot(9));
@@ -186,18 +177,16 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 	}
 
 	protected void chargeMEEnergy() {
-		IGrid grid = getActionableNode().getGrid();
-		if(grid == null) {
-			return;
+		if(getActionableNode().isActive()) {
+			IGrid grid = getActionableNode().getGrid();
+			IEnergyGrid energyGrid = grid.getCache(IEnergyGrid.class);
+			double conversion = PowerUnits.RF.convertTo(PowerUnits.AE, 1);
+			int request = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored()-energyStorage.getEnergyStored());
+			double available = energyGrid.extractAEPower((request+0.5)*conversion, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+			int extract = (int)(available/conversion);
+			energyGrid.extractAEPower(extract*conversion, Actionable.MODULATE, PowerMultiplier.CONFIG);
+			energyStorage.receiveEnergy(extract, false);
 		}
-		IEnergyGrid energyGrid = grid.getCache(IEnergyGrid.class);
-		if(energyGrid == null) {
-			return;
-		}
-		double energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored()-energyStorage.getEnergyStored())/2D;
-		double canExtract = energyGrid.extractAEPower(energyRequest, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-		double extract = Math.round(canExtract*2)/2D;
-		energyStorage.receiveEnergy((int)Math.round(energyGrid.extractAEPower(extract, Actionable.MODULATE, PowerMultiplier.CONFIG)*2), false);
 	}
 
 	@Override
