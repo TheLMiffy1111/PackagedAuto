@@ -5,6 +5,7 @@ import java.util.List;
 
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
+import appeng.api.config.PowerUnits;
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.features.IPlayerRegistry;
 import appeng.api.networking.GridFlags;
@@ -51,7 +52,7 @@ public class AEUnpackagerBlockEntity extends UnpackagerBlockEntity implements II
 			getMainNode().create(level, worldPosition);
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0 && getActionableNode().isActive()) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -157,18 +158,16 @@ public class AEUnpackagerBlockEntity extends UnpackagerBlockEntity implements II
 	}
 
 	protected void chargeMEEnergy() {
-		IGrid grid = getActionableNode().getGrid();
-		if(grid == null) {
-			return;
+		if(getMainNode().isActive()) {
+			IGrid grid = getMainNode().getGrid();
+			IEnergyService energyService = grid.getEnergyService();
+			double conversion = PowerUnits.RF.convertTo(PowerUnits.AE, 1);
+			int request = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored()-energyStorage.getEnergyStored());
+			double available = energyService.extractAEPower((request+0.5)*conversion, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+			int extract = (int)(available/conversion);
+			energyService.extractAEPower(extract*conversion, Actionable.MODULATE, PowerMultiplier.CONFIG);
+			energyStorage.receiveEnergy(extract, false);
 		}
-		IEnergyService energyService = grid.getService(IEnergyService.class);
-		if(energyService == null) {
-			return;
-		}
-		double energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored()-energyStorage.getEnergyStored())/2D;
-		double canExtract = energyService.extractAEPower(energyRequest, Actionable.SIMULATE, PowerMultiplier.CONFIG);
-		double extract = Math.round(canExtract*2)/2D;
-		energyStorage.receiveEnergy((int)Math.round(energyService.extractAEPower(extract, Actionable.MODULATE, PowerMultiplier.CONFIG)*2), false);
 	}
 
 	@Override

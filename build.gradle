@@ -51,7 +51,7 @@ def specVersion = "3"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "3.1.5.27"
+version = "3.1.5.28"
 
 archivesBaseName = "${modName}-${mcVersion}"
 
@@ -92,7 +92,7 @@ dependencies {
 	implementation fg.deobf("mezz.jei:jei-1.18.2-forge:10.2.1.1005")
 	implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.18.2:9.1.209")
 	implementation fg.deobf("vazkii.patchouli:Patchouli:1.18.2-71.1")
-	implementation fg.deobf("com.simibubi.create:create-1.18.2:0.5.1.c-298:all") {
+	implementation fg.deobf("com.simibubi.create:create-1.18.2:0.5.1.e-318:all") {
 		transitive = false
 	}
 	implementation fg.deobf("mekanism:Mekanism:1.18.2-10.2.5.465")
