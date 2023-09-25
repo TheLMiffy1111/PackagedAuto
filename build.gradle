@@ -48,7 +48,7 @@ def specVersion = "3"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "3.2.4.16"
+version = "3.2.4.17"
 
 archivesBaseName = "${modName}-${mcVersion}"
 
@@ -83,23 +83,23 @@ minecraft {
 }
 
 dependencies {
-	minecraft "net.minecraftforge:forge:1.19.2-43.2.21"
+	minecraft "net.minecraftforge:forge:1.19.2-43.3.0"
 
-	implementation fg.deobf("appeng:appliedenergistics2-forge:12.9.5")
-	implementation fg.deobf("mezz.jei:jei-1.19.2-forge:11.6.0.1016")
-	implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.19.2:10.1.48")
+	implementation fg.deobf("appeng:appliedenergistics2-forge:12.9.8")
+	implementation fg.deobf("mezz.jei:jei-1.19.2-forge:11.6.0.1018")
+	implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-forge-1.19.2:10.1.50")
 	implementation fg.deobf("vazkii.patchouli:Patchouli:1.19.2-77")
-	implementation fg.deobf("com.simibubi.create:create-1.19.2:0.5.1.c-36:all") {
+	implementation fg.deobf("com.simibubi.create:create-1.19.2:0.5.1.e-44:all") {
 		transitive = false
 	}
 	implementation fg.deobf("mekanism:Mekanism:1.19.2-10.3.9.13")
 	implementation fg.deobf("mekanism:Mekanism:1.19.2-10.3.9.13:generators")
-	implementation fg.deobf("com.blakebr0.cucumber:Cucumber:1.19.2-6.0.7")
-	implementation fg.deobf("com.blakebr0.extendedcrafting:ExtendedCrafting:1.19.2-5.1.7")
+	implementation fg.deobf("com.blakebr0.cucumber:Cucumber:1.19.2-6.0.8")
+	implementation fg.deobf("com.blakebr0.extendedcrafting:ExtendedCrafting:1.19.2-5.1.8")
 
 	//CurseMaven
 	implementation fg.deobf("curse.maven:shutup-experimental-settings-407174:3759881")
-	implementation fg.deobf("curse.maven:applied-mekanistics-574300:4380709")
+	implementation fg.deobf("curse.maven:applied-mekanistics-574300:4734608")
 	implementation fg.deobf("curse.maven:ato-405593:4046926")
 }
 
