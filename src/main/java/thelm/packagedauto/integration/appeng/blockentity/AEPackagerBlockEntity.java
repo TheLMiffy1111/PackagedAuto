@@ -141,8 +141,8 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 	protected void ejectItem() {
 		if(getMainNode().isActive()) {
 			IGrid grid = getMainNode().getGrid();
-			IStorageService storageService = grid.getService(IStorageService.class);
-			IEnergyService energyService = grid.getService(IEnergyService.class);
+			IStorageService storageService = grid.getStorageService();
+			IEnergyService energyService = grid.getEnergyService();
 			MEStorage inventory = storageService.getInventory();
 			ItemStack is = itemHandler.getStackInSlot(9);
 			AEItemKey key = AEItemKey.of(is);

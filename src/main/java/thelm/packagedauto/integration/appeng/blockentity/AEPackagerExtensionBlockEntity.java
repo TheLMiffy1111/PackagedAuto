@@ -49,7 +49,7 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 			getMainNode().create(level, worldPosition);
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0 && getActionableNode().isActive()) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -140,8 +140,8 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 	protected void ejectItem() {
 		if(getMainNode().isActive()) {
 			IGrid grid = getMainNode().getGrid();
-			IStorageService storageService = grid.getService(IStorageService.class);
-			IEnergyService energyService = grid.getService(IEnergyService.class);
+			IStorageService storageService = grid.getStorageService();
+			IEnergyService energyService = grid.getEnergyService();
 			MEStorage inventory = storageService.getInventory();
 			ItemStack is = itemHandler.getStackInSlot(9);
 			AEItemKey key = AEItemKey.of(is);
