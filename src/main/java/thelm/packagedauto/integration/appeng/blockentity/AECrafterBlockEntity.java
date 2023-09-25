@@ -110,8 +110,8 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 	protected void ejectItems() {
 		if(getMainNode().isActive()) {
 			IGrid grid = getMainNode().getGrid();
-			IStorageService storageService = grid.getService(IStorageService.class);
-			IEnergyService energyService = grid.getService(IEnergyService.class);
+			IStorageService storageService = grid.getStorageService();
+			IEnergyService energyService = grid.getEnergyService();
 			MEStorage inventory = storageService.getInventory();
 			int endIndex = isWorking ? 9 : 0;
 			for(int i = 9; i >= endIndex; --i) {
