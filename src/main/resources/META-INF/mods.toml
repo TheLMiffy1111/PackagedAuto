@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[44,)"
+loaderVersion="[46,)"
 license="MIT"
 issueTrackerURL="https://github.com/TheLMiffy1111/PackagedAuto/issues"
 displayURL="https://www.curseforge.com/minecraft/mc-mods/packagedauto"
@@ -13,7 +13,7 @@ description="An Applied Energistics 2 addon that uses 'packages' to allow autocr
 [[dependencies.packagedauto]]
     modId="forge"
     mandatory=true
-    versionRange="[44,)"
+    versionRange="[46,)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.packagedauto]]

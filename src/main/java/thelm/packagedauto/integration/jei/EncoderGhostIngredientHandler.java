@@ -3,7 +3,6 @@ package thelm.packagedauto.integration.jei;
 import java.util.List;
 
 import mezz.jei.api.gui.handlers.IGhostIngredientHandler;
-import mezz.jei.api.gui.handlers.IGhostIngredientHandler.Target;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.inventory.Slot;
