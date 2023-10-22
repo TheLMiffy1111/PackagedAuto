@@ -1,5 +1,5 @@
 plugins {
-	id "net.neoforged.gradle" version "[6.0.13,)"
+	id "net.neoforged.gradle" version "[6.0.13,7)"
 	id "wtf.gofancy.fancygradle" version "[1.1,)"
 	id "eclipse"
 	id "idea"
