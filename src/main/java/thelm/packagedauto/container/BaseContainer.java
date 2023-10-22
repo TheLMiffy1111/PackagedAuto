@@ -19,13 +19,13 @@ public class BaseContainer<T extends BaseTile> extends Container {
 
 	public final T tile;
 	public final PlayerInventory playerInventory;
-	public final BaseItemHandler itemHandler;
+	public final BaseItemHandler<?> itemHandler;
 
 	public BaseContainer(ContainerType<?> containerType, int windowId, PlayerInventory playerInventory, T tile) {
 		super(containerType, windowId);
 		this.tile = tile;
 		this.playerInventory = playerInventory;
-		itemHandler = tile != null ? tile.getItemHandler() : new BaseItemHandler(null, 0);
+		itemHandler = tile != null ? tile.getItemHandler() : new BaseItemHandler<>(null, 0);
 		addDataSlots(itemHandler);
 	}
 

@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.ICraftingRecipe;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeType;
 import net.minecraft.nbt.CompoundNBT;
@@ -23,7 +24,7 @@ import thelm.packagedauto.util.PackagePattern;
 
 public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 
-	IRecipe recipe;
+	ICraftingRecipe recipe;
 	List<ItemStack> input = new ArrayList<>();
 	CraftingInventory matrix = new CraftingInventory(new EmptyContainer(), 3, 3);
 	ItemStack output;
@@ -34,15 +35,16 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 		input.clear();
 		output = ItemStack.EMPTY;
 		patterns.clear();
-		recipe = MiscHelper.INSTANCE.getRecipeManager().byKey(new ResourceLocation(nbt.getString("Recipe"))).orElse(null);
+		IRecipe<?> recipe = MiscHelper.INSTANCE.getRecipeManager().byKey(new ResourceLocation(nbt.getString("Recipe"))).orElse(null);
 		List<ItemStack> matrixList = new ArrayList<>();
 		MiscHelper.INSTANCE.loadAllItems(nbt.getList("Matrix", 10), matrixList);
 		for(int i = 0; i < 9 && i < matrixList.size(); ++i) {
 			matrix.setItem(i, matrixList.get(i));
 		}
-		if(recipe != null) {
+		if(recipe instanceof ICraftingRecipe) {
+			this.recipe = (ICraftingRecipe)recipe;
 			input.addAll(MiscHelper.INSTANCE.condenseStacks(matrix));
-			output = recipe.assemble(matrix).copy();
+			output = this.recipe.assemble(matrix).copy();
 			for(int i = 0; i*9 < input.size(); ++i) {
 				patterns.add(new PackagePattern(this, i));
 			}
@@ -89,7 +91,7 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 	}
 
 	@Override
-	public IRecipe getRecipe() {
+	public ICraftingRecipe getRecipe() {
 		return recipe;
 	}
 
@@ -115,7 +117,7 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 				toSet.setCount(1);
 				matrix.setItem(i, toSet.copy());
 			}
-			IRecipe recipe = MiscHelper.INSTANCE.getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, matrix, world).orElse(null);
+			ICraftingRecipe recipe = MiscHelper.INSTANCE.getRecipeManager().getRecipeFor(IRecipeType.CRAFTING, matrix, world).orElse(null);
 			if(recipe != null) {
 				this.recipe = recipe;
 				this.input.addAll(MiscHelper.INSTANCE.condenseStacks(matrix));

@@ -285,7 +285,6 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 	}
 
 	protected void chargeEnergy() {
-		int prevStored = energyStorage.getEnergyStored();
 		ItemStack energyStack = itemHandler.getStackInSlot(11);
 		if(energyStack.getCapability(CapabilityEnergy.ENERGY, null).isPresent()) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());

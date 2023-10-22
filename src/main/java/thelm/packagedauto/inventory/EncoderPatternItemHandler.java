@@ -15,7 +15,7 @@ import thelm.packagedauto.recipe.ProcessingPackageRecipeType;
 import thelm.packagedauto.tile.EncoderTile;
 import thelm.packagedauto.util.ApiImpl;
 
-public class EncoderPatternItemHandler extends BaseItemHandler {
+public class EncoderPatternItemHandler extends BaseItemHandler<EncoderTile> {
 
 	public final EncoderTile tile;
 	public IPackageRecipeType recipeType;
