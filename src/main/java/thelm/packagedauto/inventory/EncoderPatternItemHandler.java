@@ -14,7 +14,7 @@ import thelm.packagedauto.block.entity.EncoderBlockEntity;
 import thelm.packagedauto.recipe.ProcessingPackageRecipeType;
 import thelm.packagedauto.util.ApiImpl;
 
-public class EncoderPatternItemHandler extends BaseItemHandler {
+public class EncoderPatternItemHandler extends BaseItemHandler<EncoderBlockEntity> {
 
 	public final EncoderBlockEntity blockEntity;
 	public IPackageRecipeType recipeType;
