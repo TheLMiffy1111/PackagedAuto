@@ -4,14 +4,14 @@ import java.util.List;
 
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.CraftingRecipe;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 
 public interface ICraftingPackageRecipeInfo extends IPackageRecipeInfo {
 
 	ItemStack getOutput();
 
-	Recipe getRecipe();
+	CraftingRecipe getRecipe();
 
 	CraftingContainer getMatrix();
 
