@@ -20,7 +20,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<En
 
 	@Override
 	public <I> List<Target<I>> getTargetsTyped(EncoderScreen gui, ITypedIngredient<I> ingredient, boolean doStart) {
-		ItemStack stack = wrapStack(ingredient);
+		ItemStack stack = wrapStack(ingredient.getIngredient());
 		if(!stack.isEmpty()) {
 			return gui.menu.slots.stream().filter(s->s instanceof FalseCopySlot).
 					<Target<I>>map(s->new SlotTarget<>(gui, s)).toList();
