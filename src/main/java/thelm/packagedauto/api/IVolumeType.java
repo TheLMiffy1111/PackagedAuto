@@ -35,6 +35,7 @@ public interface IVolumeType {
 
 	Object makeItemCapability(ItemStack volumePackage);
 
+	@SuppressWarnings("rawtypes")
 	Capability getItemCapability();
 
 	boolean hasBlockCapability(ICapabilityProvider capProvider, Direction direction);

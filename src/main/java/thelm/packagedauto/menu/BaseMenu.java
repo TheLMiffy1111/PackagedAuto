@@ -19,13 +19,13 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 
 	public final T blockEntity;
 	public final Inventory inventory;
-	public final BaseItemHandler itemHandler;
+	public final BaseItemHandler<?> itemHandler;
 
 	public BaseMenu(MenuType<?> menuType, int windowId, Inventory inventory, T blockEntity) {
 		super(menuType, windowId);
 		this.blockEntity = blockEntity;
 		this.inventory = inventory;
-		itemHandler = blockEntity != null ? blockEntity.getItemHandler() : new BaseItemHandler(null, 0);
+		itemHandler = blockEntity != null ? blockEntity.getItemHandler() : new BaseItemHandler<>(null, 0);
 		addDataSlots(itemHandler);
 	}
 

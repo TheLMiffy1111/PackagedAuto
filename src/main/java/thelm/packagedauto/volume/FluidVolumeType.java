@@ -15,6 +15,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidUtil;
 import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+import net.minecraftforge.fluids.capability.IFluidHandlerItem;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.capability.StackFluidHandlerItem;
@@ -80,12 +81,12 @@ public class FluidVolumeType implements IVolumeType {
 	}
 
 	@Override
-	public Object makeItemCapability(ItemStack volumePackage) {
+	public IFluidHandlerItem makeItemCapability(ItemStack volumePackage) {
 		return new StackFluidHandlerItem(volumePackage);
 	}
 
 	@Override
-	public Capability getItemCapability() {
+	public Capability<IFluidHandlerItem> getItemCapability() {
 		return ForgeCapabilities.FLUID_HANDLER_ITEM;
 	}
 

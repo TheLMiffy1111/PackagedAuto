@@ -1,5 +1,5 @@
 plugins {
-	id "net.neoforged.gradle" version "[6.0.13,)"
+	id "net.neoforged.gradle" version "[6.0.13,7)"
 	id "org.parchmentmc.librarian.forgegradle" version "[1,)"
 	id "eclipse"
 	id "idea"
@@ -80,7 +80,7 @@ minecraft {
 }
 
 dependencies {
-	minecraft "net.neoforged:forge:1.20.1-47.1.77"
+	minecraft "net.neoforged:forge:1.20.1-47.1.79"
 
 	implementation fg.deobf("appeng:appliedenergistics2-forge:15.0.11")
 	implementation fg.deobf("mezz.jei:jei-1.20.1-forge:15.2.0.27")
