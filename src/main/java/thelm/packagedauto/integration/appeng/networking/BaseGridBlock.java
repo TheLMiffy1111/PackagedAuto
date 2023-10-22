@@ -8,7 +8,6 @@ import appeng.api.networking.IGridBlock;
 import appeng.api.networking.IGridHost;
 import appeng.api.util.AEColor;
 import appeng.api.util.DimensionalCoord;
-import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
 import thelm.packagedauto.tile.BaseTile;
@@ -62,11 +61,7 @@ public class BaseGridBlock<T extends BaseTile & IGridHost> implements IGridBlock
 	}
 
 	@Override
-	public void gridChanged() {
-		if(tile.getLevel() != null) {
-			tile.getLevel().updateNeighborsAt(tile.getBlockPos(), Blocks.AIR);
-		}
-	}
+	public void gridChanged() {}
 
 	@Override
 	public ItemStack getMachineRepresentation() {
