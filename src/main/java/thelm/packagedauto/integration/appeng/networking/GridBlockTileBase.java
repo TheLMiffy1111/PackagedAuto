@@ -9,7 +9,6 @@ import appeng.api.networking.IGridBlock;
 import appeng.api.networking.IGridHost;
 import appeng.api.util.AEColor;
 import appeng.api.util.DimensionalCoord;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
 import thelm.packagedauto.tile.TileBase;
@@ -66,11 +65,7 @@ public class GridBlockTileBase<TILE extends TileBase & IGridHost> implements IGr
 	}
 
 	@Override
-	public void gridChanged() {
-		if(tile.getWorld() != null) {
-			tile.getWorld().notifyNeighborsOfStateChange(tile.getPos(), Blocks.AIR, true);
-		}
-	}
+	public void gridChanged() {}
 
 	@Override
 	public ItemStack getMachineRepresentation() {
