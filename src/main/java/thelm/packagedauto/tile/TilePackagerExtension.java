@@ -36,6 +36,7 @@ import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
@@ -328,16 +329,8 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 				ItemStack stack = inventory.getStackInSlot(9);
 				if(!stack.isEmpty()) {
 					IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
-					for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-						ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-						if(stackRem.getCount() < stack.getCount()) {
-							stack = stackRem;
-						}
-						if(stack.isEmpty()) {
-							break;
-						}
-					}
-					inventory.setInventorySlotContents(9, stack);
+					ItemStack stackRem = ItemHandlerHelper.insertItem(itemHandler, stack, false);
+					inventory.setInventorySlotContents(9, stackRem);
 				}
 			}
 		}
