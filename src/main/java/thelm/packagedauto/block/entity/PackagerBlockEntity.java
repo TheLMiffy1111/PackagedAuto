@@ -22,6 +22,7 @@ import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.crafting.StrictNBTIngredient;
 import net.minecraftforge.common.util.RecipeMatcher;
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
@@ -266,16 +267,8 @@ public class PackagerBlockEntity extends BaseBlockEntity {
 			if(level.getBlockEntity(worldPosition.relative(direction)) instanceof UnpackagerBlockEntity unpackager) {
 				ItemStack stack = itemHandler.getStackInSlot(9);
 				if(!stack.isEmpty()) {
-					for(int slot = 0; slot < 9; ++slot) {
-						ItemStack stackRem = unpackager.itemHandler.insertItem(slot, stack, false);
-						if(stackRem.getCount() < stack.getCount()) {
-							stack = stackRem;
-						}
-						if(stack.isEmpty()) {
-							break;
-						}
-					}
-					itemHandler.setStackInSlot(9, stack);
+					ItemStack stackRem = ItemHandlerHelper.insertItem(unpackager.itemHandler, stack, false);
+					itemHandler.setStackInSlot(9, stackRem);
 				}
 			}
 		}
