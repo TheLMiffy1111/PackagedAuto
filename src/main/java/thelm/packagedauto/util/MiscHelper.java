@@ -359,8 +359,9 @@ public class MiscHelper implements IMiscHelper {
 			return stack;
 		}
 		if(stack.getItem() instanceof IVolumePackageItem vPackage &&
-				vPackage.getVolumeType(stack) instanceof IVolumeType vType &&
-				vType.hasBlockCapability(blockEntity, direction)) {
+				vPackage.getVolumeType(stack) != null &&
+				vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction)) {
+			IVolumeType vType = vPackage.getVolumeType(stack);
 			stack = stack.copy();
 			IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
 			while(!stack.isEmpty()) {
