@@ -29,4 +29,9 @@ public class OrderedProcessingPackageRecipeType extends ProcessingPackageRecipeT
 	public IPackageRecipeInfo getNewRecipeInfo() {
 		return new OrderedProcessingPackageRecipeInfo();
 	}
+
+	@Override
+	public boolean isOrdered() {
+		return true;
+	}
 }

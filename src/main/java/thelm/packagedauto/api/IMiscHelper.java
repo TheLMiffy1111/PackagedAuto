@@ -5,12 +5,14 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.items.IItemHandler;
 
 public interface IMiscHelper {
@@ -56,6 +58,10 @@ public interface IMiscHelper {
 	boolean removeExactSet(List<ItemStack> offered, List<ItemStack> required, boolean simulate);
 
 	boolean arePatternsDisjoint(List<IPackagePattern> patternList);
+
+	ItemStack insertItem(IItemHandler itemHandler, ItemStack stack, boolean requireEmptySlot, boolean simulate);
+
+	ItemStack fillVolume(BlockEntity blockEntity, Direction direction, ItemStack stack, boolean simulate);
 
 	<T> Supplier<T> conditionalSupplier(BooleanSupplier conditionSupplier, Supplier<Supplier<T>> trueSupplier, Supplier<Supplier<T>> falseSupplier);
 

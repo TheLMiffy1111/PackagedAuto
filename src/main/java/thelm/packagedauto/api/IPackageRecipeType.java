@@ -23,11 +23,21 @@ public interface IPackageRecipeType {
 
 	IntSet getEnabledSlots();
 
-	boolean canSetOutput();
+	default boolean canSetOutput() {
+		return false;
+	}
 
-	boolean hasMachine();
+	default boolean hasMachine() {
+		return true;
+	}
 
-	boolean hasCraftingRemainingItem();
+	default boolean isOrdered() {
+		return false;
+	}
+
+	default boolean hasCraftingRemainingItem() {
+		return true;
+	}
 
 	default List<ResourceLocation> getJEICategories() {
 		return new ArrayList<>();

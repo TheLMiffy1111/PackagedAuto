@@ -23,6 +23,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -34,14 +35,19 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 import thelm.packagedauto.api.IMiscHelper;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
+import thelm.packagedauto.api.IVolumePackageItem;
+import thelm.packagedauto.api.IVolumeStackWrapper;
+import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.api.PackagedAutoApi;
 
 public class MiscHelper implements IMiscHelper {
@@ -326,6 +332,54 @@ public class MiscHelper implements IMiscHelper {
 		}
 		set.clear();
 		return true;
+	}
+
+	@Override
+	public ItemStack insertItem(IItemHandler itemHandler, ItemStack stack, boolean requireEmptySlot, boolean simulate) {
+		if(itemHandler == null || stack.isEmpty()) {
+			return stack;
+		}
+		if(!requireEmptySlot) {
+			return ItemHandlerHelper.insertItem(itemHandler, stack, simulate);
+		}
+		for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
+			if(itemHandler.getStackInSlot(slot).isEmpty()) {
+				stack = itemHandler.insertItem(slot, stack, simulate);
+				if(stack.isEmpty()) {
+					return ItemStack.EMPTY;
+				}
+			}
+		}
+		return stack;
+	}
+
+	@Override
+	public ItemStack fillVolume(BlockEntity blockEntity, Direction direction, ItemStack stack, boolean simulate) {
+		if(blockEntity == null || stack.isEmpty()) {
+			return stack;
+		}
+		if(stack.getItem() instanceof IVolumePackageItem vPackage &&
+				vPackage.getVolumeType(stack) instanceof IVolumeType vType &&
+				vType.hasBlockCapability(blockEntity, direction)) {
+			stack = stack.copy();
+			IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
+			while(!stack.isEmpty()) {
+				int simulateFilled = vType.fill(blockEntity, direction, vStack, true);
+				if(simulateFilled == vStack.getAmount()) {
+					if(!simulate) {
+						vType.fill(blockEntity, direction, vStack, false);
+					}
+					stack.shrink(1);
+					if(stack.isEmpty()) {
+						return ItemStack.EMPTY;
+					}
+				}
+				else {
+					break;
+				}
+			}
+		}
+		return stack;
 	}
 
 	@Override
