@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.block.CrafterBlock;
@@ -131,26 +132,13 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
 			if(blockEntity != null && !(blockEntity instanceof UnpackagerBlockEntity) && blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).isPresent()) {
 				IItemHandler itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).resolve().get();
-				boolean flag = true;
 				for(int i = 9; i >= endIndex; --i) {
 					ItemStack stack = this.itemHandler.getStackInSlot(i);
 					if(stack.isEmpty()) {
 						continue;
 					}
-					for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-						ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-						if(stackRem.getCount() < stack.getCount()) {
-							stack = stackRem;
-							flag = false;
-						}
-						if(stack.isEmpty()) {
-							break;
-						}
-					}
-					this.itemHandler.setStackInSlot(i, stack);
-					if(flag) {
-						break;
-					}
+					ItemStack stackRem = ItemHandlerHelper.insertItem(itemHandler, stack, false);
+					this.itemHandler.setStackInSlot(i, stackRem);
 				}
 			}
 		}
