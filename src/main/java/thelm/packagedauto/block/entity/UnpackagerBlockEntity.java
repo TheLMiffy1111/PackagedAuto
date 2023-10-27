@@ -177,8 +177,8 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
 				ItemStack stackRem = stack;
 				if(stack.getItem() instanceof IVolumePackageItem vPackage &&
-						vPackage.getVolumeType(stack) instanceof IVolumeType vType &&
-						vType.hasBlockCapability(blockEntity, direction.getOpposite())) {
+						vPackage.getVolumeType(stack) != null &&
+						vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
 					stackRem = MiscHelper.INSTANCE.fillVolume(blockEntity, direction.getOpposite(), stack, false);
 				}
 				else if(itemHandler != null) {
@@ -212,9 +212,9 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 					ItemStack stack = trackerToEmpty.toSend.get(i);
 					if(stack.getItem() instanceof IVolumePackageItem vPackage &&
-							vPackage.getVolumeType(stack) instanceof IVolumeType vType &&
-							vType.hasBlockCapability(blockEntity, direction.getOpposite())) {
-						if(!vType.isEmpty(blockEntity, direction.getOpposite())) {
+							vPackage.getVolumeType(stack) != null &&
+							vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
+						if(!vPackage.getVolumeType(stack).isEmpty(blockEntity, direction.getOpposite())) {
 							continue dir;
 						}
 					}
@@ -229,8 +229,8 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
 				ItemStack stackRem = stack;
 				if(stack.getItem() instanceof IVolumePackageItem vPackage &&
-						vPackage.getVolumeType(stack) instanceof IVolumeType vType &&
-						vType.hasBlockCapability(blockEntity, direction.getOpposite())) {
+						vPackage.getVolumeType(stack) != null &&
+						vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
 					stackRem = MiscHelper.INSTANCE.fillVolume(blockEntity, direction.getOpposite(), stack, false);
 				}
 				else if(itemHandler != null) {
