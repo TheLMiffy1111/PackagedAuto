@@ -27,8 +27,8 @@ import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.api.IVolumePackageItem;
-import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.energy.EnergyStorage;
@@ -159,9 +159,14 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.setupToSend();
 			}
-			if(trackerToEmpty.recipe != null && trackerToEmpty.recipe.getRecipeType().hasMachine()) {
-				trackerToEmpty.direction = null;
-				continue;
+			boolean ordered = false;
+			if(trackerToEmpty.recipe != null) {
+				IPackageRecipeType recipeType = trackerToEmpty.recipe.getRecipeType();
+				if(recipeType.hasMachine()) {
+					trackerToEmpty.direction = null;
+					continue;
+				}
+				ordered = recipeType.isOrdered();
 			}
 			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
 			if(blockEntity == null || blockEntity instanceof PackagerBlockEntity || blockEntity instanceof UnpackagerBlockEntity || isPatternProvider(blockEntity, direction.getOpposite())) {
@@ -171,36 +176,16 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			IItemHandler itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).orElse(null);
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
+				ItemStack stackRem = stack;
 				if(stack.getItem() instanceof IVolumePackageItem vPackage &&
-						vPackage.getVolumeType(stack) != null &&
-						vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
-					ItemStack stackCopy = stack.copy();
-					IVolumeType vType = vPackage.getVolumeType(stack);
-					IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
-					while(!stackCopy.isEmpty()) {
-						int simulateFilled = vType.fill(blockEntity, direction.getOpposite(), vStack, true);
-						if(simulateFilled == vStack.getAmount()) {
-							vType.fill(blockEntity, direction.getOpposite(), vStack, false);
-							stackCopy.shrink(1);
-						}
-						else {
-							break;
-						}
-					}
-					stack = stackCopy;
+						vPackage.getVolumeType(stack) instanceof IVolumeType vType &&
+						vType.hasBlockCapability(blockEntity, direction.getOpposite())) {
+					stackRem = MiscHelper.INSTANCE.fillVolume(blockEntity, direction.getOpposite(), stack, false);
 				}
 				else if(itemHandler != null) {
-					for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-						ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-						if(stackRem.getCount() < stack.getCount()) {
-							stack = stackRem;
-						}
-						if(stack.isEmpty()) {
-							break;
-						}
-					}
+					stackRem = MiscHelper.INSTANCE.insertItem(itemHandler, stack, ordered, false);
 				}
-				trackerToEmpty.toSend.set(i, stack);
+				trackerToEmpty.toSend.set(i, stackRem);
 			}
 			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
 			if(trackerToEmpty.toSend.isEmpty()) {
@@ -208,10 +193,10 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			}
 			setChanged();
 		}
+		if(powered) {
+			return;
+		}
 		dir:for(Direction direction : Direction.values()) {
-			if(powered) {
-				continue;
-			}
 			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.isFilled() && t.direction == null && t.recipe != null && !t.recipe.getRecipeType().hasMachine()).findFirst().orElse(null);
 			if(trackerToEmpty == null) {
 				continue;
@@ -228,9 +213,8 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 					ItemStack stack = trackerToEmpty.toSend.get(i);
 					if(stack.getItem() instanceof IVolumePackageItem vPackage &&
-							vPackage.getVolumeType(stack) != null &&
+							vPackage.getVolumeType(stack) instanceof IVolumeType vType &&
 							vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
-						IVolumeType vType = vPackage.getVolumeType(stack);
 						if(!vType.isEmpty(blockEntity, direction.getOpposite())) {
 							continue dir;
 						}
@@ -240,41 +224,21 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 					}
 				}
 			}
+			boolean ordered = trackerToEmpty.recipe.getRecipeType().isOrdered();
 			boolean inserted = false;
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
+				ItemStack stackRem = stack;
 				if(stack.getItem() instanceof IVolumePackageItem vPackage &&
-						vPackage.getVolumeType(stack) != null &&
-						vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction.getOpposite())) {
-					IVolumeType vType = vPackage.getVolumeType(stack);
-					ItemStack stackCopy = stack.copy();
-					IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
-					while(!stackCopy.isEmpty()) {
-						int simulateFilled = vType.fill(blockEntity, direction.getOpposite(), vStack, true);
-						if(simulateFilled == vStack.getAmount()) {
-							vType.fill(blockEntity, direction.getOpposite(), vStack, false);
-							stackCopy.shrink(1);
-							inserted = true;
-						}
-						else {
-							break;
-						}
-					}
-					stack = stackCopy;
+						vPackage.getVolumeType(stack) instanceof IVolumeType vType &&
+						vType.hasBlockCapability(blockEntity, direction.getOpposite())) {
+					stackRem = MiscHelper.INSTANCE.fillVolume(blockEntity, direction.getOpposite(), stack, false);
 				}
 				else if(itemHandler != null) {
-					for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-						ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-						if(stackRem.getCount() < stack.getCount()) {
-							stack = stackRem;
-							inserted = true;
-						}
-						if(stack.isEmpty()) {
-							break;
-						}
-					}
+					stackRem = MiscHelper.INSTANCE.insertItem(itemHandler, stack, ordered, false);
 				}
-				trackerToEmpty.toSend.set(i, stack);
+				inserted |= stackRem.getCount() < stack.getCount();
+				trackerToEmpty.toSend.set(i, stackRem);
 			}
 			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
 			if(inserted) {
