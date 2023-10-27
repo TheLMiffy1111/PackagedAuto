@@ -120,7 +120,9 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 
 	@Override
 	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
-		loadSync(pkt.getTag());
+		if(pkt.getTag() != null) {
+			loadSync(pkt.getTag());
+		}
 	}
 
 	@Override
