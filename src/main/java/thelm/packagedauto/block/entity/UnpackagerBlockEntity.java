@@ -29,7 +29,6 @@ import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.api.IVolumePackageItem;
-import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.integration.appeng.blockentity.AEUnpackagerBlockEntity;
