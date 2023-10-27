@@ -29,9 +29,7 @@ public interface IPackageRecipeInfo {
 
 	void generateFromStacks(List<ItemStack> input, List<ItemStack> output, World world);
 
-	default Int2ObjectMap<ItemStack> getEncoderStacks() {
-		return new Int2ObjectOpenHashMap<>();
-	}
+	Int2ObjectMap<ItemStack> getEncoderStacks();
 
 	@Override
 	boolean equals(Object obj);

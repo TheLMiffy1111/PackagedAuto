@@ -34,6 +34,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IMiscHelper;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
@@ -316,6 +317,25 @@ public class MiscHelper implements IMiscHelper {
 		}
 		set.clear();
 		return true;
+	}
+
+	@Override
+	public ItemStack insertItem(IItemHandler itemHandler, ItemStack stack, boolean requireEmptySlot, boolean simulate) {
+		if(itemHandler == null || stack.isEmpty()) {
+			return stack;
+		}
+		if(!requireEmptySlot) {
+			return ItemHandlerHelper.insertItem(itemHandler, stack, simulate);
+		}
+		for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
+			if(itemHandler.getStackInSlot(slot).isEmpty()) {
+				stack = itemHandler.insertItem(slot, stack, simulate);
+				if(stack.isEmpty()) {
+					return ItemStack.EMPTY;
+				}
+			}
+		}
+		return stack;
 	}
 
 	@Override

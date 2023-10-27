@@ -56,6 +56,8 @@ public interface IMiscHelper {
 
 	boolean arePatternsDisjoint(List<IPackagePattern> patternList);
 
+	ItemStack insertItem(IItemHandler itemHandler, ItemStack stack, boolean requireEmptySlot, boolean simulate);
+
 	<T> Supplier<T> conditionalSupplier(BooleanSupplier conditionSupplier, Supplier<Supplier<T>> trueSupplier, Supplier<Supplier<T>> falseSupplier);
 
 	RecipeManager getRecipeManager();

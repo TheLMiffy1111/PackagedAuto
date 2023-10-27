@@ -29,6 +29,7 @@ import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.container.UnpackagerContainer;
 import thelm.packagedauto.energy.EnergyStorage;
@@ -160,9 +161,14 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.setupToSend();
 			}
-			if(trackerToEmpty.recipe != null && trackerToEmpty.recipe.getRecipeType().hasMachine()) {
-				trackerToEmpty.direction = null;
-				continue;
+			boolean ordered = false;
+			if(trackerToEmpty.recipe != null) {
+				IPackageRecipeType recipeType = trackerToEmpty.recipe.getRecipeType();
+				if(recipeType.hasMachine()) {
+					trackerToEmpty.direction = null;
+					continue;
+				}
+				ordered = recipeType.isOrdered();
 			}
 			if(tile == null || tile instanceof PackagerTile || tile instanceof UnpackagerTile || isInterface(tile, direction.getOpposite()) || !tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
 				trackerToEmpty.direction = null;
@@ -171,16 +177,8 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).resolve().get();
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
-				for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-					ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-					if(stackRem.getCount() < stack.getCount()) {
-						stack = stackRem;
-					}
-					if(stack.isEmpty()) {
-						break;
-					}
-				}
-				trackerToEmpty.toSend.set(i, stack);
+				ItemStack stackRem = MiscHelper.INSTANCE.insertItem(itemHandler, stack, ordered, false);
+				trackerToEmpty.toSend.set(i, stackRem);
 			}
 			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
 			if(trackerToEmpty.toSend.isEmpty()) {
@@ -188,13 +186,16 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			}
 			setChanged();
 		}
+		if(powered) {
+			return;
+		}
 		for(Direction direction : Direction.values()) {
 			TileEntity tile = level.getBlockEntity(worldPosition.relative(direction));
 			if(tile == null || tile instanceof PackagerTile || tile instanceof UnpackagerTile || isInterface(tile, direction.getOpposite()) || !tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).isPresent()) {
 				continue;
 			}
 			IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, direction.getOpposite()).resolve().get();
-			if(powered || blocking && !MiscHelper.INSTANCE.isEmpty(itemHandler)) {
+			if(blocking && !MiscHelper.INSTANCE.isEmpty(itemHandler)) {
 				continue;
 			}
 			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.isFilled() && t.direction == null && t.recipe != null && !t.recipe.getRecipeType().hasMachine()).findFirst().orElse(null);
@@ -204,20 +205,13 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.setupToSend();
 			}
+			boolean ordered = trackerToEmpty.recipe.getRecipeType().isOrdered();
 			boolean inserted = false;
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
-				for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-					ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-					if(stackRem.getCount() < stack.getCount()) {
-						stack = stackRem;
-						inserted = true;
-					}
-					if(stack.isEmpty()) {
-						break;
-					}
-				}
-				trackerToEmpty.toSend.set(i, stack);
+				ItemStack stackRem = MiscHelper.INSTANCE.insertItem(itemHandler, stack, ordered, false);
+				inserted |= stackRem.getCount() < stack.getCount();
+				trackerToEmpty.toSend.set(i, stackRem);
 			}
 			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
 			if(inserted) {
