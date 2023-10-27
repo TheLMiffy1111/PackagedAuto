@@ -40,6 +40,7 @@ import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IRecipeInfo;
+import thelm.packagedauto.api.IRecipeType;
 import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.client.gui.GuiUnpackager;
 import thelm.packagedauto.container.ContainerUnpackager;
@@ -175,9 +176,14 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.setupToSend();
 			}
-			if(trackerToEmpty.recipe != null && trackerToEmpty.recipe.getRecipeType().hasMachine()) {
-				trackerToEmpty.facing = null;
-				continue;
+			boolean ordered = false;
+			if(trackerToEmpty.recipe != null) {
+				IRecipeType recipeType = trackerToEmpty.recipe.getRecipeType();
+				if(recipeType.hasMachine()) {
+					trackerToEmpty.facing = null;
+					continue;
+				}
+				ordered = recipeType.isOrdered();
 			}
 			if(tile == null || tile instanceof TilePackager || tile instanceof TileUnpackager || isInterface(tile, facing.getOpposite()) || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
 				trackerToEmpty.facing = null;
@@ -186,16 +192,8 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
-				for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-					ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-					if(stackRem.getCount() < stack.getCount()) {
-						stack = stackRem;
-					}
-					if(stack.isEmpty()) {
-						break;
-					}
-				}
-				trackerToEmpty.toSend.set(i, stack);
+				ItemStack stackRem = MiscUtil.insertItem(itemHandler, stack, ordered, false);
+				trackerToEmpty.toSend.set(i, stackRem);
 			}
 			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
 			if(trackerToEmpty.toSend.isEmpty()) {
@@ -203,39 +201,32 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			}
 			markDirty();
 		}
+		if(powered) {
+			return;
+		}
 		for(EnumFacing facing : EnumFacing.VALUES) {
 			TileEntity tile = world.getTileEntity(pos.offset(facing));
 			if(tile == null || tile instanceof TilePackager || tile instanceof TileUnpackager || isInterface(tile, facing.getOpposite()) || !tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
 				continue;
 			}
 			IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
-			if(powered || blocking && !MiscUtil.isEmpty(itemHandler)) {
+			if(blocking && !MiscUtil.isEmpty(itemHandler)) {
 				continue;
 			}
-			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.isFilled()).filter(t->t.facing == null).findFirst().orElse(null);
+			PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.isFilled() && t.facing == null && t.recipe != null && !t.recipe.getRecipeType().hasMachine()).findFirst().orElse(null);
 			if(trackerToEmpty == null) {
 				continue;
 			}
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.setupToSend();
 			}
-			if(trackerToEmpty.recipe != null && trackerToEmpty.recipe.getRecipeType().hasMachine()) {
-				continue;
-			}
+			boolean ordered = trackerToEmpty.recipe.getRecipeType().isOrdered();
 			boolean inserted = false;
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
-				for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-					ItemStack stackRem = itemHandler.insertItem(slot, stack, false);
-					if(stackRem.getCount() < stack.getCount()) {
-						stack = stackRem;
-						inserted = true;
-					}
-					if(stack.isEmpty()) {
-						break;
-					}
-				}
-				trackerToEmpty.toSend.set(i, stack);
+				ItemStack stackRem = MiscUtil.insertItem(itemHandler, stack, ordered, false);
+				inserted |= stackRem.getCount() < stack.getCount();
+				trackerToEmpty.toSend.set(i, stackRem);
 			}
 			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
 			if(inserted) {

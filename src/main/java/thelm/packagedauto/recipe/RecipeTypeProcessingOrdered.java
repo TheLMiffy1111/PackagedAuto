@@ -28,4 +28,9 @@ public class RecipeTypeProcessingOrdered extends RecipeTypeProcessing {
 	public IRecipeInfo getNewRecipeInfo() {
 		return new RecipeInfoProcessingOrdered();
 	}
+
+	@Override
+	public boolean isOrdered() {
+		return true;
+	}
 }

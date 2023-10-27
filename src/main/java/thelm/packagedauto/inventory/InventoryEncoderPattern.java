@@ -1,6 +1,5 @@
 package thelm.packagedauto.inventory;
 
-import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
@@ -69,19 +68,7 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 	public void updateRecipeInfo(boolean mark) {
 		validateRecipeType();
 		IRecipeInfo info = recipeType.getNewRecipeInfo();
-		try {
-			info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), tile.getWorld());
-		}
-		catch(AbstractMethodError error) {
-			try {
-				Method oldGenerateFromStacksMethod = info.getClass().getMethod("generateFromStacks", List.class, List.class);
-				oldGenerateFromStacksMethod.invoke(info, stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList());
-			}
-			catch(Exception exception) {
-				exception.addSuppressed(error);
-				exception.printStackTrace();
-			}
-		}
+		info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), tile.getWorld());
 		if(info.isValid()) {
 			if(recipeInfo == null || !recipeInfo.equals(info)) {
 				recipeInfo = info;

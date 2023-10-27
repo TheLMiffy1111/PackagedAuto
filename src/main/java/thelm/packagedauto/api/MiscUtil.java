@@ -30,6 +30,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 public class MiscUtil {
 
@@ -286,6 +287,24 @@ public class MiscUtil {
 		}
 		set.clear();
 		return true;
+	}
+
+	public static ItemStack insertItem(IItemHandler itemHandler, ItemStack stack, boolean requireEmptySlot, boolean simulate) {
+		if(itemHandler == null || stack.isEmpty()) {
+			return stack;
+		}
+		if(!requireEmptySlot) {
+			return ItemHandlerHelper.insertItem(itemHandler, stack, simulate);
+		}
+		for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
+			if(itemHandler.getStackInSlot(slot).isEmpty()) {
+				stack = itemHandler.insertItem(slot, stack, simulate);
+				if(stack.isEmpty()) {
+					return ItemStack.EMPTY;
+				}
+			}
+		}
+		return stack;
 	}
 
 	public static <T> Supplier<T> conditionalSupplier(BooleanSupplier conditionSupplier, Supplier<Supplier<T>> trueSupplier, Supplier<Supplier<T>> falseSupplier) {

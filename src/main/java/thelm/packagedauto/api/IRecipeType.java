@@ -26,9 +26,17 @@ public interface IRecipeType {
 
 	IntSet getEnabledSlots();
 
-	boolean canSetOutput();
+	default boolean canSetOutput() {
+		return false;
+	}
 
-	boolean hasMachine();
+	default boolean hasMachine() {
+		return true;
+	}
+
+	default boolean isOrdered() {
+		return false;
+	}
 
 	default List<String> getJEICategories() {
 		return new ArrayList<>();
