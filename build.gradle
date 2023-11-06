@@ -97,6 +97,7 @@ dependencies {
 	implementation fg.deobf("com.blakebr0.extendedcrafting:ExtendedCrafting:1.20.1-6.0.2")
 
 	//CurseMaven
+	implementation fg.deobf("curse.maven:yeetusexperimentus-635427:4680832")
 	implementation fg.deobf("curse.maven:applied-mekanistics-574300:4776865")
 	implementation fg.deobf("curse.maven:ato-405593:4751952")
 }
