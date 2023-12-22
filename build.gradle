@@ -83,7 +83,7 @@ minecraft {
 }
 
 dependencies {
-	minecraft "net.minecraftforge:forge:1.19.2-43.3.0"
+	minecraft "net.minecraftforge:forge:1.19.2-43.3.5"
 
 	implementation fg.deobf("appeng:appliedenergistics2-forge:12.9.8")
 	implementation fg.deobf("mezz.jei:jei-1.19.2-forge:11.6.0.1018")
