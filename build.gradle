@@ -87,7 +87,7 @@ dependencies {
 
 	implementation fg.deobf("appeng:appliedenergistics2:8.4.7")
 	implementation fg.deobf("mezz.jei:jei-1.16.5:7.8.0.1009")
-	implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-1.16.5:7.1.2.522")
+	implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-1.16.5:7.1.2.526")
 	implementation fg.deobf("vazkii.patchouli:Patchouli:1.16.4-53.3")
 	implementation fg.deobf("com.jozufozu.flywheel:Flywheel:1.16-0.2.5.53")
 	implementation fg.deobf("com.simibubi.create:Create:mc1.16.5_v0.3.2g+480")
