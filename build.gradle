@@ -98,6 +98,11 @@ dependencies {
 
 	//CurseMaven
 	implementation fg.deobf("curse.maven:ato-405593:3405905")
+
+	//Performance
+	implementation fg.deobf("curse.maven:modernfix-790626:4980927")
+	implementation fg.deobf("curse.maven:ferritecore-429235:4074330")
+	implementation fg.deobf("curse.maven:lazy-dfu-forge-460819:3249059")
 }
 
 def manifestAttributes = [
