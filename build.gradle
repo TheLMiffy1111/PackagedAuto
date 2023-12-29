@@ -6,6 +6,8 @@ plugins {
 	id "maven-publish"
 }
 
+apply from: "mixinTweakFix.gradle"
+
 repositories {
 	jcenter()
 	flatDir {
@@ -31,6 +33,9 @@ repositories {
 		metadataSources {
 			artifact()
 		}
+	}
+	maven {
+		url = "https://maven.cleanroommc.com/"
 	}
 	maven {
 		url = "https://cursemaven.com/"
@@ -123,6 +128,14 @@ dependencies {
 	implementation fg.deobf("curse.maven:thermal-foundation-222880:2926428")
 	implementation fg.deobf("curse.maven:thermal-expansion-69163:2926431")
 	implementation fg.deobf("curse.maven:thermal-dynamics-227443:2920505")
+
+	//Performance
+	implementation fg.deobf("curse.maven:reid-629017:4949840")
+	implementation("zone.rong:mixinbooter:7.1") {
+		transitive = false
+	}
+	implementation fg.deobf("curse.maven:vintagefix-871198:4800687")
+	implementation fg.deobf("curse.maven:lolasm-460609:4800875")
 }
 
 configurations.all {
