@@ -9,7 +9,7 @@ plugins {
 apply from: "mixinTweakFix.gradle"
 
 repositories {
-	jcenter()
+	mavenCentral()
 	flatDir {
 		dirs "libs"
 	}
@@ -138,7 +138,7 @@ dependencies {
 	implementation fg.deobf("curse.maven:lolasm-460609:4800875")
 }
 
-configurations.all {
+configurations.configureEach {
 	resolutionStrategy {
 		force "net.minecraftforge:legacydev:0.2.4.1"
 	}
