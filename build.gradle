@@ -114,8 +114,7 @@ def manifestAttributes = [
 	"Specification-Version": specVersion,
 	"Implementation-Title": archivesBaseName,
 	"Implementation-Version": version,
-	"Implementation-Vendor": vendor,
-	"Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+	"Implementation-Vendor": vendor
 ]
 
 jar {
