@@ -1,0 +1,11 @@
+[
+	{
+		"modid": "packagedauto",
+		"version": "0@VERSION@",
+		"name": "PackagedAuto",
+		"description": "An Applied Energistics 2 addon that uses 'packages' to allow autocrafting with more than 9 items.",
+		"logoFile": "packagedauto.logo.png",
+		"authorList": ["TheLMiffy1111"],
+		"url": "https://www.curseforge.com/minecraft/mc-mods/packagedauto"
+	}
+]
