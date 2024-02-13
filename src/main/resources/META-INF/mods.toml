@@ -1,24 +1,23 @@
-modLoader="javafml"
-loaderVersion="[41,)"
-license="MIT"
-issueTrackerURL="https://github.com/TheLMiffy1111/PackagedAuto/issues"
-displayURL="https://www.curseforge.com/minecraft/mc-mods/packagedauto"
-authors="TheLMiffy1111"
+modLoader = "javafml"
+loaderVersion = "[41,)"
+license = "MIT"
+issueTrackerURL = "https://github.com/TheLMiffy1111/PackagedAuto/issues"
+
 [[mods]]
-modId="packagedauto"
-version="${file.jarVersion}"
-displayName="PackagedAuto"
-description="An Applied Energistics 2 addon that uses 'packages' to allow autocrafting with more than 9 items."
+	modId = "packagedauto"
+	version = "0@VERSION@"
+	displayName = "PackagedAuto"
+	description = "An Applied Energistics 2 addon that uses 'packages' to allow autocrafting with more than 9 items."
+	logoFile = "packagedauto.logo.png"
+	authors = "TheLMiffy1111"
+	displayURL = "https://www.curseforge.com/minecraft/mc-mods/packagedauto"
 
 [[dependencies.packagedauto]]
-    modId="forge"
-    mandatory=true
-    versionRange="[41,)"
-    ordering="NONE"
-    side="BOTH"
+	modId = "forge"
+	versionRange = "[41,)"
+	mandatory = true
+
 [[dependencies.packagedauto]]
-    modId="ae2"
-    mandatory=false
-    versionRange="[12,)"
-    ordering="NONE"
-    side="BOTH"
+	modId = "ae2"
+	versionRange = "[12,)"
+	mandatory = false
