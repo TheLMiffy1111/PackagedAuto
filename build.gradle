@@ -1,9 +1,9 @@
 plugins {
-	id "net.neoforged.gradle" version "[6.0.13,7)"
-	id "org.parchmentmc.librarian.forgegradle" version "[1,)"
+	id "com.crystaelix.loom" version "jitpack-a0afe362"
 	id "eclipse"
 	id "idea"
 	id "maven-publish"
+	id "cl.franciscosolis.blossom-extended" version "[1,2)"
 }
 
 repositories {
@@ -11,29 +11,58 @@ repositories {
 	flatDir {
 		dirs "libs"
 	}
-	maven {
-		url = "https://maven.minecraftforge.net/"
+	exclusiveContent {
+		forRepository {
+			maven {
+				url = "https://maven.parchmentmc.net/"
+			}
+		}
+		filter {
+			includeGroup "org.parchmentmc.data"
+		}
 	}
-	maven {
-		url = "https://repo.spongepowered.org/maven/"
+	exclusiveContent {
+		forRepository {
+			maven {
+				url = "https://maven.blamejared.com/"
+			}
+		}
+		filter {
+			includeGroup "mezz.jei"
+			includeGroup "vazkii.patchouli"
+		}
 	}
-	maven {
-		url = "https://maven.tterrag.com/"
+	exclusiveContent {
+		forRepository {
+			maven {
+				url = "https://maven.tterrag.com/"
+			}
+		}
+		filter {
+			includeGroup "com.jozufozu.flywheel"
+			includeGroup "com.simibubi.create"
+		}
 	}
-	maven {
-		url = "https://maven.blamejared.com/"
-	}
-	maven {
-		url = "https://maven.blakesmods.com/releases/"
-	}
-	maven {
-		url = "https://cursemaven.com/"
-		content {
+	exclusiveContent {
+		forRepository {
+			maven {
+				url = "https://cursemaven.com/"
+			}
+		}
+		filter {
 			includeGroup "curse.maven"
 		}
 	}
-	maven {
-		url = "https://modmaven.dev/"
+	exclusiveContent {
+		forRepository {
+			maven {
+				url = "https://modmaven.dev/"
+			}
+		}
+		filter {
+			includeGroup "appeng"
+			includeGroup "mekanism"
+		}
 	}
 }
 
@@ -48,7 +77,7 @@ def specVersion = "2"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "2.0.5.25"
+version = "2.0.5.26"
 
 archivesBaseName = "${modName}-${mcVersion}"
 
@@ -61,21 +90,12 @@ tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 }
 
-minecraft {
-	mappings channel: "parchment", version: "2022.03.06-1.16.5"
-	generateRunFolders = true
+loom {
+	silentMojangMappingsLicense()
+	interfaceInjection.enableDependencyInterfaceInjection = false
 	runs {
 		configureEach {
-			workingDirectory project.file("run")
-			property "forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP"
-			property "forge.logging.console.level", "debug"
-			property "mixin.env.remapRefMap", "true"
-			property "mixin.env.refMapRemappingFile", "${buildDir}/createSrgToMcp/output.srg"
-			mods {
-				"${modId}" {
-					source sourceSets.main
-				}
-			}
+			property "fabric.log.console.level", "debug"
 		}
 		client
 		server
@@ -83,27 +103,45 @@ minecraft {
 }
 
 dependencies {
-	minecraft "net.minecraftforge:forge:1.16.5-36.2.39"
+	// Log4j
+	implementation "org.apache.logging.log4j:log4j-core:2.22.1"
 
-	implementation fg.deobf("appeng:appliedenergistics2:8.4.7")
-	implementation fg.deobf("mezz.jei:jei-1.16.5:7.8.0.1009")
-	implementation fg.deobf("com.blamejared.crafttweaker:CraftTweaker-1.16.5:7.1.2.526")
-	implementation fg.deobf("vazkii.patchouli:Patchouli:1.16.4-53.3")
-	implementation fg.deobf("com.jozufozu.flywheel:Flywheel:1.16-0.2.5.53")
-	implementation fg.deobf("com.simibubi.create:Create:mc1.16.5_v0.3.2g+480")
-	implementation fg.deobf("mekanism:Mekanism:1.16.5-10.1.2.457")
-	implementation fg.deobf("mekanism:Mekanism:1.16.5-10.1.2.457:generators")
-	implementation fg.deobf("com.blakebr0.cucumber:Cucumber:1.16.5-4.1.12")
-	implementation fg.deobf("com.blakebr0.extendedcrafting:ExtendedCrafting:1.16.5-3.1.13")
+	// Minecraft
+	minecraft "com.mojang:minecraft:1.16.5"
+	mappings loom.layered {
+		mappings("de.oceanlabs.mcp:mcp_config:1.16.5-20210115.111550@zip") {
+			mappingPath "config/joined.tsrg"
+			fallbackNamespaces "official", "named"
+			mergeNamespace "official"
+		}
+		officialMojangMappings {
+			skipClassNames = true
+		}
+		parchment "org.parchmentmc.data:parchment-1.16.5:2022.03.06@zip"
+	}
+	forge "net.minecraftforge:forge:1.16.5-36.2.39"
 
-	//CurseMaven
-	implementation fg.deobf("curse.maven:ato-405593:3405905")
+	// Dependencies
+	modImplementation "mezz.jei:jei-1.16.5:7.8.0.1009"
+	modImplementation "appeng:appliedenergistics2:8.4.7"
+	modImplementation "vazkii.patchouli:Patchouli:1.16.4-53.3"
 
-	//Performance
-	implementation fg.deobf("curse.maven:shutup-experimental-settings-407174:3188120")
-	implementation fg.deobf("curse.maven:modernfix-790626:4980927")
-	implementation fg.deobf("curse.maven:ferritecore-429235:4074330")
-	implementation fg.deobf("curse.maven:lazy-dfu-forge-460819:3249059")
+	// Testing
+	modImplementation "curse.maven:cucumber-272335:3507886"
+	modImplementation "curse.maven:extended-crafting-268387:4430385"
+	modImplementation "com.jozufozu.flywheel:Flywheel:1.16-0.2.5.53"
+	modImplementation "com.simibubi.create:Create:mc1.16.5_v0.3.2g+480"
+	modImplementation "mekanism:Mekanism:1.16.5-10.1.2.457"
+
+	// Performance
+	modImplementation "curse.maven:shutup-experimental-settings-407174:3188120"
+	modImplementation "curse.maven:modernfix-790626:5077294"
+	modImplementation "curse.maven:ferritecore-429235:3435176"
+	modImplementation "curse.maven:lazy-dfu-forge-460819:3249059"
+}
+
+blossom {
+	replaceToken "0@VERSION@", version
 }
 
 def manifestAttributes = [
@@ -117,7 +155,6 @@ def manifestAttributes = [
 
 jar {
 	manifest.attributes(manifestAttributes)
-	finalizedBy("reobfJar")
 }
 
 sourcesJar {
