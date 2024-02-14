@@ -33,7 +33,7 @@ public class ApiImpl extends PackagedAutoApi {
 	private ApiImpl() {}
 
 	@Override
-	public boolean registerRecipeType(IPackageRecipeType type) {
+	public synchronized boolean registerRecipeType(IPackageRecipeType type) {
 		if(RECIPE_REGISTRY.containsKey(type.getName())) {
 			return false;
 		}
@@ -60,7 +60,7 @@ public class ApiImpl extends PackagedAutoApi {
 		return RECIPE_IDS.getId(type);
 	}
 
-	private void computeIds() {
+	private synchronized void computeIds() {
 		if(RECIPE_IDS.size() == 0) {
 			RECIPE_ORDER.forEach((mod, type)->RECIPE_IDS.add(type));
 		}
@@ -79,7 +79,7 @@ public class ApiImpl extends PackagedAutoApi {
 	}
 
 	@Override
-	public boolean registerVolumeType(IVolumeType type) {
+	public synchronized boolean registerVolumeType(IVolumeType type) {
 		if(VOLUME_REGISTRY.containsKey(type.getName()) || VOLUME_CLASS_REGISTRY.containsKey(type.getTypeClass())) {
 			return false;
 		}
