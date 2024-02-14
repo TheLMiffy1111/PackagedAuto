@@ -24,12 +24,11 @@ public class ApiImpl extends PackagedAutoApi {
 	private static final NavigableMap<ResourceLocation, IPackageRecipeType> REGISTRY = new TreeMap<>();
 	private static final Multimap<String, IPackageRecipeType> ORDER = MultimapBuilder.treeKeys().arrayListValues().build();
 	private static final IntIdentityHashBiMap<IPackageRecipeType> IDS = new IntIdentityHashBiMap<>(4);
-	private static int id = 0;
 
 	private ApiImpl() {}
 
 	@Override
-	public boolean registerRecipeType(IPackageRecipeType type) {
+	public synchronized boolean registerRecipeType(IPackageRecipeType type) {
 		if(REGISTRY.containsKey(type.getName())) {
 			return false;
 		}
