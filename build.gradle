@@ -150,7 +150,7 @@ blossom {
 
 processResources {
 	inputs.properties(replacements)
-	filesMatching("mcmod.info") {
+	filesMatching("META-INF/mods.toml") {
 		filter {
 			it.replace(replacements)
 		}
