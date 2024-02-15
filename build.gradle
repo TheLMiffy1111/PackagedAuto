@@ -3,7 +3,8 @@ plugins {
 	id "eclipse"
 	id "idea"
 	id "maven-publish"
-	id "cl.franciscosolis.blossom-extended" version "[1,2)"
+	id "net.kyori.blossom" version "[1,2)"
+	id "me.modmuss50.mod-publish-plugin" version "0.5.0"
 }
 
 repositories {
@@ -137,8 +138,21 @@ dependencies {
 	modImplementation "curse.maven:lazy-dfu-forge-460819:4327266"
 }
 
+def replacements = [
+	"0@VERSION@": version
+]
+
 blossom {
-	replaceToken "0@VERSION@", version
+	replaceToken(replacements)
+}
+
+processResources {
+	inputs.properties(replacements)
+	filesMatching("mcmod.info") {
+		filter {
+			it.replace(replacements)
+		}
+	}
 }
 
 def manifestAttributes = [
@@ -156,4 +170,27 @@ jar {
 
 sourcesJar {
 	manifest.attributes(manifestAttributes)
+}
+
+publishMods {
+	file = remapJar.archiveFile
+	version = displayName = "${mcVersion}-${project.version}"
+	changelog = file("changelog.md").text
+	type = STABLE
+	modLoaders.add("forge")
+	additionalFiles.from(remapSourcesJar.archiveFile)
+
+	curseforge {
+		accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+		projectId = "308380"
+		minecraftVersions.add(mcVersion)
+		optional "applied-energistics-2"
+	}
+
+	modrinth {
+		accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+		projectId = "ugIdhQx4"
+		minecraftVersions.add(mcVersion)
+		optional "ae2"
+	}
 }
