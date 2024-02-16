@@ -124,9 +124,6 @@ dependencies {
 	// Testing
 	modImplementation "curse.maven:cucumber-272335:4773184"
 	modImplementation "curse.maven:extended-crafting-268387:4991289"
-	modImplementation "com.tterrag.registrate:Registrate:MC1.19-1.1.5"
-	modImplementation "com.jozufozu.flywheel:flywheel-forge-1.19.2:0.6.10-20"
-	modImplementation("com.simibubi.create:create-1.19.2:0.5.1.f-46:slim") {transitive = false}
 	modImplementation "mekanism:Mekanism:1.19.2-10.3.9.13"
 	modImplementation "curse.maven:applied-mekanistics-574300:4734608"
 
