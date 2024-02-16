@@ -36,17 +36,6 @@ repositories {
 	exclusiveContent {
 		forRepository {
 			maven {
-				url = "https://maven.tterrag.com/"
-			}
-		}
-		filter {
-			includeGroup "com.jozufozu.flywheel"
-			includeGroup "com.simibubi.create"
-		}
-	}
-	exclusiveContent {
-		forRepository {
-			maven {
 				url = "https://cursemaven.com/"
 			}
 		}
