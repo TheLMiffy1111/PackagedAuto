@@ -130,8 +130,6 @@ dependencies {
 	// Testing
 	modImplementation "curse.maven:cucumber-272335:3507886"
 	modImplementation "curse.maven:extended-crafting-268387:4430385"
-	modImplementation "com.jozufozu.flywheel:Flywheel:1.16-0.2.5.53"
-	modImplementation "com.simibubi.create:Create:mc1.16.5_v0.3.2g+480"
 	modImplementation "mekanism:Mekanism:1.16.5-10.1.2.457"
 
 	// Performance
