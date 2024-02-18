@@ -19,12 +19,10 @@ public class PackagedAuto {
 			return new ItemStack(PackageItem.INSTANCE);
 		}
 	};
-	public static PackagedAuto core;
 
 	public PackagedAuto() {
-		core = this;
 		CommonEventHandler.getInstance().onConstruct();
-		DistExecutor.runWhenOn(Dist.CLIENT, ()->()->{
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, ()->()->{
 			ClientEventHandler.getInstance().onConstruct();
 		});
 	}
