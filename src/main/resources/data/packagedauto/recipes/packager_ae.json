@@ -1,35 +1,35 @@
 {
-    "conditions": [
-        {
-            "type": "forge:mod_loaded",
-            "modid": "ae2"
-        }
-    ],
-    "type": "minecraft:crafting_shaped",
-    "result": {
-        "item": "packagedauto:packager",
-        "count": 1
-    },
-    "pattern": [
-        "ICI",
-        "RTR",
-        "IPI"
-    ],
-    "key": {
-        "C": {
-            "item": "packagedauto:me_package_component"
-        },
-        "T": {
-            "item": "minecraft:crafting_table"
-        },
-        "P": {
-            "item": "minecraft:piston"
-        },
-        "I": {
-            "tag": "forge:ingots/iron"
-        },
-        "R": {
-            "tag": "forge:dusts/redstone"
-        }
-    }
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "ae2"
+		}
+	],
+	"type": "minecraft:crafting_shaped",
+	"result": {
+		"item": "packagedauto:packager",
+		"count": 1
+	},
+	"pattern": [
+		"ICI",
+		"RTR",
+		"IPI"
+	],
+	"key": {
+		"C": {
+			"item": "packagedauto:me_package_component"
+		},
+		"T": {
+			"item": "minecraft:crafting_table"
+		},
+		"P": {
+			"item": "minecraft:piston"
+		},
+		"I": {
+			"tag": "forge:ingots/iron"
+		},
+		"R": {
+			"tag": "forge:dusts/redstone"
+		}
+	}
 }
