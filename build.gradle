@@ -67,7 +67,7 @@ def specVersion = "3"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "3.4.2.8"
+version = "3.4.2.9"
 
 archivesBaseName = "${modName}-${mcVersion}"
 
