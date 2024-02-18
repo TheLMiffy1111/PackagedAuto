@@ -43,6 +43,6 @@ public class GuiHandler implements IGuiHandler {
 	}
 
 	public void launchGui(int ID, EntityPlayer player, World world, int x, int y, int z) {
-		player.openGui(PackagedAuto.instance, ID, world, x, y, z);
+		player.openGui(PackagedAuto.MOD_ID, ID, world, x, y, z);
 	}
 }

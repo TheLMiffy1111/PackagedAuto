@@ -72,7 +72,7 @@ public abstract class BlockBase extends Block implements ITileEntityProvider, IM
 			return false;
 		}
 		if(!worldIn.isRemote) {
-			playerIn.openGui(PackagedAuto.instance, facing.getIndex(), worldIn, pos.getX(), pos.getY(), pos.getZ());
+			playerIn.openGui(PackagedAuto.MOD_ID, facing.getIndex(), worldIn, pos.getX(), pos.getY(), pos.getZ());
 			return true;
 		}
 		return true;

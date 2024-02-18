@@ -99,7 +99,7 @@ public class CommonProxy {
 	}
 
 	protected void registerNetwork() {
-		NetworkRegistry.INSTANCE.registerGuiHandler(PackagedAuto.instance, GuiHandler.INSTANCE);
+		NetworkRegistry.INSTANCE.registerGuiHandler(PackagedAuto.MOD_ID, GuiHandler.INSTANCE);
 		PacketHandler.registerPackets();
 	}
 }
