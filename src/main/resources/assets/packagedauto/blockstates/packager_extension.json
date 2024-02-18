@@ -1,5 +1,5 @@
 {
-    "variants": {
-        "": { "model": "packagedauto:block/packager_extension" }
-    }
+	"variants": {
+		"": { "model": "packagedauto:block/packager_extension" }
+	}
 }

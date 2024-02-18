@@ -1,6 +1,6 @@
 {
-    "parent": "item/generated",
-    "textures": {
-        "layer0": "packagedauto:items/package_component"
-    }
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "packagedauto:items/package_component"
+	}
 }

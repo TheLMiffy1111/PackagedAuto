@@ -1,5 +1,5 @@
 {
-    "variants": {
-        "": { "model": "packagedauto:block/crafter" }
-    }
+	"variants": {
+		"": { "model": "packagedauto:block/crafter" }
+	}
 }
