@@ -10,12 +10,10 @@ import thelm.packagedauto.event.CommonEventHandler;
 public class PackagedAuto {
 
 	public static final String MOD_ID = "packagedauto";
-	public static PackagedAuto core;
 
 	public PackagedAuto() {
-		core = this;
 		CommonEventHandler.getInstance().onConstruct();
-		DistExecutor.runWhenOn(Dist.CLIENT, ()->()->{
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, ()->()->{
 			ClientEventHandler.getInstance().onConstruct();
 		});
 	}
