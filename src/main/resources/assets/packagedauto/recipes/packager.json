@@ -1,31 +1,31 @@
 {
-    "type": "forge:ore_shaped",
-    "result": {
-        "item": "packagedauto:packager",
-        "count": 1
-    },
-    "pattern": [
-        "ICI",
-        "RTR",
-        "IPI"
-    ],
-    "key": {
-        "C": {
-            "item": "#machine_package_component"
-        },
-        "T": {
-            "item": "minecraft:crafting_table"
-        },
-        "P": {
-            "item": "minecraft:piston"
-        },
-        "I": {
-            "type": "forge:ore_dict",
-            "ore": "ingotIron"
-        },
-        "R": {
-            "type": "forge:ore_dict",
-            "ore": "dustRedstone"
-        }
-    }
+	"type": "forge:ore_shaped",
+	"result": {
+		"item": "packagedauto:packager",
+		"count": 1
+	},
+	"pattern": [
+		"ICI",
+		"RTR",
+		"IPI"
+	],
+	"key": {
+		"C": {
+			"item": "#machine_package_component"
+		},
+		"T": {
+			"item": "minecraft:crafting_table"
+		},
+		"P": {
+			"item": "minecraft:piston"
+		},
+		"I": {
+			"type": "forge:ore_dict",
+			"ore": "ingotIron"
+		},
+		"R": {
+			"type": "forge:ore_dict",
+			"ore": "dustRedstone"
+		}
+	}
 }

@@ -1,38 +1,38 @@
 {
-    "conditions": [
-        {
-            "type": "forge:mod_loaded",
-            "modid": "appliedenergistics2"
-        }
-    ],
-    "type": "forge:ore_shaped",
-    "result": {
-        "item": "packagedauto:me_package_component",
-        "count": 1
-    },
-    "pattern": [
-        "IGI",
-        "ACF",
-        "IGI"
-    ],
-    "key": {
-        "C": {
-            "item": "packagedauto:package_component"
-        },
-        "A": {
-            "item": "appliedenergistics2:material",
-            "data": 44
-        },
-        "F": {
-            "item": "appliedenergistics2:material",
-            "data": 43
-        },
-        "G": {
-            "item": "appliedenergistics2:quartz_glass"
-        },
-        "I": {
-            "type": "forge:ore_dict",
-            "ore": "ingotIron"
-        }
-    }
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "appliedenergistics2"
+		}
+	],
+	"type": "forge:ore_shaped",
+	"result": {
+		"item": "packagedauto:me_package_component",
+		"count": 1
+	},
+	"pattern": [
+		"IGI",
+		"ACF",
+		"IGI"
+	],
+	"key": {
+		"C": {
+			"item": "packagedauto:package_component"
+		},
+		"A": {
+			"item": "appliedenergistics2:material",
+			"data": 44
+		},
+		"F": {
+			"item": "appliedenergistics2:material",
+			"data": 43
+		},
+		"G": {
+			"item": "appliedenergistics2:quartz_glass"
+		},
+		"I": {
+			"type": "forge:ore_dict",
+			"ore": "ingotIron"
+		}
+	}
 }
