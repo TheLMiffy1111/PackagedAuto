@@ -1,29 +1,29 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "result": {
-        "item": "packagedauto:fluid_package_filler",
-        "count": 1
-    },
-    "pattern": [
-        "ICI",
-        "UBU",
-        "IPI"
-    ],
-    "key": {
-        "C": {
-            "item": "packagedauto:package_component"
-        },
-        "B": {
-            "item": "minecraft:bucket"
-        },
-        "P": {
-            "item": "minecraft:piston"
-        },
-        "I": {
-            "tag": "forge:ingots/iron"
-        },
-        "U": {
-            "tag": "forge:ingots/copper"
-        }
-    }
+	"type": "minecraft:crafting_shaped",
+	"result": {
+		"item": "packagedauto:fluid_package_filler",
+		"count": 1
+	},
+	"pattern": [
+		"ICI",
+		"UBU",
+		"IPI"
+	],
+	"key": {
+		"C": {
+			"item": "packagedauto:package_component"
+		},
+		"B": {
+			"item": "minecraft:bucket"
+		},
+		"P": {
+			"item": "minecraft:piston"
+		},
+		"I": {
+			"tag": "forge:ingots/iron"
+		},
+		"U": {
+			"tag": "forge:ingots/copper"
+		}
+	}
 }

@@ -1,35 +1,35 @@
 {
-    "conditions": [
-        {
-            "type": "forge:mod_loaded",
-            "modid": "ae2"
-        }
-    ],
-    "type": "minecraft:crafting_shaped",
-    "result": {
-        "item": "packagedauto:me_package_component",
-        "count": 1
-    },
-    "pattern": [
-        "IGI",
-        "ACF",
-        "IGI"
-    ],
-    "key": {
-        "C": {
-            "item": "packagedauto:package_component"
-        },
-        "A": {
-            "item": "ae2:annihilation_core"
-        },
-        "F": {
-            "item": "ae2:formation_core"
-        },
-        "G": {
-            "item": "ae2:quartz_glass"
-        },
-        "I": {
-            "tag": "forge:ingots/iron"
-        }
-    }
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "ae2"
+		}
+	],
+	"type": "minecraft:crafting_shaped",
+	"result": {
+		"item": "packagedauto:me_package_component",
+		"count": 1
+	},
+	"pattern": [
+		"IGI",
+		"ACF",
+		"IGI"
+	],
+	"key": {
+		"C": {
+			"item": "packagedauto:package_component"
+		},
+		"A": {
+			"item": "ae2:annihilation_core"
+		},
+		"F": {
+			"item": "ae2:formation_core"
+		},
+		"G": {
+			"item": "ae2:quartz_glass"
+		},
+		"I": {
+			"tag": "forge:ingots/iron"
+		}
+	}
 }
