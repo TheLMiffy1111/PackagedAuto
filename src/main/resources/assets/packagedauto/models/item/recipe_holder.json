@@ -1,14 +1,14 @@
 {
-    "parent": "item/generated",
-    "textures": {
-        "layer0": "packagedauto:items/recipe_holder"
-    },
-    "overrides": [
-        {
-            "predicate": {
-                "packagedauto:filled": 1
-            },
-            "model": "packagedauto:item/recipe_holder_filled"
-        }
-    ]
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "packagedauto:items/recipe_holder"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"packagedauto:filled": 1
+			},
+			"model": "packagedauto:item/recipe_holder_filled"
+		}
+	]
 }

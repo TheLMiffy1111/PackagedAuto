@@ -1,38 +1,38 @@
 {
-    "conditions": [
-        {
-            "type": "forge:not",
-            "value": {
-                "type": "forge:mod_loaded",
-                "modid": "ae2"
-            }
-        }
-    ],
-    "type": "minecraft:crafting_shaped",
-    "result": {
-        "item": "packagedauto:unpackager",
-        "count": 1
-    },
-    "pattern": [
-        "ICI",
-        "RSR",
-        "IHI"
-    ],
-    "key": {
-        "C": {
-            "item": "packagedauto:package_component"
-        },
-        "S": {
-            "tag": "forge:chests/wooden"
-        },
-        "H": {
-            "item": "minecraft:hopper"
-        },
-        "I": {
-            "tag": "forge:ingots/iron"
-        },
-        "R": {
-            "tag": "forge:dusts/redstone"
-        }
-    }
+	"conditions": [
+		{
+			"type": "forge:not",
+			"value": {
+				"type": "forge:mod_loaded",
+				"modid": "ae2"
+			}
+		}
+	],
+	"type": "minecraft:crafting_shaped",
+	"result": {
+		"item": "packagedauto:unpackager",
+		"count": 1
+	},
+	"pattern": [
+		"ICI",
+		"RSR",
+		"IHI"
+	],
+	"key": {
+		"C": {
+			"item": "packagedauto:package_component"
+		},
+		"S": {
+			"tag": "forge:chests/wooden"
+		},
+		"H": {
+			"item": "minecraft:hopper"
+		},
+		"I": {
+			"tag": "forge:ingots/iron"
+		},
+		"R": {
+			"tag": "forge:dusts/redstone"
+		}
+	}
 }

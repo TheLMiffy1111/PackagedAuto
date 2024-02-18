@@ -1,35 +1,35 @@
 {
-    "conditions": [
-        {
-            "type": "forge:mod_loaded",
-            "modid": "ae2"
-        }
-    ],
-    "type": "minecraft:crafting_shaped",
-    "result": {
-        "item": "packagedauto:crafter",
-        "count": 1
-    },
-    "pattern": [
-        "ICI",
-        "RTR",
-        "IHI"
-    ],
-    "key": {
-        "C": {
-            "item": "packagedauto:me_package_component"
-        },
-        "T": {
-            "item": "minecraft:crafting_table"
-        },
-        "H": {
-            "item": "minecraft:hopper"
-        },
-        "I": {
-            "tag": "forge:ingots/iron"
-        },
-        "R": {
-            "tag": "forge:dusts/redstone"
-        }
-    }
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "ae2"
+		}
+	],
+	"type": "minecraft:crafting_shaped",
+	"result": {
+		"item": "packagedauto:crafter",
+		"count": 1
+	},
+	"pattern": [
+		"ICI",
+		"RTR",
+		"IHI"
+	],
+	"key": {
+		"C": {
+			"item": "packagedauto:me_package_component"
+		},
+		"T": {
+			"item": "minecraft:crafting_table"
+		},
+		"H": {
+			"item": "minecraft:hopper"
+		},
+		"I": {
+			"tag": "forge:ingots/iron"
+		},
+		"R": {
+			"tag": "forge:dusts/redstone"
+		}
+	}
 }
