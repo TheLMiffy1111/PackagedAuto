@@ -168,7 +168,6 @@ publishMods {
 		accessToken = providers.gradleProperty("curseforge.token")
 		projectId = "308380"
 		minecraftVersions.add(mcVersion)
-		javaVersions.add(JavaVersion.VERSION_1_8)
 		optional "applied-energistics-2"
 	}
 
