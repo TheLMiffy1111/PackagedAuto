@@ -307,7 +307,11 @@ public class MiscUtil {
 		return stack;
 	}
 
+	public static Runnable conditionalRunnable(BooleanSupplier conditionSupplier, Supplier<Runnable> trueRunnable, Supplier<Runnable> falseRunnable) {
+		return ()->(conditionSupplier.getAsBoolean() ? trueRunnable : falseRunnable).get().run();
+	}
+
 	public static <T> Supplier<T> conditionalSupplier(BooleanSupplier conditionSupplier, Supplier<Supplier<T>> trueSupplier, Supplier<Supplier<T>> falseSupplier) {
-		return ()->conditionSupplier.getAsBoolean() ? trueSupplier.get().get() : falseSupplier.get().get();
+		return ()->(conditionSupplier.getAsBoolean() ? trueSupplier : falseSupplier).get().get();
 	}
 }

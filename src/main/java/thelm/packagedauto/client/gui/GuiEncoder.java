@@ -114,13 +114,12 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 			container.setupSlots();
 		}
 		if(button instanceof GuiButtonShowRecipesJEI) {
-			MiscUtil.conditionalSupplier(()->true, ()->()->{
+			MiscUtil.conditionalRunnable(()->true, ()->()->{
 				IRecipeType recipeType = container.patternInventory.recipeType;
 				if(recipeType != null) {
 					PackagedAutoJEIPlugin.showCategories(recipeType.getJEICategories());
 				}
-				return null;
-			}, null).get();
+			}, ()->()->{}).run();
 		}
 	}
 
