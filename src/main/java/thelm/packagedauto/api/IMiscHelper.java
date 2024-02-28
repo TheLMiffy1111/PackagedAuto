@@ -63,6 +63,8 @@ public interface IMiscHelper {
 
 	ItemStack fillVolume(BlockEntity blockEntity, Direction direction, ItemStack stack, boolean simulate);
 
+	Runnable conditionalRunnable(BooleanSupplier conditionSupplier, Supplier<Runnable> trueRunnable, Supplier<Runnable> falseRunnable);
+
 	<T> Supplier<T> conditionalSupplier(BooleanSupplier conditionSupplier, Supplier<Supplier<T>> trueSupplier, Supplier<Supplier<T>> falseSupplier);
 
 	RecipeManager getRecipeManager();

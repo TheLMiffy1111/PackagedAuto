@@ -384,8 +384,13 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
+	public Runnable conditionalRunnable(BooleanSupplier conditionSupplier, Supplier<Runnable> trueRunnable, Supplier<Runnable> falseRunnable) {
+		return ()->(conditionSupplier.getAsBoolean() ? trueRunnable : falseRunnable).get().run();
+	}
+
+	@Override
 	public <T> Supplier<T> conditionalSupplier(BooleanSupplier conditionSupplier, Supplier<Supplier<T>> trueSupplier, Supplier<Supplier<T>> falseSupplier) {
-		return ()->conditionSupplier.getAsBoolean() ? trueSupplier.get().get() : falseSupplier.get().get();
+		return ()->(conditionSupplier.getAsBoolean() ? trueSupplier : falseSupplier).get().get();
 	}
 
 	public void setServer(MinecraftServer server) {
