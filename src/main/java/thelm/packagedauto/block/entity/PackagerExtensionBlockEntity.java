@@ -198,12 +198,11 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 					else if(listStack.getItem() instanceof IPackageItem packageItem) {
 						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 					}
-					if(mode == PackagerBlockEntity.Mode.FIRST) {
-						disjoint = true;
-					}
-					else if(mode == PackagerBlockEntity.Mode.DISJOINT) {
-						disjoint = MiscHelper.INSTANCE.arePatternsDisjoint(patternList);
-					}
+					disjoint = switch(mode) {
+					case EXACT -> false;
+					case DISJOINT -> MiscHelper.INSTANCE.arePatternsDisjoint(patternList);
+					case FIRST -> true;
+					};
 					break;
 				}
 			}
