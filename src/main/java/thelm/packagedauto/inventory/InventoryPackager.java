@@ -124,11 +124,16 @@ public class InventoryPackager extends InventoryTileBase {
 			IPackageItem packageItem = (IPackageItem)listStack.getItem();
 			tile.patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 		}
-		if(tile.mode == TilePackager.Mode.FIRST) {
-			tile.disjoint = true;
-		}
-		else if(tile.mode == TilePackager.Mode.DISJOINT) {
+		switch(tile.mode) {
+		case EXACT:
+			tile.disjoint = false;
+			break;
+		case DISJOINT:
 			tile.disjoint = MiscUtil.arePatternsDisjoint(tile.patternList);
+			break;
+		case FIRST:
+			tile.disjoint = true;
+			break;
 		}
 		if(tile.getWorld() != null && !tile.getWorld().isRemote && tile.hostHelper != null) {
 			tile.hostHelper.postPatternChange();

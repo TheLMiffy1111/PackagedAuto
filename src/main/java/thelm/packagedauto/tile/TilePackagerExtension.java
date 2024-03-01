@@ -231,11 +231,16 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 						IPackageItem packageItem = (IPackageItem)listStack.getItem();
 						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 					}
-					if(mode == TilePackager.Mode.FIRST) {
-						disjoint = true;
-					}
-					else if(mode == TilePackager.Mode.DISJOINT) {
+					switch(mode) {
+					case EXACT:
+						disjoint = false;
+						break;
+					case DISJOINT:
 						disjoint = MiscUtil.arePatternsDisjoint(patternList);
+						break;
+					case FIRST:
+						disjoint = true;
+						break;
 					}
 					break;
 				}

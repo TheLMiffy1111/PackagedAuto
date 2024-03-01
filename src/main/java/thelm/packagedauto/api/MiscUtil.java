@@ -92,7 +92,9 @@ public class MiscUtil {
 			int meta = triple.getMiddle();
 			NBTTagCompound nbt = triple.getRight();
 			if(ignoreStackSize) {
-				list.add(new ItemStack(item, count, meta));
+				ItemStack toAdd = new ItemStack(item, count, meta);
+				toAdd.setTagCompound(nbt);
+				list.add(toAdd);
 			}
 			else {
 				while(count > 0) {
