@@ -126,7 +126,9 @@ public class MiscHelper implements IMiscHelper {
 			Item item = pair.getLeft();
 			CompoundTag nbt = pair.getRight();
 			if(ignoreStackSize) {
-				list.add(new ItemStack(item, count));
+				ItemStack toAdd = new ItemStack(item, count);
+				toAdd.setTag(nbt);
+				list.add(toAdd);
 			}
 			else {
 				while(count > 0) {
@@ -397,6 +399,6 @@ public class MiscHelper implements IMiscHelper {
 	@Override
 	public RecipeManager getRecipeManager() {
 		return server != null ? server.getRecipeManager() :
-			DistExecutor.callWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().level.getRecipeManager());
+			DistExecutor.unsafeCallWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().level.getRecipeManager());
 	}
 }
