@@ -201,11 +201,16 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 						IPackageItem packageItem = (IPackageItem)listStack.getItem();
 						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 					}
-					if(mode == PackagerTile.Mode.FIRST) {
-						disjoint = true;
-					}
-					else if(mode == PackagerTile.Mode.DISJOINT) {
+					switch(mode) {
+					case EXACT:
+						disjoint = false;
+						break;
+					case DISJOINT:
 						disjoint = MiscHelper.INSTANCE.arePatternsDisjoint(patternList);
+						break;
+					case FIRST:
+						disjoint = true;
+						break;
 					}
 					break;
 				}

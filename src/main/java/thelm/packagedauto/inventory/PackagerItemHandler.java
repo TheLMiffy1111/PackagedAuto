@@ -96,11 +96,16 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 			IPackageItem packageItem = (IPackageItem)listStack.getItem();
 			tile.patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
 		}
-		if(tile.mode == PackagerTile.Mode.FIRST) {
-			tile.disjoint = true;
-		}
-		else if(tile.mode == PackagerTile.Mode.DISJOINT) {
+		switch(tile.mode) {
+		case EXACT:
+			tile.disjoint = false;
+			break;
+		case DISJOINT:
 			tile.disjoint = MiscHelper.INSTANCE.arePatternsDisjoint(tile.patternList);
+			break;
+		case FIRST:
+			tile.disjoint = true;
+			break;
 		}
 		if(tile.getLevel() != null && !tile.getLevel().isClientSide) {
 			tile.postPatternChange();
