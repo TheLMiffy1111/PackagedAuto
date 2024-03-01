@@ -1,10 +1,12 @@
 package thelm.packagedauto.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -276,6 +278,47 @@ public class MiscHelper implements IMiscHelper {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public boolean recipeEquals(IPackageRecipeInfo recipeA, Object recipeInternalA, IPackageRecipeInfo recipeB, Object recipeInternalB) {
+		if(!Objects.equals(recipeInternalA, recipeInternalB)) {
+			return false;
+		}
+		List<ItemStack> inputsA = recipeA.getInputs();
+		List<ItemStack> inputsB = recipeB.getInputs();
+		if(inputsA.size() != inputsB.size()) {
+			return false;
+		}
+		List<ItemStack> outputsA = recipeA.getOutputs();
+		List<ItemStack> outputsB = recipeB.getOutputs();
+		if(outputsA.size() != outputsB.size()) {
+			return false;
+		}
+		for(int i = 0; i < inputsA.size(); ++i) {
+			if(!ItemStack.matches(inputsA.get(i), inputsB.get(i))) {
+				return false;
+			}
+		}
+		for(int i = 0; i < outputsA.size(); ++i) {
+			if(!ItemStack.matches(outputsA.get(i), outputsB.get(i))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public int recipeHashCode(IPackageRecipeInfo recipe, Object recipeInternal) {
+		List<ItemStack> inputs = recipe.getInputs();
+		List<ItemStack> outputs = recipe.getOutputs();
+		Function<ItemStack, Object[]> decompose = stack->new Object[] {
+				stack.getItem(), stack.getCount(), stack.getTag(),
+		};
+		Object[] toHash = {
+				recipeInternal, inputs.stream().map(decompose).toArray(), outputs.stream().map(decompose).toArray(),
+		};
+		return Arrays.deepHashCode(toHash);
 	}
 
 	//Modified from Forestry
