@@ -1,2 +1,1 @@
-Fix transmutation bug  
-Change conditional runnable/supplier implementation  
+Add utility recipe equals and hashCode methods  
