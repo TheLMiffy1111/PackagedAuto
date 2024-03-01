@@ -55,6 +55,10 @@ public interface IMiscHelper {
 
 	IPackageRecipeInfo loadRecipe(CompoundTag nbt);
 
+	boolean recipeEquals(IPackageRecipeInfo recipeA, Object recipeInternalA, IPackageRecipeInfo recipeB, Object recipeInternalB);
+
+	int recipeHashCode(IPackageRecipeInfo recipe, Object recipeInternal);
+
 	boolean removeExactSet(List<ItemStack> offered, List<ItemStack> required, boolean simulate);
 
 	boolean arePatternsDisjoint(List<IPackagePattern> patternList);
