@@ -1,1 +1,1 @@
-Add utility recipe equals and hashCode methods  
+Fix possible NPE when using package as packager pattern  

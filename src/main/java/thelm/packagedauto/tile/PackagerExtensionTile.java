@@ -199,7 +199,10 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 					}
 					else if(listStack.getItem() instanceof IPackageItem) {
 						IPackageItem packageItem = (IPackageItem)listStack.getItem();
-						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+						IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
+						if(recipe != null) {
+							patternList.add(recipe.getPatterns().get(packageItem.getIndex(listStack)));
+						}
 					}
 					switch(mode) {
 					case EXACT:

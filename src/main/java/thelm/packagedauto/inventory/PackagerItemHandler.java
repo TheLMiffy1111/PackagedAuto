@@ -7,6 +7,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.api.IPackageItem;
+import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeListItem;
 import thelm.packagedauto.tile.PackagerExtensionTile;
 import thelm.packagedauto.tile.PackagerTile;
@@ -94,7 +95,10 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 		}
 		else if(listStack.getItem() instanceof IPackageItem) {
 			IPackageItem packageItem = (IPackageItem)listStack.getItem();
-			tile.patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+			IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
+			if(recipe != null) {
+				tile.patternList.add(recipe.getPatterns().get(packageItem.getIndex(listStack)));
+			}
 		}
 		switch(tile.mode) {
 		case EXACT:
