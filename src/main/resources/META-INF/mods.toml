@@ -19,5 +19,5 @@ issueTrackerURL = "https://github.com/TheLMiffy1111/PackagedAuto/issues"
 
 [[dependencies.packagedauto]]
 	modId = "ae2"
-	versionRange = "[13,)"
+	versionRange = "[15,)"
 	mandatory = false
