@@ -17,12 +17,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.RecipeMatcher;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.util.RecipeMatcher;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
@@ -194,7 +195,10 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 						listItem.getRecipeList(level, listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(patternList::add));
 					}
 					else if(listStack.getItem() instanceof IPackageItem packageItem) {
-						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+						IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
+						if(recipe != null) {
+							patternList.add(recipe.getPatterns().get(packageItem.getIndex(listStack)));
+						}
 					}
 					disjoint = switch(mode) {
 					case EXACT -> false;
@@ -299,9 +303,10 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 
 	protected void chargeEnergy() {
 		ItemStack energyStack = itemHandler.getStackInSlot(10);
-		if(energyStack.getCapability(ForgeCapabilities.ENERGY).isPresent()) {
+		IEnergyStorage itemEnergyStorage = energyStack.getCapability(Capabilities.EnergyStorage.ITEM);
+		if(itemEnergyStorage != null) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(energyStack.getCapability(ForgeCapabilities.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
+			energyStorage.receiveEnergy(itemEnergyStorage.extractEnergy(energyRequest, false), false);
 			if(energyStack.getCount() <= 0) {
 				itemHandler.setStackInSlot(10, ItemStack.EMPTY);
 			}

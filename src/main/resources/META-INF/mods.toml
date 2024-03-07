@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[46,)"
+loaderVersion = "[2,)"
 license = "MIT"
 issueTrackerURL = "https://github.com/TheLMiffy1111/PackagedAuto/issues"
 
@@ -13,11 +13,11 @@ issueTrackerURL = "https://github.com/TheLMiffy1111/PackagedAuto/issues"
 	displayURL = "https://www.curseforge.com/minecraft/mc-mods/packagedauto"
 
 [[dependencies.packagedauto]]
-	modId = "forge"
-	versionRange = "[46,)"
-	mandatory = true
+	modId = "neoforge"
+	versionRange = "[20.4,)"
+	type = "required"
 
 [[dependencies.packagedauto]]
 	modId = "ae2"
-	versionRange = "[13,)"
-	mandatory = false
+	versionRange = "[17,)"
+	type = "optional"

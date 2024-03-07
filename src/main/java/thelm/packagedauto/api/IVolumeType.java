@@ -3,13 +3,14 @@ package thelm.packagedauto.api;
 import java.util.Optional;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.capabilities.ItemCapability;
 
 public interface IVolumeType {
 
@@ -36,17 +37,15 @@ public interface IVolumeType {
 	Object makeItemCapability(ItemStack volumePackage);
 
 	@SuppressWarnings("rawtypes")
-	Capability getItemCapability();
+	ItemCapability getItemCapability();
 
-	boolean hasBlockCapability(ICapabilityProvider capProvider, Direction direction);
+	boolean hasBlockCapability(Level level, BlockPos pos, Direction direction);
 
-	default boolean isEmpty(ICapabilityProvider capProvider, Direction direction) {
-		return false;
-	}
+	boolean isEmpty(Level level, BlockPos pos, Direction direction);
 
-	int fill(ICapabilityProvider capProvider, Direction direction, IVolumeStackWrapper resource, boolean simulate);
+	int fill(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, boolean simulate);
 
-	IVolumeStackWrapper drain(ICapabilityProvider capProvider, Direction direction, IVolumeStackWrapper resource, boolean simulate);
+	IVolumeStackWrapper drain(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, boolean simulate);
 
 	void render(GuiGraphics graphics, int i, int j, IVolumeStackWrapper stack);
 }

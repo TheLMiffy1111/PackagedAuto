@@ -2,8 +2,8 @@ package thelm.packagedauto.inventory;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.block.entity.PackagerBlockEntity;
 import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 
@@ -27,7 +27,7 @@ public class PackagerExtensionItemHandler extends BaseItemHandler<PackagerExtens
 	public boolean isItemValid(int index, ItemStack stack) {
 		return switch(index) {
 		case 9 -> false;
-		case 10 -> stack.getCapability(ForgeCapabilities.ENERGY).isPresent();
+		case 10 -> stack.getCapability(Capabilities.EnergyStorage.ITEM) != null;
 		default -> blockEntity.isWorking ? !getStackInSlot(index).isEmpty() : true;
 		};
 	}

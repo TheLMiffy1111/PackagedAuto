@@ -25,9 +25,11 @@ import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
@@ -37,12 +39,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.world.level.Level;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IMiscHelper;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
@@ -364,7 +364,7 @@ public class MiscHelper implements IMiscHelper {
 	@Override
 	public boolean arePatternsDisjoint(List<IPackagePattern> patternList) {
 		ObjectRBTreeSet<Pair<Item, CompoundTag>> set = new ObjectRBTreeSet<>(
-				Comparator.comparing(pair->Pair.of(ForgeRegistries.ITEMS.getKey(pair.getLeft()), ""+pair.getRight())));
+				Comparator.comparing(pair->Pair.of(BuiltInRegistries.ITEM.getKey(pair.getLeft()), ""+pair.getRight())));
 		for(IPackagePattern pattern : patternList) {
 			List<ItemStack> condensedInputs = condenseStacks(pattern.getInputs(), true);
 			for(ItemStack stack : condensedInputs) {
@@ -399,21 +399,21 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
-	public ItemStack fillVolume(BlockEntity blockEntity, Direction direction, ItemStack stack, boolean simulate) {
-		if(blockEntity == null || stack.isEmpty()) {
+	public ItemStack fillVolume(Level level, BlockPos pos, Direction direction, ItemStack stack, boolean simulate) {
+		if(stack.isEmpty()) {
 			return stack;
 		}
 		if(stack.getItem() instanceof IVolumePackageItem vPackage &&
 				vPackage.getVolumeType(stack) != null &&
-				vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction)) {
+				vPackage.getVolumeType(stack).hasBlockCapability(level, pos, direction)) {
 			IVolumeType vType = vPackage.getVolumeType(stack);
 			stack = stack.copy();
 			IVolumeStackWrapper vStack = vPackage.getVolumeStack(stack);
 			while(!stack.isEmpty()) {
-				int simulateFilled = vType.fill(blockEntity, direction, vStack, true);
+				int simulateFilled = vType.fill(level, pos, direction, vStack, true);
 				if(simulateFilled == vStack.getAmount()) {
 					if(!simulate) {
-						vType.fill(blockEntity, direction, vStack, false);
+						vType.fill(level, pos, direction, vStack, false);
 					}
 					stack.shrink(1);
 					if(stack.isEmpty()) {
@@ -445,12 +445,12 @@ public class MiscHelper implements IMiscHelper {
 	@Override
 	public RecipeManager getRecipeManager() {
 		return server != null ? server.getRecipeManager() :
-			DistExecutor.unsafeCallWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().level.getRecipeManager());
+			conditionalSupplier(FMLEnvironment.dist::isClient, ()->()->Minecraft.getInstance().level.getRecipeManager(), ()->()->null).get();
 	}
 
 	@Override
 	public RegistryAccess getRegistryAccess() {
 		return server != null ? server.registryAccess() :
-			DistExecutor.unsafeCallWhenOn(Dist.CLIENT, ()->()->Minecraft.getInstance().level.registryAccess());
+			conditionalSupplier(FMLEnvironment.dist::isClient, ()->()->Minecraft.getInstance().level.registryAccess(), ()->()->null).get();
 	}
 }

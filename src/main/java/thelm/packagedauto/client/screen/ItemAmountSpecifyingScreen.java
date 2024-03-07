@@ -5,9 +5,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import thelm.packagedauto.menu.ItemAmountSpecifyingMenu;
-import thelm.packagedauto.network.PacketHandler;
-import thelm.packagedauto.network.packet.SetItemStackPacket;
+import thelm.packagedauto.packet.SetItemStackPacket;
 
 public class ItemAmountSpecifyingScreen extends AmountSpecifyingScreen<ItemAmountSpecifyingMenu> {
 
@@ -54,7 +54,7 @@ public class ItemAmountSpecifyingScreen extends AmountSpecifyingScreen<ItemAmoun
 			int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
 			ItemStack newStack = stack.copy();
 			newStack.setCount(amount);
-			PacketHandler.INSTANCE.sendToServer(new SetItemStackPacket((short)containerSlot, newStack));
+			PacketDistributor.SERVER.with(null).send(new SetItemStackPacket((short)containerSlot, newStack));
 			close();
 		}
 		catch(NumberFormatException e) {

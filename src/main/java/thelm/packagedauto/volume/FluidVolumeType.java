@@ -3,19 +3,21 @@ package thelm.packagedauto.volume;
 import java.util.Optional;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.ItemCapability;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.capability.StackFluidHandlerItem;
@@ -86,18 +88,19 @@ public class FluidVolumeType implements IVolumeType {
 	}
 
 	@Override
-	public Capability<IFluidHandlerItem> getItemCapability() {
-		return ForgeCapabilities.FLUID_HANDLER_ITEM;
+	public ItemCapability<IFluidHandlerItem, Void> getItemCapability() {
+		return Capabilities.FluidHandler.ITEM;
 	}
 
 	@Override
-	public boolean hasBlockCapability(ICapabilityProvider capProvider, Direction direction) {
-		return capProvider.getCapability(ForgeCapabilities.FLUID_HANDLER, direction).isPresent();
+	public boolean hasBlockCapability(Level level, BlockPos pos, Direction direction) {
+		return level.getCapability(Capabilities.FluidHandler.BLOCK, pos, direction) != null;
 	}
 
 	@Override
-	public boolean isEmpty(ICapabilityProvider capProvider, Direction direction) {
-		return capProvider.getCapability(ForgeCapabilities.FLUID_HANDLER, direction).map(handler->{
+	public boolean isEmpty(Level level, BlockPos pos, Direction direction) {
+		IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, direction);
+		if(handler != null) {
 			if(handler.getTanks() == 0) {
 				return false;
 			}
@@ -107,26 +110,30 @@ public class FluidVolumeType implements IVolumeType {
 				}
 			}
 			return true;
-		}).orElse(false);
+		}
+		return false;
 	}
 
 	@Override
-	public int fill(ICapabilityProvider capProvider, Direction direction, IVolumeStackWrapper resource, boolean simulate) {
+	public int fill(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, boolean simulate) {
 		if(resource instanceof FluidStackWrapper fluidStack) {
-			FluidAction action = simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE;
-			return capProvider.getCapability(ForgeCapabilities.FLUID_HANDLER, direction).
-					map(handler->handler.fill(fluidStack.stack(), action)).orElse(0);
+			IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, direction);
+			if(handler != null) {
+				FluidAction action = simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE;
+				return handler.fill(fluidStack.stack(), action);
+			}
 		}
 		return 0;
 	}
 
 	@Override
-	public IVolumeStackWrapper drain(ICapabilityProvider capProvider, Direction direction, IVolumeStackWrapper resource, boolean simulate) {
+	public IVolumeStackWrapper drain(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, boolean simulate) {
 		if(resource instanceof FluidStackWrapper fluidStack) {
-			FluidAction action = simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE;
-			return capProvider.getCapability(ForgeCapabilities.FLUID_HANDLER, direction).
-					map(handler->handler.drain(fluidStack.stack(), action)).
-					map(FluidStackWrapper::new).orElse(FluidStackWrapper.EMPTY);
+			IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, direction);
+			if(handler != null) {
+				FluidAction action = simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE;
+				return new FluidStackWrapper(handler.drain(fluidStack.stack(), action));
+			}
 		}
 		return FluidStackWrapper.EMPTY;
 	}

@@ -18,17 +18,20 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.api.IVolumePackageItem;
+import thelm.packagedauto.block.PackagerBlock;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.integration.appeng.blockentity.AEUnpackagerBlockEntity;
@@ -167,19 +170,25 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				}
 				ordered = recipeType.isOrdered();
 			}
-			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
-			if(blockEntity == null || blockEntity instanceof PackagerBlockEntity || blockEntity instanceof UnpackagerBlockEntity || isPatternProvider(blockEntity, direction.getOpposite())) {
+			BlockPos offsetPos = worldPosition.relative(direction);
+			Block block = level.getBlockState(offsetPos).getBlock();
+			if(block == PackagerBlock.INSTANCE || block == UnpackagerBlock.INSTANCE) {
 				trackerToEmpty.direction = null;
 				continue;
 			}
-			IItemHandler itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).orElse(null);
+			BlockEntity blockEntity = level.getBlockEntity(offsetPos);
+			if(isPatternProvider(blockEntity, direction.getOpposite())) {
+				trackerToEmpty.direction = null;
+				continue;
+			}
+			IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, offsetPos, direction.getOpposite());
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
 				ItemStack stackRem = stack;
 				if(stack.getItem() instanceof IVolumePackageItem vPackage &&
 						vPackage.getVolumeType(stack) != null &&
-						vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction)) {
-					stackRem = MiscHelper.INSTANCE.fillVolume(blockEntity, direction.getOpposite(), stack, false);
+						vPackage.getVolumeType(stack).hasBlockCapability(level, offsetPos, direction.getOpposite())) {
+					stackRem = MiscHelper.INSTANCE.fillVolume(level, offsetPos, direction.getOpposite(), stack, false);
 				}
 				else if(itemHandler != null) {
 					stackRem = MiscHelper.INSTANCE.insertItem(itemHandler, stack, ordered, false);
@@ -200,21 +209,26 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			if(trackerToEmpty == null) {
 				continue;
 			}
+			BlockPos offsetPos = worldPosition.relative(direction);
+			Block block = level.getBlockState(offsetPos).getBlock();
+			if(block == PackagerBlock.INSTANCE || block == UnpackagerBlock.INSTANCE) {
+				continue;
+			}
 			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
-			if(blockEntity == null || blockEntity instanceof PackagerBlockEntity || blockEntity instanceof UnpackagerBlockEntity || isPatternProvider(blockEntity, direction.getOpposite())) {
+			if(isPatternProvider(blockEntity, direction.getOpposite())) {
 				continue;
 			}
 			if(trackerToEmpty.toSend.isEmpty()) {
 				trackerToEmpty.setupToSend();
 			}
-			IItemHandler itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).orElse(null);
+			IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, offsetPos, direction.getOpposite());
 			if(blocking) {
 				for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 					ItemStack stack = trackerToEmpty.toSend.get(i);
 					if(stack.getItem() instanceof IVolumePackageItem vPackage &&
 							vPackage.getVolumeType(stack) != null &&
-							vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction)) {
-						if(!vPackage.getVolumeType(stack).isEmpty(blockEntity, direction.getOpposite())) {
+							vPackage.getVolumeType(stack).hasBlockCapability(level, offsetPos, direction.getOpposite())) {
+						if(!vPackage.getVolumeType(stack).isEmpty(level, offsetPos, direction.getOpposite())) {
 							continue dir;
 						}
 					}
@@ -230,8 +244,8 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				ItemStack stackRem = stack;
 				if(stack.getItem() instanceof IVolumePackageItem vPackage &&
 						vPackage.getVolumeType(stack) != null &&
-						vPackage.getVolumeType(stack).hasBlockCapability(blockEntity, direction)) {
-					stackRem = MiscHelper.INSTANCE.fillVolume(blockEntity, direction.getOpposite(), stack, false);
+						vPackage.getVolumeType(stack).hasBlockCapability(level, offsetPos, direction.getOpposite())) {
+					stackRem = MiscHelper.INSTANCE.fillVolume(level, offsetPos, direction.getOpposite(), stack, false);
 				}
 				else if(itemHandler != null) {
 					stackRem = MiscHelper.INSTANCE.insertItem(itemHandler, stack, ordered, false);
@@ -252,9 +266,10 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 
 	protected void chargeEnergy() {
 		ItemStack energyStack = itemHandler.getStackInSlot(10);
-		if(energyStack.getCapability(ForgeCapabilities.ENERGY).isPresent()) {
+		IEnergyStorage itemEnergyStorage = energyStack.getCapability(Capabilities.EnergyStorage.ITEM);
+		if(itemEnergyStorage != null) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(energyStack.getCapability(ForgeCapabilities.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
+			energyStorage.receiveEnergy(itemEnergyStorage.extractEnergy(energyRequest, false), false);
 			if(energyStack.getCount() <= 0) {
 				itemHandler.setStackInSlot(10, ItemStack.EMPTY);
 			}

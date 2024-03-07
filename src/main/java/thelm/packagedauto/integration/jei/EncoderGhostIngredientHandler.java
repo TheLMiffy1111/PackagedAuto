@@ -7,12 +7,12 @@ import mezz.jei.api.ingredients.ITypedIngredient;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.client.screen.BaseScreen;
 import thelm.packagedauto.client.screen.EncoderScreen;
 import thelm.packagedauto.item.VolumePackageItem;
-import thelm.packagedauto.network.PacketHandler;
-import thelm.packagedauto.network.packet.SetItemStackPacket;
+import thelm.packagedauto.packet.SetItemStackPacket;
 import thelm.packagedauto.slot.FalseCopySlot;
 import thelm.packagedauto.util.ApiImpl;
 
@@ -63,7 +63,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<En
 		public void accept(I ingredient) {
 			ItemStack stack = wrapStack(ingredient);
 			if(!stack.isEmpty()) {
-				PacketHandler.INSTANCE.sendToServer(new SetItemStackPacket((short)slot.index, stack));
+				PacketDistributor.SERVER.with(null).send(new SetItemStackPacket((short)slot.index, stack));
 			}
 		}
 	}

@@ -14,6 +14,7 @@ import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import thelm.packagedauto.api.IPackagePattern;
@@ -24,6 +25,7 @@ import thelm.packagedauto.util.PackagePattern;
 
 public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 
+	ResourceLocation id;
 	CraftingRecipe recipe;
 	List<ItemStack> input = new ArrayList<>();
 	CraftingContainer matrix = new TransientCraftingContainer(new EmptyMenu(), 3, 3);
@@ -35,7 +37,8 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 		input.clear();
 		output = ItemStack.EMPTY;
 		patterns.clear();
-		Recipe<?> recipe = MiscHelper.INSTANCE.getRecipeManager().byKey(new ResourceLocation(nbt.getString("Recipe"))).orElse(null);
+		id = new ResourceLocation(nbt.getString("Recipe"));
+		Recipe<?> recipe = MiscHelper.INSTANCE.getRecipeManager().byKey(id).map(RecipeHolder::value).orElse(null);
 		List<ItemStack> matrixList = new ArrayList<>();
 		MiscHelper.INSTANCE.loadAllItems(nbt.getList("Matrix", 10), matrixList);
 		for(int i = 0; i < 9 && i < matrixList.size(); ++i) {
@@ -53,8 +56,8 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 
 	@Override
 	public void save(CompoundTag nbt) {
-		if(recipe != null) {
-			nbt.putString("Recipe", recipe.getId().toString());
+		if(isValid()) {
+			nbt.putString("Recipe", id.toString());
 		}
 		List<ItemStack> matrixList = new ArrayList<>();
 		for(int i = 0; i < 9; ++i) {
@@ -71,7 +74,7 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 
 	@Override
 	public boolean isValid() {
-		return recipe != null;
+		return id != null && recipe != null;
 	}
 
 	@Override
@@ -106,6 +109,7 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 
 	@Override
 	public void generateFromStacks(List<ItemStack> input, List<ItemStack> output, Level level) {
+		id = null;
 		recipe = null;
 		this.input.clear();
 		patterns.clear();
@@ -116,9 +120,10 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 				toSet.setCount(1);
 				matrix.setItem(i, toSet.copy());
 			}
-			CraftingRecipe recipe = MiscHelper.INSTANCE.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, matrix, level).orElse(null);
-			if(recipe != null) {
-				this.recipe = recipe;
+			RecipeHolder<CraftingRecipe> recipeHolder = MiscHelper.INSTANCE.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, matrix, level).orElse(null);
+			if(recipeHolder != null) {
+				this.id = recipeHolder.id();
+				this.recipe = recipeHolder.value();
 				this.input.addAll(MiscHelper.INSTANCE.condenseStacks(matrix));
 				this.output = recipe.assemble(matrix, level.registryAccess()).copy();
 				for(int i = 0; i*9 < this.input.size(); ++i) {

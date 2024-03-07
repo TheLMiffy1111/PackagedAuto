@@ -9,10 +9,10 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 import thelm.packagedauto.block.entity.PackagerBlockEntity;
 import thelm.packagedauto.menu.PackagerMenu;
-import thelm.packagedauto.network.PacketHandler;
-import thelm.packagedauto.network.packet.ChangePackagingPacket;
+import thelm.packagedauto.packet.ChangePackagingPacket;
 
 public class PackagerScreen extends BaseScreen<PackagerMenu> {
 
@@ -63,13 +63,8 @@ public class PackagerScreen extends BaseScreen<PackagerMenu> {
 		}
 
 		@Override
-		public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-			setTooltip(currentTooltip());
-			super.render(graphics, mouseX, mouseY, partialTick);
-		}
-
-		@Override
 		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+			setTooltip(currentTooltip());
 			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			graphics.blit(BACKGROUND, getX()+1, getY()+2, 176, 56+14*menu.blockEntity.mode.ordinal(), 14, 14);
@@ -82,7 +77,7 @@ public class PackagerScreen extends BaseScreen<PackagerMenu> {
 
 		@Override
 		public void onPress() {
-			PacketHandler.INSTANCE.sendToServer(new ChangePackagingPacket());
+			PacketDistributor.SERVER.with(null).send(new ChangePackagingPacket());
 			menu.blockEntity.changePackagingMode();
 		}
 

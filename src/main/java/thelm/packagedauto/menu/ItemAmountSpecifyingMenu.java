@@ -2,8 +2,8 @@ package thelm.packagedauto.menu;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 import thelm.packagedauto.slot.PreviewSlot;
 

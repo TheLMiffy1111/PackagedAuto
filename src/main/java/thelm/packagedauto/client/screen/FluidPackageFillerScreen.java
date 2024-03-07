@@ -8,11 +8,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import thelm.packagedauto.client.FluidRenderer;
 import thelm.packagedauto.menu.FluidPackageFillerMenu;
-import thelm.packagedauto.network.PacketHandler;
-import thelm.packagedauto.network.packet.SetFluidAmountPacket;
+import thelm.packagedauto.packet.SetFluidAmountPacket;
 
 public class FluidPackageFillerScreen extends BaseScreen<FluidPackageFillerMenu> {
 
@@ -54,7 +54,7 @@ public class FluidPackageFillerScreen extends BaseScreen<FluidPackageFillerMenu>
 			try {
 				int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 1, 1000000);
 				if(amount != menu.blockEntity.requiredAmount) {
-					PacketHandler.INSTANCE.sendToServer(new SetFluidAmountPacket(amount));
+					PacketDistributor.SERVER.with(null).send(new SetFluidAmountPacket(amount));
 				}
 			}
 			catch(NumberFormatException e) {

@@ -10,16 +10,18 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.block.CrafterBlock;
+import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.integration.appeng.blockentity.AECrafterBlockEntity;
 import thelm.packagedauto.inventory.CrafterItemHandler;
@@ -129,9 +131,10 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 	protected void ejectItems() {
 		int endIndex = isWorking ? 9 : 0;
 		for(Direction direction : Direction.values()) {
-			BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
-			if(blockEntity != null && !(blockEntity instanceof UnpackagerBlockEntity) && blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).isPresent()) {
-				IItemHandler itemHandler = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER, direction.getOpposite()).resolve().get();
+			BlockPos offsetPos = worldPosition.relative(direction);
+			Block block = level.getBlockState(offsetPos).getBlock();
+			IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, offsetPos, direction.getOpposite());
+			if(block != UnpackagerBlock.INSTANCE && itemHandler != null) {
 				for(int i = 9; i >= endIndex; --i) {
 					ItemStack stack = this.itemHandler.getStackInSlot(i);
 					if(stack.isEmpty()) {
@@ -146,9 +149,10 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 
 	protected void chargeEnergy() {
 		ItemStack energyStack = itemHandler.getStackInSlot(10);
-		if(energyStack.getCapability(ForgeCapabilities.ENERGY).isPresent()) {
+		IEnergyStorage itemEnergyStorage = energyStack.getCapability(Capabilities.EnergyStorage.ITEM);
+		if(itemEnergyStorage != null) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(energyStack.getCapability(ForgeCapabilities.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
+			energyStorage.receiveEnergy(itemEnergyStorage.extractEnergy(energyRequest, false), false);
 			if(energyStack.getCount() <= 0) {
 				itemHandler.setStackInSlot(10, ItemStack.EMPTY);
 			}

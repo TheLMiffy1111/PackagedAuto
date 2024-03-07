@@ -1,8 +1,8 @@
 package thelm.packagedauto.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
 import thelm.packagedauto.block.entity.CrafterBlockEntity;
 import thelm.packagedauto.block.entity.EncoderBlockEntity;
 import thelm.packagedauto.block.entity.FluidPackageFillerBlockEntity;
@@ -14,32 +14,32 @@ public class PackagedAutoConfig {
 
 	private PackagedAutoConfig() {}
 
-	private static ForgeConfigSpec serverSpec;
+	private static ModConfigSpec serverSpec;
 
-	public static ForgeConfigSpec.IntValue encoderPatternSlots;
+	public static ModConfigSpec.IntValue encoderPatternSlots;
 
-	public static ForgeConfigSpec.IntValue packagerEnergyCapacity;
-	public static ForgeConfigSpec.IntValue packagerEnergyReq;
-	public static ForgeConfigSpec.IntValue packagerEnergyUsage;
-	public static ForgeConfigSpec.BooleanValue packagerDrawMEEnergy;
+	public static ModConfigSpec.IntValue packagerEnergyCapacity;
+	public static ModConfigSpec.IntValue packagerEnergyReq;
+	public static ModConfigSpec.IntValue packagerEnergyUsage;
+	public static ModConfigSpec.BooleanValue packagerDrawMEEnergy;
 
-	public static ForgeConfigSpec.IntValue packagerExtensionEnergyCapacity;
-	public static ForgeConfigSpec.IntValue packagerExtensionEnergyReq;
-	public static ForgeConfigSpec.IntValue packagerExtensionEnergyUsage;
-	public static ForgeConfigSpec.BooleanValue packagerExtensionDrawMEEnergy;
+	public static ModConfigSpec.IntValue packagerExtensionEnergyCapacity;
+	public static ModConfigSpec.IntValue packagerExtensionEnergyReq;
+	public static ModConfigSpec.IntValue packagerExtensionEnergyUsage;
+	public static ModConfigSpec.BooleanValue packagerExtensionDrawMEEnergy;
 
-	public static ForgeConfigSpec.IntValue unpackagerEnergyCapacity;
-	public static ForgeConfigSpec.IntValue unpackagerEnergyUsage;
-	public static ForgeConfigSpec.BooleanValue unpackagerDrawMEEnergy;
+	public static ModConfigSpec.IntValue unpackagerEnergyCapacity;
+	public static ModConfigSpec.IntValue unpackagerEnergyUsage;
+	public static ModConfigSpec.BooleanValue unpackagerDrawMEEnergy;
 
-	public static ForgeConfigSpec.IntValue crafterEnergyCapacity;
-	public static ForgeConfigSpec.IntValue crafterEnergyReq;
-	public static ForgeConfigSpec.IntValue crafterEnergyUsage;
-	public static ForgeConfigSpec.BooleanValue crafterDrawMEEnergy;
+	public static ModConfigSpec.IntValue crafterEnergyCapacity;
+	public static ModConfigSpec.IntValue crafterEnergyReq;
+	public static ModConfigSpec.IntValue crafterEnergyUsage;
+	public static ModConfigSpec.BooleanValue crafterDrawMEEnergy;
 
-	public static ForgeConfigSpec.IntValue fluidPackageFillerEnergyCapacity;
-	public static ForgeConfigSpec.IntValue fluidPackageFillerEnergyReq;
-	public static ForgeConfigSpec.IntValue fluidPackageFillerEnergyUsage;
+	public static ModConfigSpec.IntValue fluidPackageFillerEnergyCapacity;
+	public static ModConfigSpec.IntValue fluidPackageFillerEnergyReq;
+	public static ModConfigSpec.IntValue fluidPackageFillerEnergyUsage;
 
 	public static void registerConfig() {
 		buildConfig();
@@ -47,7 +47,7 @@ public class PackagedAutoConfig {
 	}
 
 	private static void buildConfig() {
-		ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+		ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
 		builder.push("encoder");
 		builder.comment("How many pattern slots should the Package Recipe Encoder have.", "Warning: Changing this value when world is running may cause client crashes.");

@@ -2,9 +2,9 @@ package thelm.packagedauto.inventory;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.fluids.FluidUtil;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.block.entity.FluidPackageFillerBlockEntity;
 
 public class FluidPackageFillerItemHandler extends BaseItemHandler<FluidPackageFillerBlockEntity> {
@@ -17,7 +17,7 @@ public class FluidPackageFillerItemHandler extends BaseItemHandler<FluidPackageF
 	public boolean isItemValid(int index, ItemStack stack) {
 		return switch(index) {
 		case 1 -> false;
-		case 2 -> stack.getCapability(ForgeCapabilities.ENERGY).isPresent();
+		case 2 -> stack.getCapability(Capabilities.EnergyStorage.ITEM) != null;
 		default -> (blockEntity.isWorking ? !getStackInSlot(index).isEmpty() : true) && FluidUtil.getFluidHandler(stack).isPresent();
 		};
 	}

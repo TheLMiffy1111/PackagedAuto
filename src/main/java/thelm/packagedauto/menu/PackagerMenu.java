@@ -2,8 +2,8 @@ package thelm.packagedauto.menu;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
-import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.common.extensions.IMenuTypeExtension;
+import net.neoforged.neoforge.items.SlotItemHandler;
 import thelm.packagedauto.block.entity.PackagerBlockEntity;
 import thelm.packagedauto.menu.factory.PositionalBlockEntityMenuFactory;
 import thelm.packagedauto.slot.RemoveOnlySlot;
@@ -11,7 +11,7 @@ import thelm.packagedauto.slot.SingleStackSlot;
 
 public class PackagerMenu extends BaseMenu<PackagerBlockEntity> {
 
-	public static final MenuType<PackagerMenu> TYPE_INSTANCE = IForgeMenuType.create(new PositionalBlockEntityMenuFactory<>(PackagerMenu::new));
+	public static final MenuType<PackagerMenu> TYPE_INSTANCE = IMenuTypeExtension.create(new PositionalBlockEntityMenuFactory<>(PackagerMenu::new));
 
 	public PackagerMenu(int windowId, Inventory inventory, PackagerBlockEntity blockEntity) {
 		super(TYPE_INSTANCE, windowId, inventory, blockEntity);

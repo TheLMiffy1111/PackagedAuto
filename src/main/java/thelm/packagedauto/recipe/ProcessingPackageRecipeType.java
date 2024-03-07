@@ -14,7 +14,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.api.IRecipeSlotViewWrapper;

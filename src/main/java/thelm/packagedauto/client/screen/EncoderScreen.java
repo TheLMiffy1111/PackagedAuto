@@ -12,13 +12,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.menu.EncoderMenu;
-import thelm.packagedauto.network.PacketHandler;
-import thelm.packagedauto.network.packet.CycleRecipeTypePacket;
-import thelm.packagedauto.network.packet.LoadRecipeListPacket;
-import thelm.packagedauto.network.packet.SaveRecipeListPacket;
-import thelm.packagedauto.network.packet.SetPatternIndexPacket;
+import thelm.packagedauto.packet.CycleRecipeTypePacket;
+import thelm.packagedauto.packet.LoadRecipeListPacket;
+import thelm.packagedauto.packet.SaveRecipeListPacket;
+import thelm.packagedauto.packet.SetPatternIndexPacket;
 
 public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
@@ -114,7 +114,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
 		@Override
 		public void onPress() {
-			PacketHandler.INSTANCE.sendToServer(new SetPatternIndexPacket(id));
+			PacketDistributor.SERVER.with(null).send(new SetPatternIndexPacket(id));
 			menu.blockEntity.setPatternIndex(id);
 			menu.setupSlots();
 		}
@@ -152,7 +152,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		@Override
 		public void onPress() {
 			boolean reverse = hasShiftDown();
-			PacketHandler.INSTANCE.sendToServer(new CycleRecipeTypePacket(reverse));
+			PacketDistributor.SERVER.with(null).send(new CycleRecipeTypePacket(reverse));
 			menu.patternItemHandler.cycleRecipeType(reverse);
 			menu.setupSlots();
 		}
@@ -167,9 +167,9 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
 			setTooltip(hasShiftDown() ? TOOLTIP : null);
-			super.render(graphics, mouseX, mouseY, partialTick);
+			super.renderWidget(graphics, mouseX, mouseY, partialTick);
 		}
 
 		@Override
@@ -180,7 +180,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		@Override
 		public void onPress() {
 			boolean single = hasShiftDown();
-			PacketHandler.INSTANCE.sendToServer(new SaveRecipeListPacket(single));
+			PacketDistributor.SERVER.with(null).send(new SaveRecipeListPacket(single));
 		}
 	}
 
@@ -197,7 +197,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
 		@Override
 		public void onPress() {
-			PacketHandler.INSTANCE.sendToServer(new LoadRecipeListPacket());
+			PacketDistributor.SERVER.with(null).send(new LoadRecipeListPacket());
 			menu.blockEntity.loadRecipeList();
 			menu.setupSlots();
 		}

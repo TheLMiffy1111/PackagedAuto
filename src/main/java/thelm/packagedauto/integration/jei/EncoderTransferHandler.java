@@ -14,10 +14,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.network.PacketDistributor;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.menu.EncoderMenu;
-import thelm.packagedauto.network.PacketHandler;
-import thelm.packagedauto.network.packet.SetRecipePacket;
+import thelm.packagedauto.packet.SetRecipePacket;
 
 public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderMenu, Object> {
 
@@ -61,7 +61,7 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderMen
 		if(!doTransfer) {
 			return null;
 		}
-		PacketHandler.INSTANCE.sendToServer(new SetRecipePacket(map));
+		PacketDistributor.SERVER.with(null).send(new SetRecipePacket(map));
 		return null;
 	}
 }

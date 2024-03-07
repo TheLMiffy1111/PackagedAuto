@@ -9,10 +9,10 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.neoforged.neoforge.network.PacketDistributor;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity.PackageTracker;
 import thelm.packagedauto.menu.UnpackagerMenu;
-import thelm.packagedauto.network.PacketHandler;
-import thelm.packagedauto.network.packet.ChangeBlockingPacket;
+import thelm.packagedauto.packet.ChangeBlockingPacket;
 
 public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 
@@ -72,13 +72,8 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		}
 
 		@Override
-		public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-			setTooltip(menu.blockEntity.blocking ? TRUE_TOOLTIP : FALSE_TOOLTIP);
-			super.render(graphics, mouseX, mouseY, partialTick);
-		}
-
-		@Override
 		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+			setTooltip(menu.blockEntity.blocking ? TRUE_TOOLTIP : FALSE_TOOLTIP);
 			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, BACKGROUND);
@@ -92,7 +87,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 
 		@Override
 		public void onPress() {
-			PacketHandler.INSTANCE.sendToServer(new ChangeBlockingPacket());
+			PacketDistributor.SERVER.with(null).send(new ChangeBlockingPacket());
 		}
 	}
 }

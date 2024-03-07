@@ -1,1 +1,1 @@
-Add utility recipe equals and hashCode methods  
+Update to 1.20.4  

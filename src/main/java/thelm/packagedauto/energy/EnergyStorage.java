@@ -2,9 +2,9 @@ package thelm.packagedauto.energy;
 
 import net.minecraft.nbt.CompoundTag;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
-import thelm.packagedauto.network.packet.SyncEnergyPacket;
+import thelm.packagedauto.packet.SyncEnergyPacket;
 
-public class EnergyStorage extends net.minecraftforge.energy.EnergyStorage {
+public class EnergyStorage extends net.neoforged.neoforge.energy.EnergyStorage {
 
 	public final BaseBlockEntity blockEntity;
 	public int prevEnergy;

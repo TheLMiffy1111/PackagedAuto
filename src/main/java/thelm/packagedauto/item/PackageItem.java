@@ -52,7 +52,7 @@ public class PackageItem extends Item implements IPackageItem {
 						ItemStack input = inputs.get(i).copy();
 						if(!player.getInventory().add(input)) {
 							ItemEntity item = new ItemEntity(level, player.getX(), player.getY(), player.getZ(), input);
-							item.setThrower(player.getUUID());
+							item.setThrower(player);
 							level.addFreshEntity(item);
 						}
 					}

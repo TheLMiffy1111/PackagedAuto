@@ -10,8 +10,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.items.ItemStackHandler;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 
 public class BaseItemHandler<T extends BaseBlockEntity> extends ItemStackHandler implements ContainerData {

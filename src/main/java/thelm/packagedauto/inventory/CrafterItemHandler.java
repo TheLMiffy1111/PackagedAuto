@@ -2,8 +2,8 @@ package thelm.packagedauto.inventory;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.block.entity.CrafterBlockEntity;
 
 public class CrafterItemHandler extends BaseItemHandler<CrafterBlockEntity> {
@@ -15,7 +15,7 @@ public class CrafterItemHandler extends BaseItemHandler<CrafterBlockEntity> {
 	@Override
 	public boolean isItemValid(int index, ItemStack stack) {
 		if(index == 10) {
-			return stack.getCapability(ForgeCapabilities.ENERGY).isPresent();
+			return stack.getCapability(Capabilities.EnergyStorage.ITEM) != null;
 		}
 		return false;
 	}

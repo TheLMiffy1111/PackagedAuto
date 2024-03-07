@@ -1,7 +1,6 @@
 package thelm.packagedauto.block;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -15,8 +14,8 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.network.NetworkHooks;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandler;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 
 public abstract class BaseBlock extends Block implements EntityBlock {
@@ -40,7 +39,7 @@ public abstract class BaseBlock extends Block implements EntityBlock {
 		if(!level.isClientSide) {
 			BlockEntity blockEntity = level.getBlockEntity(pos);
 			if(blockEntity instanceof MenuProvider menuProvider) {
-				NetworkHooks.openScreen((ServerPlayer)player, menuProvider, pos);
+				player.openMenu(menuProvider, buf->buf.writeBlockPos(pos));
 			}
 		}
 		return InteractionResult.SUCCESS;

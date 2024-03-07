@@ -1,9 +1,9 @@
 package thelm.packagedauto.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.TickEvent;
 
 public class RenderTimer {
 
@@ -14,7 +14,7 @@ public class RenderTimer {
 
 	private RenderTimer() {
 		mc = Minecraft.getInstance();
-		MinecraftForge.EVENT_BUS.register(this);
+		NeoForge.EVENT_BUS.register(this);
 	}
 
 	public int getTicks() {

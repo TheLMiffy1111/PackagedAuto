@@ -5,6 +5,7 @@ import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
@@ -12,8 +13,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.items.IItemHandler;
 
 public interface IMiscHelper {
 
@@ -65,7 +66,7 @@ public interface IMiscHelper {
 
 	ItemStack insertItem(IItemHandler itemHandler, ItemStack stack, boolean requireEmptySlot, boolean simulate);
 
-	ItemStack fillVolume(BlockEntity blockEntity, Direction direction, ItemStack stack, boolean simulate);
+	ItemStack fillVolume(Level level, BlockPos pos, Direction direction, ItemStack stack, boolean simulate);
 
 	Runnable conditionalRunnable(BooleanSupplier conditionSupplier, Supplier<Runnable> trueRunnable, Supplier<Runnable> falseRunnable);
 

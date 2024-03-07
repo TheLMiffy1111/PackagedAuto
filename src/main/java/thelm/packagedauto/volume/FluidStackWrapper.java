@@ -4,10 +4,10 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 
@@ -48,7 +48,7 @@ public record FluidStackWrapper(FluidStack stack) implements IVolumeStackWrapper
 	@Override
 	public CompoundTag saveAEKey(CompoundTag tag) {
 		tag.putString("#c", "ae2:f");
-		tag.putString("id", ForgeRegistries.FLUIDS.getKey(stack.getFluid()).toString());
+		tag.putString("id", BuiltInRegistries.FLUID.getKey(stack.getFluid()).toString());
 		if(stack.hasTag()) {
 			tag.put("tag", stack.getTag().copy());
 		}

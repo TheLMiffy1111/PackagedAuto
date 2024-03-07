@@ -3,8 +3,8 @@ package thelm.packagedauto.inventory;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeListItem;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
@@ -31,7 +31,7 @@ public class UnpackagerItemHandler extends BaseItemHandler<UnpackagerBlockEntity
 	public boolean isItemValid(int slot, ItemStack stack) {
 		return switch(slot) {
 		case 9 -> stack.getItem() instanceof IPackageRecipeListItem;
-		case 10 -> stack.getCapability(ForgeCapabilities.ENERGY).isPresent();
+		case 10 -> stack.getCapability(Capabilities.EnergyStorage.ITEM) != null;
 		default -> stack.getItem() instanceof IPackageItem;
 		};
 	}

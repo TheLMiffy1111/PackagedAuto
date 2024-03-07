@@ -18,11 +18,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.crafting.StrictNBTIngredient;
-import net.minecraftforge.common.util.RecipeMatcher;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.fml.ModList;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.crafting.NBTIngredient;
+import net.neoforged.neoforge.common.util.RecipeMatcher;
+import net.neoforged.neoforge.energy.IEnergyStorage;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
@@ -109,7 +110,7 @@ public class PackagerBlockEntity extends BaseBlockEntity {
 	}
 
 	protected static Ingredient getIngredient(ItemStack stack) {
-		return stack.hasTag() ? new StrictNBTIngredient(stack) {} : Ingredient.of(stack);
+		return stack.hasTag() ? NBTIngredient.of(true, stack) : Ingredient.of(stack);
 	}
 
 	public boolean isInputValid() {
@@ -276,9 +277,10 @@ public class PackagerBlockEntity extends BaseBlockEntity {
 
 	protected void chargeEnergy() {
 		ItemStack energyStack = itemHandler.getStackInSlot(11);
-		if(energyStack.getCapability(ForgeCapabilities.ENERGY).isPresent()) {
+		IEnergyStorage itemEnergyStorage = energyStack.getCapability(Capabilities.EnergyStorage.ITEM);
+		if(itemEnergyStorage != null) {
 			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(energyStack.getCapability(ForgeCapabilities.ENERGY).resolve().get().extractEnergy(energyRequest, false), false);
+			energyStorage.receiveEnergy(itemEnergyStorage.extractEnergy(energyRequest, false), false);
 			if(energyStack.getCount() <= 0) {
 				itemHandler.setStackInSlot(11, ItemStack.EMPTY);
 			}

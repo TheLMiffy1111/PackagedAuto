@@ -17,10 +17,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.BaseItemHandler;
 
@@ -39,11 +37,19 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 		return itemHandler;
 	}
 
+	public IItemHandler getItemHandler(Direction direction) {
+		return itemHandler.getWrapperForDirection(direction);
+	}
+
 	public void setItemHandler(BaseItemHandler<?> itemHandler) {
 		this.itemHandler = itemHandler;
 	}
 
 	public EnergyStorage getEnergyStorage() {
+		return energyStorage;
+	}
+
+	public EnergyStorage getEnergyStorage(Direction direction) {
 		return energyStorage;
 	}
 
@@ -146,17 +152,6 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 			BlockState state = level.getBlockState(worldPosition);
 			level.sendBlockUpdated(worldPosition, state, state, 2 + (rerender ? 4 : 0));
 		}
-	}
-
-	@Override
-	public <T> LazyOptional<T> getCapability(Capability<T> capability, Direction direction) {
-		if(capability == ForgeCapabilities.ITEM_HANDLER) {
-			return LazyOptional.of(()->(T)itemHandler.getWrapperForDirection(direction));
-		}
-		else if(capability == ForgeCapabilities.ENERGY && energyStorage.getMaxEnergyStored() > 0) {
-			return LazyOptional.of(()->(T)energyStorage);
-		}
-		return super.getCapability(capability, direction);
 	}
 
 	public static <T extends BlockEntity> void tick(Level level, BlockPos pos, BlockState state, T blockEntity) {

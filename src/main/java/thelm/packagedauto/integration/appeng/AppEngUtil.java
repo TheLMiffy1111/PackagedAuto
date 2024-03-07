@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.google.common.base.Functions;
 
 import appeng.api.crafting.IPatternDetails.IInput;
+import appeng.api.networking.IInWorldGridNodeHost;
 import appeng.api.parts.IPartHost;
 import appeng.api.stacks.GenericStack;
 import appeng.helpers.patternprovider.PatternProviderLogicHost;
@@ -22,6 +23,13 @@ public class AppEngUtil {
 	private static final Comparator<GenericStack> COMPARE_BY_STACKSIZE = (s1, s2)->Long.compare(s1.amount(), s2.amount());
 
 	private AppEngUtil() {}
+
+	public static IInWorldGridNodeHost getAsInWorldGridNodeHost(BlockEntity blockEntity, Direction direction) {
+		if(blockEntity instanceof IInWorldGridNodeHost inWorldGridNodeHost) {
+			return inWorldGridNodeHost;
+		}
+		return null;
+	}
 
 	public static GenericStack[] condenseStacks(GenericStack[] stacks) {
 		GenericStack[] merged = Arrays.stream(stacks).filter(Objects::nonNull).
