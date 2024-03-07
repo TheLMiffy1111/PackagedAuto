@@ -111,7 +111,7 @@ public class PackagerBlockEntity extends BaseBlockEntity {
 	}
 
 	protected static Ingredient getIngredient(ItemStack stack) {
-		return stack.hasTag() ? new NBTIngredient(stack) {} : Ingredient.of(stack);
+		return stack.hasTag() ? NBTIngredient.of(stack) : Ingredient.of(stack);
 	}
 
 	public boolean isInputValid() {

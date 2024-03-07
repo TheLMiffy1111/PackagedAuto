@@ -7,6 +7,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import thelm.packagedauto.api.IPackageItem;
+import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeListItem;
 import thelm.packagedauto.block.entity.PackagerBlockEntity;
 import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
@@ -85,7 +86,10 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 			listItem.getRecipeList(blockEntity.getLevel(), listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(blockEntity.patternList::add));
 		}
 		else if(listStack.getItem() instanceof IPackageItem packageItem) {
-			blockEntity.patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+			IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
+			if(recipe != null) {
+				blockEntity.patternList.add(recipe.getPatterns().get(packageItem.getIndex(listStack)));
+			}
 		}
 		blockEntity.disjoint = switch(blockEntity.mode) {
 		case EXACT -> false;

@@ -196,7 +196,10 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 						listItem.getRecipeList(level, listStack).getRecipeList().forEach(recipe->recipe.getPatterns().forEach(patternList::add));
 					}
 					else if(listStack.getItem() instanceof IPackageItem packageItem) {
-						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+						IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
+						if(recipe != null) {
+							patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+						}
 					}
 					disjoint = switch(mode) {
 					case EXACT -> false;
