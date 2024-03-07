@@ -10,6 +10,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.energy.CapabilityEnergy;
 import thelm.packagedauto.api.IPackageItem;
+import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeListItem;
 import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.tile.TilePackager;
@@ -122,7 +123,10 @@ public class InventoryPackager extends InventoryTileBase {
 		}
 		else if(listStack.getItem() instanceof IPackageItem) {
 			IPackageItem packageItem = (IPackageItem)listStack.getItem();
-			tile.patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+			IRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
+			if(recipe != null) {
+				tile.patternList.add(recipe.getPatterns().get(packageItem.getIndex(listStack)));
+			}
 		}
 		switch(tile.mode) {
 		case EXACT:

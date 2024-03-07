@@ -229,7 +229,10 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 					}
 					else if(listStack.getItem() instanceof IPackageItem) {
 						IPackageItem packageItem = (IPackageItem)listStack.getItem();
-						patternList.add(packageItem.getRecipeInfo(listStack).getPatterns().get(packageItem.getIndex(listStack)));
+						IRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
+						if(recipe != null) {
+							patternList.add(recipe.getPatterns().get(packageItem.getIndex(listStack)));
+						}
 					}
 					switch(mode) {
 					case EXACT:
