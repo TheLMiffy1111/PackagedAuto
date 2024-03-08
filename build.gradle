@@ -36,6 +36,16 @@ repositories {
 	exclusiveContent {
 		forRepository {
 			maven {
+				url = "https://maven.terraformersmc.com/releases/"
+			}
+		}
+		filter {
+			includeGroup "dev.emi"
+		}
+	}
+	exclusiveContent {
+		forRepository {
+			maven {
 				url = "https://cursemaven.com/"
 			}
 		}

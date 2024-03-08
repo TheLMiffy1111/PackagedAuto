@@ -39,7 +39,7 @@ public record SetItemStackPacket(short containerSlot, ItemStack stack) implement
 						Slot slot = container.getSlot(containerSlot);
 						if(slot instanceof FalseCopySlot fSlot) {
 							ItemStackHandler handler = (ItemStackHandler)fSlot.getItemHandler();
-							handler.setStackInSlot(slot.getSlotIndex(), stack);
+							handler.setStackInSlot(slot.getSlotIndex(), stack.isEmpty() ? ItemStack.EMPTY : stack);
 						}
 					}
 				}
