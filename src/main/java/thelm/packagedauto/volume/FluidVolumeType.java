@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.material.FlowingFluid;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
@@ -54,6 +55,9 @@ public class FluidVolumeType implements IVolumeType {
 	@Override
 	public Optional<IVolumeStackWrapper> wrapStack(Object volumeStack) {
 		if(volumeStack instanceof FluidStack fluidStack) {
+			if(fluidStack.getFluid() instanceof FlowingFluid fFluid && fFluid == fFluid.getFlowing()) {
+				fluidStack = new FluidStack(fFluid.getSource(), fluidStack.getAmount(), fluidStack.getTag());
+			}
 			return Optional.of(new FluidStackWrapper(fluidStack));
 		}
 		return Optional.empty();
