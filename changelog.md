@@ -1,2 +1,1 @@
-Fix possible NPE when using package as packager pattern  
-Don't anonymous inner class the nbt ingredient  
+Force new fluid volume packages to use source fluids  
