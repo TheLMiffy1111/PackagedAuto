@@ -10,7 +10,5 @@ public class PreviewVolumeSlot extends FalseCopyVolumeSlot {
 	}
 
 	@Override
-	public void set(ItemStack stack) {
-
-	}
+	public void set(ItemStack stack) {}
 }

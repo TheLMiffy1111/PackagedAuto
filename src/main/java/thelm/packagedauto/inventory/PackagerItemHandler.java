@@ -87,8 +87,9 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 		}
 		else if(listStack.getItem() instanceof IPackageItem packageItem) {
 			IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
-			if(recipe != null) {
-				blockEntity.patternList.add(recipe.getPatterns().get(packageItem.getIndex(listStack)));
+			int index = packageItem.getIndex(listStack);
+			if(recipe != null && recipe.validPatternIndex(index)) {
+				blockEntity.patternList.add(recipe.getPatterns().get(index));
 			}
 		}
 		blockEntity.disjoint = switch(blockEntity.mode) {

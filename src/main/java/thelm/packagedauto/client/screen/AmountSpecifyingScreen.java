@@ -140,9 +140,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
-		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
-
-		}
+		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {}
 
 		@Override
 		public void onPress() {
@@ -157,9 +155,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
-		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
-
-		}
+		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {}
 
 		@Override
 		public void onPress() {
@@ -177,9 +173,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
-		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {
-
-		}
+		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {}
 
 		@Override
 		public void onPress() {

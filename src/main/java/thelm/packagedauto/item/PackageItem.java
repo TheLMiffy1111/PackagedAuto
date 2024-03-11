@@ -41,20 +41,18 @@ public class PackageItem extends Item implements IPackageItem {
 		if(!level.isClientSide && player.isShiftKeyDown()) {
 			ItemStack stack = player.getItemInHand(hand).copy();
 			ItemStack stack1 = stack.split(1);
-			IPackageRecipeInfo recipeInfo = getRecipeInfo(stack1);
-			if(recipeInfo != null) {
-				List<IPackagePattern> patterns = recipeInfo.getPatterns();
-				int index = getIndex(stack1);
-				if(index >= 0 && index < patterns.size()) {
-					IPackagePattern pattern = patterns.get(index);
-					List<ItemStack> inputs = pattern.getInputs();
-					for(int i = 0; i < inputs.size(); ++i) {
-						ItemStack input = inputs.get(i).copy();
-						if(!player.getInventory().add(input)) {
-							ItemEntity item = new ItemEntity(level, player.getX(), player.getY(), player.getZ(), input);
-							item.setThrower(player.getUUID());
-							level.addFreshEntity(item);
-						}
+			IPackageRecipeInfo recipe = getRecipeInfo(stack1);
+			int index = getIndex(stack1);
+			if(recipe != null && recipe.validPatternIndex(index)) {
+				List<IPackagePattern> patterns = recipe.getPatterns();
+				IPackagePattern pattern = patterns.get(index);
+				List<ItemStack> inputs = pattern.getInputs();
+				for(int i = 0; i < inputs.size(); ++i) {
+					ItemStack input = inputs.get(i).copy();
+					if(!player.getInventory().add(input)) {
+						ItemEntity item = new ItemEntity(level, player.getX(), player.getY(), player.getZ(), input);
+						item.setThrower(player.getUUID());
+						level.addFreshEntity(item);
 					}
 				}
 			}
@@ -66,7 +64,8 @@ public class PackageItem extends Item implements IPackageItem {
 	@Override
 	public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag isAdvanced) {
 		IPackageRecipeInfo recipe = getRecipeInfo(stack);
-		if(recipe != null) {
+		int index = getIndex(stack);
+		if(recipe != null && recipe.validPatternIndex(index)) {
 			tooltip.add(recipe.getRecipeType().getDisplayName().append(": "));
 			for(ItemStack is : recipe.getOutputs()) {
 				if(is.getItem() instanceof IVolumePackageItem vp) {
@@ -78,7 +77,6 @@ public class PackageItem extends Item implements IPackageItem {
 					tooltip.add(Component.literal(is.getCount()+" ").append(is.getDisplayName()));
 				}
 			}
-			int index = getIndex(stack);
 			tooltip.add(Component.translatable("item.packagedauto.package.index", index));
 			tooltip.add(Component.translatable("item.packagedauto.package.items"));
 			List<ItemStack> recipeInputs = recipe.getInputs();
