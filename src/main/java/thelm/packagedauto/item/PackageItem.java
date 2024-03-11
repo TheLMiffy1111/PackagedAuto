@@ -16,7 +16,6 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import thelm.packagedauto.api.IPackageItem;
-import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.util.MiscHelper;
 
@@ -42,20 +41,16 @@ public class PackageItem extends Item implements IPackageItem {
 		if(!worldIn.isClientSide && playerIn.isShiftKeyDown()) {
 			ItemStack stack = playerIn.getItemInHand(handIn).copy();
 			ItemStack stack1 = stack.split(1);
-			IPackageRecipeInfo recipeInfo = getRecipeInfo(stack1);
-			if(recipeInfo != null) {
-				List<IPackagePattern> patterns = recipeInfo.getPatterns();
-				int index = getIndex(stack1);
-				if(index >= 0 && index < patterns.size()) {
-					IPackagePattern pattern = patterns.get(index);
-					List<ItemStack> inputs = pattern.getInputs();
-					for(int i = 0; i < inputs.size(); ++i) {
-						ItemStack input = inputs.get(i).copy();
-						if(!playerIn.inventory.add(input)) {
-							ItemEntity item = new ItemEntity(worldIn, playerIn.getX(), playerIn.getY(), playerIn.getZ(), input);
-							item.setThrower(playerIn.getUUID());
-							worldIn.addFreshEntity(item);
-						}
+			IPackageRecipeInfo recipe = getRecipeInfo(stack1);
+			int index = getIndex(stack1);
+			if(recipe != null && recipe.validPatternIndex(index)) {
+				List<ItemStack> inputs = recipe.getPatterns().get(index).getInputs();
+				for(int i = 0; i < inputs.size(); ++i) {
+					ItemStack input = inputs.get(i).copy();
+					if(!playerIn.inventory.add(input)) {
+						ItemEntity item = new ItemEntity(worldIn, playerIn.getX(), playerIn.getY(), playerIn.getZ(), input);
+						item.setThrower(playerIn.getUUID());
+						worldIn.addFreshEntity(item);
 					}
 				}
 			}
@@ -67,12 +62,12 @@ public class PackageItem extends Item implements IPackageItem {
 	@Override
 	public void appendHoverText(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		IPackageRecipeInfo recipe = getRecipeInfo(stack);
-		if(recipe != null) {
+		int index = getIndex(stack);
+		if(recipe != null && recipe.validPatternIndex(index)) {
 			tooltip.add(recipe.getRecipeType().getDisplayName().append(": "));
 			for(ItemStack is : recipe.getOutputs()) {
 				tooltip.add(new StringTextComponent(is.getCount()+" ").append(is.getDisplayName()));
 			}
-			int index = getIndex(stack);
 			tooltip.add(new TranslationTextComponent("item.packagedauto.package.index", index));
 			tooltip.add(new TranslationTextComponent("item.packagedauto.package.items"));
 			List<ItemStack> recipeInputs = recipe.getInputs();

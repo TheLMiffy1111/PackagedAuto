@@ -251,9 +251,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 		return false;
 	}
 
-	public void postPatternChange() {
-
-	}
+	public void postPatternChange() {}
 
 	public int getScaledEnergy(int scale) {
 		if(energyStorage.getMaxEnergyStored() <= 0) {
@@ -325,17 +323,17 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 				return false;
 			}
 			IPackageRecipeInfo recipe = packageItem.getRecipeInfo(stack);
-			if(recipe != null) {
+			int index = packageItem.getIndex(stack);
+			if(recipe != null && recipe.validPatternIndex(index)) {
 				if(this.recipe == null) {
 					this.recipe = recipe;
 					amount = recipe.getPatterns().size();
 					received.size(amount);
-					received.set(packageItem.getIndex(stack), true);
+					received.set(index, true);
 					setChanged();
 					return true;
 				}
 				else if(this.recipe.equals(recipe)) {
-					int index = packageItem.getIndex(stack);
 					if(!received.getBoolean(index)) {
 						received.set(index, true);
 						setChanged();

@@ -306,9 +306,7 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 		return 0;
 	}
 
-	public void postPatternChange() {
-
-	}
+	public void postPatternChange() {}
 
 	@Override
 	public void load(BlockState blockState, CompoundNBT nbt) {

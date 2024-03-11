@@ -11,9 +11,7 @@ public class LoadRecipeListPacket {
 
 	public LoadRecipeListPacket() {}
 
-	public static void encode(LoadRecipeListPacket pkt, PacketBuffer buf) {
-
-	}
+	public static void encode(LoadRecipeListPacket pkt, PacketBuffer buf) {}
 
 	public static LoadRecipeListPacket decode(PacketBuffer buf) {
 		return new LoadRecipeListPacket();

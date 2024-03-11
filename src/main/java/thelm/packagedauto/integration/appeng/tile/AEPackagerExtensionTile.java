@@ -30,6 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
+import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.integration.appeng.networking.BaseGridBlock;
 import thelm.packagedauto.integration.appeng.recipe.PackageCraftingPatternDetails;
 import thelm.packagedauto.tile.PackagerExtensionTile;
@@ -119,12 +120,16 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 			ItemStack outputStack = patternDetails.getOutputs().get(0).createItemStack();
 			if(outputStack.getItem() instanceof IPackageItem && (slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize())) {
 				IPackageItem packageItem = (IPackageItem)outputStack.getItem();
-				currentPattern = packageItem.getRecipeInfo(outputStack).getPatterns().get(packageItem.getIndex(outputStack));
-				lockPattern = true;
-				for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
-					itemHandler.setStackInSlot(i, table.getItem(i).copy());
+				IPackageRecipeInfo recipe = packageItem.getRecipeInfo(outputStack);
+				int index = packageItem.getIndex(outputStack);
+				if(recipe != null && recipe.validPatternIndex(index)) {
+					currentPattern = recipe.getPatterns().get(index);
+					lockPattern = true;
+					for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
+						itemHandler.setStackInSlot(i, table.getItem(i).copy());
+					}
+					return true;
 				}
-				return true;
 			}
 		}
 		return false;

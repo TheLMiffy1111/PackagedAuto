@@ -200,8 +200,9 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 					else if(listStack.getItem() instanceof IPackageItem) {
 						IPackageItem packageItem = (IPackageItem)listStack.getItem();
 						IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
-						if(recipe != null) {
-							patternList.add(recipe.getPatterns().get(packageItem.getIndex(listStack)));
+						int index = packageItem.getIndex(listStack);
+						if(recipe != null && recipe.validPatternIndex(index)) {
+							patternList.add(recipe.getPatterns().get(index));
 						}
 					}
 					switch(mode) {
@@ -342,9 +343,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 		return 0;
 	}
 
-	protected void postPatternChange() {
-
-	}
+	protected void postPatternChange() {}
 
 	@Override
 	public void load(BlockState blockState, CompoundNBT nbt) {

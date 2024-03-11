@@ -58,14 +58,14 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 			for(int j = 0; j < 9; ++j) {
 				Vector3i color = recipeType.getSlotColor(i*9+j);
 				RenderSystem.color4f(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
-				blit(matrixStack, leftPos+8+j*18, topPos+56+i*18, 258, 0, 16, 16, 512, 512);
+				blit(matrixStack, leftPos+8+j*18, topPos+57+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
 				Vector3i color = recipeType.getSlotColor(81+i*3+j);
 				RenderSystem.color4f(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
-				blit(matrixStack, leftPos+198+j*18, topPos+110+i*18, 258, 0, 16, 16, 512, 512);
+				blit(matrixStack, leftPos+198+j*18, topPos+111+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		RenderSystem.color4f(1F, 1F, 1F, 1F);

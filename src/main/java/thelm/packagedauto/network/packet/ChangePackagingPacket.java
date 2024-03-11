@@ -12,9 +12,7 @@ public class ChangePackagingPacket {
 
 	public ChangePackagingPacket() {}
 
-	public static void encode(ChangePackagingPacket pkt, PacketBuffer buf) {
-
-	}
+	public static void encode(ChangePackagingPacket pkt, PacketBuffer buf) {}
 
 	public static ChangePackagingPacket decode(PacketBuffer buf) {
 		return new ChangePackagingPacket();
