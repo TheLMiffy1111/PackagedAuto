@@ -40,5 +40,12 @@
 	"gui.packagedauto.item_amount_specifying": "物品數量",
 	"gui.packagedauto.volume_amount_specifying": "體積量以mB為單位",
 
-	"misc.packagedauto.set": "設置"
+	"misc.packagedauto.set": "設置",
+
+	"jei.category.packagedauto.package_recipe": "封包配方",
+	"jei.category.packagedauto.packaging": "封包",
+	"jei.category.packagedauto.package_processing": "封包處理",
+	"jei.category.packagedauto.package_contents": "封包內容",
+	"jei.category.packagedauto.fluid_package_filling": "液體封包填充",
+	"jei.category.packagedauto.fluid_package_contents": "液體封包內容"
 }

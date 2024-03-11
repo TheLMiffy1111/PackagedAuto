@@ -71,9 +71,7 @@ public class PackagerScreen extends BaseScreen<PackagerMenu> {
 		}
 
 		@Override
-		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-
-		}
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
 		public void onPress() {

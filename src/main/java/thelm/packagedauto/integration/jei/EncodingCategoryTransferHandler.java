@@ -1,7 +1,6 @@
 package thelm.packagedauto.integration.jei;
 
 
-import java.util.List;
 import java.util.Optional;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -10,20 +9,21 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
+import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
+import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
 import thelm.packagedauto.menu.EncoderMenu;
 import thelm.packagedauto.packet.SetRecipePacket;
 
-public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderMenu, Object> {
+public class EncodingCategoryTransferHandler implements IRecipeTransferHandler<EncoderMenu, IPackageRecipeInfo> {
 
 	private final IRecipeTransferHandlerHelper transferHelper;
 
-	public EncoderTransferHandler(IRecipeTransferHandlerHelper transferHelper) {
+	public EncodingCategoryTransferHandler(IRecipeTransferHandlerHelper transferHelper) {
 		this.transferHelper = transferHelper;
 	}
 
@@ -38,21 +38,17 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderMen
 	}
 
 	@Override
-	public RecipeType<Object> getRecipeType() {
-		return null;
+	public RecipeType<IPackageRecipeInfo> getRecipeType() {
+		return PackageRecipeCategory.TYPE;
 	}
 
 	@Override
-	public IRecipeTransferError transferRecipe(EncoderMenu menu, Object recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer) {
-		List<ResourceLocation> categories = PackagedAutoJEIPlugin.getRecipeCategoriesForRecipe(recipe);
-		if(categories.isEmpty()) {
-			return transferHelper.createInternalError();
-		}
+	public IRecipeTransferError transferRecipe(EncoderMenu menu, IPackageRecipeInfo recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer) {
 		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
-		if(!categories.stream().anyMatch(recipeType.getJEICategories()::contains)) {
+		if(recipe.getRecipeType() != recipeType) {
 			return transferHelper.createInternalError();
 		}
-		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(new RecipeSlotsViewWrapper(recipe, recipeSlots));
+		Int2ObjectMap<ItemStack> map = recipe.getEncoderStacks();
 		if(map == null || map.isEmpty()) {
 			return transferHelper.createInternalError();
 		}

@@ -81,9 +81,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		}
 
 		@Override
-		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {
-
-		}
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
 		public void onPress() {

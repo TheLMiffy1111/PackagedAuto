@@ -64,9 +64,7 @@ public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContaine
 		}
 	}
 
-	protected void renderBgAdditional(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
-
-	}
+	protected void renderBgAdditional(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {}
 
 	@Override
 	protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {

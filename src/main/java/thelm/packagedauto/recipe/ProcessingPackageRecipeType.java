@@ -101,7 +101,7 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 					++inputIndex;
 				}
 				else if(displayed != null) {
-					ItemStack stack = VolumePackageItem.tryMakeVolumePackage(displayed);
+					ItemStack stack = MiscHelper.INSTANCE.tryMakeVolumePackage(displayed);
 					if(!stack.isEmpty()) {
 						map.put(inputIndex, stack);
 						++inputIndex;

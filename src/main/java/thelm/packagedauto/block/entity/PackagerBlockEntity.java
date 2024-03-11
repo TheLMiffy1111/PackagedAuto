@@ -306,9 +306,7 @@ public class PackagerBlockEntity extends BaseBlockEntity {
 		return 0;
 	}
 
-	public void postPatternChange() {
-
-	}
+	public void postPatternChange() {}
 
 	@Override
 	public void load(CompoundTag nbt) {

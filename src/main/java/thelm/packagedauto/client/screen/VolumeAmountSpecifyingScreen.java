@@ -6,9 +6,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.neoforged.neoforge.network.PacketDistributor;
 import thelm.packagedauto.api.IVolumeStackWrapper;
-import thelm.packagedauto.item.VolumePackageItem;
 import thelm.packagedauto.menu.VolumeAmountSpecifyingMenu;
 import thelm.packagedauto.packet.SetItemStackPacket;
+import thelm.packagedauto.util.MiscHelper;
 
 public class VolumeAmountSpecifyingScreen extends AmountSpecifyingScreen<VolumeAmountSpecifyingMenu> {
 
@@ -55,7 +55,7 @@ public class VolumeAmountSpecifyingScreen extends AmountSpecifyingScreen<VolumeA
 			int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
 			IVolumeStackWrapper newStack = stack.copy();
 			newStack.setAmount(amount);
-			PacketDistributor.SERVER.with(null).send(new SetItemStackPacket((short)containerSlot, VolumePackageItem.makeVolumePackage(newStack)));
+			PacketDistributor.SERVER.with(null).send(new SetItemStackPacket((short)containerSlot, MiscHelper.INSTANCE.makeVolumePackage(newStack)));
 			close();
 		}
 		catch(NumberFormatException e) {

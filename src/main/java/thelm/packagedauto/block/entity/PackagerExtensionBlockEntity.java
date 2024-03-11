@@ -196,8 +196,9 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 					}
 					else if(listStack.getItem() instanceof IPackageItem packageItem) {
 						IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
-						if(recipe != null) {
-							patternList.add(recipe.getPatterns().get(packageItem.getIndex(listStack)));
+						int index = packageItem.getIndex(listStack);
+						if(recipe != null && recipe.validPatternIndex(index)) {
+							patternList.add(recipe.getPatterns().get(index));
 						}
 					}
 					disjoint = switch(mode) {
@@ -332,9 +333,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 		return 0;
 	}
 
-	protected void postPatternChange() {
-
-	}
+	protected void postPatternChange() {}
 
 	@Override
 	public void load(CompoundTag nbt) {
