@@ -18,7 +18,6 @@ import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
 import thelm.packagedauto.api.IPackageItem;
-import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.client.IModelRegister;
@@ -47,20 +46,16 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister {
 		if(!worldIn.isRemote && playerIn.isSneaking()) {
 			ItemStack stack = playerIn.getHeldItem(handIn).copy();
 			ItemStack stack1 = stack.splitStack(1);
-			IRecipeInfo recipeInfo = getRecipeInfo(stack1);
-			if(recipeInfo != null) {
-				List<IPackagePattern> patterns = recipeInfo.getPatterns();
-				int index = getIndex(stack1);
-				if(index >= 0 && index < patterns.size()) {
-					IPackagePattern pattern = patterns.get(index);
-					List<ItemStack> inputs = pattern.getInputs();
-					for(int i = 0; i < inputs.size(); ++i) {
-						ItemStack input = inputs.get(i).copy();
-						if(!playerIn.inventory.addItemStackToInventory(input)) {
-							EntityItem item = new EntityItem(worldIn, playerIn.posX, playerIn.posY, playerIn.posZ, input);
-							item.setThrower(playerIn.getName());
-							worldIn.spawnEntity(item);
-						}
+			IRecipeInfo recipe = getRecipeInfo(stack1);
+			int index = getIndex(stack1);
+			if(recipe != null && recipe.validPatternIndex(index)) {
+				List<ItemStack> inputs = recipe.getPatterns().get(index).getInputs();
+				for(int i = 0; i < inputs.size(); ++i) {
+					ItemStack input = inputs.get(i).copy();
+					if(!playerIn.inventory.addItemStackToInventory(input)) {
+						EntityItem item = new EntityItem(worldIn, playerIn.posX, playerIn.posY, playerIn.posZ, input);
+						item.setThrower(playerIn.getName());
+						worldIn.spawnEntity(item);
 					}
 				}
 			}
@@ -72,12 +67,12 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister {
 	@Override
 	public void addInformation(ItemStack stack, World worldIn, List<String> tooltip, ITooltipFlag flagIn) {
 		IRecipeInfo recipe = getRecipeInfo(stack);
-		if(recipe != null) {
+		int index = getIndex(stack);
+		if(recipe != null && recipe.validPatternIndex(index)) {
 			tooltip.add(recipe.getRecipeType().getLocalizedName()+": ");
 			for(ItemStack is : recipe.getOutputs()) {
 				tooltip.add(is.getCount()+" "+is.getDisplayName());
 			}
-			int index = getIndex(stack);
 			tooltip.add(I18n.translateToLocalFormatted("item.packagedauto.package.index", index));
 			tooltip.add(I18n.translateToLocal("item.packagedauto.package.items"));
 			List<ItemStack> recipeInputs = recipe.getInputs();

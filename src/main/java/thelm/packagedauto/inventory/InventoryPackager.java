@@ -124,8 +124,9 @@ public class InventoryPackager extends InventoryTileBase {
 		else if(listStack.getItem() instanceof IPackageItem) {
 			IPackageItem packageItem = (IPackageItem)listStack.getItem();
 			IRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
-			if(recipe != null) {
-				tile.patternList.add(recipe.getPatterns().get(packageItem.getIndex(listStack)));
+			int index = packageItem.getIndex(listStack);
+			if(recipe != null && recipe.validPatternIndex(index)) {
+				tile.patternList.add(recipe.getPatterns().get(index));
 			}
 		}
 		switch(tile.mode) {

@@ -27,9 +27,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<Gu
 	}
 
 	@Override
-	public void onComplete() {
-
-	}
+	public void onComplete() {}
 
 	private static ItemStack wrapStack(Object ingredient) {
 		if(ingredient instanceof ItemStack) {

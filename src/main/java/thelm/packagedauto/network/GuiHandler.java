@@ -12,9 +12,7 @@ public class GuiHandler implements IGuiHandler {
 
 	public static final GuiHandler INSTANCE = new GuiHandler();
 
-	protected GuiHandler() {
-
-	}
+	protected GuiHandler() {}
 
 	@Override
 	public Object getClientGuiElement(int ID, EntityPlayer player, World world, int x, int y, int z) {

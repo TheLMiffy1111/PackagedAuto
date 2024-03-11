@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
+import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import thelm.packagedauto.api.IRecipeType;
@@ -13,7 +14,11 @@ import thelm.packagedauto.network.packet.PacketSetRecipe;
 
 public class EncoderTransferHandler implements IRecipeTransferHandler<ContainerEncoder> {
 
-	public static final EncoderTransferHandler INSTANCE = new EncoderTransferHandler();
+	private final IRecipeTransferHandlerHelper transferHelper;
+
+	public EncoderTransferHandler(IRecipeTransferHandlerHelper transferHelper) {
+		this.transferHelper = transferHelper;
+	}
 
 	@Override
 	public Class<ContainerEncoder> getContainerClass() {
@@ -25,11 +30,11 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<ContainerE
 		String category = recipeLayout.getRecipeCategory().getUid();
 		IRecipeType recipeType = container.patternInventory.recipeType;
 		if(!recipeType.getJEICategories().contains(category)) {
-			return PackagedAutoJEIPlugin.registry.getJeiHelpers().recipeTransferHandlerHelper().createInternalError();
+			return transferHelper.createInternalError();
 		}
 		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(recipeLayout, category);
 		if(map == null || map.isEmpty()) {
-			return PackagedAutoJEIPlugin.registry.getJeiHelpers().recipeTransferHandlerHelper().createInternalError();
+			return transferHelper.createInternalError();
 		}
 		if(!doTransfer) {
 			return null;

@@ -62,14 +62,14 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 			for(int j = 0; j < 9; ++j) {
 				Color color = recipeType.getSlotColor(i*9+j);
 				GlStateManager.color(color.getRed()/255F, color.getGreen()/255F, color.getBlue()/255F, color.getAlpha()/255F);
-				drawModalRectWithCustomSizedTexture(guiLeft+8+j*18, guiTop+56+i*18, 258, 0, 16, 16, 512, 512);
+				drawModalRectWithCustomSizedTexture(guiLeft+8+j*18, guiTop+57+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
 				Color color = recipeType.getSlotColor(81+i*3+j);
-				GlStateManager.color(color.getRed()/255F, color.getGreen()/255F, color.getBlue()/255F, color.getAlpha()/255F);
-				drawModalRectWithCustomSizedTexture(guiLeft+198+j*18, guiTop+110+i*18, 258, 0, 16, 16, 512, 512);
+				GlStateManager.color(color.getRed()/255F, color.getGreen()/255F, color.getBlue()/255F, 1);
+				drawModalRectWithCustomSizedTexture(guiLeft+198+j*18, guiTop+111+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		GlStateManager.color(1, 1, 1, 1);

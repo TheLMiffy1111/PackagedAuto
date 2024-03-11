@@ -34,3 +34,8 @@ recipe.packagedauto.crafting.short=合成
 gui.packagedauto.amount_specifying=物品数量
 
 misc.packagedauto.set=设置
+
+jei.category.packagedauto.package_recipe=封包配方
+jei.category.packagedauto.packaging=封包
+jei.category.packagedauto.package_processing=封包处理
+jei.category.packagedauto.package_contents=封包內容

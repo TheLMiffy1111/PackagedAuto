@@ -30,6 +30,10 @@ public interface IRecipeInfo {
 
 	Int2ObjectMap<ItemStack> getEncoderStacks();
 
+	default boolean validPatternIndex(int index) {
+		return index >= 0 && index < getPatterns().size();
+	}
+
 	@Override
 	boolean equals(Object obj);
 

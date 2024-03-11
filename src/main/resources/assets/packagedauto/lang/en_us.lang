@@ -34,3 +34,8 @@ recipe.packagedauto.crafting.short=Crafting
 gui.packagedauto.amount_specifying=Item amount
 
 misc.packagedauto.set=Set
+
+jei.category.packagedauto.package_recipe=Package Recipe
+jei.category.packagedauto.packaging=Packaging
+jei.category.packagedauto.package_processing=Package Processing
+jei.category.packagedauto.package_contents=Package Contents

@@ -6,7 +6,5 @@ import thelm.packagedauto.client.IModelRegister;
 public class ItemBase extends Item implements IModelRegister {
 
 	@Override
-	public void registerModels() {
-
-	}
+	public void registerModels() {}
 }
