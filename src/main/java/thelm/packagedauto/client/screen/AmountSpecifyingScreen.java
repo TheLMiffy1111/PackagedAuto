@@ -143,9 +143,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
-
-		}
+		public void updateNarration(NarrationElementOutput pNarrationElementOutput) {}
 	}
 
 	class ButtonCancel extends AbstractWidget {
@@ -160,9 +158,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
-
-		}
+		public void updateNarration(NarrationElementOutput pNarrationElementOutput) {}
 	}
 
 	class ButtonIncrement extends AbstractWidget {
@@ -180,8 +176,6 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput pNarrationElementOutput) {
-
-		}
+		public void updateNarration(NarrationElementOutput pNarrationElementOutput) {}
 	}
 }

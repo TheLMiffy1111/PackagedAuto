@@ -9,11 +9,11 @@ import net.minecraft.world.item.ItemStack;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.client.screen.BaseScreen;
 import thelm.packagedauto.client.screen.EncoderScreen;
-import thelm.packagedauto.item.VolumePackageItem;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.SetItemStackPacket;
 import thelm.packagedauto.slot.FalseCopySlot;
 import thelm.packagedauto.util.ApiImpl;
+import thelm.packagedauto.util.MiscHelper;
 
 public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<EncoderScreen> {
 
@@ -28,9 +28,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<En
 	}
 
 	@Override
-	public void onComplete() {
-
-	}
+	public void onComplete() {}
 
 	private static ItemStack wrapStack(Object ingredient) {
 		if(ingredient instanceof ItemStack stack) {
@@ -38,7 +36,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<En
 		}
 		IVolumeType type = ApiImpl.INSTANCE.getVolumeType(ingredient.getClass());
 		if(type != null) {
-			return VolumePackageItem.tryMakeVolumePackage(ingredient);
+			return MiscHelper.INSTANCE.tryMakeVolumePackage(ingredient);
 		}
 		return ItemStack.EMPTY;
 	}

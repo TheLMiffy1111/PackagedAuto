@@ -8,16 +8,22 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraftforge.fluids.FluidStack;
+import thelm.packagedauto.api.IFluidStackWrapper;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 
-public record FluidStackWrapper(FluidStack stack) implements IVolumeStackWrapper {
+public record FluidStackWrapper(FluidStack stack) implements IFluidStackWrapper {
 
 	public static final FluidStackWrapper EMPTY = new FluidStackWrapper(FluidStack.EMPTY);
 
 	@Override
 	public IVolumeType getVolumeType() {
 		return FluidVolumeType.INSTANCE;
+	}
+
+	@Override
+	public FluidStack getFluid() {
+		return stack;
 	}
 
 	@Override

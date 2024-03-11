@@ -11,9 +11,7 @@ public class ChangeBlockingPacket {
 
 	public ChangeBlockingPacket() {}
 
-	public static void encode(ChangeBlockingPacket pkt, FriendlyByteBuf buf) {
-
-	}
+	public static void encode(ChangeBlockingPacket pkt, FriendlyByteBuf buf) {}
 
 	public static ChangeBlockingPacket decode(FriendlyByteBuf buf) {
 		return new ChangeBlockingPacket();

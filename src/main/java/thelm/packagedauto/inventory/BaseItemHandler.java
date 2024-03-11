@@ -66,9 +66,7 @@ public class BaseItemHandler<T extends BaseBlockEntity> extends ItemStackHandler
 	}
 
 	@Override
-	public void set(int index, int value) {
-
-	}
+	public void set(int index, int value) {}
 
 	@Override
 	public int getCount() {

@@ -40,5 +40,12 @@
 	"gui.packagedauto.item_amount_specifying": "Item amount",
 	"gui.packagedauto.volume_amount_specifying": "Volume amount in mB",
 
-	"misc.packagedauto.set": "Set"
+	"misc.packagedauto.set": "Set",
+
+	"jei.category.packagedauto.package_recipe": "Package Recipe",
+	"jei.category.packagedauto.packaging": "Packaging",
+	"jei.category.packagedauto.package_processing": "Package Processing",
+	"jei.category.packagedauto.package_contents": "Package Contents",
+	"jei.category.packagedauto.fluid_package_filling": "Fluid Package Filling",
+	"jei.category.packagedauto.fluid_package_contents": "Fluid Package Contents"
 }

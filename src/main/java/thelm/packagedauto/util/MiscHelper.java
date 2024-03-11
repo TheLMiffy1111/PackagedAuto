@@ -48,6 +48,7 @@ import thelm.packagedauto.api.IVolumePackageItem;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.api.PackagedAutoApi;
+import thelm.packagedauto.item.VolumePackageItem;
 
 public class MiscHelper implements IMiscHelper {
 
@@ -253,6 +254,16 @@ public class MiscHelper implements IMiscHelper {
 			}
 		}
 		return true;
+	}
+
+	@Override
+	public ItemStack makeVolumePackage(IVolumeStackWrapper volumeStack) {
+		return VolumePackageItem.makeVolumePackage(volumeStack);
+	}
+
+	@Override
+	public ItemStack tryMakeVolumePackage(Object volumeStack) {
+		return VolumePackageItem.tryMakeVolumePackage(volumeStack);
 	}
 
 	@Override

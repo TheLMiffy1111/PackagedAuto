@@ -58,7 +58,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 			for(int j = 0; j < 9; ++j) {
 				Vec3i color = recipeType.getSlotColor(i*9+j);
 				RenderSystem.setShaderColor(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
-				blit(poseStack, leftPos+8+j*18, topPos+56+i*18, 258, 0, 16, 16, 512, 512);
+				blit(poseStack, leftPos+8+j*18, topPos+57+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
@@ -66,7 +66,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 				int slotIndex = 81+(i*3+j == 4 ? 0 : i*3+j < 4 ? i*3+j+1 : i*3+j);
 				Vec3i color = recipeType.getSlotColor(slotIndex);
 				RenderSystem.setShaderColor(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
-				blit(poseStack, leftPos+198+j*18, topPos+110+i*18, 258, 0, 16, 16, 512, 512);
+				blit(poseStack, leftPos+198+j*18, topPos+111+i*18, 258, 0, 16, 16, 512, 512);
 			}
 		}
 		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
@@ -131,9 +131,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
-
-		}
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {}
 	}
 
 	class ButtonRecipeType extends AbstractWidget {
@@ -174,9 +172,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
-
-		}
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {}
 	}
 
 	class ButtonSavePatterns extends AbstractWidget {
@@ -199,9 +195,7 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
-
-		}
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {}
 	}
 
 	class ButtonLoadPatterns extends AbstractWidget {
@@ -218,8 +212,6 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
-
-		}
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {}
 	}
 }
