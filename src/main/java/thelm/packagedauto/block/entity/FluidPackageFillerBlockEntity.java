@@ -22,8 +22,8 @@ import thelm.packagedauto.api.IVolumePackageItem;
 import thelm.packagedauto.block.FluidPackageFillerBlock;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.FluidPackageFillerItemHandler;
-import thelm.packagedauto.item.VolumePackageItem;
 import thelm.packagedauto.menu.FluidPackageFillerMenu;
+import thelm.packagedauto.util.MiscHelper;
 
 public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 
@@ -112,7 +112,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 			return false;
 		}
 		ItemStack slotStack = itemHandler.getStackInSlot(1);
-		ItemStack outputStack = VolumePackageItem.tryMakeVolumePackage(currentFluid);
+		ItemStack outputStack = MiscHelper.INSTANCE.tryMakeVolumePackage(currentFluid);
 		return slotStack.isEmpty() || ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
 	}
 
@@ -158,7 +158,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 			return;
 		}
 		if(itemHandler.getStackInSlot(1).isEmpty()) {
-			itemHandler.setStackInSlot(1, VolumePackageItem.tryMakeVolumePackage(currentFluid));
+			itemHandler.setStackInSlot(1, MiscHelper.INSTANCE.tryMakeVolumePackage(currentFluid));
 		}
 		else if(itemHandler.getStackInSlot(1).getItem() instanceof IVolumePackageItem) {
 			itemHandler.getStackInSlot(1).grow(1);

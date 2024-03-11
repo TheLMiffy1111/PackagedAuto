@@ -50,6 +50,10 @@ public interface IMiscHelper {
 
 	boolean isEmpty(IItemHandler itemHandler);
 
+	ItemStack makeVolumePackage(IVolumeStackWrapper volumeStack);
+
+	ItemStack tryMakeVolumePackage(Object volumeStack);
+
 	CompoundTag saveRecipe(CompoundTag nbt, IPackageRecipeInfo recipe);
 
 	IPackageRecipeInfo loadRecipe(CompoundTag nbt);

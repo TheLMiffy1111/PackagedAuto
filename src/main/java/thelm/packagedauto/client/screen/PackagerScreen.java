@@ -83,8 +83,6 @@ public class PackagerScreen extends BaseScreen<PackagerMenu> {
 		}
 
 		@Override
-		public void updateNarration(NarrationElementOutput narrationElementOutput) {
-
-		}
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {}
 	}
 }

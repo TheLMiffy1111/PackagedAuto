@@ -73,9 +73,7 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 
 	protected abstract Component getDefaultName();
 
-	public void tick() {
-
-	}
+	public void tick() {}
 
 	public int getComparatorSignal() {
 		return ItemHandlerHelper.calcRedstoneFromInventory(itemHandler.getWrapperForDirection(null));

@@ -11,9 +11,7 @@ public class LoadRecipeListPacket {
 
 	public LoadRecipeListPacket() {}
 
-	public static void encode(LoadRecipeListPacket pkt, FriendlyByteBuf buf) {
-
-	}
+	public static void encode(LoadRecipeListPacket pkt, FriendlyByteBuf buf) {}
 
 	public static LoadRecipeListPacket decode(FriendlyByteBuf buf) {
 		return new LoadRecipeListPacket();

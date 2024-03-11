@@ -29,9 +29,7 @@ public class UnknownStackWrapper implements IVolumeStackWrapper {
 	}
 
 	@Override
-	public void setAmount(int amount) {
-
-	}
+	public void setAmount(int amount) {}
 
 	@Override
 	public boolean isEmpty() {
