@@ -1,6 +1,7 @@
 package thelm.packagedauto.integration.jei;
 
 import java.util.List;
+import java.util.Optional;
 
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.RecipeType;
@@ -9,9 +10,9 @@ import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.fluids.FluidStack;
 import thelm.packagedauto.api.IVolumePackageItem;
+import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.integration.jei.category.FluidPackageContentsCategory;
 import thelm.packagedauto.integration.jei.category.FluidPackageFillingCategory;
-import thelm.packagedauto.volume.FluidStackWrapper;
 import thelm.packagedauto.volume.FluidVolumeType;
 
 public class FluidPackageManagerPlugin implements IRecipeManagerPlugin {
@@ -55,7 +56,10 @@ public class FluidPackageManagerPlugin implements IRecipeManagerPlugin {
 		}
 		if(ingredient instanceof FluidStack stack) {
 			if(FluidPackageContentsCategory.TYPE.equals(type) || FluidPackageFillingCategory.TYPE.equals(type)) {
-				return (List<T>)List.of(new FluidStackWrapper(stack));
+				Optional<IVolumeStackWrapper> vStack = FluidVolumeType.INSTANCE.wrapStack(stack);
+				if(vStack.isPresent()) {
+					return (List<T>)List.of(vStack.get());
+				}
 			}
 		}
 		return List.of();
