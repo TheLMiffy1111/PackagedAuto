@@ -55,7 +55,7 @@ public class FluidPackageContentsCategory implements IRecipeCategory<IFluidStack
 		IRecipeSlotBuilder slot;
 		slot = builder.addSlot(RecipeIngredientRole.INPUT, 1, 5);
 		slot.addItemStack(MiscHelper.INSTANCE.makeVolumePackage(recipe));
-		slot = builder.addSlot(RecipeIngredientRole.INPUT, 55, 5);
+		slot = builder.addSlot(RecipeIngredientRole.OUTPUT, 55, 5);
 		slot.setFluidRenderer((long)recipe.getAmount(), false, 16, 16);
 		slot.addIngredient(ForgeTypes.FLUID_STACK, recipe.getFluid());
 	}
