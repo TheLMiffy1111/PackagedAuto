@@ -11,10 +11,10 @@ import net.minecraft.world.item.ItemStack;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeListItem;
-import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
 import thelm.packagedauto.integration.jei.category.PackageContentsCategory;
-import thelm.packagedauto.integration.jei.category.PackagingCategory;
 import thelm.packagedauto.integration.jei.category.PackageProcessingCategory;
+import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
+import thelm.packagedauto.integration.jei.category.PackagingCategory;
 
 public class PackageManagerPlugin implements IRecipeManagerPlugin {
 
@@ -56,9 +56,8 @@ public class PackageManagerPlugin implements IRecipeManagerPlugin {
 				}
 			}
 			if(stack.getItem() instanceof IPackageRecipeListItem recipeListItem) {
-				List<IPackageRecipeInfo> recipeList = recipeListItem.getRecipeList(Minecraft.getInstance().level, stack).getRecipeList();
 				if(PackageRecipeCategory.TYPE.equals(type) || PackageProcessingCategory.TYPE.equals(type)) {
-					return (List<T>)recipeList;
+					return (List<T>)recipeListItem.getRecipeList(Minecraft.getInstance().level, stack).getRecipeList();
 				}
 			}
 		}
