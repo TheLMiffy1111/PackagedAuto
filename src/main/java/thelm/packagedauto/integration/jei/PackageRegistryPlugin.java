@@ -15,14 +15,14 @@ import net.minecraft.item.ItemStack;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeListItem;
-import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
-import thelm.packagedauto.integration.jei.category.PackageRecipeWrapper;
 import thelm.packagedauto.integration.jei.category.PackageContentsCategory;
 import thelm.packagedauto.integration.jei.category.PackageContentsWrapper;
-import thelm.packagedauto.integration.jei.category.PackagingCategory;
-import thelm.packagedauto.integration.jei.category.PackagingWrapper;
 import thelm.packagedauto.integration.jei.category.PackageProcessingCategory;
 import thelm.packagedauto.integration.jei.category.PackageProcessingWrapper;
+import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
+import thelm.packagedauto.integration.jei.category.PackageRecipeWrapper;
+import thelm.packagedauto.integration.jei.category.PackagingCategory;
+import thelm.packagedauto.integration.jei.category.PackagingWrapper;
 import thelm.packagedauto.recipe.RecipeTypeProcessing;
 
 public class PackageRegistryPlugin implements IRecipeRegistryPlugin {

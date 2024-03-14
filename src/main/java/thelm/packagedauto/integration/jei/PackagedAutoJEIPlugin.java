@@ -12,6 +12,7 @@ import mezz.jei.api.JEIPlugin;
 import mezz.jei.api.recipe.IRecipeCategory;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
+import mezz.jei.api.recipe.transfer.IRecipeTransferRegistry;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import thelm.packagedauto.block.BlockEncoder;
@@ -19,10 +20,10 @@ import thelm.packagedauto.block.BlockPackager;
 import thelm.packagedauto.block.BlockPackagerExtension;
 import thelm.packagedauto.block.BlockUnpackager;
 import thelm.packagedauto.client.gui.GuiEncoder;
-import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
 import thelm.packagedauto.integration.jei.category.PackageContentsCategory;
-import thelm.packagedauto.integration.jei.category.PackagingCategory;
 import thelm.packagedauto.integration.jei.category.PackageProcessingCategory;
+import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
+import thelm.packagedauto.integration.jei.category.PackagingCategory;
 
 @JEIPlugin
 public class PackagedAutoJEIPlugin implements IModPlugin {
@@ -44,8 +45,10 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 
 	@Override
 	public void register(IModRegistry registry) {
+		IRecipeTransferRegistry recipeTransferRegistry = registry.getRecipeTransferRegistry();
 		IRecipeTransferHandlerHelper transferHelper = registry.getJeiHelpers().recipeTransferHandlerHelper();
-		registry.getRecipeTransferRegistry().addUniversalRecipeTransferHandler(new EncoderTransferHandler(transferHelper));
+		recipeTransferRegistry.addRecipeTransferHandler(new PackageRecipeTransferHandler(transferHelper), PackageRecipeCategory.UID);
+		recipeTransferRegistry.addUniversalRecipeTransferHandler(new EncoderTransferHandler(transferHelper));
 		registry.addRecipeCatalyst(new ItemStack(BlockEncoder.INSTANCE), PackageRecipeCategory.UID);
 		registry.addRecipeCatalyst(new ItemStack(BlockPackager.INSTANCE), PackagingCategory.UID);
 		registry.addRecipeCatalyst(new ItemStack(BlockPackagerExtension.INSTANCE), PackagingCategory.UID);
