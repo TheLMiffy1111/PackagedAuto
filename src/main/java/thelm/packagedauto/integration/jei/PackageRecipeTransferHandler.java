@@ -14,11 +14,11 @@ import thelm.packagedauto.menu.EncoderMenu;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.SetRecipePacket;
 
-public class EncodingCategoryTransferHandler implements IRecipeTransferHandler<EncoderMenu, IPackageRecipeInfo> {
+public class PackageRecipeTransferHandler implements IRecipeTransferHandler<EncoderMenu, IPackageRecipeInfo> {
 
 	private final IRecipeTransferHandlerHelper transferHelper;
 
-	public EncodingCategoryTransferHandler(IRecipeTransferHandlerHelper transferHelper) {
+	public PackageRecipeTransferHandler(IRecipeTransferHandlerHelper transferHelper) {
 		this.transferHelper = transferHelper;
 	}
 
