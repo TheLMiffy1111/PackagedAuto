@@ -54,7 +54,7 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 	@Override
 	public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
 		IRecipeTransferHandlerHelper transferHelper = registration.getTransferHelper();
-		registration.addRecipeTransferHandler(new EncodingCategoryTransferHandler(transferHelper), PackageRecipeCategory.UID);
+		registration.addRecipeTransferHandler(new PackageRecipeTransferHandler(transferHelper), PackageRecipeCategory.UID);
 		registration.addUniversalRecipeTransferHandler(new EncoderTransferHandler(transferHelper));
 	}
 
