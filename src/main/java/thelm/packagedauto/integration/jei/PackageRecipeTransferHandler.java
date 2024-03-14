@@ -45,10 +45,16 @@ public class PackageRecipeTransferHandler implements IRecipeTransferHandler<Enco
 	@Override
 	public IRecipeTransferError transferRecipe(EncoderMenu menu, IPackageRecipeInfo recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer) {
 		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
-		if(recipe.getRecipeType() != recipeType) {
+		Int2ObjectMap<ItemStack> map;
+		if(recipe.getRecipeType() == recipeType) {
+			map = recipe.getEncoderStacks();
+		}
+		else if(recipeType.getJEICategories().contains(PackageRecipeCategory.TYPE.getUid())) {
+			map = recipeType.getRecipeTransferMap(new RecipeSlotsViewWrapper(recipe, recipeSlots));
+		}
+		else {
 			return transferHelper.createInternalError();
 		}
-		Int2ObjectMap<ItemStack> map = recipe.getEncoderStacks();
 		if(map == null || map.isEmpty()) {
 			return transferHelper.createInternalError();
 		}
