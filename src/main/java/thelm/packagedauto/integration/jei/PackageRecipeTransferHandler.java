@@ -10,6 +10,7 @@ import net.minecraft.item.ItemStack;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.container.EncoderContainer;
+import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.SetRecipePacket;
 
@@ -30,10 +31,16 @@ public class PackageRecipeTransferHandler implements IRecipeTransferHandler<Enco
 	public IRecipeTransferError transferRecipe(EncoderContainer container, Object recipe, IRecipeLayout recipeLayout, PlayerEntity player, boolean maxTransfer, boolean doTransfer) {
 		IPackageRecipeInfo recipeInfo = (IPackageRecipeInfo)recipe;
 		IPackageRecipeType recipeType = container.patternItemHandler.recipeType;
-		if(recipeInfo.getRecipeType() != recipeType) {
+		Int2ObjectMap<ItemStack> map;
+		if(recipeInfo.getRecipeType() == recipeType) {
+			map = recipeInfo.getEncoderStacks();
+		}
+		else if(recipeType.getJEICategories().contains(PackageRecipeCategory.UID)) {
+			map = recipeType.getRecipeTransferMap(new RecipeLayoutWrapper(recipeLayout));
+		}
+		else {
 			return transferHelper.createInternalError();
 		}
-		Int2ObjectMap<ItemStack> map = recipeInfo.getEncoderStacks();
 		if(map == null || map.isEmpty()) {
 			return transferHelper.createInternalError();
 		}

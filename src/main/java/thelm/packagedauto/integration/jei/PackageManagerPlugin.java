@@ -14,10 +14,10 @@ import net.minecraft.util.ResourceLocation;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeListItem;
-import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
 import thelm.packagedauto.integration.jei.category.PackageContentsCategory;
-import thelm.packagedauto.integration.jei.category.PackagingCategory;
 import thelm.packagedauto.integration.jei.category.PackageProcessingCategory;
+import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
+import thelm.packagedauto.integration.jei.category.PackagingCategory;
 
 public class PackageManagerPlugin implements IRecipeManagerPlugin {
 

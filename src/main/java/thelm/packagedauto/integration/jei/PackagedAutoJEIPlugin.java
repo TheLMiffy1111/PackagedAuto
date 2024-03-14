@@ -22,10 +22,10 @@ import thelm.packagedauto.block.PackagerBlock;
 import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.client.screen.EncoderScreen;
-import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
 import thelm.packagedauto.integration.jei.category.PackageContentsCategory;
-import thelm.packagedauto.integration.jei.category.PackagingCategory;
 import thelm.packagedauto.integration.jei.category.PackageProcessingCategory;
+import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
+import thelm.packagedauto.integration.jei.category.PackagingCategory;
 
 @JeiPlugin
 public class PackagedAutoJEIPlugin implements IModPlugin {
