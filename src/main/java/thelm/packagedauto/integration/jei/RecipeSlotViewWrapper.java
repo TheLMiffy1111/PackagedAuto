@@ -7,13 +7,7 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import thelm.packagedauto.api.IRecipeSlotViewWrapper;
 
-public class RecipeSlotViewWrapper implements IRecipeSlotViewWrapper {
-
-	private final IRecipeSlotView recipeSlotView;
-
-	public RecipeSlotViewWrapper(IRecipeSlotView recipeSlotView) {
-		this.recipeSlotView = recipeSlotView;
-	}
+public record RecipeSlotViewWrapper(IRecipeSlotView recipeSlotView) implements IRecipeSlotViewWrapper {
 
 	@Override
 	public Optional<?> getDisplayedIngredient() {
