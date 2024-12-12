@@ -39,7 +39,7 @@
 	"item.packagedauto.package": "レシピパッケージ",
 	"item.packagedauto.package.index": "索引 : %d",
 	"item.packagedauto.package.items": "アイテム:",
-	"item.packagedauto.volume_package": "ボリュームパッケージ",
+	"item.packagedauto.volume_package": "体積パッケージ",
 	"item.packagedauto.package_component": "パッケージコンポーネント",
 	"item.packagedauto.me_package_component": "MEパッケージコンポーネント",
 
@@ -47,8 +47,8 @@
 	"recipe.packagedauto.processing.short": "処理",
 	"recipe.packagedauto.ordered_processing": "順序処理",
 	"recipe.packagedauto.ordered_processing.short": "順序",
-	"recipe.packagedauto.positioned_processing": "位置指定処理",
-	"recipe.packagedauto.positioned_processing.short": "位置指定",
+	"recipe.packagedauto.positioned_processing": "ポジション処理",
+	"recipe.packagedauto.positioned_processing.short": "ポジション指定",
 	"recipe.packagedauto.crafting": "クラフト",
 	"recipe.packagedauto.crafting.short": "クラフト",
 
