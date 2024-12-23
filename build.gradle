@@ -1,5 +1,5 @@
 plugins {
-	id "com.crystaelix.loom" version "jitpack-3a42c174"
+	id "com.crystaelix.loom" version "jitpack-ca3766c3"
 	id "eclipse"
 	id "idea"
 	id "maven-publish"
@@ -67,7 +67,7 @@ def specVersion = "2"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "2.0.9.43"
+version = "2.0.9.44"
 
 archivesBaseName = "${modName}-${mcVersion}"
 
