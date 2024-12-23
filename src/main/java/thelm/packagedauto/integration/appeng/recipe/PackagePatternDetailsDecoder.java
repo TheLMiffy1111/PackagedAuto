@@ -48,7 +48,6 @@ public class PackagePatternDetailsDecoder implements IPatternDetailsDecoder {
 					return new DirectCraftingPatternDetails(recipe, level.registryAccess());
 				}
 			}
-			default -> {}
 			}
 		}
 		return null;
