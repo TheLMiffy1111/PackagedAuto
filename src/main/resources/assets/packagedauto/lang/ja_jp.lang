@@ -1,6 +1,6 @@
 itemGroup.packagedauto=PackagedAuto
 
-tile.packagedauto.encoder.name梱包レシピエンコーダー
+tile.packagedauto.encoder.name=梱包レシピエンコーダー
 tile.packagedauto.encoder.save=保存
 tile.packagedauto.encoder.save_single=一つ保存
 tile.packagedauto.encoder.load=読込

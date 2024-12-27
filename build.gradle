@@ -105,7 +105,7 @@ dependencies {
 	legacyForge "net.minecraftforge:forge:1.12.2-14.23.5.2860"
 
 	// Dependencies
-	modImplementation "mezz.jei:jei_1.12.2:4.16.1.1012"
+	modImplementation "mezz.jei:jei_1.12.2:4.16.1.1013"
 	modImplementation "curse.maven:applied-energistics-2-223794:2747063"
 	modImplementation "vazkii.patchouli:Patchouli:1.0-23.6"
 	modImplementation "curse.maven:mouse-tweaks-unofficial-461660:3962479"
@@ -117,7 +117,7 @@ dependencies {
 	modImplementation "curse.maven:mekanism-268560:2835175"
 
 	// Performance
-	implementation("zone.rong:mixinbooter:9.4") {transitive = false}
+	implementation("zone.rong:mixinbooter:10.2") {transitive = false}
 	modImplementation "curse.maven:reid-629017:5502915"
 	modImplementation "curse.maven:vintagefix-871198:5536276"
 	modImplementation "curse.maven:lolasm-460609:5257348"
