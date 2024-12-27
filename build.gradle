@@ -112,7 +112,7 @@ dependencies {
 	forge "net.minecraftforge:forge:1.16.5-36.2.42"
 
 	// Dependencies
-	modImplementation "mezz.jei:jei-1.16.5:7.8.0.1012"
+	modImplementation "mezz.jei:jei-1.16.5:7.8.0.1013"
 	modImplementation "appeng:appliedenergistics2:8.4.7"
 	modImplementation "vazkii.patchouli:Patchouli:1.16.4-53.3"
 	modImplementation "curse.maven:mouse-tweaks-60089:3603191"
