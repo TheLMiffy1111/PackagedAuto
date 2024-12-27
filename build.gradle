@@ -105,7 +105,7 @@ dependencies {
 	forge "net.minecraftforge:forge:1.18.2-40.2.21"
 
 	// Dependencies
-	modImplementation("mezz.jei:jei-1.18.2-forge:10.2.1.1008") {transitive = false}
+	modImplementation("mezz.jei:jei-1.18.2-forge:10.2.1.1009") {transitive = false}
 	modImplementation "appeng:appliedenergistics2-forge:11.7.6"
 	modImplementation "vazkii.patchouli:Patchouli:1.18.2-71.1"
 	modImplementation "curse.maven:mouse-tweaks-60089:3578801"
