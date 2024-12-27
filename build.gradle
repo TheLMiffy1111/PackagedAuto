@@ -112,26 +112,26 @@ dependencies {
 		officialMojangMappings()
 		parchment "org.parchmentmc.data:parchment-1.21:2024.07.28@zip"
 	}
-	neoForge "net.neoforged:neoforge:21.1.72"
+	neoForge "net.neoforged:neoforge:21.1.90"
 
 	// Dependencies
-	implementation("mezz.jei:jei-1.21.1-neoforge:19.21.0.246") {transitive = false}
-	implementation "dev.emi:emi-neoforge:1.1.16+1.21.1"
-	implementation "appeng:appliedenergistics2:19.0.23-beta"
+	implementation("mezz.jei:jei-1.21.1-neoforge:19.21.0.247") {transitive = false}
+	implementation "dev.emi:emi-neoforge:1.1.18+1.21.1"
+	implementation "appeng:appliedenergistics2:19.0.27"
 	implementation "curse.maven:ae2-jei-integration-1074338:5748513"
 	implementation "vazkii.patchouli:Patchouli:1.21-87-NEOFORGE"
 	implementation "curse.maven:mouse-tweaks-60089:5437296"
 
 	// Testing
-	implementation "curse.maven:cucumber-272335:5774468"
-	implementation "curse.maven:extended-crafting-268387:5711764"
-	implementation "mekanism:Mekanism:1.21.1-10.7.7.64"
-	implementation "curse.maven:applied-mekanistics-574300:5664061"
+	implementation "curse.maven:cucumber-272335:5920855"
+	implementation "curse.maven:extended-crafting-268387:5858321"
+	implementation "mekanism:Mekanism:1.21.1-10.7.8.70"
+	implementation "curse.maven:applied-mekanistics-574300:5978711"
 
 	//Performance
 	implementation "curse.maven:yeetusexperimentus-635427:5444189"
-	implementation "curse.maven:modernfix-790626:5659985"
-	implementation "curse.maven:ferritecore-429235:5434178"
+	implementation "curse.maven:modernfix-790626:5972257"
+	implementation "curse.maven:ferritecore-429235:5850121"
 }
 
 def replacements = [
