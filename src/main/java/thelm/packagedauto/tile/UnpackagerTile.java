@@ -2,6 +2,7 @@ package thelm.packagedauto.tile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,14 +31,17 @@ import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.IPackageRecipeList;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.container.UnpackagerContainer;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.integration.appeng.tile.AEUnpackagerTile;
 import thelm.packagedauto.inventory.UnpackagerItemHandler;
+import thelm.packagedauto.item.RecipeHolderItem;
 import thelm.packagedauto.util.MiscHelper;
 
-public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
+public class UnpackagerTile extends BaseTile implements ITickableTileEntity, ISettingsCloneable {
 
 	public static final TileEntityType<UnpackagerTile> TYPE_INSTANCE = (TileEntityType<UnpackagerTile>)TileEntityType.Builder.
 			of(MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("appliedenergistics2"),
@@ -46,6 +50,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 
 	public static int energyCapacity = 5000;
 	public static int energyUsage = 50;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean firstTick = true;
@@ -54,6 +59,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 	public boolean powered = false;
 	public boolean blocking = false;
 	public int trackerCount = 6;
+	public int roundRobinIndex = 0;
 
 	public UnpackagerTile() {
 		super(TYPE_INSTANCE);
@@ -70,6 +76,11 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 	}
 
 	@Override
+	public String getConfigTypeName() {
+		return "block.packagedauto.unpackager";
+	}
+
+	@Override
 	public void tick() {
 		if(firstTick) {
 			firstTick = false;
@@ -80,7 +91,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 		}
 		if(!level.isClientSide) {
 			chargeEnergy();
-			if(level.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % refreshInterval == 0) {
 				fillTrackers();
 				emptyTrackers();
 			}
@@ -137,7 +148,9 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 	}
 
 	protected void emptyTrackers() {
-		for(Direction direction : Direction.values()) {
+		List<Direction> directions = Lists.newArrayList(Direction.values());
+		Collections.rotate(directions, roundRobinIndex);
+		for(Direction direction : directions) {
 			TileEntity tile = level.getBlockEntity(worldPosition.relative(direction));
 			if(tile instanceof IPackageCraftingMachine) {
 				IPackageCraftingMachine machine = (IPackageCraftingMachine)tile;
@@ -145,6 +158,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 					if(tracker.isFilled() && tracker.recipe != null && tracker.recipe.getRecipeType().hasMachine()) {
 						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), direction.getOpposite())) {
 							tracker.clearRecipe();
+							roundRobinIndex = (roundRobinIndex+1) % 6;
 							setChanged();
 							break;
 						}
@@ -154,7 +168,9 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			}
 		}
 		if(!powered) {
-			for(Direction direction : Direction.values()) {
+			directions = Lists.newArrayList(Direction.values());
+			Collections.rotate(directions, roundRobinIndex);
+			for(Direction direction : directions) {
 				TileEntity tile = level.getBlockEntity(worldPosition.relative(direction));
 				if(!validSendTarget(tile, direction.getOpposite())) {
 					continue;
@@ -182,6 +198,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 				trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
 				if(acceptsAll) {
 					trackerToEmpty.direction = direction;
+					roundRobinIndex = (roundRobinIndex+1) % 6;
 				}
 				setChanged();
 			}
@@ -223,6 +240,7 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 
 	protected boolean validSendTarget(TileEntity tile, Direction direction) {
 		return tile != null &&
+				!(tile instanceof IPackageCraftingMachine) &&
 				!(tile instanceof PackagerTile) &&
 				!(tile instanceof PackagerExtensionTile) &&
 				!(tile instanceof UnpackagerTile);
@@ -258,6 +276,38 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 			return 0;
 		}
 		return Math.min(scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored(), scale);
+	}
+
+	@Override
+	public boolean loadConfig(CompoundNBT nbt, PlayerEntity player) {
+		blocking = nbt.getBoolean("Blocking");
+		trackerCount = nbt.getByte("Trackers");
+		if(nbt.contains("Recipes") && itemHandler.getStackInSlot(9).isEmpty()) {
+			PlayerInventory playerInventory = player.inventory;
+			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
+				ItemStack stack = playerInventory.getItem(i);
+				if(!stack.isEmpty() && stack.getItem() == RecipeHolderItem.INSTANCE && !stack.hasTag()) {
+					ItemStack stackCopy = stack.split(1);
+					IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stackCopy);
+					List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.readRecipeList(nbt.getList("Recipes", 10));
+					recipeListObj.setRecipeList(recipeList);
+					RecipeHolderItem.INSTANCE.setRecipeList(stackCopy, recipeListObj);
+					itemHandler.setStackInSlot(9, stackCopy);
+					break;
+				}
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean saveConfig(CompoundNBT nbt, PlayerEntity player) {
+		nbt.putBoolean("Blocking", blocking);
+		nbt.putByte("Trackers", (byte)trackerCount);
+		if(!recipeList.isEmpty()) {
+			nbt.put("Recipes", MiscHelper.INSTANCE.writeRecipeList(new ListNBT(), recipeList));
+		}
+		return true;
 	}
 
 	@Override
@@ -310,16 +360,25 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity {
 		public List<ItemStack> toSend = new ArrayList<>();
 		public Direction direction;
 
-		public void setRecipe(IPackageRecipeInfo recipe) {
-			this.recipe = recipe;
-		}
-
 		public void clearRecipe() {
 			clearRejectedIndexes();
 			recipe = null;
 			amount = 0;
 			received.clear();
 			direction = null;
+			if(level != null && !level.isClientSide) {
+				setChanged();
+			}
+		}
+
+		public void fillRecipe(IPackageRecipeInfo recipe) {
+			this.recipe = recipe;
+			amount = recipe.getPatterns().size();
+			received.clear();
+			received.size(amount);
+			for(int i = 0; i < received.size(); ++i) {
+				received.set(i, true);
+			}
 			if(level != null && !level.isClientSide) {
 				setChanged();
 			}

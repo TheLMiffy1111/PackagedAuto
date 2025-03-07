@@ -333,6 +333,26 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
+	public ListNBT writeRecipeList(ListNBT tagList, List<IPackageRecipeInfo> recipes) {
+		for(IPackageRecipeInfo recipe : recipes) {
+			tagList.add(writeRecipe(new CompoundNBT(), recipe));
+		}
+		return tagList;
+	}
+
+	@Override
+	public List<IPackageRecipeInfo> readRecipeList(ListNBT tagList) {
+		List<IPackageRecipeInfo> recipes = new ArrayList<>(tagList.size());
+		for(int i = 0; i < tagList.size(); ++i) {
+			IPackageRecipeInfo recipe = readRecipe(tagList.getCompound(i));
+			if(recipe != null) {
+				recipes.add(recipe);
+			}
+		}
+		return recipes;
+	}
+
+	@Override
 	public boolean recipeEquals(IPackageRecipeInfo recipeA, Object recipeInternalA, IPackageRecipeInfo recipeB, Object recipeInternalB) {
 		if(!Objects.equals(recipeInternalA, recipeInternalB)) {
 			return false;
@@ -380,7 +400,7 @@ public class MiscHelper implements IMiscHelper {
 		List<ItemStack> condensedOffered = condenseStacks(offered, true);
 		f:for(ItemStack req : condensedRequired) {
 			for(ItemStack offer : condensedOffered) {
-				if(req.getCount() <= offer.getCount() && req.getItem() == offer.getItem() &&
+				if(req.getCount() <= offer.getCount() && req.sameItem(offer) &&
 						(!req.hasTag() || ItemStack.tagMatches(req, offer))) {
 					continue f;
 				}
@@ -394,8 +414,7 @@ public class MiscHelper implements IMiscHelper {
 			int count = req.getCount();
 			for(ItemStack offer : offered) {
 				if(!offer.isEmpty()) {
-					if(req.getItem() == offer.getItem() &&
-							(!req.hasTag() || ItemStack.tagMatches(req, offer))) {
+					if(req.sameItem(offer) && (!req.hasTag() || ItemStack.tagMatches(req, offer))) {
 						int toRemove = Math.min(count, offer.getCount());
 						offer.shrink(toRemove);
 						count -= toRemove;

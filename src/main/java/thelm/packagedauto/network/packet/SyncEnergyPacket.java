@@ -17,8 +17,8 @@ import thelm.packagedauto.tile.BaseTile;
 
 public class SyncEnergyPacket {
 
-	private BlockPos pos;
-	private int energy;
+	private final BlockPos pos;
+	private final int energy;
 
 	public SyncEnergyPacket(BlockPos pos, int energy) {
 		this.pos = pos;

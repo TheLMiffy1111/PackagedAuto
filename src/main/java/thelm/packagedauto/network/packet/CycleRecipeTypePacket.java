@@ -9,7 +9,7 @@ import thelm.packagedauto.container.EncoderContainer;
 
 public class CycleRecipeTypePacket {
 
-	private boolean reverse;
+	private final boolean reverse;
 
 	public CycleRecipeTypePacket(boolean reverse) {
 		this.reverse = reverse;

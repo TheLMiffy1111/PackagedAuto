@@ -15,7 +15,10 @@ import appeng.api.networking.crafting.ICraftingPatternDetails;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.networking.crafting.ICraftingProviderHelper;
 import appeng.api.networking.energy.IEnergyGrid;
+import appeng.api.networking.events.MENetworkChannelsChanged;
 import appeng.api.networking.events.MENetworkCraftingPatternChange;
+import appeng.api.networking.events.MENetworkEventSubscribe;
+import appeng.api.networking.events.MENetworkPowerStatusChange;
 import appeng.api.networking.security.IActionHost;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.util.AECableType;
@@ -56,7 +59,7 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 			}
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -106,7 +109,7 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 
 	@Override
 	public boolean pushPattern(ICraftingPatternDetails patternDetails, CraftingInventory table) {
-		if(!isBusy()) {
+		if(getActionableNode().isActive() && !isBusy()) {
 			IntList emptySlots = new IntArrayList();
 			for(int i = 0; i < 9; ++i) {
 				if(itemHandler.getStackInSlot(i).isEmpty()) {
@@ -132,16 +135,28 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 
 	@Override
 	public boolean isBusy() {
-		return Arrays.stream(trackers).noneMatch(PackageTracker::isEmpty);
+		return Arrays.stream(trackers).limit(trackerCount).noneMatch(PackageTracker::isEmpty);
 	}
 
 	@Override
 	public void provideCrafting(ICraftingProviderHelper craftingTracker) {
-		for(IPackageRecipeInfo pattern : recipeList) {
-			if(!pattern.getOutputs().isEmpty()) {
-				craftingTracker.addCraftingOption(this, new RecipeCraftingPatternDetails(pattern).toAEInternal(level));
+		if(getActionableNode().isActive()) {
+			for(IPackageRecipeInfo pattern : recipeList) {
+				if(!pattern.getOutputs().isEmpty()) {
+					craftingTracker.addCraftingOption(this, new RecipeCraftingPatternDetails(pattern).toAEInternal(level));
+				}
 			}
 		}
+	}
+
+	@MENetworkEventSubscribe
+	public void onChannelsChanged(MENetworkChannelsChanged event) {
+		postPatternChange();
+	}
+
+	@MENetworkEventSubscribe
+	public void onPowerStatusChange(MENetworkPowerStatusChange event) {
+		postPatternChange();
 	}
 
 	@Override
@@ -154,8 +169,7 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 
 	@Override
 	protected boolean validSendTarget(TileEntity tile, Direction direction) {
-		return super.validSendTarget(tile, direction) &&
-				!AppEngUtil.isInterface(tile, direction);
+		return super.validSendTarget(tile, direction) && !AppEngUtil.isInterface(tile, direction);
 	}
 
 	protected void chargeMEEnergy() {

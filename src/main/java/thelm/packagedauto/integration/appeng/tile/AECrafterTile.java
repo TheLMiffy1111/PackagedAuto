@@ -51,7 +51,7 @@ public class AECrafterTile extends CrafterTile implements IGridHost, IActionHost
 			}
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}

@@ -9,7 +9,7 @@ import thelm.packagedauto.container.UnpackagerContainer;
 
 public class TrackerCountPacket {
 
-	private boolean decrease;
+	private final boolean decrease;
 
 	public TrackerCountPacket(boolean decrease) {
 		this.decrease = decrease;

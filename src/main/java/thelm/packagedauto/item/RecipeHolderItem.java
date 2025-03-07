@@ -6,6 +6,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -28,14 +29,27 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 	}
 
 	@Override
-	public IPackageRecipeList getRecipeList(World world, ItemStack stack) {
-		return new PackageRecipeList(world, stack.getTag());
+	public IPackageRecipeList getRecipeList(ItemStack stack) {
+		return new PackageRecipeList(stack.getTag());
+	}
+
+	@Override
+	public void setRecipeList(ItemStack stack, IPackageRecipeList recipeList) {
+		stack.getOrCreateTag().remove("Recipes");
+		if(recipeList != null) {
+			recipeList.write(stack.getTag());
+		}
+		if(stack.getTag().isEmpty()) {
+			stack.setTag(null);
+		}
 	}
 
 	@Override
 	public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
 		if(!worldIn.isClientSide && playerIn.isShiftKeyDown()) {
-			return ActionResult.success(new ItemStack(INSTANCE, playerIn.getItemInHand(handIn).getCount()));
+			ItemStack stack = playerIn.getItemInHand(handIn).copy();
+			setRecipeList(stack, null);
+			return ActionResult.success(stack);
 		}
 		return super.use(worldIn, playerIn, handIn);
 	}
@@ -43,7 +57,7 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 	@Override
 	public void appendHoverText(ItemStack stack, World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
 		if(stack.hasTag()) {
-			List<IPackageRecipeInfo> recipeList = getRecipeList(worldIn, stack).getRecipeList();
+			List<IPackageRecipeInfo> recipeList = getRecipeList(stack).getRecipeList();
 			tooltip.add(new TranslationTextComponent("item.packagedauto.recipe_holder.recipes"));
 			for(IPackageRecipeInfo recipe : recipeList) {
 				IFormattableTextComponent component = recipe.getRecipeType().getDisplayName().append(": ");
@@ -58,5 +72,10 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 			}
 		}
 		super.appendHoverText(stack, worldIn, tooltip, flagIn);
+	}
+
+	public boolean isFilled(ItemStack stack) {
+		CompoundNBT nbt = stack.getTag();
+		return nbt != null && !nbt.getList("Recipes", 10).isEmpty();
 	}
 }

@@ -3,6 +3,7 @@ package thelm.packagedauto.client.screen;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
@@ -63,8 +64,7 @@ public class PackagerScreen extends BaseScreen<PackagerContainer> {
 		}
 
 		@Override
-		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
+		protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
 			minecraft.getTextureManager().bind(BACKGROUND);
 			blit(matrixStack, x+1, y+2, 176, 56+14*menu.tile.mode.ordinal(), 14, 14);

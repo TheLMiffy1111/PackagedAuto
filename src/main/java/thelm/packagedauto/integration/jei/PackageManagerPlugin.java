@@ -8,7 +8,6 @@ import com.google.common.collect.ImmutableList;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.Minecraft;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import thelm.packagedauto.api.IPackageItem;
@@ -60,7 +59,7 @@ public class PackageManagerPlugin implements IRecipeManagerPlugin {
 				}
 			}
 			if(stack.getItem() instanceof IPackageRecipeListItem) {
-				List<IPackageRecipeInfo> recipeList = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(Minecraft.getInstance().level, stack).getRecipeList();
+				List<IPackageRecipeInfo> recipeList = ((IPackageRecipeListItem)stack.getItem()).getRecipeList(stack).getRecipeList();
 				if(PackageRecipeCategory.UID.equals(uid) || PackageProcessingCategory.UID.equals(uid)) {
 					return (List<T>)recipeList;
 				}

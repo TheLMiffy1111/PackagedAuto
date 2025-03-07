@@ -9,18 +9,21 @@ import thelm.packagedauto.container.EncoderContainer;
 
 public class LoadRecipeListPacket {
 
-	private boolean single;
+	private final boolean single;
+	private final boolean clear;
 
-	public LoadRecipeListPacket(boolean single) {
+	public LoadRecipeListPacket(boolean single, boolean clear) {
 		this.single = single;
+		this.clear = clear;
 	}
 
 	public void encode(PacketBuffer buf) {
 		buf.writeBoolean(single);
+		buf.writeBoolean(clear);
 	}
 
 	public static LoadRecipeListPacket decode(PacketBuffer buf) {
-		return new LoadRecipeListPacket(buf.readBoolean());
+		return new LoadRecipeListPacket(buf.readBoolean(), buf.readBoolean());
 	}
 
 	public void handle(Supplier<NetworkEvent.Context> ctx) {
@@ -28,7 +31,7 @@ public class LoadRecipeListPacket {
 		ctx.get().enqueueWork(()->{
 			if(player.containerMenu instanceof EncoderContainer) {
 				EncoderContainer container = (EncoderContainer)player.containerMenu;
-				container.tile.loadRecipeList(single);
+				container.tile.loadRecipeList(single, clear);
 			}
 		});
 		ctx.get().setPacketHandled(true);

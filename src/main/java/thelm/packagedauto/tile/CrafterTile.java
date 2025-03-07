@@ -39,6 +39,7 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean isWorking = false;
@@ -67,7 +68,7 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 				}
 			}
 			chargeEnergy();
-			if(level.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % refreshInterval == 0) {
 				ejectItems();
 			}
 		}
@@ -79,7 +80,7 @@ public class CrafterTile extends BaseTile implements ITickableTileEntity, IPacka
 			ICraftingPackageRecipeInfo recipe = (ICraftingPackageRecipeInfo)recipeInfo;
 			ItemStack slotStack = itemHandler.getStackInSlot(9);
 			ItemStack outputStack = recipe.getOutput();
-			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+outputStack.getCount() <= outputStack.getMaxStackSize()) {
+			if(slotStack.isEmpty() || slotStack.sameItem(outputStack) && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+outputStack.getCount() <= outputStack.getMaxStackSize()) {
 				currentRecipe = recipe;
 				isWorking = true;
 				remainingProgress = energyReq;

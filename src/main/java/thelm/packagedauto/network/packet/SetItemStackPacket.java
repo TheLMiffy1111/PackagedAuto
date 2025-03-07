@@ -14,8 +14,8 @@ import thelm.packagedauto.util.MiscHelper;
 
 public class SetItemStackPacket {
 
-	private short containerSlot;
-	private ItemStack stack;
+	private final short containerSlot;
+	private final ItemStack stack;
 
 	public SetItemStackPacket(short containerSlot, ItemStack stack) {
 		this.containerSlot = containerSlot;

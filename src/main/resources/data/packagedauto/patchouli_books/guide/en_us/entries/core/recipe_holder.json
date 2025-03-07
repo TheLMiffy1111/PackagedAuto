@@ -1,0 +1,26 @@
+{
+	"name": "Package Recipe Holder",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:recipe_holder",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "$(item)Package Recipe Holders/$ hold recipe data for machines, encoded in the $(l:core/encoder)Package Recipe Encoder/$.$(p)You can $(thing)$(k:sneak) + $(k:use)/$ an encoded $(item)Package Recipe Holder/$ to clear it.$(p)You can combine an encoded $(item)Package Recipe Holder/$ with empty ones in a crafting grid to copy contents."
+		},
+		{
+			"type": "patchouli:spotlight",
+			"flag": "mod:jei",
+			"item": "packagedauto:recipe_holder",
+			"link_recipe": true,
+			"title": "JEI Integration",
+			"text": "You can press $(thing)$(k:jei.showUses)/$ on encoded $(item)Package Recipe Holders/$ to show detailed information on what recipes are encoded."
+		},
+		{
+			"type": "patchouli:crafting",
+			"recipe": "packagedauto:recipe_holder",
+			"title": "Crafting"
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 4
+}

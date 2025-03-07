@@ -1,0 +1,8 @@
+{
+	"parent": "block/cube_bottom_top",
+	"textures": {
+		"side": "packagedauto:blocks/crafting_proxy_side",
+		"top": "packagedauto:blocks/crafting_proxy_top",
+		"bottom": "packagedauto:blocks/machine_bottom"
+	}
+}

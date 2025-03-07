@@ -166,28 +166,38 @@ public class BaseContainer<T extends BaseTile> extends Container {
 
 	@Override
 	public ItemStack clicked(int slotId, int mouseButton, ClickType clickType, PlayerEntity player) {
-		if(slotId >= 0 && !player.inventory.getCarried().isEmpty()) {
+		if(slotId >= 0) {
 			Slot slot = slots.get(slotId);
 			if(slot instanceof FalseCopySlot) {
-				ItemStack toPut = player.inventory.getCarried().copy();
-				ItemStack stack = slot.getItem().copy();
-				switch(mouseButton) {
-				case 0: {
-					slot.set(toPut);
-					break;
+				if(clickType == ClickType.QUICK_MOVE) {
+					slot.set(ItemStack.EMPTY);
 				}
-				case 1: {
-					if(stack.isEmpty()) {
-						toPut.setCount(1);
+				else {
+					ItemStack toPut = player.inventory.getCarried().copy();
+					ItemStack stack = slot.getItem().copy();
+					switch(mouseButton) {
+					case 0: {
 						slot.set(toPut);
+						break;
 					}
-					else if(stack.getItem() == toPut.getItem() &&
-							ItemStack.tagMatches(stack, toPut) && stack.getCount() < stack.getMaxStackSize()) {
-						stack.grow(1);
-						slot.set(stack);
+					case 1: {
+						if(stack.isEmpty()) {
+							if(!toPut.isEmpty()) {
+								toPut.setCount(1);
+							}
+							slot.set(toPut);
+						}
+						else if(stack.sameItem(toPut) && ItemStack.tagMatches(stack, toPut) && stack.getCount() < stack.getMaxStackSize()) {
+							stack.grow(1);
+							slot.set(stack);
+						}
+						else {
+							stack.shrink(1);
+							slot.set(stack);
+						}
+						break;
 					}
-					break;
-				}
+					}
 				}
 				return player.inventory.getCarried();
 			}

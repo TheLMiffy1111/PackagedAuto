@@ -99,7 +99,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerTile> {
 		tile.patternList.clear();
 		ItemStack listStack = getStackInSlot(10);
 		if(listStack.getItem() instanceof IPackageRecipeListItem) {
-			((IPackageRecipeListItem)listStack.getItem()).getRecipeList(tile.getLevel(), listStack).getRecipeList().stream().
+			((IPackageRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList().stream().
 			filter(IPackageRecipeInfo::isValid).forEach(recipe->{
 				recipe.getPatterns().forEach(tile.patternList::add);
 				recipe.getExtraPatterns().forEach(tile.patternList::add);

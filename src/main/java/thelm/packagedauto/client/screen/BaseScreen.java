@@ -44,12 +44,14 @@ public abstract class BaseScreen<C extends BaseContainer<?>> extends ContainerSc
 
 	@Override
 	protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type) {
-		if(type != ClickType.QUICK_MOVE && (type != ClickType.CLONE || !minecraft.player.isCreative()) &&
-				minecraft.player.inventory.getCarried().isEmpty() && slot instanceof FalseCopySlot && slot.isActive()) {
-			if(!slot.getItem().isEmpty()) {
-				minecraft.setScreen(new ItemAmountSpecifyingScreen(
-						this, minecraft.player.inventory, slot.index, slot.getItem(), getItemAmountSpecificationLimit(slot)));
-			}
+		if(mouseButton == 0 &&
+				type != ClickType.QUICK_MOVE &&
+				minecraft.player.inventory.getCarried().isEmpty() &&
+				slot instanceof FalseCopySlot &&
+				slot.isActive() &&
+				!slot.getItem().isEmpty()) {
+			minecraft.setScreen(new ItemAmountSpecifyingScreen(
+					this, minecraft.player.inventory, slot.index, slot.getItem(), getItemAmountSpecificationLimit(slot)));
 		}
 		else {
 			super.slotClicked(slot, slotId, mouseButton, type);

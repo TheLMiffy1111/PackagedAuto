@@ -9,7 +9,7 @@ import thelm.packagedauto.container.EncoderContainer;
 
 public class SetPatternIndexPacket {
 
-	private int index;
+	private final int index;
 
 	public SetPatternIndexPacket(int index) {
 		this.index = index;

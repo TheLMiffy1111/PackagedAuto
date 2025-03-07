@@ -10,11 +10,7 @@ import appeng.api.networking.GridFlags;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
-import appeng.api.networking.crafting.ICraftingPatternDetails;
-import appeng.api.networking.crafting.ICraftingProvider;
-import appeng.api.networking.crafting.ICraftingProviderHelper;
 import appeng.api.networking.energy.IEnergyGrid;
-import appeng.api.networking.events.MENetworkCraftingPatternChange;
 import appeng.api.networking.security.IActionHost;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.storage.IStorageGrid;
@@ -27,17 +23,12 @@ import appeng.core.Api;
 import appeng.me.helpers.MachineSource;
 import appeng.util.Platform;
 import net.minecraft.block.BlockState;
-import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import thelm.packagedauto.api.IPackageItem;
-import thelm.packagedauto.api.IPackagePattern;
-import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.integration.appeng.networking.BaseGridBlock;
-import thelm.packagedauto.integration.appeng.recipe.PackageCraftingPatternDetails;
 import thelm.packagedauto.tile.PackagerExtensionTile;
 
-public class AEPackagerExtensionTile extends PackagerExtensionTile implements IGridHost, IActionHost, ICraftingProvider {
+public class AEPackagerExtensionTile extends PackagerExtensionTile implements IGridHost, IActionHost {
 
 	public BaseGridBlock<AEPackagerExtensionTile> gridBlock;
 	public IActionSource source;
@@ -58,7 +49,7 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 			}
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -107,53 +98,6 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 	}
 
 	@Override
-	public boolean pushPattern(ICraftingPatternDetails patternDetails, CraftingInventory table) {
-		if(!isBusy() && patternDetails instanceof PackageCraftingPatternDetails) {
-			PackageCraftingPatternDetails pattern = (PackageCraftingPatternDetails)patternDetails;
-			ItemStack slotStack = itemHandler.getStackInSlot(9);
-			ItemStack outputStack = pattern.pattern.getOutput();
-			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
-				currentPattern = pattern.pattern;
-				lockPattern = true;
-				for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
-					itemHandler.setStackInSlot(i, table.getItem(i).copy());
-				}
-				return true;
-			}
-		}
-		else if(!isBusy()) {
-			ItemStack slotStack = itemHandler.getStackInSlot(9);
-			ItemStack outputStack = patternDetails.getOutputs().get(0).createItemStack();
-			if(outputStack.getItem() instanceof IPackageItem && (slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize())) {
-				IPackageItem packageItem = (IPackageItem)outputStack.getItem();
-				IPackageRecipeInfo recipe = packageItem.getRecipeInfo(outputStack);
-				int index = packageItem.getIndex(outputStack);
-				if(recipe != null && recipe.validPatternIndex(index)) {
-					currentPattern = recipe.getPatterns().get(index);
-					lockPattern = true;
-					for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
-						itemHandler.setStackInSlot(i, table.getItem(i).copy());
-					}
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public boolean isBusy() {
-		return isWorking || !itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty);
-	}
-
-	@Override
-	public void provideCrafting(ICraftingProviderHelper craftingTracker) {
-		for(IPackagePattern pattern : patternList) {
-			craftingTracker.addCraftingOption(this, new PackageCraftingPatternDetails(pattern).toAEInternal(level));
-		}
-	}
-
-	@Override
 	protected void ejectItem() {
 		if(getActionableNode().isActive()) {
 			IGrid grid = getActionableNode().getGrid();
@@ -172,17 +116,6 @@ public class AEPackagerExtensionTile extends PackagerExtensionTile implements IG
 		}
 		else {
 			super.ejectItem();
-		}
-	}
-
-	@Override
-	public void postPatternChange() {
-		if(getActionableNode() != null) {
-			IGrid grid = getActionableNode().getGrid();
-			if(grid == null) {
-				return;
-			}
-			grid.postEvent(new MENetworkCraftingPatternChange(this, getActionableNode()));
 		}
 	}
 

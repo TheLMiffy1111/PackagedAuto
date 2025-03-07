@@ -6,7 +6,6 @@ import java.util.List;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.world.World;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeList;
 
@@ -14,8 +13,8 @@ public class PackageRecipeList implements IPackageRecipeList {
 
 	private List<IPackageRecipeInfo> recipeList = new ArrayList<>();
 
-	public PackageRecipeList(World world, CompoundNBT nbt) {
-		read(world, nbt);
+	public PackageRecipeList(CompoundNBT nbt) {
+		read(nbt);
 	}
 
 	public PackageRecipeList(List<IPackageRecipeInfo> recipeList) {
@@ -34,28 +33,19 @@ public class PackageRecipeList implements IPackageRecipeList {
 	}
 
 	@Override
-	public void read(World world, CompoundNBT nbt) {
+	public void read(CompoundNBT nbt) {
 		recipeList.clear();
 		if(nbt != null) {
-			ListNBT tagList = nbt.getList("Recipes", 10);
-			for(int i = 0; i < tagList.size(); ++i) {
-				CompoundNBT tag = tagList.getCompound(i);
-				IPackageRecipeInfo recipe = MiscHelper.INSTANCE.readRecipe(tag);
-				if(recipe != null) {
-					recipeList.add(recipe);
-				}
-			}
+			recipeList.addAll(MiscHelper.INSTANCE.readRecipeList(nbt.getList("Recipes", 10)));
 		}
 	}
 
 	@Override
 	public CompoundNBT write(CompoundNBT nbt) {
-		ListNBT tagList = new ListNBT();
-		for(IPackageRecipeInfo recipe : recipeList) {
-			CompoundNBT tag = MiscHelper.INSTANCE.writeRecipe(new CompoundNBT(), recipe);
-			tagList.add(tag);
+		ListNBT tagList = MiscHelper.INSTANCE.writeRecipeList(new ListNBT(), recipeList);
+		if(!tagList.isEmpty()) {
+			nbt.put("Recipes", tagList);
 		}
-		nbt.put("Recipes", tagList);
 		return nbt;
 	}
 }

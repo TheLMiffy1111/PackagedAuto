@@ -5,12 +5,17 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ActionResultType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import thelm.packagedauto.PackagedAuto;
@@ -29,6 +34,20 @@ public class DistributorBlock extends BaseBlock {
 	@Override
 	public DistributorTile createTileEntity(BlockState state, IBlockReader worldIn) {
 		return DistributorTile.TYPE_INSTANCE.create();
+	}
+
+	@Override
+	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity playerIn, Hand hand, BlockRayTraceResult rayTraceResult) {
+		if(playerIn.isShiftKeyDown()) {
+			TileEntity tileentity = worldIn.getBlockEntity(pos);
+			if(tileentity instanceof DistributorTile) {
+				if(!worldIn.isClientSide) {
+					((DistributorTile)tileentity).sendPreview((ServerPlayerEntity)playerIn);
+				}
+				return ActionResultType.SUCCESS;
+			}
+		}
+		return super.use(state, worldIn, pos, playerIn, hand, rayTraceResult);
 	}
 
 	@Override

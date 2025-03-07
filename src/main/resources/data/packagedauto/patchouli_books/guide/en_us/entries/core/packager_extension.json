@@ -1,0 +1,48 @@
+{
+	"name": "Packager Extension",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:packager_extension",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "The $(item)Packager Extension/$ copies the function of a nearby $(l:core/packager)Packager/$, allowing less $(l:core/recipe_holder)Package Recipe Holders/$ to be used when parallelizing packaging.$(p)This machine requires power."
+		},
+		{
+			"type": "patchouli:spotlight",
+			"item": "packagedauto:packager_extension",
+			"link_recipe": true,
+			"title": "Usage",
+			"text": "To use the $(item)Packager Extension/$, place anywhere within a 3x3x3 area around a $(l:core/packager)Packager/$ to copy its function.$(p)If multiple $(l:core/packager)Packagers/$ are present, the machine will copy the north-west-bottommost one it can find.$(p)You may extract inputs out from the top side."
+		},
+		{
+			"type": "patchouli:text",
+			"title": "Modes",
+			"text": "$(thing)Require Exact/$: Make the first package that exactly matches inventory contents.$(p)$(thing)Require Disjoint/$: Checks if packages have no overlap and make the package that can be made from inventory contents, otherwise fallback to $(thing)Require Exact/$.$(p)$(thing)First Match/$: Make the first package that can be made from inventory contents."
+		},
+		{
+			"type": "patchouli:text",
+			"title": "Settings Cloning",
+			"text": "Using the $(l:core/settings_cloner)Packaging Settings Cloner/$, you can copy and paste the mode setting."
+		},
+		{
+			"type": "patchouli:text",
+			"flag": "mod:appliedenergistics2",
+			"title": "AE2 Integration",
+			"text": "The $(item)Packager Extension/$ can be connected to an $(thing)ME Network/$.$(p)It will extract power to use, provide packaging as autocrafting, and instead eject created $(l:core/package)Recipe Packages/$ into the network."
+		},
+		{
+			"type": "patchouli:crafting",
+			"flag": "!mod:appliedenergistics2",
+			"recipe": "packagedauto:packager_extension",
+			"title": "Crafting"
+		},
+		{
+			"type": "patchouli:crafting",
+			"flag": "mod:appliedenergistics2",
+			"recipe": "packagedauto:packager_extension_ae",
+			"title": "Crafting"
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 8
+}

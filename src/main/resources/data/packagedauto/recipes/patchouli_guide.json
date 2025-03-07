@@ -1,0 +1,24 @@
+{
+	"conditions": [
+		{
+			"type": "forge:mod_loaded",
+			"modid": "patchouli"
+		}
+	],
+	"type": "minecraft:crafting_shapeless",
+	"result": {
+		"item": "patchouli:guide_book",
+		"nbt": {
+			"patchouli:book": "packagedauto:guide"
+		},
+		"count": 1
+	},
+	"ingredients": [
+		{
+			"item": "minecraft:book"
+		},
+		{
+			"item": "packagedauto:package_component"
+		}
+	]
+}

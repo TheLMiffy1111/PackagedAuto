@@ -9,7 +9,7 @@ import thelm.packagedauto.container.EncoderContainer;
 
 public class SaveRecipeListPacket {
 
-	private boolean single;
+	private final boolean single;
 
 	public SaveRecipeListPacket(boolean single) {
 		this.single = single;

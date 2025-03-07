@@ -25,6 +25,11 @@ public class DistributorItemHandler extends BaseItemHandler<DistributorTile> {
 	}
 
 	@Override
+	public int getSlotLimit(int slot) {
+		return 1;
+	}
+
+	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
 		return stack.getItem() instanceof IDistributorMarkerItem && ((IDistributorMarkerItem)stack.getItem()).getDirectionalGlobalPos(stack) != null;
 	}

@@ -29,7 +29,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
-import thelm.packagedauto.api.IPackageRecipeListItem;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.container.PackagerExtensionContainer;
 import thelm.packagedauto.energy.EnergyStorage;
@@ -37,7 +37,7 @@ import thelm.packagedauto.integration.appeng.tile.AEPackagerExtensionTile;
 import thelm.packagedauto.inventory.PackagerExtensionItemHandler;
 import thelm.packagedauto.util.MiscHelper;
 
-public class PackagerExtensionTile extends BaseTile implements ITickableTileEntity {
+public class PackagerExtensionTile extends BaseTile implements ITickableTileEntity, ISettingsCloneable {
 
 	public static final TileEntityType<PackagerExtensionTile> TYPE_INSTANCE = (TileEntityType<PackagerExtensionTile>)TileEntityType.Builder.
 			of(MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("appliedenergistics2"),
@@ -47,11 +47,13 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean firstTick = true;
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
+	public PackagerTile packager;
 	public IItemHandlerModifiable listStackItemHandler = new ItemStackHandler(1);
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
@@ -69,6 +71,11 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 	@Override
 	protected ITextComponent getDefaultName() {
 		return new TranslationTextComponent("block.packagedauto.packager_extension");
+	}
+
+	@Override
+	public String getConfigTypeName() {
+		return "block.packagedauto.packager";
 	}
 
 	@Override
@@ -94,7 +101,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 					}
 				}
 			}
-			else if(level.getGameTime() % 8 == 0) {
+			else if(level.getGameTime() % refreshInterval == 0) {
 				if(canStart()) {
 					startProcess();
 					tickProcess();
@@ -102,7 +109,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 				}
 			}
 			chargeEnergy();
-			if(level.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % refreshInterval == 0) {
 				if(!itemHandler.getStackInSlot(9).isEmpty()) {
 					ejectItem();
 				}
@@ -147,7 +154,7 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 		}
 		ItemStack slotStack = itemHandler.getStackInSlot(9);
 		ItemStack outputStack = currentPattern.getOutput();
-		return slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
+		return slotStack.isEmpty() || slotStack.sameItem(outputStack) && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
 	}
 
 	protected boolean canFinish() {
@@ -186,28 +193,17 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 	}
 
 	public void updatePatternList() {
+		packager = null;
+		listStackItemHandler.setStackInSlot(0, ItemStack.EMPTY);
 		patternList.clear();
 		if(level != null) {
 			for(BlockPos posP : BlockPos.betweenClosed(worldPosition.offset(-1, -1, -1), worldPosition.offset(1, 1, 1))) {
 				TileEntity te = level.getBlockEntity(posP);
 				if(te instanceof PackagerTile) {
-					PackagerTile packager = (PackagerTile)te;
+					packager = (PackagerTile)te;
 					ItemStack listStack = packager.itemHandler.getStackInSlot(10);
 					listStackItemHandler.setStackInSlot(0, listStack);
-					if(listStack.getItem() instanceof IPackageRecipeListItem) {
-						((IPackageRecipeListItem)listStack.getItem()).getRecipeList(level, listStack).getRecipeList().stream().
-						filter(IPackageRecipeInfo::isValid).forEach(recipe->{
-							recipe.getPatterns().forEach(patternList::add);
-						});
-					}
-					else if(listStack.getItem() instanceof IPackageItem) {
-						IPackageItem packageItem = (IPackageItem)listStack.getItem();
-						IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
-						int index = packageItem.getIndex(listStack);
-						if(recipe != null && recipe.isValid() && recipe.validPatternIndex(index)) {
-							patternList.add(recipe.getPatterns().get(index));
-						}
-					}
+					patternList.addAll(packager.patternList);
 					switch(mode) {
 					case EXACT:
 						disjoint = false;
@@ -221,9 +217,6 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 					}
 					break;
 				}
-			}
-			if(!level.isClientSide) {
-				postPatternChange();
 			}
 		}
 	}
@@ -346,7 +339,21 @@ public class PackagerExtensionTile extends BaseTile implements ITickableTileEnti
 		return 0;
 	}
 
-	protected void postPatternChange() {}
+	public boolean canPushPattern() {
+		return !isWorking && itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty);
+	}
+
+	@Override
+	public boolean loadConfig(CompoundNBT nbt, PlayerEntity player) {
+		mode = PackagerTile.Mode.values()[nbt.getByte("Mode")];
+		return true;
+	}
+
+	@Override
+	public boolean saveConfig(CompoundNBT nbt, PlayerEntity player) {
+		nbt.putByte("Mode", (byte)mode.ordinal());
+		return true;
+	}
 
 	@Override
 	public void load(BlockState blockState, CompoundNBT nbt) {

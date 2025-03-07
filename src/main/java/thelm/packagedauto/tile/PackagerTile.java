@@ -14,6 +14,7 @@ import net.minecraft.inventory.container.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -28,14 +29,18 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.IPackageRecipeList;
+import thelm.packagedauto.api.IPackageRecipeListItem;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.block.PackagerBlock;
 import thelm.packagedauto.container.PackagerContainer;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.integration.appeng.tile.AEPackagerTile;
 import thelm.packagedauto.inventory.PackagerItemHandler;
+import thelm.packagedauto.item.RecipeHolderItem;
 import thelm.packagedauto.util.MiscHelper;
 
-public class PackagerTile extends BaseTile implements ITickableTileEntity {
+public class PackagerTile extends BaseTile implements ITickableTileEntity, ISettingsCloneable {
 
 	public static final TileEntityType<PackagerTile> TYPE_INSTANCE = (TileEntityType<PackagerTile>)TileEntityType.Builder.
 			of(MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("appliedenergistics2"),
@@ -45,6 +50,7 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean firstTick = true;
@@ -66,6 +72,11 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 	@Override
 	protected ITextComponent getDefaultName() {
 		return new TranslationTextComponent("block.packagedauto.packager");
+	}
+
+	@Override
+	public String getConfigTypeName() {
+		return "block.packagedauto.packager";
 	}
 
 	@Override
@@ -93,7 +104,7 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 					}
 				}
 			}
-			else if(level.getGameTime() % 8 == 0) {
+			else if(level.getGameTime() % refreshInterval == 0) {
 				if(canStart()) {
 					startProcess();
 					tickProcess();
@@ -101,7 +112,7 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 				}
 			}
 			chargeEnergy();
-			if(level.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % refreshInterval == 0) {
 				if(!itemHandler.getStackInSlot(9).isEmpty()) {
 					ejectItem();
 				}
@@ -150,7 +161,7 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 		}
 		ItemStack slotStack = itemHandler.getStackInSlot(9);
 		ItemStack outputStack = currentPattern.getOutput();
-		return slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
+		return slotStack.isEmpty() || slotStack.sameItem(outputStack) && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
 	}
 
 	protected boolean canFinish() {
@@ -306,7 +317,45 @@ public class PackagerTile extends BaseTile implements ITickableTileEntity {
 		return 0;
 	}
 
+	public boolean canPushPattern() {
+		return !isWorking && itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty);
+	}
+
 	public void postPatternChange() {}
+
+	@Override
+	public boolean loadConfig(CompoundNBT nbt, PlayerEntity player) {
+		mode = Mode.values()[nbt.getByte("Mode")];
+		if(nbt.contains("Recipes") && itemHandler.getStackInSlot(10).isEmpty()) {
+			PlayerInventory playerInventory = player.inventory;
+			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
+				ItemStack stack = playerInventory.getItem(i);
+				if(!stack.isEmpty() && stack.getItem() == RecipeHolderItem.INSTANCE && !stack.hasTag()) {
+					ItemStack stackCopy = stack.split(1);
+					IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stackCopy);
+					List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.readRecipeList(nbt.getList("Recipes", 10));
+					recipeListObj.setRecipeList(recipeList);
+					RecipeHolderItem.INSTANCE.setRecipeList(stackCopy, recipeListObj);
+					itemHandler.setStackInSlot(10, stackCopy);
+					break;
+				}
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean saveConfig(CompoundNBT nbt, PlayerEntity player) {
+		nbt.putByte("Mode", (byte)mode.ordinal());
+		ItemStack listStack = itemHandler.getStackInSlot(10);
+		if(listStack.getItem() instanceof IPackageRecipeListItem) {
+			List<IPackageRecipeInfo> recipeList = ((IPackageRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList();
+			if(!recipeList.isEmpty()) {
+				nbt.put("Recipes", MiscHelper.INSTANCE.writeRecipeList(new ListNBT(), recipeList));
+			}
+		}
+		return true;
+	}
 
 	@Override
 	public void load(BlockState blockState, CompoundNBT nbt) {

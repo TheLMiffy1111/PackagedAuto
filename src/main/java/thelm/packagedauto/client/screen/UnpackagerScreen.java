@@ -3,6 +3,7 @@ package thelm.packagedauto.client.screen;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
@@ -86,8 +87,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 		}
 
 		@Override
-		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
+		protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
 			minecraft.getTextureManager().bind(BACKGROUND);
 			blit(matrixStack, x+1, y+2, 176, menu.tile.blocking ? 64 : 50, 14, 14);
@@ -106,7 +106,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 
 	class ButtonTrackerCount extends Widget {
 
-		boolean decrease;
+		final boolean decrease;
 
 		public ButtonTrackerCount(boolean decrease, int x, int y) {
 			super(x, y, 8, 18, StringTextComponent.EMPTY);
@@ -114,8 +114,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 		}
 
 		@Override
-		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(matrixStack, mouseX, mouseY, partialTicks);
+		protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 			RenderSystem.color4f(1F, 1F, 1F, 1F);
 			minecraft.getTextureManager().bind(BACKGROUND);
 			blit(matrixStack, x+1, y+2, decrease ? 176 : 182, 78, 6, 14);

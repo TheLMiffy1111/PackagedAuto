@@ -1,0 +1,24 @@
+{
+	"name": "Crafting Components",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:package_component",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "Basic crafting components used by $(#822)PackagedAuto/$."
+		},
+		{
+			"type": "patchouli:crafting",
+			"recipe": "packagedauto:package_component",
+			"title": "Crafting"
+		},
+		{
+			"type": "patchouli:crafting",
+			"flag": "mod:appliedenergistics2",
+			"recipe": "packagedauto:me_package_component",
+			"title": "Crafting"
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 1
+}

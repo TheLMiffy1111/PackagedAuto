@@ -13,7 +13,10 @@ import appeng.api.networking.crafting.ICraftingPatternDetails;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.networking.crafting.ICraftingProviderHelper;
 import appeng.api.networking.energy.IEnergyGrid;
+import appeng.api.networking.events.MENetworkChannelsChanged;
 import appeng.api.networking.events.MENetworkCraftingPatternChange;
+import appeng.api.networking.events.MENetworkEventSubscribe;
+import appeng.api.networking.events.MENetworkPowerStatusChange;
 import appeng.api.networking.security.IActionHost;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.storage.IStorageGrid;
@@ -29,6 +32,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
@@ -56,7 +61,7 @@ public class AEPackagerTile extends PackagerTile implements IGridHost, IActionHo
 			}
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -106,34 +111,58 @@ public class AEPackagerTile extends PackagerTile implements IGridHost, IActionHo
 
 	@Override
 	public boolean pushPattern(ICraftingPatternDetails patternDetails, CraftingInventory table) {
-		if(!isBusy() && patternDetails instanceof PackageCraftingPatternDetails) {
-			PackageCraftingPatternDetails pattern = (PackageCraftingPatternDetails)patternDetails;
-			ItemStack slotStack = itemHandler.getStackInSlot(9);
-			ItemStack outputStack = pattern.pattern.getOutput();
-			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
-				currentPattern = pattern.pattern;
-				lockPattern = true;
-				for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
-					itemHandler.setStackInSlot(i, table.getItem(i).copy());
-				}
-				return true;
+		if(getActionableNode().isActive()) {
+			ItemStack outputStack;
+			IPackagePattern pattern;
+			if(patternDetails instanceof PackageCraftingPatternDetails) {
+				PackageCraftingPatternDetails details = (PackageCraftingPatternDetails)patternDetails;
+				pattern = details.pattern;
+				outputStack = pattern.getOutput();
 			}
-		}
-		else if(!isBusy()) {
-			ItemStack slotStack = itemHandler.getStackInSlot(9);
-			ItemStack outputStack = patternDetails.getOutputs().get(0).createItemStack();
-			if(outputStack.getItem() instanceof IPackageItem && (slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize())) {
-				IPackageItem packageItem = (IPackageItem)outputStack.getItem();
-				IPackageRecipeInfo recipe = packageItem.getRecipeInfo(outputStack);
-				int index = packageItem.getIndex(outputStack);
-				if(recipe != null && recipe.validPatternIndex(index)) {
-					currentPattern = recipe.getPatterns().get(index);
+			else {
+				outputStack = patternDetails.getOutputs().get(0).createItemStack();
+				if(outputStack.getItem() instanceof IPackageItem) {
+					IPackageItem packageItem = (IPackageItem)outputStack.getItem();
+					IPackageRecipeInfo recipe = packageItem.getRecipeInfo(outputStack);
+					int index = packageItem.getIndex(outputStack);
+					if(recipe != null && recipe.validPatternIndex(index)) {
+						pattern = recipe.getPatterns().get(index);
+					}
+					else {
+						return false;
+					}
+				}
+				else {
+					return false;
+				}
+			}
+			if(canPushPattern()) {
+				ItemStack slotStack = itemHandler.getStackInSlot(9);
+				if(slotStack.isEmpty() || slotStack.sameItem(outputStack) && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
+					currentPattern = pattern;
 					lockPattern = true;
 					for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
 						itemHandler.setStackInSlot(i, table.getItem(i).copy());
 					}
+					return true;
 				}
-				return true;
+			}
+			for(BlockPos posP : BlockPos.betweenClosed(worldPosition.offset(-1, -1, -1), worldPosition.offset(1, 1, 1))) {
+				TileEntity te = level.getBlockEntity(posP);
+				if(te instanceof AEPackagerExtensionTile) {
+					AEPackagerExtensionTile extension = (AEPackagerExtensionTile)te;
+					if(extension.packager == this && extension.getActionableNode().isActive() && getActionableNode().getGrid() == extension.getActionableNode().getGrid() && extension.canPushPattern()) {
+						ItemStack slotStack = extension.getItemHandler().getStackInSlot(9);
+						if(slotStack.isEmpty() || slotStack.sameItem(outputStack) && ItemStack.tagMatches(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
+							extension.currentPattern = pattern;
+							extension.lockPattern = true;
+							for(int i = 0; i < table.getContainerSize() && i < 9; ++i) {
+								extension.getItemHandler().setStackInSlot(i, table.getItem(i).copy());
+							}
+							return true;
+						}
+					}
+				}
 			}
 		}
 		return false;
@@ -141,14 +170,38 @@ public class AEPackagerTile extends PackagerTile implements IGridHost, IActionHo
 
 	@Override
 	public boolean isBusy() {
-		return isWorking || !itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty);
+		if(canPushPattern()) {
+			return false;
+		}
+		for(BlockPos posP : BlockPos.betweenClosed(worldPosition.offset(-1, -1, -1), worldPosition.offset(1, 1, 1))) {
+			TileEntity te = level.getBlockEntity(posP);
+			if(te instanceof AEPackagerExtensionTile) {
+				AEPackagerExtensionTile extension = (AEPackagerExtensionTile)te;
+				if(extension.packager == this && getActionableNode().getGrid() == extension.getActionableNode().getGrid() && extension.canPushPattern()) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	@Override
 	public void provideCrafting(ICraftingProviderHelper craftingTracker) {
-		for(IPackagePattern pattern : patternList) {
-			craftingTracker.addCraftingOption(this, new PackageCraftingPatternDetails(pattern).toAEInternal(level));
+		if(getActionableNode().isActive()) {
+			for(IPackagePattern pattern : patternList) {
+				craftingTracker.addCraftingOption(this, new PackageCraftingPatternDetails(pattern).toAEInternal(level));
+			}
 		}
+	}
+
+	@MENetworkEventSubscribe
+	public void onChannelsChanged(MENetworkChannelsChanged event) {
+		postPatternChange();
+	}
+
+	@MENetworkEventSubscribe
+	public void onPowerStatusChange(MENetworkPowerStatusChange event) {
+		postPatternChange();
 	}
 
 	@Override

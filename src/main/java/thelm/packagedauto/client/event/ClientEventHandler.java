@@ -6,21 +6,25 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import thelm.packagedauto.client.DistributorRenderer;
+import thelm.packagedauto.client.WorldOverlayRenderer;
 import thelm.packagedauto.client.screen.CrafterScreen;
+import thelm.packagedauto.client.screen.CraftingProxyScreen;
 import thelm.packagedauto.client.screen.DistributorScreen;
 import thelm.packagedauto.client.screen.EncoderScreen;
 import thelm.packagedauto.client.screen.PackagerExtensionScreen;
 import thelm.packagedauto.client.screen.PackagerScreen;
 import thelm.packagedauto.client.screen.UnpackagerScreen;
 import thelm.packagedauto.container.CrafterContainer;
+import thelm.packagedauto.container.CraftingProxyContainer;
 import thelm.packagedauto.container.DistributorContainer;
 import thelm.packagedauto.container.EncoderContainer;
 import thelm.packagedauto.container.PackagerContainer;
 import thelm.packagedauto.container.PackagerExtensionContainer;
 import thelm.packagedauto.container.UnpackagerContainer;
 import thelm.packagedauto.item.DistributorMarkerItem;
+import thelm.packagedauto.item.ProxyMarkerItem;
 import thelm.packagedauto.item.RecipeHolderItem;
+import thelm.packagedauto.item.SettingsClonerItem;
 
 public class ClientEventHandler {
 
@@ -32,7 +36,7 @@ public class ClientEventHandler {
 
 	public void onConstruct() {
 		FMLJavaModLoadingContext.get().getModEventBus().register(this);
-		DistributorRenderer.INSTANCE.onConstruct();
+		WorldOverlayRenderer.INSTANCE.onConstruct();
 	}
 
 	@SubscribeEvent
@@ -42,16 +46,25 @@ public class ClientEventHandler {
 		ScreenManager.register(PackagerExtensionContainer.TYPE_INSTANCE, PackagerExtensionScreen::new);
 		ScreenManager.register(UnpackagerContainer.TYPE_INSTANCE, UnpackagerScreen::new);
 		ScreenManager.register(DistributorContainer.TYPE_INSTANCE, DistributorScreen::new);
+		ScreenManager.register(CraftingProxyContainer.TYPE_INSTANCE, CraftingProxyScreen::new);
 		ScreenManager.register(CrafterContainer.TYPE_INSTANCE, CrafterScreen::new);
 
 		event.enqueueWork(()->{
 			ItemModelsProperties.register(RecipeHolderItem.INSTANCE,
 					new ResourceLocation("packagedauto", "filled"), (stack, world, living)->{
-						return stack.hasTag() ? 1F : 0F;
+						return RecipeHolderItem.INSTANCE.isFilled(stack) ? 1F : 0F;
 					});
 			ItemModelsProperties.register(DistributorMarkerItem.INSTANCE,
 					new ResourceLocation("packagedauto", "bound"), (stack, world, living)->{
-						return stack.hasTag() ? 1F : 0F;
+						return DistributorMarkerItem.INSTANCE.isBound(stack) ? 1F : 0F;
+					});
+			ItemModelsProperties.register(ProxyMarkerItem.INSTANCE,
+					new ResourceLocation("packagedauto", "bound"), (stack, world, living)->{
+						return ProxyMarkerItem.INSTANCE.isBound(stack) ? 1F : 0F;
+					});
+			ItemModelsProperties.register(SettingsClonerItem.INSTANCE,
+					new ResourceLocation("packagedauto", "filled"), (stack, world, living)->{
+						return SettingsClonerItem.INSTANCE.hasData(stack) ? 1F : 0F;
 					});
 		});
 	}

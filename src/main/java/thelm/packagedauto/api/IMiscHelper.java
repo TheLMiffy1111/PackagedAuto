@@ -65,6 +65,10 @@ public interface IMiscHelper {
 
 	IPackageRecipeInfo readRecipe(CompoundNBT nbt);
 
+	ListNBT writeRecipeList(ListNBT tagList, List<IPackageRecipeInfo> recipes);
+
+	List<IPackageRecipeInfo> readRecipeList(ListNBT tagList);
+
 	boolean recipeEquals(IPackageRecipeInfo recipeA, Object recipeInternalA, IPackageRecipeInfo recipeB, Object recipeInternalB);
 
 	int recipeHashCode(IPackageRecipeInfo recipe, Object recipeInternal);

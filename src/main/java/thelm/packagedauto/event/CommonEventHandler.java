@@ -3,6 +3,7 @@ package thelm.packagedauto.event;
 import net.minecraft.block.Block;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.Item;
+import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
@@ -13,6 +14,7 @@ import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import thelm.packagedauto.block.CrafterBlock;
+import thelm.packagedauto.block.CraftingProxyBlock;
 import thelm.packagedauto.block.DistributorBlock;
 import thelm.packagedauto.block.EncoderBlock;
 import thelm.packagedauto.block.PackagerBlock;
@@ -20,21 +22,28 @@ import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.config.PackagedAutoConfig;
 import thelm.packagedauto.container.CrafterContainer;
+import thelm.packagedauto.container.CraftingProxyContainer;
 import thelm.packagedauto.container.DistributorContainer;
 import thelm.packagedauto.container.EncoderContainer;
 import thelm.packagedauto.container.PackagerContainer;
 import thelm.packagedauto.container.PackagerExtensionContainer;
 import thelm.packagedauto.container.UnpackagerContainer;
+import thelm.packagedauto.crafting.DistributorMarkerCloningRecipe;
+import thelm.packagedauto.crafting.ProxyMarkerCloningRecipe;
+import thelm.packagedauto.crafting.RecipeHolderCloningRecipe;
 import thelm.packagedauto.item.DistributorMarkerItem;
 import thelm.packagedauto.item.MiscItem;
 import thelm.packagedauto.item.PackageItem;
+import thelm.packagedauto.item.ProxyMarkerItem;
 import thelm.packagedauto.item.RecipeHolderItem;
+import thelm.packagedauto.item.SettingsClonerItem;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.recipe.CraftingPackageRecipeType;
 import thelm.packagedauto.recipe.OrderedProcessingPackageRecipeType;
 import thelm.packagedauto.recipe.PositionedProcessingPackageRecipeType;
 import thelm.packagedauto.recipe.ProcessingPackageRecipeType;
 import thelm.packagedauto.tile.CrafterTile;
+import thelm.packagedauto.tile.CraftingProxyTile;
 import thelm.packagedauto.tile.DistributorTile;
 import thelm.packagedauto.tile.EncoderTile;
 import thelm.packagedauto.tile.PackagerExtensionTile;
@@ -65,6 +74,7 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionBlock.INSTANCE);
 		registry.register(UnpackagerBlock.INSTANCE);
 		registry.register(DistributorBlock.INSTANCE);
+		registry.register(CraftingProxyBlock.INSTANCE);
 		registry.register(CrafterBlock.INSTANCE);
 	}
 
@@ -76,9 +86,12 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionBlock.ITEM_INSTANCE);
 		registry.register(UnpackagerBlock.ITEM_INSTANCE);
 		registry.register(DistributorBlock.ITEM_INSTANCE);
+		registry.register(CraftingProxyBlock.ITEM_INSTANCE);
 		registry.register(CrafterBlock.ITEM_INSTANCE);
 		registry.register(RecipeHolderItem.INSTANCE);
 		registry.register(DistributorMarkerItem.INSTANCE);
+		registry.register(ProxyMarkerItem.INSTANCE);
+		registry.register(SettingsClonerItem.INSTANCE);
 		registry.register(PackageItem.INSTANCE);
 		registry.register(MiscItem.PACKAGE_COMPONENT);
 		registry.register(MiscItem.ME_PACKAGE_COMPONENT);
@@ -92,6 +105,7 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionTile.TYPE_INSTANCE);
 		registry.register(UnpackagerTile.TYPE_INSTANCE);
 		registry.register(DistributorTile.TYPE_INSTANCE);
+		registry.register(CraftingProxyTile.TYPE_INSTANCE);
 		registry.register(CrafterTile.TYPE_INSTANCE);
 	}
 
@@ -103,7 +117,16 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionContainer.TYPE_INSTANCE);
 		registry.register(UnpackagerContainer.TYPE_INSTANCE);
 		registry.register(DistributorContainer.TYPE_INSTANCE);
+		registry.register(CraftingProxyContainer.TYPE_INSTANCE);
 		registry.register(CrafterContainer.TYPE_INSTANCE);
+	}
+
+	@SubscribeEvent
+	public void onRecipeSerializerRegister(RegistryEvent.Register<IRecipeSerializer<?>> event) {
+		IForgeRegistry<IRecipeSerializer<?>> registry = event.getRegistry();
+		registry.register(RecipeHolderCloningRecipe.SERIALIZER);
+		registry.register(DistributorMarkerCloningRecipe.SERIALIZER);
+		registry.register(ProxyMarkerCloningRecipe.SERIALIZER);
 	}
 
 	@SubscribeEvent
