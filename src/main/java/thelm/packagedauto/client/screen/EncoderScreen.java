@@ -1,7 +1,10 @@
 package thelm.packagedauto.client.screen;
 
+import java.util.List;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -9,8 +12,10 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -44,11 +49,13 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		super.init();
 		int patternSlots = menu.blockEntity.patternItemHandlers.length;
 		for(int i = 0; i < patternSlots; ++i) {
-			addRenderableWidget(new ButtonPatternSlot(i, leftPos+29+(i%10)*18, topPos+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
+			addRenderableWidget(new ButtonPatternSlot(i, leftPos+30+(i%10)*18, topPos+(patternSlots > 10 ? 16 : 25)+(i/10)*18));
 		}
-		addRenderableWidget(new ButtonRecipeType(leftPos+203, topPos+74));
-		addRenderableWidget(new ButtonSavePatterns(leftPos+213, topPos+16, Component.translatable("block.packagedauto.encoder.save")));
-		addRenderableWidget(new ButtonLoadPatterns(leftPos+213, topPos+34, Component.translatable("block.packagedauto.encoder.load")));
+		addRenderableWidget(new ButtonRecipeType(true, leftPos+189, topPos+74));
+		addRenderableWidget(new ButtonRecipeType(false, leftPos+225, topPos+74));
+		addRenderableWidget(new ButtonSavePatterns(leftPos+215, topPos+16));
+		addRenderableWidget(new ButtonLoadPatterns(leftPos+215, topPos+34));
+		addRenderableWidget(new ButtonClearPatterns(leftPos+171, topPos+56));
 	}
 
 	@Override
@@ -80,6 +87,19 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		String str = menu.patternItemHandler.recipeType.getShortDisplayName().getString();
 		graphics.drawString(font, str, 212 - font.width(str)/2, 64, 0x404040, false);
 		super.renderLabels(graphics, mouseX, mouseY);
+		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
+		if(recipeType != null) {
+			Object rep = recipeType.getRepresentation();
+			if(rep instanceof TextureAtlasSprite sprite) {
+				RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+				RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
+				graphics.blit(204, 75, 0, 16, 16, sprite);
+			}
+			if(rep instanceof ItemStack stack) {
+				RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+				graphics.renderItem(stack, 204, 75);
+			}
+		}
 	}
 
 	@Override
@@ -129,26 +149,19 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
 	class ButtonRecipeType extends AbstractButton {
 
-		ButtonRecipeType(int x, int y) {
-			super(x, y, 18, 18, Component.empty());
-			setTooltip(Tooltip.create(Component.translatable("block.packagedauto.encoder.change_recipe_type")));
+		final boolean prev;
+
+		ButtonRecipeType(boolean prev, int x, int y) {
+			super(x, y, 10, 18, Component.empty());
+			this.prev = prev;
+			setTooltip(Tooltip.create(Component.translatable("block.packagedauto.encoder.recipe_type."+(prev ? "prev" : "next"))));
 		}
 
 		@Override
-		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
 			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-			IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
-			if(recipeType != null) {
-				Object rep = recipeType.getRepresentation();
-				if(rep instanceof TextureAtlasSprite sprite) {
-					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-					graphics.blit(getX()+1, getY()+1, 0, 16, 16, sprite);
-				}
-				if(rep instanceof ItemStack stack) {
-					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-					graphics.renderItem(stack, getX()+1, getY()+1);
-				}
-			}
+			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+			graphics.blit(BACKGROUND, getX()+1, getY()+1, prev ? 258 : 266, 48, 8, 16, 512, 512);
 		}
 
 		@Override
@@ -156,25 +169,26 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
 		@Override
 		public void onPress() {
-			boolean reverse = hasShiftDown();
-			PacketDistributor.sendToServer(new CycleRecipeTypePacket(reverse));
-			menu.patternItemHandler.cycleRecipeType(reverse);
+			PacketDistributor.sendToServer(new CycleRecipeTypePacket(prev));
+			menu.patternItemHandler.cycleRecipeType(prev);
 			menu.setupSlots();
 		}
 	}
 
 	class ButtonSavePatterns extends AbstractButton {
 
-		final Tooltip tooltip = Tooltip.create(Component.translatable("block.packagedauto.encoder.save_single"));
-
-		ButtonSavePatterns(int x, int y, Component text) {
-			super(x, y, 38, 18, text);
+		ButtonSavePatterns(int x, int y) {
+			super(x, y, 36, 18, Component.empty());
+			Component line0 = Component.translatable("block.packagedauto.encoder.save");
+			Component line1 = Component.translatable("block.packagedauto.encoder.save.single").withStyle(ChatFormatting.GRAY);
+			setTooltip(Tooltip.create(ComponentUtils.formatList(List.of(line0, line1), Component.literal("\n"))));
 		}
 
 		@Override
-		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-			setTooltip(hasShiftDown() ? tooltip : null);
-			super.renderWidget(graphics, mouseX, mouseY, partialTick);
+		protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
+			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+			graphics.blit(BACKGROUND, getX()+1, getY()+1, 258, 16, 34, 16, 512, 512);
 		}
 
 		@Override
@@ -189,16 +203,18 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
 	class ButtonLoadPatterns extends AbstractButton {
 
-		final Tooltip tooltip = Tooltip.create(Component.translatable("block.packagedauto.encoder.load_single"));
-
-		ButtonLoadPatterns(int x, int y, Component text) {
-			super(x, y, 38, 18, text);
+		ButtonLoadPatterns(int x, int y) {
+			super(x, y, 36, 18, Component.empty());
+			Component line0 = Component.translatable("block.packagedauto.encoder.load");
+			Component line1 = Component.translatable("block.packagedauto.encoder.load.single").withStyle(ChatFormatting.GRAY);
+			setTooltip(Tooltip.create(ComponentUtils.formatList(List.of(line0, line1), Component.literal("\n"))));
 		}
 
 		@Override
-		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-			setTooltip(hasShiftDown() ? tooltip : null);
-			super.renderWidget(graphics, mouseX, mouseY, partialTick);
+		protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
+			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+			graphics.blit(BACKGROUND, getX()+1, getY()+1, 258, 32, 34, 16, 512, 512);
 		}
 
 		@Override
@@ -207,8 +223,32 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		@Override
 		public void onPress() {
 			boolean single = hasShiftDown();
-			PacketDistributor.sendToServer(new LoadRecipeListPacket(single));
-			menu.blockEntity.loadRecipeList(single);
+			PacketDistributor.sendToServer(new LoadRecipeListPacket(single, false));
+			menu.blockEntity.loadRecipeList(single, false);
+			menu.setupSlots();
+		}
+	}
+
+	class ButtonClearPatterns extends AbstractButton {
+
+		ButtonClearPatterns(int x, int y) {
+			super(x, y, 7, 7, Component.empty());
+			Component line0 = Component.translatable("block.packagedauto.encoder.clear");
+			Component line1 = Component.translatable("block.packagedauto.encoder.clear.all").withStyle(ChatFormatting.GRAY);
+			setTooltip(Tooltip.create(ComponentUtils.formatList(List.of(line0, line1), Component.literal("\n"))));
+		}
+
+		@Override
+		protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {}
+
+		@Override
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
+
+		@Override
+		public void onPress() {
+			boolean single = !hasShiftDown();
+			PacketDistributor.sendToServer(new LoadRecipeListPacket(single, true));
+			menu.blockEntity.loadRecipeList(single, true);
 			menu.setupSlots();
 		}
 	}

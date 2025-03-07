@@ -109,15 +109,14 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 		}
 	}
 
-	public void loadRecipeList(boolean single) {
+	public void loadRecipeList(boolean single, boolean clear) {
 		ItemStack stack = itemHandler.getStackInSlot(0);
 		if(stack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
 			List<IPackageRecipeInfo> recipeList = stack.get(PackagedAutoDataComponents.RECIPE_LIST);
 			if(single) {
 				EncoderPatternItemHandler inv = patternItemHandlers[patternIndex];
-				if(!recipeList.isEmpty()) {
-					int i = recipeList.size() > patternIndex ? patternIndex : 0;
-					IPackageRecipeInfo recipe = recipeList.get(i);
+				if(!clear && !recipeList.isEmpty()) {
+					IPackageRecipeInfo recipe = recipeList.get(0);
 					inv.recipeType = recipe.getRecipeType();
 					if(recipe.isValid()) {
 						inv.setRecipe(recipe.getEncoderStacks());
@@ -129,7 +128,7 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 			}
 			else for(int i = 0; i < patternItemHandlers.length; ++i) {
 				EncoderPatternItemHandler inv = patternItemHandlers[i];
-				if(i < recipeList.size()) {
+				if(!clear && i < recipeList.size()) {
 					IPackageRecipeInfo recipe = recipeList.get(i);
 					inv.recipeType = recipe.getRecipeType();
 					if(recipe.isValid()) {

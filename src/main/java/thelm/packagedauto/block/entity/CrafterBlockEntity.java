@@ -33,6 +33,7 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean isWorking = false;
@@ -61,7 +62,7 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 				}
 			}
 			chargeEnergy();
-			if(level.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % refreshInterval == 0) {
 				ejectItems();
 			}
 		}

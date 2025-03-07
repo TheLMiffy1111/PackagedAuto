@@ -24,22 +24,24 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
-import thelm.packagedauto.component.PackagedAutoDataComponents;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.PackagerExtensionItemHandler;
 import thelm.packagedauto.menu.PackagerExtensionMenu;
 import thelm.packagedauto.util.MiscHelper;
 
-public class PackagerExtensionBlockEntity extends BaseBlockEntity {
+public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISettingsCloneable {
 
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean firstTick = true;
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
+	public PackagerBlockEntity packager;
 	public IItemHandlerModifiable listStackItemHandler = new ItemStackHandler(1);
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
@@ -57,6 +59,11 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	@Override
 	protected Component getDefaultName() {
 		return Component.translatable("block.packagedauto.packager_extension");
+	}
+
+	@Override
+	public String getConfigTypeName() {
+		return "block.packagedauto.packager";
 	}
 
 	@Override
@@ -82,7 +89,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 					}
 				}
 			}
-			else if(level.getGameTime() % 8 == 0) {
+			else if(level.getGameTime() % refreshInterval == 0) {
 				if(canStart()) {
 					startProcess();
 					tickProcess();
@@ -90,7 +97,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 				}
 			}
 			chargeEnergy();
-			if(level.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % refreshInterval == 0) {
 				if(!itemHandler.getStackInSlot(9).isEmpty()) {
 					ejectItem();
 				}
@@ -174,26 +181,16 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	}
 
 	public void updatePatternList() {
+		packager = null;
+		listStackItemHandler.setStackInSlot(0, ItemStack.EMPTY);
 		patternList.clear();
 		if(level != null) {
 			for(BlockPos posP : BlockPos.betweenClosed(worldPosition.offset(-1, -1, -1), worldPosition.offset(1, 1, 1))) {
 				if(level.getBlockEntity(posP) instanceof PackagerBlockEntity packager) {
+					this.packager = packager;
 					ItemStack listStack = packager.itemHandler.getStackInSlot(10);
 					listStackItemHandler.setStackInSlot(0, listStack);
-					if(listStack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
-						listStack.get(PackagedAutoDataComponents.RECIPE_LIST).stream().
-						filter(IPackageRecipeInfo::isValid).forEach(recipe->{
-							recipe.getPatterns().forEach(patternList::add);
-							recipe.getExtraPatterns().forEach(patternList::add);
-						});
-					}
-					else if(MiscHelper.INSTANCE.isPackage(listStack)) {
-						IPackageRecipeInfo recipe = listStack.get(PackagedAutoDataComponents.RECIPE);
-						int index = listStack.get(PackagedAutoDataComponents.PACKAGE_INDEX);
-						if(recipe.isValid() && recipe.validPatternIndex(index)) {
-							patternList.add(recipe.getPatterns().get(index));
-						}
-					}
+					patternList.addAll(packager.patternList);
 					disjoint = switch(mode) {
 					case EXACT -> false;
 					case DISJOINT -> MiscHelper.INSTANCE.arePatternsDisjoint(patternList);
@@ -201,9 +198,6 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 					};
 					break;
 				}
-			}
-			if(!level.isClientSide) {
-				postPatternChange();
 			}
 		}
 	}
@@ -326,11 +320,25 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 		return 0;
 	}
 
-	protected void postPatternChange() {}
+	public boolean canPushPattern() {
+		return !isWorking && itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty);
+	}
+
+	@Override
+	public boolean loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+		mode = PackagerBlockEntity.Mode.values()[nbt.getByte("mode")];
+		return true;
+	}
+
+	@Override
+	public boolean saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+		nbt.putByte("mode", (byte)mode.ordinal());
+		return true;
+	}
 
 	@Override
 	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		mode = PackagerBlockEntity.Mode.values()[nbt.getByte("Mode")];
+		mode = PackagerBlockEntity.Mode.values()[nbt.getByte("mode")];
 		super.loadAdditional(nbt, registries);
 		updatePatternList();
 		isWorking = nbt.getBoolean("working");

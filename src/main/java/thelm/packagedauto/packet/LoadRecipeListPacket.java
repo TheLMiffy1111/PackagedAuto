@@ -9,11 +9,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import thelm.packagedauto.menu.EncoderMenu;
 
-public record LoadRecipeListPacket(boolean single) implements CustomPacketPayload {
+public record LoadRecipeListPacket(boolean single, boolean clear) implements CustomPacketPayload {
 
 	public static final Type<LoadRecipeListPacket> TYPE = new Type<>(ResourceLocation.parse("packagedauto:load_recipe_list"));
-	public static final StreamCodec<RegistryFriendlyByteBuf, LoadRecipeListPacket> STREAM_CODEC = ByteBufCodecs.BOOL.
-			map(LoadRecipeListPacket::new, LoadRecipeListPacket::single).cast();
+	public static final StreamCodec<RegistryFriendlyByteBuf, LoadRecipeListPacket> STREAM_CODEC = StreamCodec.composite(
+			ByteBufCodecs.BOOL, LoadRecipeListPacket::single,
+			ByteBufCodecs.BOOL, LoadRecipeListPacket::clear,
+			LoadRecipeListPacket::new);
 
 	@Override
 	public Type<LoadRecipeListPacket> type() {
@@ -24,7 +26,7 @@ public record LoadRecipeListPacket(boolean single) implements CustomPacketPayloa
 		if(ctx.player() instanceof ServerPlayer player) {
 			ctx.enqueueWork(()->{
 				if(player.containerMenu instanceof EncoderMenu menu) {
-					menu.blockEntity.loadRecipeList(single);
+					menu.blockEntity.loadRecipeList(single, clear);
 				}
 			});
 		}

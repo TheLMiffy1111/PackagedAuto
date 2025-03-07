@@ -15,6 +15,7 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import thelm.packagedauto.block.PackagedAutoBlocks;
 import thelm.packagedauto.integration.appeng.blockentity.AECrafterBlockEntity;
+import thelm.packagedauto.integration.appeng.blockentity.AECraftingProxyBlockEntity;
 import thelm.packagedauto.integration.appeng.blockentity.AEDistributorBlockEntity;
 import thelm.packagedauto.integration.appeng.blockentity.AEPackagerBlockEntity;
 import thelm.packagedauto.integration.appeng.blockentity.AEPackagerExtensionBlockEntity;
@@ -48,6 +49,8 @@ public class PackagedAutoBlockEntities {
 			"unpackager", of(AE2_LOADED, ()->()->AEUnpackagerBlockEntity::new, ()->()->UnpackagerBlockEntity::new, PackagedAutoBlocks.UNPACKAGER));
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DistributorBlockEntity>> DISTRIBUTOR = BLOCK_ENTITIES.register(
 			"distributor", of(AE2_LOADED, ()->()->AEDistributorBlockEntity::new, ()->()->DistributorBlockEntity::new, PackagedAutoBlocks.DISTRIBUTOR));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CraftingProxyBlockEntity>> CRAFTING_PROXY = BLOCK_ENTITIES.register(
+			"crafting_proxy", of(AE2_LOADED, ()->()->AECraftingProxyBlockEntity::new, ()->()->CraftingProxyBlockEntity::new, PackagedAutoBlocks.CRAFTING_PROXY));
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CrafterBlockEntity>> CRAFTER = BLOCK_ENTITIES.register(
 			"crafter", of(AE2_LOADED, ()->()->AECrafterBlockEntity::new, ()->()->CrafterBlockEntity::new, PackagedAutoBlocks.CRAFTER));
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FluidPackageFillerBlockEntity>> FLUID_PACKAGE_FILLER = BLOCK_ENTITIES.register(

@@ -2,6 +2,7 @@ package thelm.packagedauto.block.entity;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -11,6 +12,7 @@ import it.unimi.dsi.fastutil.booleans.BooleanList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
@@ -26,16 +28,19 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.UnpackagerItemHandler;
+import thelm.packagedauto.item.PackagedAutoItems;
 import thelm.packagedauto.menu.UnpackagerMenu;
 import thelm.packagedauto.util.MiscHelper;
 
-public class UnpackagerBlockEntity extends BaseBlockEntity {
+public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsCloneable {
 
 	public static int energyCapacity = 5000;
 	public static int energyUsage = 50;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean firstTick = true;
@@ -44,6 +49,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 	public boolean powered = false;
 	public boolean blocking = false;
 	public int trackerCount = 6;
+	public int roundRobinIndex = 0;
 
 	public UnpackagerBlockEntity(BlockPos pos, BlockState state) {
 		super(PackagedAutoBlockEntities.UNPACKAGER.get(), pos, state);
@@ -60,6 +66,11 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 	}
 
 	@Override
+	public String getConfigTypeName() {
+		return "block.packagedauto.unpackager";
+	}
+
+	@Override
 	public void tick() {
 		if(firstTick) {
 			firstTick = false;
@@ -70,7 +81,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 		}
 		if(!level.isClientSide) {
 			chargeEnergy();
-			if(level.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % refreshInterval == 0) {
 				fillTrackers();
 				emptyTrackers();
 			}
@@ -126,13 +137,15 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 	}
 
 	protected void emptyTrackers() {
-		for(Direction direction : Direction.values()) {
+		List<Direction> directions = Lists.newArrayList(Direction.values());
+		Collections.rotate(directions, roundRobinIndex);
+		for(Direction direction : directions) {
 			if(level.getBlockEntity(worldPosition.relative(direction)) instanceof IPackageCraftingMachine machine) {
 				for(PackageTracker tracker : trackers) {
 					if(tracker.isFilled() && tracker.recipe != null && tracker.recipe.getRecipeType().hasMachine()) {
 						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), direction.getOpposite())) {
 							tracker.clearRecipe();
-							sync(false);
+							roundRobinIndex = (roundRobinIndex+1) % 6;
 							setChanged();
 							break;
 						}
@@ -142,7 +155,9 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			}
 		}
 		if(!powered) {
-			dir:for(Direction direction : Direction.values()) {
+			directions = Lists.newArrayList(Direction.values());
+			Collections.rotate(directions, roundRobinIndex);
+			dir:for(Direction direction : directions) {
 				PackageTracker trackerToEmpty = Arrays.stream(trackers).filter(t->t.isFilled() && t.direction == null && t.recipe != null && !t.recipe.getRecipeType().hasMachine()).findFirst().orElse(null);
 				if(trackerToEmpty == null) {
 					continue;
@@ -185,6 +200,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 				}
 				if(acceptsAll) {
 					trackerToEmpty.direction = direction;
+					roundRobinIndex = (roundRobinIndex+1) % 6;
 				}
 				setChanged();
 			}
@@ -229,7 +245,8 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 	}
 
 	protected boolean validSendTarget(BlockEntity blockEntity, Direction direction) {
-		return blockEntity != null &&
+		return blockEntity == null ||
+				!(blockEntity instanceof IPackageCraftingMachine) &&
 				!(blockEntity instanceof PackagerBlockEntity) &&
 				!(blockEntity instanceof PackagerExtensionBlockEntity) &&
 				!(blockEntity instanceof UnpackagerBlockEntity);
@@ -267,6 +284,41 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			return 0;
 		}
 		return Math.min(scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored(), scale);
+	}
+
+	@Override
+	public boolean loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+		blocking = nbt.getBoolean("blocking");
+		trackerCount = nbt.getByte("trackers");
+		if(nbt.contains("recipes") && itemHandler.getStackInSlot(9).isEmpty()) {
+			Inventory playerInventory = player.getInventory();
+			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
+				ItemStack stack = playerInventory.getItem(i);
+				if(!stack.isEmpty() && stack.is(PackagedAutoItems.RECIPE_HOLDER) && !stack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
+					ItemStack stackCopy = stack.split(1);
+					List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.loadRecipeList(nbt.getList("recipes", 10), registries);
+					if(!recipeList.isEmpty()) {
+						DataComponentPatch patch = DataComponentPatch.builder().
+								set(PackagedAutoDataComponents.RECIPE_LIST.get(), recipeList).
+								build();
+						stackCopy.applyComponents(patch);
+					}
+					itemHandler.setStackInSlot(9, stackCopy);
+					break;
+				}
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+		nbt.putBoolean("blocking", blocking);
+		nbt.putByte("trackers", (byte)trackerCount);
+		if(!recipeList.isEmpty()) {
+			nbt.put("recipes", MiscHelper.INSTANCE.saveRecipeList(new ListTag(), recipeList, registries));
+		}
+		return true;
 	}
 
 	@Override
@@ -318,10 +370,6 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 		public List<ItemStack> toSend = new ArrayList<>();
 		public Direction direction;
 
-		public void setRecipe(IPackageRecipeInfo recipe) {
-			this.recipe = recipe;
-		}
-
 		public void clearRecipe() {
 			clearRejectedIndexes();
 			recipe = null;
@@ -329,7 +377,19 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 			received.clear();
 			direction = null;
 			if(level != null && !level.isClientSide) {
-				sync(false);
+				setChanged();
+			}
+		}
+
+		public void fillRecipe(IPackageRecipeInfo recipe) {
+			this.recipe = recipe;
+			amount = recipe.getPatterns().size();
+			received.clear();
+			received.size(amount);
+			for(int i = 0; i < received.size(); ++i) {
+				received.set(i, true);
+			}
+			if(level != null && !level.isClientSide) {
 				setChanged();
 			}
 		}
@@ -347,14 +407,12 @@ public class UnpackagerBlockEntity extends BaseBlockEntity {
 						amount = recipe.getPatterns().size();
 						received.size(amount);
 						received.set(index, true);
-						sync(false);
 						setChanged();
 						return true;
 					}
 					else if(this.recipe.equals(recipe)) {
 						if(!received.getBoolean(index)) {
 							received.set(index, true);
-							sync(false);
 							setChanged();
 							return true;
 						}

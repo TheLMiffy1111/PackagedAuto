@@ -16,7 +16,7 @@ public record SetRecipePacket(Int2ObjectMap<ItemStack> map) implements CustomPac
 
 	public static final Type<SetRecipePacket> TYPE = new Type<>(ResourceLocation.parse("packagedauto:set_recipe"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, SetRecipePacket> STREAM_CODEC = ByteBufCodecs.
-			map(SetRecipePacket::createMap, ByteBufCodecs.VAR_INT, ItemStack.OPTIONAL_STREAM_CODEC).
+			map(SetRecipePacket::createMap, ByteBufCodecs.BYTE.map(Number::intValue, Number::byteValue), ItemStack.OPTIONAL_STREAM_CODEC).
 			map(SetRecipePacket::new, SetRecipePacket::map);
 
 	@Override

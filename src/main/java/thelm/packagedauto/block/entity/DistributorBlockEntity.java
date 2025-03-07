@@ -2,16 +2,25 @@ package thelm.packagedauto.block.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -25,19 +34,25 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.DirectionalGlobalPos;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
 import thelm.packagedauto.inventory.DistributorItemHandler;
+import thelm.packagedauto.item.PackagedAutoItems;
 import thelm.packagedauto.menu.DistributorMenu;
-import thelm.packagedauto.packet.DistributorBeamPacket;
+import thelm.packagedauto.packet.BeamPacket;
+import thelm.packagedauto.packet.DirectionalMarkerPacket;
+import thelm.packagedauto.packet.SizedMarkerPacket;
 import thelm.packagedauto.recipe.IPositionedProcessingPackageRecipeInfo;
 import thelm.packagedauto.util.MiscHelper;
 
-public class DistributorBlockEntity extends BaseBlockEntity implements IPackageCraftingMachine {
+public class DistributorBlockEntity extends BaseBlockEntity implements IPackageCraftingMachine, ISettingsCloneable {
 
 	public static int range = 16;
+	public static int refreshInterval = 4;
 
 	public final Int2ObjectMap<DirectionalGlobalPos> positions = new Int2ObjectArrayMap<>(81);
 	public final Int2ObjectMap<ItemStack> pending = new Int2ObjectArrayMap<>(81);
+	public final Cache<UUID, Long> previewTimes = CacheBuilder.newBuilder().initialCapacity(2).expireAfterWrite(60, TimeUnit.SECONDS).build();
 
 	public DistributorBlockEntity(BlockPos pos, BlockState state) {
 		super(PackagedAutoBlockEntities.DISTRIBUTOR.get(), pos, state);
@@ -50,9 +65,14 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 	}
 
 	@Override
+	public String getConfigTypeName() {
+		return "block.packagedauto.distributor";
+	}
+
+	@Override
 	public void tick() {
 		if(!level.isClientSide) {
-			if(level.getGameTime() % 8 == 0 && !pending.isEmpty()) {
+			if(level.getGameTime() % refreshInterval == 0 && !pending.isEmpty()) {
 				distributeItems();
 			}
 		}
@@ -113,10 +133,11 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 	}
 
 	protected void distributeItems() {
+		List<Vec3> deltas = new ArrayList<>();
 		for(int i : pending.keySet().toIntArray()) {
 			if(!positions.containsKey(i)) {
 				ejectItems();
-				return;
+				break;
 			}
 			BlockPos pos = positions.get(i).blockPos();
 			if(!level.isLoaded(pos)) {
@@ -135,12 +156,11 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 			}
 			else {
 				ejectItems();
-				return;
+				break;
 			}
-			if(!level.isClientSide && stackRem.getCount() < stack.getCount()) {
-				Vec3 source = worldPosition.getCenter();
-				Vec3 target = pos.getCenter().add(dir.getStepX()*0.5, dir.getStepY()*0.5, dir.getStepZ()*0.5);
-				DistributorBeamPacket.sendBeam((ServerLevel)level, source, target.subtract(source), 32);
+			if(stackRem.getCount() < stack.getCount()) {
+				Vec3 delta = Vec3.atLowerCornerOf(pos.subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getNormal()).scale(0.5));
+				deltas.add(delta);	
 			}
 			if(stackRem.isEmpty()) {
 				pending.remove(i);
@@ -148,6 +168,11 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 			else {
 				pending.put(i, stackRem);
 			}
+			setChanged();
+		}
+		if(!deltas.isEmpty()) {
+			Vec3 source = Vec3.atCenterOf(worldPosition);
+			BeamPacket.sendBeams((ServerLevel)level, source, deltas, 0x00FFFF, 6, true, 32);
 			setChanged();
 		}
 	}
@@ -169,12 +194,121 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 		setChanged();
 	}
 
+	public void sendPreview(ServerPlayer player) {
+		long currentTime = level.getGameTime();
+		Long cachedTime = previewTimes.getIfPresent(player.getUUID());
+		if(cachedTime == null || currentTime-cachedTime > 180) {
+			previewTimes.put(player.getUUID(), currentTime);
+			if(!positions.isEmpty()) {
+				List<Vec3> deltas = positions.values().stream().map(globalPos->{
+					BlockPos pos = globalPos.blockPos();
+					Direction dir = globalPos.direction();
+					return Vec3.atLowerCornerOf(pos.subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getNormal()).scale(0.5));
+				}).collect(Collectors.toList());
+				Vec3 source = Vec3.atCenterOf(worldPosition);
+				DirectionalMarkerPacket.sendDirectionalMarkers(player, new ArrayList<>(positions.values()), 0x00FF7F, 200);
+				BeamPacket.sendBeams(player, source, deltas, 0x00FF7F, 200, false);
+			}
+			Vec3 lowerCorner = Vec3.atLowerCornerOf(worldPosition).subtract(range, range, range);
+			Vec3 size = new Vec3(range*2+1, range*2+1, range*2+1);
+			SizedMarkerPacket.sendSizedMarker(player, lowerCorner, size, 0x00FFFF, 200);
+		}
+	}
+
 	@Override
 	public int getComparatorSignal() {
 		if(!pending.isEmpty()) {
 			return 15;
 		}
 		return 0;
+	}
+
+	@Override
+	public boolean loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+		ListTag positionsTag = nbt.getList("positions", 10);
+		if(positionsTag.isEmpty()) {
+			return false;
+		}
+		int requiredCount = positionsTag.size();
+		int availableCount = 0;
+		Inventory playerInventory = player.getInventory();
+		for(int i = 0; i < itemHandler.getSlots(); ++i) {
+			ItemStack stack = itemHandler.getStackInSlot(i);
+			if(!stack.isEmpty()) {
+				if(stack.is(PackagedAutoItems.DISTRIBUTOR_MARKER)) {
+					availableCount += stack.getCount();
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		if(availableCount < requiredCount) {
+			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
+				ItemStack stack = playerInventory.getItem(i);
+				if(!stack.isEmpty() && stack.is(PackagedAutoItems.DISTRIBUTOR_MARKER) && stack.isComponentsPatchEmpty()) {
+					availableCount += stack.getCount();
+				}
+				if(availableCount >= requiredCount) {
+					break;
+				}
+			}
+		}
+		if(availableCount < requiredCount) {
+			return false;
+		}
+		int removedCount = 0;
+		for(int i = 0; i < itemHandler.getSlots(); ++i) {
+			removedCount += itemHandler.getStackInSlot(i).getCount();
+			itemHandler.setStackInSlot(i, ItemStack.EMPTY);
+		}
+		if(removedCount < requiredCount) {
+			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
+				ItemStack stack = playerInventory.getItem(i);
+				if(!stack.isEmpty() && stack.is(PackagedAutoItems.DISTRIBUTOR_MARKER) && stack.isComponentsPatchEmpty()) {
+					removedCount += stack.split(requiredCount - removedCount).getCount();
+				}
+				if(removedCount >= requiredCount) {
+					break;
+				}
+			}
+		}
+		if(removedCount > requiredCount) {
+			ItemStack stack = PackagedAutoItems.DISTRIBUTOR_MARKER.toStack(removedCount-requiredCount);
+			if(!playerInventory.add(stack)) {
+				ItemEntity item = new ItemEntity(level, player.getX(), player.getY(), player.getZ(), stack);
+				item.setThrower(player);
+				level.addFreshEntity(item);
+			}
+		}
+		for(int i = 0; i < requiredCount; ++i) {
+			CompoundTag positionTag = positionsTag.getCompound(i);
+			int index = positionTag.getByte("index");
+			DirectionalGlobalPos globalPos = DirectionalGlobalPos.CODEC.parse(NbtOps.INSTANCE, positionTag).result().get();
+			ItemStack stack = PackagedAutoItems.DISTRIBUTOR_MARKER.toStack();
+			DataComponentPatch patch = DataComponentPatch.builder().
+					set(PackagedAutoDataComponents.MARKER_POS.get(), globalPos).
+					build();
+			stack.applyComponents(patch);
+			itemHandler.setStackInSlot(index, stack);
+		}
+		return true;
+	}
+
+	@Override
+	public boolean saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+		if(positions.isEmpty()) {
+			return false;
+		}
+		ListTag positionsTag = new ListTag();
+		for(Int2ObjectMap.Entry<DirectionalGlobalPos> entry : positions.int2ObjectEntrySet()) {
+			DirectionalGlobalPos pos = entry.getValue();
+			CompoundTag positionTag = (CompoundTag)DirectionalGlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, pos).result().get();
+			positionTag.putByte("index", (byte)entry.getIntKey());
+			positionsTag.add(positionTag);
+		}
+		nbt.put("positions", positionsTag);
+		return true;
 	}
 
 	@Override

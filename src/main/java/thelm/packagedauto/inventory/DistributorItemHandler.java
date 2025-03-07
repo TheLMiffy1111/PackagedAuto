@@ -12,6 +12,7 @@ import net.neoforged.neoforge.items.wrapper.EmptyItemHandler;
 import thelm.packagedauto.api.DirectionalGlobalPos;
 import thelm.packagedauto.block.entity.DistributorBlockEntity;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
+import thelm.packagedauto.item.PackagedAutoItems;
 
 public class DistributorItemHandler extends BaseItemHandler<DistributorBlockEntity> {
 
@@ -32,7 +33,7 @@ public class DistributorItemHandler extends BaseItemHandler<DistributorBlockEnti
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		return stack.has(PackagedAutoDataComponents.MARKER_POS);
+		return stack.is(PackagedAutoItems.DISTRIBUTOR_MARKER);
 	}
 
 	@Override

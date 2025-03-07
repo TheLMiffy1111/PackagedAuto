@@ -7,8 +7,9 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
-import thelm.packagedauto.client.DistributorRenderer;
+import thelm.packagedauto.client.WorldOverlayRenderer;
 import thelm.packagedauto.client.screen.CrafterScreen;
+import thelm.packagedauto.client.screen.CraftingProxyScreen;
 import thelm.packagedauto.client.screen.DistributorScreen;
 import thelm.packagedauto.client.screen.EncoderScreen;
 import thelm.packagedauto.client.screen.FluidPackageFillerScreen;
@@ -30,7 +31,7 @@ public class ClientEventHandler {
 
 	public void onConstruct(IEventBus modEventBus) {
 		modEventBus.register(this);
-		DistributorRenderer.INSTANCE.onConstruct();
+		WorldOverlayRenderer.INSTANCE.onConstruct();
 	}
 
 	@SubscribeEvent
@@ -44,6 +45,14 @@ public class ClientEventHandler {
 					ResourceLocation.parse("packagedauto:bound"), (stack, world, living, seed)->{
 						return stack.has(PackagedAutoDataComponents.MARKER_POS) ? 1F : 0F;
 					});
+			ItemProperties.register(PackagedAutoItems.proxy_marker.get(),
+					ResourceLocation.parse("packagedauto:bound"), (stack, world, living, seed)->{
+						return stack.has(PackagedAutoDataComponents.MARKER_POS) ? 1F : 0F;
+					});
+			ItemProperties.register(PackagedAutoItems.SETTINGS_CLONER.get(),
+					ResourceLocation.parse("packagedauto:filled"), (stack, world, living, seed)->{
+						return stack.has(PackagedAutoDataComponents.CLONER_DATA) ? 1F : 0F;
+					});
 		});
 	}
 
@@ -54,6 +63,7 @@ public class ClientEventHandler {
 		event.register(PackagedAutoMenus.PACKAGER_EXTENSION.get(), PackagerExtensionScreen::new);
 		event.register(PackagedAutoMenus.UNPACKAGER.get(), UnpackagerScreen::new);
 		event.register(PackagedAutoMenus.DISTRIBUTOR.get(), DistributorScreen::new);
+		event.register(PackagedAutoMenus.CRAFTING_PROXY.get(), CraftingProxyScreen::new);
 		event.register(PackagedAutoMenus.CRAFTER.get(), CrafterScreen::new);
 		event.register(PackagedAutoMenus.FLUID_PACKAGE_FILLER.get(), FluidPackageFillerScreen::new);
 		event.register(PackagedAutoMenus.PACKAGING_PROVIDER.get(), PackagingProviderScreen::new);
@@ -61,6 +71,6 @@ public class ClientEventHandler {
 
 	@SubscribeEvent
 	public void onRegisterRenderBuffers(RegisterRenderBuffersEvent event) {
-		DistributorRenderer.INSTANCE.onRegisterRenderBuffers(event);
+		WorldOverlayRenderer.INSTANCE.onRegisterRenderBuffers(event);
 	}
 }

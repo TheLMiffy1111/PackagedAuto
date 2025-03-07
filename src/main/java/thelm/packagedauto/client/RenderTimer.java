@@ -13,14 +13,14 @@ public class RenderTimer {
 
 	private RenderTimer() {
 		mc = Minecraft.getInstance();
-		NeoForge.EVENT_BUS.addListener(this::onClientTickPost);
+		NeoForge.EVENT_BUS.addListener(this::onClientTickPre);
 	}
 
 	public int getTicks() {
 		return ticks;
 	}
 
-	public void onClientTickPost(ClientTickEvent.Post event) {
+	public void onClientTickPre(ClientTickEvent.Pre event) {
 		if(mc.level == null || mc.player == null || mc.isPaused()) {
 			return;
 		}

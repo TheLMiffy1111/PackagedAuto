@@ -6,6 +6,7 @@
 		"packagedauto:packager_extension",
 		"packagedauto:unpackager",
 		"packagedauto:distributor",
+		"packagedauto:crafting_proxy",
 		"packagedauto:crafter",
 		"packagedauto:fluid_package_filler",
 		"packagedauto:packaging_provider"

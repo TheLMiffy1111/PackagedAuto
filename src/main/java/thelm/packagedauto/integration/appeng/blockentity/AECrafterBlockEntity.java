@@ -47,7 +47,7 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 			getMainNode().create(level, worldPosition);
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}

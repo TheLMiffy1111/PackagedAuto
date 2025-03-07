@@ -81,8 +81,12 @@ public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContaine
 
 	@Override
 	protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type) {
-		if(type != ClickType.QUICK_MOVE && (type != ClickType.CLONE || !minecraft.player.isCreative()) &&
-				menu.getCarried().isEmpty() && slot instanceof FalseCopySlot && slot.isActive() && !slot.getItem().isEmpty()) {
+		if(mouseButton == 0 &&
+				type != ClickType.QUICK_MOVE &&
+				menu.getCarried().isEmpty() &&
+				slot instanceof FalseCopySlot &&
+				slot.isActive() &&
+				!slot.getItem().isEmpty()) {
 			if(!hasControlDown() && slot.getItem().has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK)) {
 				minecraft.setScreen(new VolumeAmountSpecifyingScreen(
 						this, minecraft.player.getInventory(), slot.index, slot.getItem().get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK), getVolumeAmountSpecificationLimit(slot)));
@@ -92,7 +96,9 @@ public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContaine
 						this, minecraft.player.getInventory(), slot.index, slot.getItem(), getItemAmountSpecificationLimit(slot)));
 			}
 		}
-		super.slotClicked(slot, slotId, mouseButton, type);
+		else {
+			super.slotClicked(slot, slotId, mouseButton, type);
+		}
 	}
 
 	public int getItemAmountSpecificationLimit(Slot slot) {

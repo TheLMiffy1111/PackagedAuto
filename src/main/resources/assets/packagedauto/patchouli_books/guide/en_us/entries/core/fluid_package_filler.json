@@ -1,0 +1,30 @@
+{
+	"name": "Fluid Package Filler",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:fluid_package_filler",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "The $(item)Fluid Package Filler/$ creates $(l:core/volume_package)Volume Packages/$ filled with fluids.$(p)This machine requires power."
+		},
+		{
+			"type": "patchouli:spotlight",
+			"item": "packagedauto:fluid_package_filler",
+			"link_recipe": true,
+			"title": "Usage",
+			"text": "To use the $(item)Fluid Package Filler/$, place next to a fluid container, and place a template fluid container inside.$(p)You can then specify the amount of fluid the created $(l:core/volume_package)Volume Package/$ should contain."
+		},
+		{
+			"type": "patchouli:text",
+			"title": "Usage (cont.)",
+			"text": "Finally, apply a redstone signal to the machine to create the package.$(p)The created package will be ejected into adjacent inventories."
+		},
+		{
+			"type": "patchouli:crafting",
+			"recipe": "packagedauto:fluid_package_filler",
+			"title": "Crafting"
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 11
+}

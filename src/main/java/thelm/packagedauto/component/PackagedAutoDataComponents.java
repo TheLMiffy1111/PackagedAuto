@@ -12,6 +12,7 @@ import thelm.packagedauto.api.DirectionalGlobalPos;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.PatternType;
+import thelm.packagedauto.api.SettingsClonerData;
 
 public class PackagedAutoDataComponents {
 
@@ -29,6 +30,8 @@ public class PackagedAutoDataComponents {
 			"pattern_type", builder->builder.persistent(PatternType.CODEC).networkSynchronized(PatternType.STREAM_CODEC));
 	public static final DeferredHolder<DataComponentType<?>, DataComponentType<DirectionalGlobalPos>> MARKER_POS = DATA_COMPONENTS.registerComponentType(
 			"marker_pos", builder->builder.persistent(DirectionalGlobalPos.CODEC).networkSynchronized(DirectionalGlobalPos.STREAM_CODEC));
+	public static final DeferredHolder<DataComponentType<?>, DataComponentType<SettingsClonerData>> CLONER_DATA = DATA_COMPONENTS.registerComponentType(
+			"cloner_data", builder->builder.persistent(SettingsClonerData.CODEC).networkSynchronized(SettingsClonerData.STREAM_CODEC).cacheEncoding());
 	public static final DeferredHolder<DataComponentType<?>, DataComponentType<IVolumeStackWrapper>> VOLUME_PACKAGE_STACK = DATA_COMPONENTS.registerComponentType(
 			"volume_package_stack", builder->builder.persistent(IVolumeStackWrapper.CODEC).networkSynchronized(IVolumeStackWrapper.STREAM_CODEC).cacheEncoding());
 }

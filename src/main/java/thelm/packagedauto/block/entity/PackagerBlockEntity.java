@@ -9,7 +9,9 @@ import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -24,16 +26,20 @@ import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.ISettingsCloneable;
+import thelm.packagedauto.component.PackagedAutoDataComponents;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.inventory.PackagerItemHandler;
+import thelm.packagedauto.item.PackagedAutoItems;
 import thelm.packagedauto.menu.PackagerMenu;
 import thelm.packagedauto.util.MiscHelper;
 
-public class PackagerBlockEntity extends BaseBlockEntity {
+public class PackagerBlockEntity extends BaseBlockEntity implements ISettingsCloneable {
 
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean firstTick = true;
@@ -55,6 +61,11 @@ public class PackagerBlockEntity extends BaseBlockEntity {
 	@Override
 	protected Component getDefaultName() {
 		return Component.translatable("block.packagedauto.packager");
+	}
+
+	@Override
+	public String getConfigTypeName() {
+		return "block.packagedauto.packager";
 	}
 
 	@Override
@@ -82,7 +93,7 @@ public class PackagerBlockEntity extends BaseBlockEntity {
 					}
 				}
 			}
-			else if(level.getGameTime() % 8 == 0) {
+			else if(level.getGameTime() % refreshInterval == 0) {
 				if(canStart()) {
 					startProcess();
 					tickProcess();
@@ -90,7 +101,7 @@ public class PackagerBlockEntity extends BaseBlockEntity {
 				}
 			}
 			chargeEnergy();
-			if(level.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % refreshInterval == 0) {
 				if(!itemHandler.getStackInSlot(9).isEmpty()) {
 					ejectItem();
 				}
@@ -295,7 +306,48 @@ public class PackagerBlockEntity extends BaseBlockEntity {
 		return 0;
 	}
 
+	public boolean canPushPattern() {
+		return !isWorking && itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty);
+	}
+
 	public void postPatternChange() {}
+
+	@Override
+	public boolean loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+		mode = Mode.values()[nbt.getByte("mode")];
+		if(nbt.contains("recipes") && itemHandler.getStackInSlot(10).isEmpty()) {
+			Inventory playerInventory = player.getInventory();
+			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
+				ItemStack stack = playerInventory.getItem(i);
+				if(!stack.isEmpty() && stack.is(PackagedAutoItems.RECIPE_HOLDER) && !stack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
+					ItemStack stackCopy = stack.split(1);
+					List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.loadRecipeList(nbt.getList("recipes", 10), registries);
+					if(!recipeList.isEmpty()) {
+						DataComponentPatch patch = DataComponentPatch.builder().
+								set(PackagedAutoDataComponents.RECIPE_LIST.get(), recipeList).
+								build();
+						stackCopy.applyComponents(patch);
+					}
+					itemHandler.setStackInSlot(10, stackCopy);
+					break;
+				}
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+		nbt.putByte("mode", (byte)mode.ordinal());
+		ItemStack listStack = itemHandler.getStackInSlot(10);
+		if(listStack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
+			List<IPackageRecipeInfo> recipeList = listStack.get(PackagedAutoDataComponents.RECIPE_LIST);
+			if(!recipeList.isEmpty()) {
+				nbt.put("recipes", MiscHelper.INSTANCE.saveRecipeList(new ListTag(), recipeList, registries));
+			}
+		}
+		return true;
+	}
 
 	@Override
 	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {

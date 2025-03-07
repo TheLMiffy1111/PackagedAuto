@@ -4,6 +4,7 @@ import appeng.api.AECapabilities;
 import appeng.api.crafting.PatternDetailsHelper;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -19,22 +20,25 @@ import thelm.packagedauto.block.entity.BaseBlockEntity;
 import thelm.packagedauto.block.entity.PackagedAutoBlockEntities;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
 import thelm.packagedauto.config.PackagedAutoConfig;
+import thelm.packagedauto.crafting.PackagedAutoRecipeSerializers;
 import thelm.packagedauto.creativetab.PackagedAutoCreativeTabs;
 import thelm.packagedauto.integration.appeng.AppEngUtil;
 import thelm.packagedauto.integration.appeng.recipe.PackagePatternDetailsDecoder;
 import thelm.packagedauto.item.PackagedAutoItems;
 import thelm.packagedauto.menu.PackagedAutoMenus;
+import thelm.packagedauto.packet.BeamPacket;
 import thelm.packagedauto.packet.ChangeBlockingPacket;
 import thelm.packagedauto.packet.ChangePackagingPacket;
 import thelm.packagedauto.packet.ChangeProvidingPacket;
 import thelm.packagedauto.packet.CycleRecipeTypePacket;
-import thelm.packagedauto.packet.DistributorBeamPacket;
+import thelm.packagedauto.packet.DirectionalMarkerPacket;
 import thelm.packagedauto.packet.LoadRecipeListPacket;
 import thelm.packagedauto.packet.SaveRecipeListPacket;
 import thelm.packagedauto.packet.SetFluidAmountPacket;
 import thelm.packagedauto.packet.SetItemStackPacket;
 import thelm.packagedauto.packet.SetPatternIndexPacket;
 import thelm.packagedauto.packet.SetRecipePacket;
+import thelm.packagedauto.packet.SizedMarkerPacket;
 import thelm.packagedauto.packet.SyncEnergyPacket;
 import thelm.packagedauto.packet.TrackerCountPacket;
 import thelm.packagedauto.recipe.CraftingPackageRecipeType;
@@ -53,16 +57,17 @@ public class CommonEventHandler {
 		return INSTANCE;
 	}
 
-	public void onConstruct(IEventBus modEventBus) {
+	public void onConstruct(IEventBus modEventBus, ModContainer modContainer) {
 		modEventBus.register(this);
 		NeoForge.EVENT_BUS.addListener(this::onServerAboutToStart);
-		PackagedAutoConfig.registerConfig();
+		PackagedAutoConfig.registerConfig(modContainer);
 
 		PackagedAutoBlocks.BLOCKS.register(modEventBus);
 		PackagedAutoItems.ITEMS.register(modEventBus);
 		PackagedAutoBlockEntities.BLOCK_ENTITIES.register(modEventBus);
 		PackagedAutoMenus.MENUS.register(modEventBus);
 		PackagedAutoDataComponents.DATA_COMPONENTS.register(modEventBus);
+		PackagedAutoRecipeSerializers.RECIPE_SERIALIZERS.register(modEventBus);
 		PackagedAutoCreativeTabs.CREATIVE_TABS.register(modEventBus);
 	}
 
@@ -99,6 +104,7 @@ public class CommonEventHandler {
 			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.PACKAGER_EXTENSION.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
 			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.UNPACKAGER.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
 			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.DISTRIBUTOR.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
+			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.CRAFTING_PROXY.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
 			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.CRAFTER.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
 			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.PACKAGING_PROVIDER.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
 		}, ()->()->{}).run();
@@ -127,7 +133,9 @@ public class CommonEventHandler {
 		registrar.playToServer(SetFluidAmountPacket.TYPE, SetFluidAmountPacket.STREAM_CODEC, SetFluidAmountPacket::handle);
 		registrar.playToServer(ChangePackagingPacket.TYPE, ChangePackagingPacket.STREAM_CODEC, ChangePackagingPacket::handle);
 		registrar.playToServer(TrackerCountPacket.TYPE, TrackerCountPacket.STREAM_CODEC, TrackerCountPacket::handle);
-		registrar.playToClient(DistributorBeamPacket.TYPE, DistributorBeamPacket.STREAM_CODEC, DistributorBeamPacket::handle);
+		registrar.playToClient(BeamPacket.TYPE, BeamPacket.STREAM_CODEC, BeamPacket::handle);
+		registrar.playToClient(DirectionalMarkerPacket.TYPE, DirectionalMarkerPacket.STREAM_CODEC, DirectionalMarkerPacket::handle);
+		registrar.playToClient(SizedMarkerPacket.TYPE, SizedMarkerPacket.STREAM_CODEC, SizedMarkerPacket::handle);
 		registrar.playToServer(ChangeProvidingPacket.TYPE, ChangeProvidingPacket.STREAM_CODEC, ChangeProvidingPacket::handle);
 	}
 

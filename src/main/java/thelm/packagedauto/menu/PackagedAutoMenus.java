@@ -26,6 +26,7 @@ public class PackagedAutoMenus {
 	public static final DeferredHolder<MenuType<?>, MenuType<PackagerExtensionMenu>> PACKAGER_EXTENSION = MENUS.register("packager_extension", of(PackagerExtensionMenu::new));
 	public static final DeferredHolder<MenuType<?>, MenuType<UnpackagerMenu>> UNPACKAGER = MENUS.register("unpackager", of(UnpackagerMenu::new));
 	public static final DeferredHolder<MenuType<?>, MenuType<DistributorMenu>> DISTRIBUTOR = MENUS.register("distributor", of(DistributorMenu::new));
+	public static final DeferredHolder<MenuType<?>, MenuType<CraftingProxyMenu>> CRAFTING_PROXY = MENUS.register("crafting_proxy", of(CraftingProxyMenu::new));
 	public static final DeferredHolder<MenuType<?>, MenuType<CrafterMenu>> CRAFTER = MENUS.register("crafter", of(CrafterMenu::new));
 	public static final DeferredHolder<MenuType<?>, MenuType<FluidPackageFillerMenu>> FLUID_PACKAGE_FILLER = MENUS.register("fluid_package_filler", of(FluidPackageFillerMenu::new));
 	public static final DeferredHolder<MenuType<?>, MenuType<PackagingProviderMenu>> PACKAGING_PROVIDER = MENUS.register("packaging_provider", of(PackagingProviderMenu::new));

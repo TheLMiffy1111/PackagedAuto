@@ -102,7 +102,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 
 	class ButtonTrackerCount extends AbstractButton {
 
-		boolean decrease;
+		final boolean decrease;
 
 		public ButtonTrackerCount(boolean decrease, int x, int y) {
 			super(x, y, 8, 18, Component.empty());

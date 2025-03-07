@@ -15,7 +15,6 @@ public class EncoderItemHandler extends BaseItemHandler<EncoderBlockEntity> {
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		// TODO use tags instead
 		return stack.is(PackagedAutoItems.RECIPE_HOLDER);
 	}
 

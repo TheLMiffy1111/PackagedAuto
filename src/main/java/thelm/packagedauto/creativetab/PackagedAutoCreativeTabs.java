@@ -24,6 +24,7 @@ public class PackagedAutoCreativeTabs {
 				output.accept(PackagedAutoItems.PACKAGER_EXTENSION);
 				output.accept(PackagedAutoItems.UNPACKAGER);
 				output.accept(PackagedAutoItems.DISTRIBUTOR);
+				output.accept(PackagedAutoItems.CRAFTING_PROXY);
 				output.accept(PackagedAutoItems.CRAFTER);
 				output.accept(PackagedAutoItems.FLUID_PACKAGE_FILLER);
 				if(ModList.get().isLoaded("ae2")) {
@@ -31,6 +32,8 @@ public class PackagedAutoCreativeTabs {
 				}
 				output.accept(PackagedAutoItems.RECIPE_HOLDER);
 				output.accept(PackagedAutoItems.DISTRIBUTOR_MARKER);
+				output.accept(PackagedAutoItems.proxy_marker);
+				output.accept(PackagedAutoItems.SETTINGS_CLONER);
 				output.accept(PackagedAutoItems.PACKAGE_COMPONENT);
 				if(ModList.get().isLoaded("ae2")) {
 					output.accept(PackagedAutoItems.ME_PACKAGE_COMPONENT);

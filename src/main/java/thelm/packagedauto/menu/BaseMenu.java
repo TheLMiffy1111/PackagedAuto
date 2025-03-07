@@ -166,21 +166,32 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 
 	@Override
 	public void clicked(int slotId, int mouseButton, ClickType clickType, Player player) {
-		if(slotId >= 0 && !getCarried().isEmpty() && slots.get(slotId) instanceof FalseCopySlot slot) {
-			ItemStack toPut = getCarried().copy();
-			ItemStack stack = slot.getItem().copy();
-			switch(mouseButton) {
-			case 0 -> slot.set(toPut);
-			case 1 -> {
-				if(stack.isEmpty()) {
-					toPut.setCount(1);
-					slot.set(toPut);
-				}
-				else if(ItemStack.isSameItemSameComponents(stack, toPut) && stack.getCount() < stack.getMaxStackSize()) {
-					stack.grow(1);
-					slot.set(stack);
-				}
+		if(slotId >= 0 && slots.get(slotId) instanceof FalseCopySlot slot) {
+			if(clickType == ClickType.QUICK_MOVE) {
+				slot.set(ItemStack.EMPTY);
 			}
+			else {
+				ItemStack toPut = getCarried().copy();
+				ItemStack stack = slot.getItem().copy();
+				switch(mouseButton) {
+				case 0 -> slot.set(toPut);
+				case 1 -> {
+					if(stack.isEmpty()) {
+						if(!toPut.isEmpty()) {
+							toPut.setCount(1);
+						}
+						slot.set(toPut);
+					}
+					else if(ItemStack.isSameItemSameComponents(stack, toPut) && stack.getCount() < stack.getMaxStackSize()) {
+						stack.grow(1);
+						slot.set(stack);
+					}
+					else {
+						stack.shrink(1);
+						slot.set(stack);
+					}
+				}
+				}
 			}
 		}
 		else {

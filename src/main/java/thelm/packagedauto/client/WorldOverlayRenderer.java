@@ -23,28 +23,32 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import thelm.packagedauto.api.DirectionalGlobalPos;
-import thelm.packagedauto.block.entity.DistributorBlockEntity;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
+import thelm.packagedauto.item.PackagedAutoItems;
 
 // Based on Botania, Scannables, and AE2
-public class DistributorRenderer {
+public class WorldOverlayRenderer {
 
-	public static final DistributorRenderer INSTANCE = new DistributorRenderer();
+	public static final WorldOverlayRenderer INSTANCE = new WorldOverlayRenderer();
 	public static final Vec3 BLOCK_SIZE = new Vec3(1, 1, 1);
-	public static final int BEAM_LIFETIME = 6;
 
-	private DistributorRenderer() {}
+	private WorldOverlayRenderer() {}
 
+	private Minecraft mc;
+	private List<DirectionalMarkerInfo> directionalMarkers = new LinkedList<>();
+	private List<SizedMarkerInfo> sizedMarkers = new LinkedList<>();
 	private List<BeamInfo> beams = new LinkedList<>();
 
 	public void onConstruct() {
+		mc = Minecraft.getInstance();
+		NeoForge.EVENT_BUS.addListener(this::onClientTickPost);
 		NeoForge.EVENT_BUS.addListener(this::onRenderLevel);
 	}
 
@@ -52,6 +56,21 @@ public class DistributorRenderer {
 		event.registerRenderBuffer(RenderTypeHelper.MARKER_LINE_4);
 		event.registerRenderBuffer(RenderTypeHelper.MARKER_QUAD);
 		event.registerRenderBuffer(RenderTypeHelper.BEAM_LINE_3);
+	}
+
+	public void onClientTickPost(ClientTickEvent.Post event) {
+		if(mc.level == null || mc.player == null || mc.isPaused()) {
+			return;
+		}
+		for(InteractionHand hand : InteractionHand.values()) {
+			ItemStack stack = mc.player.getItemInHand(hand);
+			if(stack.is(PackagedAutoItems.DISTRIBUTOR_MARKER) && stack.has(PackagedAutoDataComponents.MARKER_POS)) {
+				addDirectionalMarkers(List.of(stack.get(PackagedAutoDataComponents.MARKER_POS)), 0x00FFFF, 1);
+			}
+			if(stack.is(PackagedAutoItems.proxy_marker) && stack.has(PackagedAutoDataComponents.MARKER_POS)) {
+				addDirectionalMarkers(List.of(stack.get(PackagedAutoDataComponents.MARKER_POS)), 0xFF7F00, 1);
+			}
+		}
 	}
 
 	public void onRenderLevel(RenderLevelStageEvent event) {
@@ -64,77 +83,102 @@ public class DistributorRenderer {
 		matrixStack.mul(event.getModelViewMatrix());
 		RenderSystem.applyModelViewMatrix();
 
-		Player player = Minecraft.getInstance().player;
-		for(InteractionHand hand : InteractionHand.values()) {
-			ItemStack stack = player.getItemInHand(hand);
-			if(stack.has(PackagedAutoDataComponents.MARKER_POS)) {
-				renderMarker(event.getPoseStack(), stack.get(PackagedAutoDataComponents.MARKER_POS));
-			}
-		}
-
-		renderBeams(event.getPoseStack(), event.getPartialTick());
+		render(event.getPoseStack(), event.getPartialTick());
 
 		matrixStack.popMatrix();
 		RenderSystem.applyModelViewMatrix();
 	}
 
-	public void addBeam(Vec3 source, Vec3 delta) {
-		beams.add(new BeamInfo(source, delta));
+	public void addDirectionalMarkers(List<DirectionalGlobalPos> positions, int color, int lifetime) {
+		directionalMarkers.add(new DirectionalMarkerInfo(positions, color, lifetime));
 	}
 
-	public void renderMarker(PoseStack poseStack, DirectionalGlobalPos globalPos) {
-		if(globalPos == null) {
-			return;
-		}
-		Minecraft mc = Minecraft.getInstance();
-		if(!globalPos.dimension().equals(mc.level.dimension())) {
-			return;
-		}
+	public void addSizedMarker(Vec3 lowerCorner, Vec3 size, int color, int lifetime) {
+		sizedMarkers.add(new SizedMarkerInfo(lowerCorner, size, color, lifetime));
+	}
 
-		int range = 2*DistributorBlockEntity.range+2;
-		BlockPos blockPos = globalPos.blockPos();
+	public void addBeams(Vec3 source, List<Vec3> deltas, int color, int lifetime, boolean fadeout) {
+		beams.add(new BeamInfo(source, deltas, color, lifetime, fadeout));
+	}
+
+	public void render(PoseStack poseStack, DeltaTracker deltaTracker) {
+		int currentTick = RenderTimer.INSTANCE.getTicks();
+		directionalMarkers.removeIf(marker->marker.shouldRemove(currentTick));
+		sizedMarkers.removeIf(marker->marker.shouldRemove(currentTick));
+		beams.removeIf(beam->beam.shouldRemove(currentTick));
+
+		float renderTick = currentTick+deltaTracker.getGameTimeDeltaPartialTick(true);
 		Vec3 cameraPos = mc.gameRenderer.getMainCamera().getPosition();
-		Vec3 distVec = cameraPos.subtract(blockPos.getCenter());
-		if(Doubles.max(Math.abs(distVec.x), Math.abs(distVec.y), Math.abs(distVec.z)) > range) {
-			return;
-		}
 
 		MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
 		VertexConsumer quadBuffer = buffers.getBuffer(RenderTypeHelper.MARKER_QUAD);
 		VertexConsumer lineBuffer = buffers.getBuffer(RenderTypeHelper.MARKER_LINE_4);
 
-		poseStack.pushPose();
-		poseStack.translate(blockPos.getX()-cameraPos.x, blockPos.getY()-cameraPos.y, blockPos.getZ()-cameraPos.z);
+		for(DirectionalMarkerInfo marker : directionalMarkers) {
+			int r = marker.color>>16&0xFF;
+			int g = marker.color>> 8&0xFF;
+			int b = marker.color    &0xFF;
 
-		Direction direction = globalPos.direction();
-		addMarkerVertices(poseStack, quadBuffer, BLOCK_SIZE, direction, 0F, 1F, 1F, 0.5F);
-		addMarkerVertices(poseStack, lineBuffer, BLOCK_SIZE, null, 0F, 1F, 1F, 1F);
+			for(DirectionalGlobalPos globalPos : marker.positions) {
+				if(!globalPos.dimension().equals(mc.level.dimension())) {
+					continue;
+				}
 
-		poseStack.popPose();
+				int range = 64;
+				BlockPos blockPos = globalPos.blockPos();
+				Vec3 distVec = cameraPos.subtract(blockPos.getCenter());
+				if(Doubles.max(Math.abs(distVec.x), Math.abs(distVec.y), Math.abs(distVec.z)) > range) {
+					continue;
+				}
+
+				poseStack.pushPose();
+				poseStack.translate(blockPos.getX()-cameraPos.x, blockPos.getY()-cameraPos.y, blockPos.getZ()-cameraPos.z);
+
+				Direction direction = globalPos.direction();
+				addMarkerVertices(poseStack, quadBuffer, BLOCK_SIZE, direction, r, g, b, 127);
+				addMarkerVertices(poseStack, lineBuffer, BLOCK_SIZE, null, r, g, b, 255);
+
+				poseStack.popPose();
+			}
+		}
 
 		RenderSystem.disableDepthTest();
 		buffers.endBatch();
 		RenderSystem.enableDepthTest();
-	}
 
-	public void renderBeams(PoseStack poseStack, DeltaTracker deltaTracker) {
-		int currentTick = RenderTimer.INSTANCE.getTicks();
-		beams.removeIf(beam->beam.shouldRemove(currentTick));
+		lineBuffer = buffers.getBuffer(RenderTypeHelper.MARKER_LINE_4);
 
-		float renderTick = currentTick+deltaTracker.getGameTimeDeltaPartialTick(true);
-		Minecraft mc = Minecraft.getInstance();
-		Vec3 cameraPos = mc.gameRenderer.getMainCamera().getPosition();
+		for(SizedMarkerInfo marker : sizedMarkers) {
+			Vec3 lowerCorner = marker.lowerCorner;
 
-		MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
-		VertexConsumer lineBuffer = buffers.getBuffer(RenderTypeHelper.BEAM_LINE_3);
+			poseStack.pushPose();
+			poseStack.translate(lowerCorner.x-cameraPos.x, lowerCorner.y-cameraPos.y, lowerCorner.z-cameraPos.z);
+
+			int r = marker.color>>16&0xFF;
+			int g = marker.color>> 8&0xFF;
+			int b = marker.color    &0xFF;
+			addMarkerVertices(poseStack, lineBuffer, marker.size, null, r, g, b, 255);
+
+			poseStack.popPose();
+		}
+
+		buffers.endBatch();
+
+		lineBuffer = buffers.getBuffer(RenderTypeHelper.BEAM_LINE_3);
 
 		for(BeamInfo beam : beams) {
-			Vec3 source = beam.source();
+			Vec3 source = beam.source;
 
 			poseStack.pushPose();
 			poseStack.translate(source.x-cameraPos.x, source.y-cameraPos.y, source.z-cameraPos.z);
 
-			addBeamVertices(poseStack, lineBuffer, beam.delta(), 0F, 1F, 1F, beam.getAlpha(renderTick));
+			int r = beam.color>>16&0xFF;
+			int g = beam.color>> 8&0xFF;
+			int b = beam.color    &0xFF;
+			int a = (int)(beam.getAlpha(renderTick)*255);
+			for(Vec3 delta : beam.deltas) {
+				addBeamVertices(poseStack, lineBuffer, delta, r, g, b, a);
+			}
 
 			poseStack.popPose();
 		}
@@ -142,7 +186,7 @@ public class DistributorRenderer {
 		buffers.endBatch();
 	}
 
-	public void addMarkerVertices(PoseStack poseStack, VertexConsumer buffer, Vec3 delta, Direction direction, float r, float g, float b, float a) {
+	public void addMarkerVertices(PoseStack poseStack, VertexConsumer buffer, Vec3 delta, Direction direction, int r, int g, int b, int a) {
 		Pose pose = poseStack.last();
 		float x = (float)delta.x;
 		float y = (float)delta.y;
@@ -209,7 +253,7 @@ public class DistributorRenderer {
 		}
 	}
 
-	public void addBeamVertices(PoseStack poseStack, VertexConsumer buffer, Vec3 delta, float r, float g, float b, float a) {
+	public void addBeamVertices(PoseStack poseStack, VertexConsumer buffer, Vec3 delta, int r, int g, int b, int a) {
 		Vec3 normalVec = delta.normalize();
 		Pose pose = poseStack.last();
 		float x = (float)delta.x;
@@ -222,25 +266,56 @@ public class DistributorRenderer {
 		buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, xn, yn, zn);
 	}
 
-	public static record BeamInfo(Vec3 source, Vec3 delta, int startTick) {
+	public static record DirectionalMarkerInfo(List<DirectionalGlobalPos> positions, int color, int lifetime, int startTick) {
 
-		public BeamInfo(Vec3 source, Vec3 delta) {
-			this(source, delta, RenderTimer.INSTANCE.getTicks());
+		public DirectionalMarkerInfo(List<DirectionalGlobalPos> positions, int color, int lifetime) {
+			this(positions, color, lifetime, RenderTimer.INSTANCE.getTicks());
 		}
 
 		public boolean shouldRemove(int currentTick) {
 			if(currentTick < startTick) {
 				currentTick += 0x1FFFFF;
 			}
-			return currentTick-startTick >= BEAM_LIFETIME;
+			return currentTick-startTick >= lifetime;
+		}
+	}
+
+	public static record SizedMarkerInfo(Vec3 lowerCorner, Vec3 size, int color, int lifetime, int startTick) {
+
+		public SizedMarkerInfo(Vec3 lowerCorner, Vec3 size, int color, int lifetime) {
+			this(lowerCorner, size, color, lifetime, RenderTimer.INSTANCE.getTicks());
+		}
+
+		public boolean shouldRemove(int currentTick) {
+			if(currentTick < startTick) {
+				currentTick += 0x1FFFFF;
+			}
+			return currentTick-startTick >= lifetime;
+		}
+	}
+
+	public static record BeamInfo(Vec3 source, List<Vec3> deltas, int color, int lifetime, boolean fadeout, int startTick) {
+
+		public BeamInfo(Vec3 source, List<Vec3> deltas, int color, int lifetime, boolean fadeout) {
+			this(source, deltas, color, lifetime, fadeout, RenderTimer.INSTANCE.getTicks());
+		}
+
+		public boolean shouldRemove(int currentTick) {
+			if(currentTick < startTick) {
+				currentTick += 0x1FFFFF;
+			}
+			return currentTick-startTick >= lifetime;
 		}
 
 		public float getAlpha(float renderTick) {
+			if(!fadeout) {
+				return 1;
+			}
 			float diff = renderTick-startTick;
 			if(diff < 0) {
 				diff += 0x1FFFFF;
 			}
-			float factor = diff/BEAM_LIFETIME;
+			float factor = Math.min(diff/lifetime, 1);
 			return 1-factor*factor;
 		}
 	}
@@ -257,7 +332,7 @@ public class DistributorRenderer {
 
 		static {
 			MARKER_LINE_4 = create("packagedauto:marker_line_4",
-					DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 128, false, false,
+					DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 8192, false, false,
 					CompositeState.builder().
 					setShaderState(RENDERTYPE_LINES_SHADER).
 					setLineState(new LineStateShard(OptionalDouble.of(4))).
@@ -267,7 +342,7 @@ public class DistributorRenderer {
 					setCullState(NO_CULL).
 					createCompositeState(false));
 			MARKER_QUAD = create("packagedauto:marker_quad",
-					DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.QUADS, 128, false, false,
+					DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.QUADS, 1024, false, false,
 					CompositeState.builder().
 					setShaderState(RenderStateShard.POSITION_COLOR_SHADER).
 					setLayeringState(VIEW_OFFSET_Z_LAYERING).

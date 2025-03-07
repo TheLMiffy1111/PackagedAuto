@@ -18,19 +18,20 @@ import net.minecraft.world.level.Level;
 import thelm.packagedauto.api.DirectionalGlobalPos;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
 
-public class DistributorMarkerItem extends Item {
+public class MarkerItem extends Item {
 
-	protected DistributorMarkerItem() {
-		super(new Item.Properties());
+	public MarkerItem(Item.Properties properties) {
+		super(properties);
 	}
 
 	@Override
 	public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
-		if(!context.getLevel().isClientSide) {
+		Level level = context.getLevel();
+		if(!level.isClientSide) {
 			if(stack.has(PackagedAutoDataComponents.MARKER_POS)) {
 				return super.onItemUseFirst(stack, context);
 			}
-			DirectionalGlobalPos pos = new DirectionalGlobalPos(context.getLevel().dimension(), context.getClickedPos(), context.getClickedFace());
+			DirectionalGlobalPos pos = new DirectionalGlobalPos(level.dimension(), context.getClickedPos(), context.getClickedFace());
 			DataComponentPatch patch = DataComponentPatch.builder().
 					set(PackagedAutoDataComponents.MARKER_POS.get(), pos).
 					build();
@@ -39,7 +40,6 @@ public class DistributorMarkerItem extends Item {
 				stack1.applyComponents(patch);
 				Player player = context.getPlayer();
 				if(!player.getInventory().add(stack1)) {
-					Level level = context.getLevel();
 					ItemEntity item = new ItemEntity(level, player.getX(), player.getY(), player.getZ(), stack1);
 					item.setThrower(player);
 					level.addFreshEntity(item);
@@ -77,5 +77,6 @@ public class DistributorMarkerItem extends Item {
 			Component dirComponent = Component.translatable("misc.packagedauto."+pos.direction().getName());
 			tooltip.add(Component.translatable("item.packagedauto.distributor_marker.direction", dirComponent));
 		}
+		super.appendHoverText(stack, context, tooltip, isAdvanced);
 	}
 }

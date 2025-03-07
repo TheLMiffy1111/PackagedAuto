@@ -1,0 +1,21 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"result": {
+		"id": "packagedauto:settings_cloner",
+		"count": 1
+	},
+	"ingredients": [
+		{
+			"item": "packagedauto:package_component"
+		},
+		{
+			"tag": "c:dusts/redstone"
+		},
+		{
+			"tag": "c:gems/quartz"
+		},
+		{
+			"tag": "c:gems/quartz"
+		}
+	]
+}

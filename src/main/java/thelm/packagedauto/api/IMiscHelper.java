@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -68,9 +67,13 @@ public interface IMiscHelper {
 
 	ItemStack tryMakeVolumePackage(Object volumeStack);
 
-	CompoundTag saveRecipe(CompoundTag nbt, IPackageRecipeInfo recipe, Provider registries);
+	CompoundTag saveRecipe(CompoundTag nbt, IPackageRecipeInfo recipe, HolderLookup.Provider registries);
 
 	IPackageRecipeInfo loadRecipe(CompoundTag nbt, HolderLookup.Provider registries);
+
+	ListTag saveRecipeList(ListTag tagList, List<IPackageRecipeInfo> recipes, HolderLookup.Provider registries);
+
+	List<IPackageRecipeInfo> loadRecipeList(ListTag tagList, HolderLookup.Provider registries);
 
 	boolean recipeEquals(IPackageRecipeInfo recipeA, Object recipeInternalA, IPackageRecipeInfo recipeB, Object recipeInternalB);
 

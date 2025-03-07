@@ -1,0 +1,32 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"result": {
+		"id": "packagedauto:crafting_proxy",
+		"count": 1
+	},
+	"pattern": [
+		"ECE",
+		"SMS",
+		"OIO"
+	],
+	"key": {
+		"C": {
+			"item": "packagedauto:package_component"
+		},
+		"M": {
+			"item": "packagedauto:proxy_marker"
+		},
+		"S": {
+			"item": "minecraft:shulker_shell"
+		},
+		"E": {
+			"tag": "c:ender_pearls"
+		},
+		"O": {
+			"tag": "c:obsidians/crying"
+		},
+		"I": {
+			"tag": "c:storage_blocks/iron"
+		}
+	}
+}
