@@ -2,6 +2,7 @@ package thelm.packagedauto.item;
 
 import java.util.List;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.MutableComponent;
@@ -28,14 +29,27 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 	}
 
 	@Override
-	public IPackageRecipeList getRecipeList(Level level, ItemStack stack) {
-		return new PackageRecipeList(level, stack.getTag());
+	public IPackageRecipeList getRecipeList(ItemStack stack) {
+		return new PackageRecipeList(stack.getTag());
+	}
+
+	@Override
+	public void setRecipeList(ItemStack stack, IPackageRecipeList recipeList) {
+		stack.getOrCreateTag().remove("Recipes");
+		if(recipeList != null) {
+			recipeList.save(stack.getTag());
+		}
+		if(stack.getTag().isEmpty()) {
+			stack.setTag(null);
+		}
 	}
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
 		if(!level.isClientSide && player.isShiftKeyDown()) {
-			return InteractionResultHolder.success(new ItemStack(INSTANCE, player.getItemInHand(hand).getCount()));
+			ItemStack stack = player.getItemInHand(hand).copy();
+			setRecipeList(stack, null);
+			return InteractionResultHolder.success(stack);
 		}
 		return super.use(level, player, hand);
 	}
@@ -43,7 +57,7 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 	@Override
 	public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag isAdvanced) {
 		if(stack.hasTag()) {
-			List<IPackageRecipeInfo> recipeList = getRecipeList(level, stack).getRecipeList();
+			List<IPackageRecipeInfo> recipeList = getRecipeList(stack).getRecipeList();
 			tooltip.add(Component.translatable("item.packagedauto.recipe_holder.recipes"));
 			for(IPackageRecipeInfo recipe : recipeList) {
 				MutableComponent component = recipe.getRecipeType().getDisplayName().append(": ");
@@ -65,5 +79,10 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 			}
 		}
 		super.appendHoverText(stack, level, tooltip, isAdvanced);
+	}
+
+	public boolean isFilled(ItemStack stack) {
+		CompoundTag nbt = stack.getTag();
+		return nbt != null && !nbt.getList("Recipes", 10).isEmpty();
 	}
 }

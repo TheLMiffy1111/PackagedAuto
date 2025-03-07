@@ -33,6 +33,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static int refreshInterval = 4;
 
 	public boolean firstTick = true;
 	public boolean isWorking = false;
@@ -85,7 +86,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 				}
 			}
 			chargeEnergy();
-			if(level.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % refreshInterval == 0) {
 				if(!itemHandler.getStackInSlot(1).isEmpty()) {
 					ejectItem();
 				}

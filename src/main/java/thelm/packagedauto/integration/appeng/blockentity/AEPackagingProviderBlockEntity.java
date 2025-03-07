@@ -1,6 +1,7 @@
 package thelm.packagedauto.integration.appeng.blockentity;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -57,6 +58,7 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 	public boolean firstTick = true;
 	public IActionSource source;
 	public IManagedGridNode gridNode;
+	public int roundRobinIndex = 0;
 
 	public AEPackagingProviderBlockEntity(BlockPos pos, BlockState state) {
 		super(pos, state);
@@ -179,6 +181,13 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 		setChanged();
 	}
 
+	@Override
+	public void onStateChanged(AEPackagingProviderBlockEntity nodeOwner, IGridNode node, State state) {
+		if(state == State.POWER || state == State.CHANNEL) {
+			postPatternChange();
+		}
+	}
+
 	public IManagedGridNode getMainNode() {
 		if(gridNode == null) {
 			gridNode = GridHelper.createManagedNode(this, this);
@@ -219,6 +228,7 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 				if(request - energyService.extractAEPower(request, Actionable.SIMULATE, PowerMultiplier.CONFIG) > 0.0001) {
 					return false;
 				}
+				energyService.extractAEPower(request, Actionable.MODULATE, PowerMultiplier.CONFIG);
 				currentPattern = pattern.pattern;
 				return true;
 			}
@@ -228,10 +238,13 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 					return false;
 				}
 				if(recipe.getRecipeType().hasMachine()) {
-					for(Direction direction : Direction.values()) {
+					List<Direction> directions = Lists.newArrayList(Direction.values());
+					Collections.rotate(directions, roundRobinIndex);
+					for(Direction direction : directions) {
 						if(level.getBlockEntity(worldPosition.relative(direction)) instanceof IPackageCraftingMachine machine) {
 							if(!machine.isBusy() && machine.acceptPackage(recipe, Lists.transform(recipe.getInputs(), ItemStack::copy), direction.getOpposite())) {
-								energyService.extractAEPower(request, Actionable.SIMULATE, PowerMultiplier.CONFIG);
+								energyService.extractAEPower(request, Actionable.MODULATE, PowerMultiplier.CONFIG);
+								roundRobinIndex = (roundRobinIndex+1) % 6;
 								return true;
 							}
 						}
@@ -241,7 +254,9 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 				else {
 					List<ItemStack> toSend = new ArrayList<>();
 					recipe.getInputs().stream().map(ItemStack::copy).forEach(toSend::add);
-					dir:for(Direction direction : Direction.values()) {
+					List<Direction> directions = Lists.newArrayList(Direction.values());
+					Collections.rotate(directions, roundRobinIndex);
+					dir:for(Direction direction : directions) {
 						BlockEntity blockEntity = level.getBlockEntity(worldPosition.relative(direction));
 						if(!validSendTarget(blockEntity, direction.getOpposite())) {
 							continue;
@@ -277,9 +292,11 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 							acceptsAll &= stackRem.getCount() < stack.getCount();
 						}
 						if(acceptsAll) {
+							energyService.extractAEPower(request, Actionable.MODULATE, PowerMultiplier.CONFIG);
 							sendDirection = direction;
 							this.toSend.addAll(toSend);
 							sendOrdered = recipe.getRecipeType().isOrdered();
+							roundRobinIndex = (roundRobinIndex+1) % 6;
 							sendUnpackaging();
 							return true;
 						}
@@ -293,6 +310,7 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 
 	protected boolean validSendTarget(BlockEntity blockEntity, Direction direction) {
 		return blockEntity != null &&
+				!(blockEntity instanceof IPackageCraftingMachine) &&
 				!(blockEntity instanceof PackagerBlockEntity) &&
 				!(blockEntity instanceof PackagerExtensionBlockEntity) &&
 				!(blockEntity instanceof UnpackagerBlockEntity) &&
@@ -306,24 +324,29 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 
 	@Override
 	public List<IPatternDetails> getAvailablePatterns() {
-		List<IPatternDetails> patterns = new ArrayList<>();
-		if(provideDirect) {
-			recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).
-			map(pattern->new DirectCraftingPatternDetails(pattern)).
-			forEach(patterns::add);
+		if(getMainNode().isActive()) {
+			List<IPatternDetails> patterns = new ArrayList<>();
+			if(provideDirect) {
+				recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).
+				map(pattern->new DirectCraftingPatternDetails(pattern)).
+				forEach(patterns::add);
+			}
+			if(providePackaging) {
+				recipeList.stream().filter(IPackageRecipeInfo::isValid).
+				flatMap(recipe->Streams.concat(recipe.getPatterns().stream(), recipe.getExtraPatterns().stream())).
+				map(pattern->new PackageCraftingPatternDetails(pattern)).
+				forEach(patterns::add);
+			}
+			if(provideUnpackaging) {
+				recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).
+				map(pattern->new RecipeCraftingPatternDetails(pattern)).
+				forEach(patterns::add);
+			}
+			return patterns;
 		}
-		if(providePackaging) {
-			recipeList.stream().filter(IPackageRecipeInfo::isValid).
-			flatMap(recipe->Streams.concat(recipe.getPatterns().stream(), recipe.getExtraPatterns().stream())).
-			map(pattern->new PackageCraftingPatternDetails(pattern)).
-			forEach(patterns::add);
+		else {
+			return List.of();
 		}
-		if(provideUnpackaging) {
-			recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).
-			map(pattern->new RecipeCraftingPatternDetails(pattern)).
-			forEach(patterns::add);
-		}
-		return patterns;
 	}
 
 	@Override

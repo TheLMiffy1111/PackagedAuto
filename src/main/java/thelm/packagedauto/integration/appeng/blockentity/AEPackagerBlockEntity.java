@@ -30,6 +30,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import thelm.packagedauto.block.PackagerBlock;
 import thelm.packagedauto.block.entity.PackagerBlockEntity;
@@ -51,7 +52,7 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 			getMainNode().create(level, worldPosition);
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -87,6 +88,13 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 		setChanged();
 	}
 
+	@Override
+	public void onStateChanged(AEPackagerBlockEntity nodeOwner, IGridNode node, State state) {
+		if(state == State.POWER || state == State.CHANNEL) {
+			postPatternChange();
+		}
+	}
+
 	public IManagedGridNode getMainNode() {
 		if(gridNode == null) {
 			gridNode = GridHelper.createManagedNode(this, this);
@@ -111,17 +119,35 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 
 	@Override
 	public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
-		if(!isBusy() && patternDetails instanceof PackageCraftingPatternDetails pattern) {
-			ItemStack slotStack = itemHandler.getStackInSlot(9);
+		if(getMainNode().isActive() && !isBusy() && patternDetails instanceof PackageCraftingPatternDetails pattern) {
 			ItemStack outputStack = pattern.pattern.getOutput();
-			if(slotStack.isEmpty() || ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
-				currentPattern = pattern.pattern;
-				lockPattern = true;
-				List<ItemStack> inputs = pattern.pattern.getInputs();
-				for(int i = 0; i < inputs.size(); ++i) {
-					itemHandler.setStackInSlot(i, inputs.get(i).copy());
+			List<ItemStack> inputs = pattern.pattern.getInputs();
+			if(canPushPattern()) {
+				ItemStack slotStack = itemHandler.getStackInSlot(9);
+				if(slotStack.isEmpty() || ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
+					currentPattern = pattern.pattern;
+					lockPattern = true;
+					for(int i = 0; i < inputs.size(); ++i) {
+						itemHandler.setStackInSlot(i, inputs.get(i).copy());
+					}
+					return true;
 				}
-				return true;
+			}
+			for(BlockPos posP : BlockPos.betweenClosed(worldPosition.offset(-1, -1, -1), worldPosition.offset(1, 1, 1))) {
+				BlockEntity blockEntity = level.getBlockEntity(posP);
+				if(blockEntity instanceof AEPackagerExtensionBlockEntity extension) {
+					if(extension.packager == this && extension.getMainNode().isActive() && getMainNode().getGrid() == extension.getMainNode().getGrid() && extension.canPushPattern()) {
+						ItemStack slotStack = extension.getItemHandler().getStackInSlot(9);
+						if(slotStack.isEmpty() || ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
+							extension.currentPattern = pattern.pattern;
+							extension.lockPattern = true;
+							for(int i = 0; i < inputs.size(); ++i) {
+								itemHandler.setStackInSlot(i, inputs.get(i).copy());
+							}
+							return true;
+						}
+					}
+				}
 			}
 		}
 		return false;
@@ -129,13 +155,30 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 
 	@Override
 	public boolean isBusy() {
-		return isWorking || !itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty);
+		if(canPushPattern()) {
+			return false;
+		}
+		for(BlockPos posP : BlockPos.betweenClosed(worldPosition.offset(-1, -1, -1), worldPosition.offset(1, 1, 1))) {
+			BlockEntity blockEntity = level.getBlockEntity(posP);
+			if(blockEntity instanceof AEPackagerExtensionBlockEntity extension) {
+				if(extension.packager == this && getMainNode().getGrid() == extension.getMainNode().getGrid() && extension.canPushPattern()) {
+					return false;
+				}
+			}
+		}
+		return true;
 	}
 
 	@Override
 	public List<IPatternDetails> getAvailablePatterns() {
-		return patternList.stream().<IPatternDetails>map(pattern->new PackageCraftingPatternDetails(pattern)).toList();
+		if(getMainNode().isActive()) {
+			return patternList.stream().<IPatternDetails>map(pattern->new PackageCraftingPatternDetails(pattern)).toList();
+		}
+		else {
+			return List.of();
+		}
 	}
+
 
 	@Override
 	protected void ejectItem() {

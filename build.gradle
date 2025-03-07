@@ -77,7 +77,7 @@ def specVersion = "3"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "3.4.9.29"
+version = "3.4.10.30"
 
 archivesBaseName = "${modName}-${mcVersion}"
 
@@ -115,22 +115,23 @@ dependencies {
 	forge "net.minecraftforge:forge:1.20.1-47.3.7"
 
 	// Dependencies
-	modImplementation("mezz.jei:jei-1.20.1-forge:15.20.0.105") {transitive = false}
-	modImplementation "dev.emi:emi-forge:1.1.18+1.20.1"
-	modImplementation "appeng:appliedenergistics2-forge:15.2.13"
-	modImplementation "vazkii.patchouli:Patchouli:1.20.1-84-FORGE"
+	modImplementation("mezz.jei:jei-1.20.1-forge:15.20.0.106") {transitive = false}
+	modImplementation "dev.emi:emi-forge:1.1.20+1.20.1"
+	modImplementation "appeng:appliedenergistics2-forge:15.3.3"
+	modImplementation "vazkii.patchouli:Patchouli:1.20.1-84.1-FORGE"
+	modImplementation "org.appliedenergistics:guideme:20.1.3"
 	modImplementation "curse.maven:mouse-tweaks-60089:5338457"
 
 	// Testing
 	modImplementation "curse.maven:cucumber-272335:5587888"
-	modImplementation "curse.maven:extended-crafting-268387:5228960"
-	modImplementation "mekanism:Mekanism:1.20.1-10.4.13.69"
+	modImplementation "curse.maven:extended-crafting-268387:6034128"
+	modImplementation "mekanism:Mekanism:1.20.1-10.4.14.71"
 	modImplementation "curse.maven:applied-mekanistics-574300:4842281"
 
 	//Performance
 	modImplementation "curse.maven:yeetusexperimentus-635427:4680832"
 	implementation "io.github.llamalad7:mixinextras-forge:0.3.6"
-	modImplementation "curse.maven:modernfix-790626:5986634"
+	modImplementation "curse.maven:modernfix-790626:6125143"
 	modImplementation "curse.maven:ferritecore-429235:4810975"
 }
 
@@ -180,13 +181,13 @@ publishMods {
 		accessToken = providers.gradleProperty("curseforge.token")
 		projectId = "308380"
 		minecraftVersions.add(mcVersion)
-		optional "applied-energistics-2"
+		optional "applied-energistics-2", "jei", "patchouli"
 	}
 
 	modrinth {
 		accessToken = providers.gradleProperty("modrinth.token")
 		projectId = "ugIdhQx4"
 		minecraftVersions.add(mcVersion)
-		optional "ae2"
+		optional "ae2", "jei", "patchouli"
 	}
 }

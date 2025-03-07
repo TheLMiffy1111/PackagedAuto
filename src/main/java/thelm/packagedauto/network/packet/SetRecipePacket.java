@@ -27,8 +27,8 @@ public record SetRecipePacket(Int2ObjectMap<ItemStack> map) {
 	}
 
 	public static SetRecipePacket decode(FriendlyByteBuf buf) {
-		Int2ObjectMap<ItemStack> map = new Int2ObjectOpenHashMap<>();
 		int size = buf.readByte();
+		Int2ObjectMap<ItemStack> map = new Int2ObjectOpenHashMap<>(size);
 		for(int i = 0; i < size; ++i) {
 			int index = buf.readByte();
 			ItemStack stack = MiscHelper.INSTANCE.readItemWithLargeCount(buf);

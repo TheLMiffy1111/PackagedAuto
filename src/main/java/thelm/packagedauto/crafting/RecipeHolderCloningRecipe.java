@@ -1,0 +1,93 @@
+package thelm.packagedauto.crafting;
+
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SimpleCraftingRecipeSerializer;
+import net.minecraft.world.level.Level;
+import thelm.packagedauto.api.IPackageRecipeList;
+import thelm.packagedauto.item.RecipeHolderItem;
+
+public class RecipeHolderCloningRecipe extends CustomRecipe {
+
+	public static final RecipeSerializer<RecipeHolderCloningRecipe> SERIALIZER = new SimpleCraftingRecipeSerializer<>(RecipeHolderCloningRecipe::new);
+
+	public RecipeHolderCloningRecipe(ResourceLocation id, CraftingBookCategory category) {
+		super(id, category);
+	}
+
+	@Override
+	public RecipeSerializer<?> getSerializer() {
+		return SERIALIZER;
+	}
+
+	@Override
+	public boolean matches(CraftingContainer container, Level level) {
+		IPackageRecipeList template = null;
+		int copyCount = 0;
+		for(int i = 0; i < container.getContainerSize(); ++i) {
+			ItemStack stack = container.getItem(i);
+			if(!stack.isEmpty()) {
+				if(stack.is(RecipeHolderItem.INSTANCE)) {
+					IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stack);
+					if(!recipeListObj.getRecipeList().isEmpty()) {
+						if(template != null) {
+							return false;
+						}
+						template = recipeListObj;
+					}
+					else {
+						++copyCount;
+					}
+				}
+				else {
+					return false;
+				}
+			}
+		}
+		return template != null && copyCount > 0;
+	}
+
+	@Override
+	public ItemStack assemble(CraftingContainer container, RegistryAccess registryAccess) {
+		IPackageRecipeList template = null;
+		int copyCount = 0;
+		for(int i = 0; i < container.getContainerSize(); ++i) {
+			ItemStack stack = container.getItem(i);
+			if(!stack.isEmpty()) {
+				if(stack.is(RecipeHolderItem.INSTANCE)) {
+					IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stack);
+					if(!recipeListObj.getRecipeList().isEmpty()) {
+						if(template != null) {
+							return ItemStack.EMPTY;
+						}
+						template = recipeListObj;
+					}
+					else {
+						++copyCount;
+					}
+				}
+				else {
+					return ItemStack.EMPTY;
+				}
+			}
+		}
+		if(template != null && copyCount > 0) {
+			ItemStack result = new ItemStack(RecipeHolderItem.INSTANCE, copyCount+1);
+			RecipeHolderItem.INSTANCE.setRecipeList(result, template);
+			return result;
+		}
+		else {
+			return ItemStack.EMPTY;
+		}
+	}
+
+	@Override
+	public boolean canCraftInDimensions(int width, int height) {
+		return width*height >= 2;
+	}
+}

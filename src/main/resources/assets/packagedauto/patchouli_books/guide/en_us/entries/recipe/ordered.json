@@ -1,0 +1,13 @@
+{
+	"name": "Ordered Processing",
+	"category": "packagedauto:recipe",
+	"icon": "minecraft:brewing_stand",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "$(thing)Ordered Processing/$ is a processing recipe type that preserves ingredient order.$(p)When encoded, outputs will be sorted and stacked.$(p)When unpackaged, items will be inserted into adjacent inventories in the encoded order, and will only be inserted into empty slots."
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 102
+}

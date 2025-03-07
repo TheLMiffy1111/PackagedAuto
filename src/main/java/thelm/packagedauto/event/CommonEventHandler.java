@@ -7,6 +7,7 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
@@ -19,6 +20,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import thelm.packagedauto.block.CrafterBlock;
+import thelm.packagedauto.block.CraftingProxyBlock;
 import thelm.packagedauto.block.DistributorBlock;
 import thelm.packagedauto.block.EncoderBlock;
 import thelm.packagedauto.block.FluidPackageFillerBlock;
@@ -27,6 +29,7 @@ import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.block.PackagingProviderBlock;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.block.entity.CrafterBlockEntity;
+import thelm.packagedauto.block.entity.CraftingProxyBlockEntity;
 import thelm.packagedauto.block.entity.DistributorBlockEntity;
 import thelm.packagedauto.block.entity.EncoderBlockEntity;
 import thelm.packagedauto.block.entity.FluidPackageFillerBlockEntity;
@@ -35,13 +38,19 @@ import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 import thelm.packagedauto.block.entity.PackagingProviderBlockEntity;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
 import thelm.packagedauto.config.PackagedAutoConfig;
+import thelm.packagedauto.crafting.DistributorMarkerCloningRecipe;
+import thelm.packagedauto.crafting.ProxyMarkerCloningRecipe;
+import thelm.packagedauto.crafting.RecipeHolderCloningRecipe;
 import thelm.packagedauto.integration.appeng.recipe.PackagePatternDetailsDecoder;
 import thelm.packagedauto.item.DistributorMarkerItem;
 import thelm.packagedauto.item.MiscItem;
 import thelm.packagedauto.item.PackageItem;
+import thelm.packagedauto.item.ProxyMarkerItem;
 import thelm.packagedauto.item.RecipeHolderItem;
+import thelm.packagedauto.item.SettingsClonerItem;
 import thelm.packagedauto.item.VolumePackageItem;
 import thelm.packagedauto.menu.CrafterMenu;
+import thelm.packagedauto.menu.CraftingProxyMenu;
 import thelm.packagedauto.menu.DistributorMenu;
 import thelm.packagedauto.menu.EncoderMenu;
 import thelm.packagedauto.menu.FluidPackageFillerMenu;
@@ -79,6 +88,7 @@ public class CommonEventHandler {
 		blockRegister.register("packager_extension", ()->PackagerExtensionBlock.INSTANCE);
 		blockRegister.register("unpackager", ()->UnpackagerBlock.INSTANCE);
 		blockRegister.register("distributor", ()->DistributorBlock.INSTANCE);
+		blockRegister.register("crafting_proxy", ()->CraftingProxyBlock.INSTANCE);
 		blockRegister.register("crafter", ()->CrafterBlock.INSTANCE);
 		blockRegister.register("fluid_package_filler", ()->FluidPackageFillerBlock.INSTANCE);
 		blockRegister.register("packaging_provider", ()->PackagingProviderBlock.INSTANCE);
@@ -90,11 +100,14 @@ public class CommonEventHandler {
 		itemRegister.register("packager_extension", ()->PackagerExtensionBlock.ITEM_INSTANCE);
 		itemRegister.register("unpackager", ()->UnpackagerBlock.ITEM_INSTANCE);
 		itemRegister.register("distributor", ()->DistributorBlock.ITEM_INSTANCE);
+		itemRegister.register("crafting_proxy", ()->CraftingProxyBlock.ITEM_INSTANCE);
 		itemRegister.register("crafter", ()->CrafterBlock.ITEM_INSTANCE);
 		itemRegister.register("fluid_package_filler", ()->FluidPackageFillerBlock.ITEM_INSTANCE);
 		itemRegister.register("packaging_provider", ()->PackagingProviderBlock.ITEM_INSTANCE);
 		itemRegister.register("recipe_holder", ()->RecipeHolderItem.INSTANCE);
 		itemRegister.register("distributor_marker", ()->DistributorMarkerItem.INSTANCE);
+		itemRegister.register("proxy_marker", ()->ProxyMarkerItem.INSTANCE);
+		itemRegister.register("settings_cloner", ()->SettingsClonerItem.INSTANCE);
 		itemRegister.register("package", ()->PackageItem.INSTANCE);
 		itemRegister.register("volume_package", ()->VolumePackageItem.INSTANCE);
 		itemRegister.register("package_component", ()->MiscItem.PACKAGE_COMPONENT);
@@ -107,6 +120,7 @@ public class CommonEventHandler {
 		blockEntityRegister.register("packager_extension", ()->PackagerExtensionBlockEntity.TYPE_INSTANCE);
 		blockEntityRegister.register("unpackager", ()->UnpackagerBlockEntity.TYPE_INSTANCE);
 		blockEntityRegister.register("distributor", ()->DistributorBlockEntity.TYPE_INSTANCE);
+		blockEntityRegister.register("crafting_proxy", ()->CraftingProxyBlockEntity.TYPE_INSTANCE);
 		blockEntityRegister.register("crafter", ()->CrafterBlockEntity.TYPE_INSTANCE);
 		blockEntityRegister.register("fluid_package_filler", ()->FluidPackageFillerBlockEntity.TYPE_INSTANCE);
 		blockEntityRegister.register("packaging_provider", ()->PackagingProviderBlockEntity.TYPE_INSTANCE);
@@ -118,9 +132,16 @@ public class CommonEventHandler {
 		menuRegister.register("packager_extension", ()->PackagerExtensionMenu.TYPE_INSTANCE);
 		menuRegister.register("unpackager", ()->UnpackagerMenu.TYPE_INSTANCE);
 		menuRegister.register("distributor", ()->DistributorMenu.TYPE_INSTANCE);
+		menuRegister.register("crafting_proxy", ()->CraftingProxyMenu.TYPE_INSTANCE);
 		menuRegister.register("crafter", ()->CrafterMenu.TYPE_INSTANCE);
 		menuRegister.register("fluid_package_filler", ()->FluidPackageFillerMenu.TYPE_INSTANCE);
 		menuRegister.register("packaging_provider", ()->PackagingProviderMenu.TYPE_INSTANCE);
+
+		DeferredRegister<RecipeSerializer<?>> recipeSerializerRegister = DeferredRegister.create(Registries.RECIPE_SERIALIZER, "packagedauto");
+		recipeSerializerRegister.register(modEventBus);
+		recipeSerializerRegister.register("recipe_holder_cloning", ()->RecipeHolderCloningRecipe.SERIALIZER);
+		recipeSerializerRegister.register("distributor_marker_cloning", ()->DistributorMarkerCloningRecipe.SERIALIZER);
+		recipeSerializerRegister.register("proxy_marker_cloning", ()->ProxyMarkerCloningRecipe.SERIALIZER);
 
 		DeferredRegister<CreativeModeTab> creativeTabRegister = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, "packagedauto");
 		creativeTabRegister.register(modEventBus);
@@ -133,6 +154,7 @@ public class CommonEventHandler {
 					output.accept(PackagerExtensionBlock.ITEM_INSTANCE);
 					output.accept(UnpackagerBlock.ITEM_INSTANCE);
 					output.accept(DistributorBlock.ITEM_INSTANCE);
+					output.accept(CraftingProxyBlock.ITEM_INSTANCE);
 					output.accept(CrafterBlock.ITEM_INSTANCE);
 					output.accept(FluidPackageFillerBlock.ITEM_INSTANCE);
 					if(ModList.get().isLoaded("ae2")) {
@@ -140,6 +162,8 @@ public class CommonEventHandler {
 					}
 					output.accept(RecipeHolderItem.INSTANCE);
 					output.accept(DistributorMarkerItem.INSTANCE);
+					output.accept(ProxyMarkerItem.INSTANCE);
+					output.accept(SettingsClonerItem.INSTANCE);
 					output.accept(MiscItem.PACKAGE_COMPONENT);
 					if(ModList.get().isLoaded("ae2")) {
 						output.accept(MiscItem.ME_PACKAGE_COMPONENT);

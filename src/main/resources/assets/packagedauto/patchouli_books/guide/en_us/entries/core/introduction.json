@@ -1,0 +1,19 @@
+{
+	"name": "Introduction",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:package",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "$(#822)PackagedAuto/$ uses $(thing)packages/$ of items to ease certain crafting tasks.$(p)To start, you will need to encode $(l:core/recipe_holder)Recipe Pattern Holders/$ with a $(l:core/encoder)Package Recipe Encoder/$.$(br)You can then use the encoded holders to tell $(l:core/packager)Packagers/$ what $(l:core/package)Recipe Packages/$ they can make, and these packages can be unpackaged in the $(l:core/unpackager)Unpackager/$."
+		},
+		{
+			"type": "patchouli:text",
+			"flag": "mod:ae2",
+			"title": "AE2 Integration",
+			"text": "Much of $(#822)PackagedAuto/$ are designed with AE2 integration in mind, check entries for machines to see what functionality is added when connected to $(thing)ME Networks/$."
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 0
+}

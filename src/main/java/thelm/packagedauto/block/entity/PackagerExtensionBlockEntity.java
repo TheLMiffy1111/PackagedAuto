@@ -25,7 +25,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
-import thelm.packagedauto.api.IPackageRecipeListItem;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.integration.appeng.blockentity.AEPackagerExtensionBlockEntity;
@@ -33,7 +33,7 @@ import thelm.packagedauto.inventory.PackagerExtensionItemHandler;
 import thelm.packagedauto.menu.PackagerExtensionMenu;
 import thelm.packagedauto.util.MiscHelper;
 
-public class PackagerExtensionBlockEntity extends BaseBlockEntity {
+public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISettingsCloneable {
 
 	public static final BlockEntityType<PackagerExtensionBlockEntity> TYPE_INSTANCE = BlockEntityType.Builder.
 			of(MiscHelper.INSTANCE.<BlockEntityType.BlockEntitySupplier<PackagerExtensionBlockEntity>>conditionalSupplier(
@@ -44,11 +44,13 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean firstTick = true;
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
+	public PackagerBlockEntity packager;
 	public IItemHandlerModifiable listStackItemHandler = new ItemStackHandler(1);
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
@@ -66,6 +68,11 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	@Override
 	protected Component getDefaultName() {
 		return Component.translatable("block.packagedauto.packager_extension");
+	}
+
+	@Override
+	public String getConfigTypeName() {
+		return "block.packagedauto.packager";
 	}
 
 	@Override
@@ -91,7 +98,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 					}
 				}
 			}
-			else if(level.getGameTime() % 8 == 0) {
+			else if(level.getGameTime() % refreshInterval == 0) {
 				if(canStart()) {
 					startProcess();
 					tickProcess();
@@ -99,7 +106,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 				}
 			}
 			chargeEnergy();
-			if(level.getGameTime() % 8 == 0) {
+			if(level.getGameTime() % refreshInterval == 0) {
 				if(!itemHandler.getStackInSlot(9).isEmpty()) {
 					ejectItem();
 				}
@@ -183,26 +190,16 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 	}
 
 	public void updatePatternList() {
+		packager = null;
+		listStackItemHandler.setStackInSlot(0, ItemStack.EMPTY);
 		patternList.clear();
 		if(level != null) {
 			for(BlockPos posP : BlockPos.betweenClosed(worldPosition.offset(-1, -1, -1), worldPosition.offset(1, 1, 1))) {
 				if(level.getBlockEntity(posP) instanceof PackagerBlockEntity packager) {
+					this.packager = packager;
 					ItemStack listStack = packager.itemHandler.getStackInSlot(10);
 					listStackItemHandler.setStackInSlot(0, listStack);
-					if(listStack.getItem() instanceof IPackageRecipeListItem listItem) {
-						listItem.getRecipeList(level, listStack).getRecipeList().stream().
-						filter(IPackageRecipeInfo::isValid).forEach(recipe->{
-							recipe.getPatterns().forEach(patternList::add);
-							recipe.getExtraPatterns().forEach(patternList::add);
-						});
-					}
-					else if(listStack.getItem() instanceof IPackageItem packageItem) {
-						IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
-						int index = packageItem.getIndex(listStack);
-						if(recipe != null && recipe.isValid() && recipe.validPatternIndex(index)) {
-							patternList.add(recipe.getPatterns().get(index));
-						}
-					}
+					patternList.addAll(packager.patternList);
 					disjoint = switch(mode) {
 					case EXACT -> false;
 					case DISJOINT -> MiscHelper.INSTANCE.arePatternsDisjoint(patternList);
@@ -210,9 +207,6 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 					};
 					break;
 				}
-			}
-			if(!level.isClientSide) {
-				postPatternChange();
 			}
 		}
 	}
@@ -334,7 +328,21 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity {
 		return 0;
 	}
 
-	protected void postPatternChange() {}
+	public boolean canPushPattern() {
+		return !isWorking && itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty);
+	}
+
+	@Override
+	public boolean loadConfig(CompoundTag nbt, Player player) {
+		mode = PackagerBlockEntity.Mode.values()[nbt.getByte("Mode")];
+		return true;
+	}
+
+	@Override
+	public boolean saveConfig(CompoundTag nbt, Player player) {
+		nbt.putByte("Mode", (byte)mode.ordinal());
+		return true;
+	}
 
 	@Override
 	public void load(CompoundTag nbt) {

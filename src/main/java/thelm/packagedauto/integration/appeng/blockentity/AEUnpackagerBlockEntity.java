@@ -22,15 +22,12 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.KeyCounter;
 import appeng.api.util.AECableType;
 import appeng.api.util.AEColor;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
 import thelm.packagedauto.integration.appeng.AppEngUtil;
@@ -52,7 +49,7 @@ public class AEUnpackagerBlockEntity extends UnpackagerBlockEntity implements II
 			getMainNode().create(level, worldPosition);
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -88,6 +85,13 @@ public class AEUnpackagerBlockEntity extends UnpackagerBlockEntity implements II
 		setChanged();
 	}
 
+	@Override
+	public void onStateChanged(AEUnpackagerBlockEntity nodeOwner, IGridNode node, State state) {
+		if(state == State.POWER || state == State.CHANNEL) {
+			postPatternChange();
+		}
+	}
+
 	public IManagedGridNode getMainNode() {
 		if(gridNode == null) {
 			gridNode = GridHelper.createManagedNode(this, this);
@@ -112,33 +116,31 @@ public class AEUnpackagerBlockEntity extends UnpackagerBlockEntity implements II
 
 	@Override
 	public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
-		if(!isBusy() && patternDetails instanceof RecipeCraftingPatternDetails pattern) {
-			IntList emptySlots = new IntArrayList();
-			for(int i = 0; i < 9; ++i) {
-				if(itemHandler.getStackInSlot(i).isEmpty()) {
-					emptySlots.add(i);
-				}
+		if(getMainNode().isActive() && !isBusy() && patternDetails instanceof RecipeCraftingPatternDetails pattern) {
+			int energyReq = energyUsage*pattern.recipe.getPatterns().size();
+			if(energyStorage.getEnergyStored() >= energyReq) {
+				PackageTracker tracker = Arrays.stream(trackers).limit(trackerCount).filter(PackageTracker::isEmpty).findFirst().get();
+				tracker.fillRecipe(pattern.recipe);
+				energyStorage.extractEnergy(energyReq, false);
+				return true;
 			}
-			List<IPackagePattern> patterns = pattern.recipe.getPatterns();
-			if(patterns.size() > emptySlots.size()) {
-				return false;
-			}
-			for(int i = 0; i < patterns.size(); ++i) {
-				itemHandler.setStackInSlot(emptySlots.getInt(i), patterns.get(i).getOutput().copy());
-			}
-			return true;
 		}
 		return false;
 	}
 
 	@Override
 	public boolean isBusy() {
-		return Arrays.stream(trackers).noneMatch(PackageTracker::isEmpty);
+		return Arrays.stream(trackers).limit(trackerCount).noneMatch(PackageTracker::isEmpty);
 	}
 
 	@Override
 	public List<IPatternDetails> getAvailablePatterns() {
-		return recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).<IPatternDetails>map(pattern->new RecipeCraftingPatternDetails(pattern)).toList();
+		if(getMainNode().isActive()) {
+			return recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).<IPatternDetails>map(pattern->new RecipeCraftingPatternDetails(pattern)).toList();
+		}
+		else {
+			return List.of();
+		}
 	}
 
 	@Override

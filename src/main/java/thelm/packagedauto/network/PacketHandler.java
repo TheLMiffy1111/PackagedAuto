@@ -6,17 +6,19 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.simple.SimpleChannel;
+import thelm.packagedauto.network.packet.BeamPacket;
 import thelm.packagedauto.network.packet.ChangeBlockingPacket;
 import thelm.packagedauto.network.packet.ChangePackagingPacket;
 import thelm.packagedauto.network.packet.ChangeProvidingPacket;
 import thelm.packagedauto.network.packet.CycleRecipeTypePacket;
-import thelm.packagedauto.network.packet.DistributorBeamPacket;
+import thelm.packagedauto.network.packet.DirectionalMarkerPacket;
 import thelm.packagedauto.network.packet.LoadRecipeListPacket;
 import thelm.packagedauto.network.packet.SaveRecipeListPacket;
 import thelm.packagedauto.network.packet.SetFluidAmountPacket;
 import thelm.packagedauto.network.packet.SetItemStackPacket;
 import thelm.packagedauto.network.packet.SetPatternIndexPacket;
 import thelm.packagedauto.network.packet.SetRecipePacket;
+import thelm.packagedauto.network.packet.SizedMarkerPacket;
 import thelm.packagedauto.network.packet.SyncEnergyPacket;
 import thelm.packagedauto.network.packet.TrackerCountPacket;
 
@@ -62,9 +64,15 @@ public class PacketHandler {
 		INSTANCE.registerMessage(id++, TrackerCountPacket.class,
 				TrackerCountPacket::encode, TrackerCountPacket::decode,
 				TrackerCountPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
-		INSTANCE.registerMessage(id++, DistributorBeamPacket.class,
-				DistributorBeamPacket::encode, DistributorBeamPacket::decode,
-				DistributorBeamPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+		INSTANCE.registerMessage(id++, BeamPacket.class,
+				BeamPacket::encode, BeamPacket::decode,
+				BeamPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+		INSTANCE.registerMessage(id++, DirectionalMarkerPacket.class,
+				DirectionalMarkerPacket::encode, DirectionalMarkerPacket::decode,
+				DirectionalMarkerPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+		INSTANCE.registerMessage(id++, SizedMarkerPacket.class,
+				SizedMarkerPacket::encode, SizedMarkerPacket::decode,
+				SizedMarkerPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
 		INSTANCE.registerMessage(id++, ChangeProvidingPacket.class,
 				ChangeProvidingPacket::encode, ChangeProvidingPacket::decode,
 				ChangeProvidingPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));

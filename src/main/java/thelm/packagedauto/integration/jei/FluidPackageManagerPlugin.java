@@ -31,7 +31,7 @@ public class FluidPackageManagerPlugin implements IRecipeManagerPlugin {
 				}
 			}
 		}
-		if(ingredient instanceof FluidStack stack) {
+		if(ingredient instanceof FluidStack) {
 			switch(focus.getRole()) {
 			case INPUT: return List.of(FluidPackageFillingCategory.TYPE);
 			case OUTPUT: return List.of(FluidPackageContentsCategory.TYPE);

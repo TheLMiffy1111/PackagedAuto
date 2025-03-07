@@ -39,16 +39,16 @@ public class PackagingProviderBlock extends BaseBlock {
 	@Override
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
 		if(state.getBlock() != newState.getBlock()) {
-			if(level.getBlockEntity(pos) instanceof PackagingProviderBlockEntity blockEntity) {
-				if(blockEntity.currentPattern != null) {
-					for(ItemStack stack : blockEntity.currentPattern.getInputs()) {
+			if(level.getBlockEntity(pos) instanceof PackagingProviderBlockEntity provider) {
+				if(provider.currentPattern != null) {
+					for(ItemStack stack : provider.currentPattern.getInputs()) {
 						if(!stack.isEmpty()) {
 							Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
 						}
 					}
 				}
-				if(!blockEntity.toSend.isEmpty()) {
-					for(ItemStack stack : blockEntity.toSend) {
+				if(!provider.toSend.isEmpty()) {
+					for(ItemStack stack : provider.toSend) {
 						if(!stack.isEmpty()) {
 							Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
 						}
