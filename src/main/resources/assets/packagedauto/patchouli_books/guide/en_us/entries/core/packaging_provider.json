@@ -1,0 +1,36 @@
+{
+	"name": "ME Packaging Provider",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:packaging_provider",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "The $(item)ME Packaging Provider/$ combines the function of the $(l:core/packager)Packager/$ and the $(l:core/unpackager)Unpackager/$.$(p)This machine must be connected to an $(thing)ME Network/$, requiring a channel."
+		},
+		{
+			"type": "patchouli:spotlight",
+			"item": "packagedauto:packaging_provider",
+			"link_recipe": true,
+			"title": "Usage",
+			"text": "To use the $(item)ME Packaging Provider/$, put an encoded $(l:core/recipe_holder)Package Recipe Holder/$ inside. The machine will then provide Direct, Packaging, and/or Unpackaging recipes depending on the settings."
+		},
+		{
+			"type": "patchouli:text",
+			"title": "Settings",
+			"text": "$(thing)Direct/$: Provide package recipes as a large processing recipe, skipping the packaging and unpackaging steps.$(p)$(thing)Packaging/$: Provide packaging recipes like a $(l:core/packager)Packager/$.$(p)$(thing)Unpackaging/$: Provide unpackaging recipes like an $(l:core/unpackager)Unpackager/$."
+		},
+		{
+			"type": "patchouli:text",
+			"title": "Settings Cloning",
+			"text": "Using the $(l:core/settings_cloner)Packaging Settings Cloner/$, you can copy and paste the providing settings and the current available recipes.$(p)To paste recipes, the target $(item)ME Packaging Provider/$ should not have recipes, and you must have a an $(l:core/recipe_holder)Package Recipe Holder/$ in your inventory."
+		},
+		{
+			"type": "patchouli:crafting",
+			"recipe": "packagedauto:packaging_provider",
+			"title": "Crafting"
+		}
+	],
+	"flag": "mod:ae2",
+	"read_by_default": true,
+	"sortnum": 10
+}

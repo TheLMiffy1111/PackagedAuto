@@ -71,7 +71,7 @@ public class PackagingProviderItemHandler extends BaseItemHandler<PackagingProvi
 		blockEntity.recipeList.clear();
 		ItemStack listStack = getStackInSlot(0);
 		if(listStack.getItem() instanceof IPackageRecipeListItem listItem) {
-			blockEntity.recipeList.addAll(listItem.getRecipeList(blockEntity.getLevel(), listStack).getRecipeList());
+			blockEntity.recipeList.addAll(listItem.getRecipeList(listStack).getRecipeList());
 		}
 		if(blockEntity.getLevel() != null && !blockEntity.getLevel().isClientSide) {
 			blockEntity.postPatternChange();

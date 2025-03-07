@@ -1,11 +1,8 @@
 package thelm.packagedauto.integration.appeng.blockentity;
 
-import java.util.List;
-
 import appeng.api.config.Actionable;
 import appeng.api.config.PowerMultiplier;
 import appeng.api.config.PowerUnits;
-import appeng.api.crafting.IPatternDetails;
 import appeng.api.features.IPlayerRegistry;
 import appeng.api.networking.GridHelper;
 import appeng.api.networking.IGrid;
@@ -13,13 +10,11 @@ import appeng.api.networking.IGridNode;
 import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.IInWorldGridNodeHost;
 import appeng.api.networking.IManagedGridNode;
-import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.networking.energy.IEnergyService;
 import appeng.api.networking.security.IActionHost;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.networking.storage.IStorageService;
 import appeng.api.stacks.AEItemKey;
-import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.MEStorage;
 import appeng.api.storage.StorageHelper;
 import appeng.api.util.AECableType;
@@ -32,9 +27,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
-import thelm.packagedauto.integration.appeng.recipe.PackageCraftingPatternDetails;
 
-public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity implements IInWorldGridNodeHost, IGridNodeListener<AEPackagerExtensionBlockEntity>, IActionHost, ICraftingProvider {
+public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity implements IInWorldGridNodeHost, IGridNodeListener<AEPackagerExtensionBlockEntity>, IActionHost {
 
 	public IActionSource source;
 	public IManagedGridNode gridNode;
@@ -50,7 +44,7 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 			getMainNode().create(level, worldPosition);
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % 8 == 0) {
+		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -97,7 +91,6 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 			gridNode.setTagName("Node");
 			gridNode.setVisualRepresentation(PackagerExtensionBlock.INSTANCE);
 			gridNode.setGridColor(AEColor.TRANSPARENT);
-			gridNode.addService(ICraftingProvider.class, this);
 			gridNode.setIdlePowerUsage(1);
 			gridNode.setInWorldNode(true);
 			if(ownerUUID != null && level instanceof ServerLevel) {
@@ -110,34 +103,6 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 	@Override
 	public IGridNode getActionableNode() {
 		return getMainNode().getNode();
-	}
-
-	@Override
-	public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
-		if(!isBusy() && patternDetails instanceof PackageCraftingPatternDetails pattern) {
-			ItemStack slotStack = itemHandler.getStackInSlot(9);
-			ItemStack outputStack = pattern.pattern.getOutput();
-			if(slotStack.isEmpty() || ItemStack.isSameItemSameTags(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
-				currentPattern = pattern.pattern;
-				lockPattern = true;
-				List<ItemStack> inputs = pattern.pattern.getInputs();
-				for(int i = 0; i < inputs.size(); ++i) {
-					itemHandler.setStackInSlot(i, inputs.get(i).copy());
-				}
-				return true;
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public boolean isBusy() {
-		return isWorking || !itemHandler.getStacks().subList(0, 9).stream().allMatch(ItemStack::isEmpty);
-	}
-
-	@Override
-	public List<IPatternDetails> getAvailablePatterns() {
-		return patternList.stream().<IPatternDetails>map(pattern->new PackageCraftingPatternDetails(pattern)).toList();
 	}
 
 	@Override
@@ -161,11 +126,6 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 		else {
 			super.ejectItem();
 		}
-	}
-
-	@Override
-	public void postPatternChange() {
-		ICraftingProvider.requestUpdate(getMainNode());
 	}
 
 	protected void chargeMEEnergy() {

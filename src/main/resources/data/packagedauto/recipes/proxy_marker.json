@@ -1,0 +1,21 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"result": {
+		"item": "packagedauto:proxy_marker",
+		"count": 1
+	},
+	"ingredients": [
+		{
+			"item": "packagedauto:package_component"
+		},
+		{
+			"tag": "forge:ender_pearls"
+		},
+		{
+			"tag": "forge:obsidian"
+		},
+		{
+			"item": "minecraft:blaze_powder"
+		}
+	]
+}

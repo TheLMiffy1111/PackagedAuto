@@ -1,0 +1,13 @@
+{
+	"name": "Processing",
+	"category": "packagedauto:recipe",
+	"icon": "minecraft:furnace",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "$(thing)Processing/$ is the most basic processing recipe type.$(p)When encoded, inputs and outputs will be sorted and stacked."
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 101
+}

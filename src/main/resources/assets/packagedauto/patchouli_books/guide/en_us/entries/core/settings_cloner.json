@@ -1,0 +1,25 @@
+{
+	"name": "Settings Cloner",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:settings_cloner",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "The $(item)Packaging Settings Cloner/$ can copy and paste settings of certain packaging machines."
+		},
+		{
+			"type": "patchouli:spotlight",
+			"item": "packagedauto:settings_cloner",
+			"link_recipe": true,
+			"title": "Usage",
+			"text": "To use the $(item)Packaging Settings Cloner/$, $(thing)$(k:use)/$ on a supported machine to copy its settings.$(p)You can then $(thing)$(k:use)/$ on the same type of machine to paste settings.$(p)You can $(thing)$(k:sneak) + $(k:use)/$ an filled $(item)Packaging Settings Cloner/$ to clear it."
+		},
+		{
+			"type": "patchouli:crafting",
+			"recipe": "packagedauto:settings_cloner",
+			"title": "Crafting"
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 5
+}

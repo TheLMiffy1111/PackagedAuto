@@ -1,0 +1,6 @@
+{
+	"name": "Recipe Types",
+	"description": "Recipe types selectable in the $(l:core/encoder)Package Recipe Encoder/$ and their respective specialized package crafting machines.",
+	"icon": "packagedauto:distributor",
+	"sortnum": 1
+}

@@ -43,6 +43,7 @@ public class AEDistributorBlockEntity extends DistributorBlockEntity implements 
 			firstTick = false;
 			getMainNode().create(level, worldPosition);
 		}
+		super.tick();
 	}
 
 	@Override

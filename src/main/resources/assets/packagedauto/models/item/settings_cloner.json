@@ -1,0 +1,14 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "packagedauto:items/settings_cloner"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"packagedauto:filled": 1
+			},
+			"model": "packagedauto:item/settings_cloner_filled"
+		}
+	]
+}

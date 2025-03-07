@@ -3,6 +3,7 @@ package thelm.packagedauto.client.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -59,8 +60,7 @@ public class PackagingProviderScreen extends BaseScreen<PackagingProviderMenu> {
 		}
 
 		@Override
-		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+		protected void renderBg(PoseStack poseStack, Minecraft minecraft, int mouseX, int mouseY) {
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, BACKGROUND);
 			blit(poseStack, x+1, y+2, 176, menu.blockEntity.blocking ? 14 : 0, 14, 14);
@@ -87,8 +87,7 @@ public class PackagingProviderScreen extends BaseScreen<PackagingProviderMenu> {
 		}
 
 		@Override
-		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+		protected void renderBg(PoseStack poseStack, Minecraft minecraft, int mouseX, int mouseY) {
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, BACKGROUND);
 			blit(poseStack, x+1, y+2, 176, menu.blockEntity.provideDirect ? 42 : 28, 14, 14);
@@ -115,8 +114,7 @@ public class PackagingProviderScreen extends BaseScreen<PackagingProviderMenu> {
 		}
 
 		@Override
-		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+		protected void renderBg(PoseStack poseStack, Minecraft minecraft, int mouseX, int mouseY) {
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, BACKGROUND);
 			blit(poseStack, x+1, y+2, 176, menu.blockEntity.providePackaging ? 70 : 56, 14, 14);
@@ -143,8 +141,7 @@ public class PackagingProviderScreen extends BaseScreen<PackagingProviderMenu> {
 		}
 
 		@Override
-		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+		protected void renderBg(PoseStack poseStack, Minecraft minecraft, int mouseX, int mouseY) {
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, BACKGROUND);
 			blit(poseStack, x+1, y+2, 176, menu.blockEntity.provideUnpackaging ? 98 : 84, 14, 14);

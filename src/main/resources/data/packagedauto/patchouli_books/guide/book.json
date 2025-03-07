@@ -1,0 +1,9 @@
+{
+	"name": "item.packagedauto.guide",
+	"landing_text": "item.packagedauto.guide.landing",
+	"use_resource_pack": true,
+	"model": "packagedauto:guide",
+	"show_progress": false,
+	"creative_tab": "packagedauto",
+	"show_toasts": false
+}
