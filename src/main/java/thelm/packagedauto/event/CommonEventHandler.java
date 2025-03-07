@@ -3,6 +3,7 @@ package thelm.packagedauto.event;
 import appeng.api.crafting.PatternDetailsHelper;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
@@ -15,6 +16,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.IForgeRegistry;
 import thelm.packagedauto.block.CrafterBlock;
+import thelm.packagedauto.block.CraftingProxyBlock;
 import thelm.packagedauto.block.DistributorBlock;
 import thelm.packagedauto.block.EncoderBlock;
 import thelm.packagedauto.block.FluidPackageFillerBlock;
@@ -23,6 +25,7 @@ import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.block.PackagingProviderBlock;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.block.entity.CrafterBlockEntity;
+import thelm.packagedauto.block.entity.CraftingProxyBlockEntity;
 import thelm.packagedauto.block.entity.DistributorBlockEntity;
 import thelm.packagedauto.block.entity.EncoderBlockEntity;
 import thelm.packagedauto.block.entity.FluidPackageFillerBlockEntity;
@@ -31,13 +34,19 @@ import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 import thelm.packagedauto.block.entity.PackagingProviderBlockEntity;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
 import thelm.packagedauto.config.PackagedAutoConfig;
+import thelm.packagedauto.crafting.DistributorMarkerCloningRecipe;
+import thelm.packagedauto.crafting.ProxyMarkerCloningRecipe;
+import thelm.packagedauto.crafting.RecipeHolderCloningRecipe;
 import thelm.packagedauto.integration.appeng.recipe.PackagePatternDetailsDecoder;
 import thelm.packagedauto.item.DistributorMarkerItem;
 import thelm.packagedauto.item.MiscItem;
 import thelm.packagedauto.item.PackageItem;
+import thelm.packagedauto.item.ProxyMarkerItem;
 import thelm.packagedauto.item.RecipeHolderItem;
+import thelm.packagedauto.item.SettingsClonerItem;
 import thelm.packagedauto.item.VolumePackageItem;
 import thelm.packagedauto.menu.CrafterMenu;
+import thelm.packagedauto.menu.CraftingProxyMenu;
 import thelm.packagedauto.menu.DistributorMenu;
 import thelm.packagedauto.menu.EncoderMenu;
 import thelm.packagedauto.menu.FluidPackageFillerMenu;
@@ -76,6 +85,7 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionBlock.INSTANCE);
 		registry.register(UnpackagerBlock.INSTANCE);
 		registry.register(DistributorBlock.INSTANCE);
+		registry.register(CraftingProxyBlock.INSTANCE);
 		registry.register(CrafterBlock.INSTANCE);
 		registry.register(FluidPackageFillerBlock.INSTANCE);
 		registry.register(PackagingProviderBlock.INSTANCE);
@@ -89,11 +99,14 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionBlock.ITEM_INSTANCE);
 		registry.register(UnpackagerBlock.ITEM_INSTANCE);
 		registry.register(DistributorBlock.ITEM_INSTANCE);
+		registry.register(CraftingProxyBlock.ITEM_INSTANCE);
 		registry.register(CrafterBlock.ITEM_INSTANCE);
 		registry.register(FluidPackageFillerBlock.ITEM_INSTANCE);
 		registry.register(PackagingProviderBlock.ITEM_INSTANCE);
 		registry.register(RecipeHolderItem.INSTANCE);
 		registry.register(DistributorMarkerItem.INSTANCE);
+		registry.register(ProxyMarkerItem.INSTANCE);
+		registry.register(SettingsClonerItem.INSTANCE);
 		registry.register(PackageItem.INSTANCE);
 		registry.register(VolumePackageItem.INSTANCE);
 		registry.register(MiscItem.PACKAGE_COMPONENT);
@@ -108,22 +121,32 @@ public class CommonEventHandler {
 		registry.register(PackagerExtensionBlockEntity.TYPE_INSTANCE);
 		registry.register(UnpackagerBlockEntity.TYPE_INSTANCE);
 		registry.register(DistributorBlockEntity.TYPE_INSTANCE);
+		registry.register(CraftingProxyBlockEntity.TYPE_INSTANCE);
 		registry.register(CrafterBlockEntity.TYPE_INSTANCE);
 		registry.register(FluidPackageFillerBlockEntity.TYPE_INSTANCE);
 		registry.register(PackagingProviderBlockEntity.TYPE_INSTANCE);
 	}
 
 	@SubscribeEvent
-	public void onMenuTypeRegister(RegistryEvent.Register<MenuType<?>> event) {
+	public void onMenuRegister(RegistryEvent.Register<MenuType<?>> event) {
 		IForgeRegistry<MenuType<?>> registry = event.getRegistry();
 		registry.register(EncoderMenu.TYPE_INSTANCE);
 		registry.register(PackagerMenu.TYPE_INSTANCE);
 		registry.register(PackagerExtensionMenu.TYPE_INSTANCE);
 		registry.register(UnpackagerMenu.TYPE_INSTANCE);
 		registry.register(DistributorMenu.TYPE_INSTANCE);
+		registry.register(CraftingProxyMenu.TYPE_INSTANCE);
 		registry.register(CrafterMenu.TYPE_INSTANCE);
 		registry.register(FluidPackageFillerMenu.TYPE_INSTANCE);
 		registry.register(PackagingProviderMenu.TYPE_INSTANCE);
+	}
+
+	@SubscribeEvent
+	public void onRecipeSerializerRegister(RegistryEvent.Register<RecipeSerializer<?>> event) {
+		IForgeRegistry<RecipeSerializer<?>> registry = event.getRegistry();
+		registry.register(RecipeHolderCloningRecipe.SERIALIZER);
+		registry.register(DistributorMarkerCloningRecipe.SERIALIZER);
+		registry.register(ProxyMarkerCloningRecipe.SERIALIZER);
 	}
 
 	@SubscribeEvent

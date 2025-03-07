@@ -45,8 +45,8 @@ public class UnpackagerBlock extends BaseBlock {
 	@Override
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
 		if(state.getBlock() != newState.getBlock()) {
-			if(level.getBlockEntity(pos) instanceof UnpackagerBlockEntity blockEntity) {
-				for(PackageTracker tracker : blockEntity.trackers) {
+			if(level.getBlockEntity(pos) instanceof UnpackagerBlockEntity unpackager) {
+				for(PackageTracker tracker : unpackager.trackers) {
 					if(!tracker.isEmpty()) {
 						if(!tracker.toSend.isEmpty()) {
 							for(ItemStack stack : tracker.toSend) {

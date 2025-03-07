@@ -1,0 +1,27 @@
+{
+	"name": "Recipe Package",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:package",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "$(item)Recipe Packages/$ are created by $(l:core/packager)Packagers/$, and can be unpackaged in a set in $(l:core/unpackager)Unpackagers/$.$(p)You can $(thing)$(k:sneak) + $(k:use)/$ a $(item)Recipe Packages/$ to manually unpackage it."
+		},
+		{
+			"type": "patchouli:spotlight",
+			"flag": "mod:jei",
+			"item": "packagedauto:package",
+			"link_recipe": true,
+			"title": "JEI Integration",
+			"text": "You can press $(thing)$(k:jei.showUses)/$ on a $(item)Recipe Package/$ to show its contents and what the package set is meant to create."
+		},
+		{
+			"type": "patchouli:spotlight",
+			"flag": "!mod:jei",
+			"item": "packagedauto:package",
+			"link_recipe": true
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 2
+}

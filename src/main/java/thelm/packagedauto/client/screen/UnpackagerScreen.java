@@ -3,6 +3,7 @@ package thelm.packagedauto.client.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -88,8 +89,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		}
 
 		@Override
-		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+		protected void renderBg(PoseStack poseStack, Minecraft minecraft, int mouseX, int mouseY) {
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, BACKGROUND);
 			blit(poseStack, x+1, y+2, 176, menu.blockEntity.blocking ? 64 : 50, 14, 14);
@@ -111,7 +111,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 
 	class ButtonTrackerCount extends AbstractWidget {
 
-		boolean decrease;
+		final boolean decrease;
 
 		public ButtonTrackerCount(boolean decrease, int x, int y) {
 			super(x, y, 8, 18, TextComponent.EMPTY);
@@ -119,8 +119,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		}
 
 		@Override
-		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+		protected void renderBg(PoseStack poseStack, Minecraft minecraft, int mouseX, int mouseY) {
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, BACKGROUND);
 			blit(poseStack, x+1, y+2, decrease ? 176 : 182, 78, 6, 14);

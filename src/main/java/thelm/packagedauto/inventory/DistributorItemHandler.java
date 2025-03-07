@@ -25,6 +25,11 @@ public class DistributorItemHandler extends BaseItemHandler<DistributorBlockEnti
 	}
 
 	@Override
+	public int getSlotLimit(int slot) {
+		return 1;
+	}
+
+	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
 		return stack.getItem() instanceof IDistributorMarkerItem marker && marker.getDirectionalGlobalPos(stack) != null;
 	}

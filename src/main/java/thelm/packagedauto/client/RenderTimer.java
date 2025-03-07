@@ -21,7 +21,7 @@ public class RenderTimer {
 	}
 
 	public void onClientTick(TickEvent.ClientTickEvent event) {
-		if(event.phase == TickEvent.Phase.START || mc.level == null || mc.player == null || mc.isPaused()) {
+		if(event.phase != TickEvent.Phase.START || mc.level == null || mc.player == null || mc.isPaused()) {
 			return;
 		}
 		ticks = (ticks+1) & 0x1FFFFF;

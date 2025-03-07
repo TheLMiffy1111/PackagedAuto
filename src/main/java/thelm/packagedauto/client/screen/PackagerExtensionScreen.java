@@ -3,6 +3,7 @@ package thelm.packagedauto.client.screen;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -65,8 +66,7 @@ public class PackagerExtensionScreen extends BaseScreen<PackagerExtensionMenu> {
 		}
 
 		@Override
-		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-			super.renderButton(poseStack, mouseX, mouseY, partialTicks);
+		protected void renderBg(PoseStack poseStack, Minecraft minecraft, int mouseX, int mouseY) {
 			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 			RenderSystem.setShaderTexture(0, BACKGROUND);
 			blit(poseStack, x+1, y+2, 176, 56+14*menu.blockEntity.mode.ordinal(), 14, 14);

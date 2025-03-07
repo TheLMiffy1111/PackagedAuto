@@ -85,7 +85,8 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 
 	public void saveRecipeList(boolean single) {
 		ItemStack stack = itemHandler.getStackInSlot(0);
-		if(stack.getItem() instanceof IPackageRecipeListItem listItem) {
+		if(stack.getItem() instanceof IPackageRecipeListItem recipeListItem) {
+			IPackageRecipeList recipeListObj = recipeListItem.getRecipeList(stack);
 			List<IPackageRecipeInfo> recipeList = new ArrayList<>();
 			if(!single) {
 				for(EncoderPatternItemHandler inv : patternItemHandlers) {
@@ -100,24 +101,20 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 					recipeList.add(inv.recipeInfo);
 				}
 			}
-			IPackageRecipeList recipeListItem = listItem.getRecipeList(level, stack);
-			recipeListItem.setRecipeList(recipeList);
-			CompoundTag nbt = new CompoundTag();
-			recipeListItem.save(nbt);
-			stack.setTag(nbt);
+			recipeListObj.setRecipeList(recipeList);
+			recipeListItem.setRecipeList(stack, recipeListObj);
 		}
 	}
 
-	public void loadRecipeList(boolean single) {
+	public void loadRecipeList(boolean single, boolean clear) {
 		ItemStack stack = itemHandler.getStackInSlot(0);
-		if(stack.getItem() instanceof IPackageRecipeListItem listItem) {
-			IPackageRecipeList recipeListItem = listItem.getRecipeList(level, stack);
-			List<IPackageRecipeInfo> recipeList = recipeListItem.getRecipeList();
+		if(stack.getItem() instanceof IPackageRecipeListItem recipeListItem) {
+			IPackageRecipeList recipeListObj = recipeListItem.getRecipeList(stack);
+			List<IPackageRecipeInfo> recipeList = recipeListObj.getRecipeList();
 			if(single) {
 				EncoderPatternItemHandler inv = patternItemHandlers[patternIndex];
-				if(!recipeList.isEmpty()) {
-					int i = recipeList.size() > patternIndex ? patternIndex : 0;
-					IPackageRecipeInfo recipe = recipeList.get(i);
+				if(!clear && !recipeList.isEmpty()) {
+					IPackageRecipeInfo recipe = recipeList.get(0);
 					if(recipe.isValid()) {
 						inv.setRecipe(recipe.getEncoderStacks());
 					}
@@ -128,7 +125,7 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 			}
 			else for(int i = 0; i < patternItemHandlers.length; ++i) {
 				EncoderPatternItemHandler inv = patternItemHandlers[i];
-				if(i < recipeList.size()) {
+				if(!clear && i < recipeList.size()) {
 					IPackageRecipeInfo recipe = recipeList.get(i);
 					inv.recipeType = recipe.getRecipeType();
 					if(recipe.isValid()) {

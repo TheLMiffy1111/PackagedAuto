@@ -6,7 +6,6 @@ import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.advanced.IRecipeManagerPlugin;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import thelm.packagedauto.api.IPackageItem;
@@ -63,7 +62,7 @@ public class PackageManagerPlugin implements IRecipeManagerPlugin {
 			}
 			if(stack.getItem() instanceof IPackageRecipeListItem recipeListItem) {
 				if(PackageRecipeCategory.TYPE.equals(type) || PackageProcessingCategory.TYPE.equals(type)) {
-					return (List<T>)recipeListItem.getRecipeList(Minecraft.getInstance().level, stack).getRecipeList();
+					return (List<T>)recipeListItem.getRecipeList(stack).getRecipeList();
 				}
 			}
 		}

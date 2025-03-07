@@ -1,0 +1,42 @@
+{
+	"name": "Crafting Proxy",
+	"category": "packagedauto:recipe",
+	"icon": "packagedauto:crafting_proxy",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "The $(item)Package Crafting Machine Proxy/$ allows $(l:core/unpackager)Unpackagers/$ to send items to specialized package crafting machines at a distance."
+		},
+		{
+			"type": "packagedauto:spotlight2",
+			"item1": "packagedauto:proxy_marker",
+			"item2": "packagedauto:crafting_proxy",
+			"title": "Usage",
+			"text": "To use, bind a $(item)Proxy Marker/$ to a package crafting machine, and put the marker into the proxy."
+		},
+		{
+			"type": "patchouli:text",
+			"title": "Usage (cont.)",
+			"text": "You can $(thing)$(k:sneak) + $(k:use)/$ a bound $(item)Proxy Marker/$ to unbind it.$(p)You can $(thing)$(k:sneak) + $(k:use)/$ with an empty hand on a $(item)Package Crafting Machine Proxy/$ to show its current range and target.$(p)You can combine a bound $(item)Proxy Marker/$ with unbound ones in a crafting grid to copy contents."
+		},
+		{
+			"type": "patchouli:text",
+			"title": "Settings Cloning",
+			"text": "Using the $(l:core/settings_cloner)Packaging Settings Cloner/$, you can copy and paste current target setting of a $(item)Package Crafting Machine Proxy/$.$(p)To paste target settings, you must have an empty $(item)Proxy Marker/$ in your inventory."
+		},
+		{
+			"type": "patchouli:text",
+			"flag": "mod:ae2",
+			"title": "AE2 Integration",
+			"text": "The $(item)Package Crafting Machine Proxy/$ can be connected to an $(thing)ME Network/$."
+		},
+		{
+			"type": "patchouli:crafting",
+			"recipe": "packagedauto:proxy_marker",
+			"recipe2": "packagedauto:crafting_proxy",
+			"title": "Crafting"
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 100
+}

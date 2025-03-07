@@ -1,0 +1,14 @@
+{
+	"parent": "item/generated",
+	"textures": {
+		"layer0": "packagedauto:items/proxy_marker"
+	},
+	"overrides": [
+		{
+			"predicate": {
+				"packagedauto:bound": 1
+			},
+			"model": "packagedauto:item/proxy_marker_bound"
+		}
+	]
+}

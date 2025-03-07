@@ -6,7 +6,6 @@ import java.util.List;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.world.level.Level;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeList;
 
@@ -14,8 +13,8 @@ public class PackageRecipeList implements IPackageRecipeList {
 
 	private List<IPackageRecipeInfo> recipeList = new ArrayList<>();
 
-	public PackageRecipeList(Level level, CompoundTag nbt) {
-		load(level, nbt);
+	public PackageRecipeList(CompoundTag nbt) {
+		load(nbt);
 	}
 
 	public PackageRecipeList(List<IPackageRecipeInfo> recipeList) {
@@ -34,27 +33,18 @@ public class PackageRecipeList implements IPackageRecipeList {
 	}
 
 	@Override
-	public void load(Level level, CompoundTag nbt) {
+	public void load(CompoundTag nbt) {
 		recipeList.clear();
 		if(nbt != null) {
-			ListTag tagList = nbt.getList("Recipes", 10);
-			for(int i = 0; i < tagList.size(); ++i) {
-				CompoundTag tag = tagList.getCompound(i);
-				IPackageRecipeInfo recipe = MiscHelper.INSTANCE.loadRecipe(tag);
-				if(recipe != null) {
-					recipeList.add(recipe);
-				}
-			}
+			recipeList.addAll(MiscHelper.INSTANCE.loadRecipeList(nbt.getList("Recipes", 10)));
 		}
 	}
 
 	@Override
 	public void save(CompoundTag nbt) {
-		ListTag tagList = new ListTag();
-		for(IPackageRecipeInfo recipe : recipeList) {
-			CompoundTag tag = MiscHelper.INSTANCE.saveRecipe(new CompoundTag(), recipe);
-			tagList.add(tag);
+		ListTag tagList = MiscHelper.INSTANCE.saveRecipeList(new ListTag(), recipeList);
+		if(!tagList.isEmpty()) {
+			nbt.put("Recipes", tagList);
 		}
-		nbt.put("Recipes", tagList);
 	}
 }

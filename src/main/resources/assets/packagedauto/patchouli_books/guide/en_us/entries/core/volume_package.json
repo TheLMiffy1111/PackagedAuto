@@ -1,0 +1,34 @@
+{
+	"name": "Volume Package",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:volume_package",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "$(item)Volume Packages/$ can contain certain bulk materials such as fluids, and can be inserted or unpackaged into corresponding containers."
+		},
+		{
+			"type": "patchouli:spotlight",
+			"item": "packagedauto:volume_package",
+			"link_recipe": true,
+			"title": "Creation",
+			"text": "$(item)Volume Packages/$ of specific materials can be created in corresponding special machines, such as in $(l:core/fluid_package_filler)Fluid Package Fillers/$ for $(item)Volume Packages/$ that contain fluids."
+		},
+		{
+			"type": "patchouli:text",
+			"flag": "mod:jei",
+			"item": "packagedauto:volume_package",
+			"title": "JEI Integration",
+			"text": "You can press $(thing)$(k:jei.showUses)/$ on a $(item)Volume Package/$ to show its contents."
+		},
+		{
+			"type": "patchouli:text",
+			"flag": "mod:ae2",
+			"item": "packagedauto:volume_package",
+			"title": "AE2 Integration",
+			"text": "Machines that provide autocrafting to $(thing)ME Networks/$ can treat $(thing)Volume Packages/$ contents as autocrafting inputs/outputs, and can directly create them."
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 3
+}

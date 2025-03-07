@@ -1,0 +1,48 @@
+{
+	"name": "Unpackager",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:unpackager",
+	"pages": [
+		{
+			"type": "patchouli:text",
+			"text": "The $(item)Unpackager/$ unpackages sets of $(l:core/package)Recipe Packages/$ into adjacent inventories or $(thing)package crafting machines/$ depending on the $(l:recipe)recipe type/$.$(p)This machine requires power."
+		},
+		{
+			"type": "patchouli:spotlight",
+			"item": "packagedauto:unpackager",
+			"link_recipe": true,
+			"title": "Usage",
+			"text": "To use the $(item)Unpackager/$, put sets of $(l:core/package)Recipe Packages/$ inside. The packages will be inserted into $(thing)trackers/$, and when filled, packages will be unpackaged into adjacent adjacent inventories or $(thing)package crafting machines/$ depending on the $(thing)recipe type/$. You may change the number of trackers."
+		},
+		{
+			"type": "patchouli:text",
+			"title": "Usage (cont.)",
+			"text": "For processing recipes, you can enable $(thing)blocking mode/$, which prevents unpackaging into occupied inventories.$(p)You may extract inputs out from the top side."
+		},
+		{
+			"type": "patchouli:text",
+			"title": "Settings Cloning",
+			"text": "Using the $(l:core/settings_cloner)Packaging Settings Cloner/$, you can copy and paste the blocking mode setting, the tracker count setting, and the current available recipes.$(p)To paste recipes, the target $(item)Unpackager/$ should not have recipes, and you must have an empty $(l:core/recipe_holder)Package Recipe Holder/$ in your inventory."
+		},
+		{
+			"type": "patchouli:text",
+			"flag": "mod:ae2",
+			"title": "AE2 Integration",
+			"text": "The $(item)Unpackager/$ can be connected to an $(thing)ME Network/$, requiring a channel.$(p)It will extract power to use and provide unpackaging as autocrafting.$(p)Place an encoded $(l:core/recipe_holder)Package Recipe Holder/$ inside to allow the provide unpackaging autocrafting for the encoded recipes."
+		},
+		{
+			"type": "patchouli:crafting",
+			"flag": "!mod:ae2",
+			"recipe": "packagedauto:unpackager",
+			"title": "Crafting"
+		},
+		{
+			"type": "patchouli:crafting",
+			"flag": "mod:ae2",
+			"recipe": "packagedauto:unpackager_ae",
+			"title": "Crafting"
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 9
+}
