@@ -40,12 +40,14 @@ public abstract class GuiContainerTileBase<CONTAINER extends ContainerTileBase<?
 
 	@Override
 	protected void handleMouseClick(Slot slot, int slotId, int mouseButton, ClickType type) {
-		if(type != ClickType.QUICK_MOVE && (type != ClickType.CLONE || !mc.player.capabilities.isCreativeMode) &&
-				mc.player.inventory.getItemStack().isEmpty() && slot instanceof SlotFalseCopy && slot.isEnabled()) {
-			if(!slot.getStack().isEmpty()) {
-				mc.displayGuiScreen(new GuiItemAmountSpecifying(
-						this, mc.player.inventory, slot.slotNumber, slot.getStack(), getItemAmountSpecificationLimit(slot)));
-			}
+		if(mouseButton == 0 &&
+				type != ClickType.QUICK_MOVE &&
+				mc.player.inventory.getItemStack().isEmpty() &&
+				slot instanceof SlotFalseCopy &&
+				slot.isEnabled() &&
+				!slot.getStack().isEmpty()) {
+			mc.displayGuiScreen(new GuiItemAmountSpecifying(
+					this, mc.player.inventory, slot.slotNumber, slot.getStack(), getItemAmountSpecificationLimit(slot)));
 		}
 		else {
 			super.handleMouseClick(slot, slotId, mouseButton, type);

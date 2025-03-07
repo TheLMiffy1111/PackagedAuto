@@ -37,8 +37,8 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister, I
 	public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation("packagedauto:package#inventory");
 
 	protected ItemPackage() {
-		setRegistryName("packagedauto:package");
 		setTranslationKey("packagedauto.package");
+		setRegistryName("packagedauto:package");
 		setCreativeTab(null);
 	}
 

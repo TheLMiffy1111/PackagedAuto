@@ -10,12 +10,15 @@ import thelm.packagedauto.client.IModelRegister;
 
 public class ItemMisc extends Item implements IModelRegister {
 
+	public static final ItemMisc PACKAGE_COMPONENT = new ItemMisc("packagedauto:package_component", PackagedAuto.CREATIVE_TAB);
+	public static final ItemMisc ME_PACKAGE_COMPONENT = new ItemMisc("packagedauto:me_package_component", Loader.isModLoaded("appliedenergistics2") ? PackagedAuto.CREATIVE_TAB : null);
+
 	public final ModelResourceLocation modelLocation;
 
-	protected ItemMisc(String registryName, String unlocalizedName, String modelLocation, CreativeTabs creativeTab) {
+	protected ItemMisc(String registryName, CreativeTabs creativeTab) {
+		setTranslationKey(registryName.replace(':', '.'));
 		setRegistryName(registryName);
-		setTranslationKey(unlocalizedName);
-		this.modelLocation = new ModelResourceLocation(modelLocation);
+		this.modelLocation = new ModelResourceLocation(registryName, "inventory");
 		setCreativeTab(creativeTab);
 	}
 
@@ -23,7 +26,4 @@ public class ItemMisc extends Item implements IModelRegister {
 	public void registerModels() {
 		ModelLoader.setCustomModelResourceLocation(this, 0, modelLocation);
 	}
-
-	public static final ItemMisc PACKAGE_COMPONENT = new ItemMisc("packagedauto:package_component", "packagedauto.package_component", "packagedauto:package_component#inventory", PackagedAuto.CREATIVE_TAB);
-	public static final ItemMisc ME_PACKAGE_COMPONENT = new ItemMisc("packagedauto:me_package_component", "packagedauto.me_package_component", "packagedauto:me_package_component#inventory", Loader.isModLoaded("appliedenergistics2") ? PackagedAuto.CREATIVE_TAB : null);
 }

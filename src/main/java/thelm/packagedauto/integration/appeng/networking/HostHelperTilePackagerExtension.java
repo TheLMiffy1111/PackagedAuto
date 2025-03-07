@@ -7,7 +7,6 @@ import appeng.api.config.PowerUnits;
 import appeng.api.networking.GridFlags;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.energy.IEnergyGrid;
-import appeng.api.networking.events.MENetworkCraftingPatternChange;
 import appeng.api.networking.storage.IStorageGrid;
 import appeng.api.storage.IMEMonitor;
 import appeng.api.storage.channels.IItemStorageChannel;
@@ -50,13 +49,6 @@ public class HostHelperTilePackagerExtension extends HostHelperTile<TilePackager
 			int extract = (int)(available/conversion);
 			energyGrid.extractAEPower(extract*conversion, Actionable.MODULATE, PowerMultiplier.CONFIG);
 			tile.getEnergyStorage().receiveEnergy(extract, false);
-		}
-	}
-
-	public void postPatternChange() {
-		if(isActive()) {
-			IGrid grid = getNode().getGrid();
-			grid.postEvent(new MENetworkCraftingPatternChange(tile, getNode()));
 		}
 	}
 }

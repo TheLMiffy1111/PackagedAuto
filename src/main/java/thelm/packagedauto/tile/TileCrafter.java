@@ -45,6 +45,7 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean isWorking = false;
@@ -80,7 +81,7 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 				}
 			}
 			chargeEnergy();
-			if(world.getTotalWorldTime() % 8 == 0) {
+			if(world.getTotalWorldTime() % refreshInterval == 0) {
 				if(hostHelper != null && hostHelper.isActive()) {
 					hostHelper.ejectItem();
 					if(drawMEEnergy) {
@@ -100,7 +101,7 @@ public class TileCrafter extends TileBase implements ITickable, IPackageCrafting
 			IRecipeInfoCrafting recipe = (IRecipeInfoCrafting)recipeInfo;
 			ItemStack slotStack = inventory.getStackInSlot(9);
 			ItemStack outputStack = recipe.getOutput();
-			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && slotStack.getItemDamage() == outputStack.getItemDamage() && ItemStack.areItemStackShareTagsEqual(slotStack, outputStack) && slotStack.getCount()+outputStack.getCount() <= outputStack.getMaxStackSize()) {
+			if(slotStack.isEmpty() || slotStack.isItemEqual(outputStack) && ItemStack.areItemStackShareTagsEqual(slotStack, outputStack) && slotStack.getCount()+outputStack.getCount() <= outputStack.getMaxStackSize()) {
 				currentRecipe = recipe;
 				isWorking = true;
 				remainingProgress = energyReq;

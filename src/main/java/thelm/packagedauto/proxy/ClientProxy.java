@@ -7,9 +7,9 @@ import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import thelm.packagedauto.client.DistributorRenderer;
 import thelm.packagedauto.client.IModelRegister;
 import thelm.packagedauto.client.ModelUtil;
+import thelm.packagedauto.client.WorldOverlayRenderer;
 
 public class ClientProxy extends CommonProxy {
 
@@ -18,7 +18,7 @@ public class ClientProxy extends CommonProxy {
 	@Override
 	public void register(FMLPreInitializationEvent event) {
 		super.register(event);
-		DistributorRenderer.INSTANCE.onConstruct();
+		WorldOverlayRenderer.INSTANCE.onConstruct();
 	}
 
 	@Override

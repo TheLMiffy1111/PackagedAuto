@@ -5,6 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.SidedProxy;
+import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
@@ -38,6 +39,11 @@ public class PackagedAuto {
 
 	@EventHandler
 	public void firstMovement(FMLPreInitializationEvent event) {
+		proxy.register(event);
+	}
+
+	@EventHandler
+	public void secondMovement(FMLInitializationEvent event) {
 		proxy.register(event);
 	}
 }

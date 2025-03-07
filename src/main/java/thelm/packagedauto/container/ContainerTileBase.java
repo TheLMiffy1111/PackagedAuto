@@ -159,28 +159,38 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 
 	@Override
 	public ItemStack slotClick(int slotId, int mouseButton, ClickType clickType, EntityPlayer player) {
-		if(slotId >= 0 && !player.inventory.getItemStack().isEmpty()) {
+		if(slotId >= 0) {
 			Slot slot = inventorySlots.get(slotId);
 			if(slot instanceof SlotFalseCopy) {
-				ItemStack toPut = player.inventory.getItemStack().copy();
-				ItemStack stack = slot.getStack().copy();
-				switch(mouseButton) {
-				case 0: {
-					slot.putStack(toPut);
-					break;
+				if(clickType == ClickType.QUICK_MOVE) {
+					slot.putStack(ItemStack.EMPTY);
 				}
-				case 1: {
-					if(stack.isEmpty()) {
-						toPut.setCount(1);
+				else {
+					ItemStack toPut = player.inventory.getItemStack().copy();
+					ItemStack stack = slot.getStack().copy();
+					switch(mouseButton) {
+					case 0: {
 						slot.putStack(toPut);
+						break;
 					}
-					else if(stack.getItem() == toPut.getItem() && stack.getItemDamage() == toPut.getItemDamage() &&
-							ItemStack.areItemStackShareTagsEqual(stack, toPut) && stack.getCount() < stack.getMaxStackSize()) {
-						stack.grow(1);
-						slot.putStack(stack);
+					case 1: {
+						if(stack.isEmpty()) {
+							if(!toPut.isEmpty()) {
+								toPut.setCount(1);
+							}
+							slot.putStack(toPut);
+						}
+						else if(stack.isItemEqual(toPut) && ItemStack.areItemStackShareTagsEqual(stack, toPut) && stack.getCount() < stack.getMaxStackSize()) {
+							stack.grow(1);
+							slot.putStack(stack);
+						}
+						else {
+							stack.shrink(1);
+							slot.putStack(stack);
+						}
+						break;
 					}
-					break;
-				}
+					}
 				}
 				return player.inventory.getItemStack();
 			}

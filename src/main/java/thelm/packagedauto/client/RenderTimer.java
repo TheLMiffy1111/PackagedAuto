@@ -23,7 +23,7 @@ public class RenderTimer {
 
 	@SubscribeEvent
 	public void onClientTick(TickEvent.ClientTickEvent event) {
-		if(event.phase == TickEvent.Phase.START || mc.world == null || mc.player == null || mc.isGamePaused()) {
+		if(event.phase != TickEvent.Phase.START || mc.world == null || mc.player == null || mc.isGamePaused()) {
 			return;
 		}
 		ticks = (ticks+1) & 0x1FFFFF;

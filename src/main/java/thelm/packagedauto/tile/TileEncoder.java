@@ -80,6 +80,8 @@ public class TileEncoder extends TileBase {
 	public void saveRecipeList(boolean single) {
 		ItemStack stack = inventory.getStackInSlot(0);
 		if(stack.getItem() instanceof IRecipeListItem) {
+			IRecipeListItem recipeListItem = (IRecipeListItem)stack.getItem();
+			IRecipeList recipeListObj = recipeListItem.getRecipeList(stack);
 			List<IRecipeInfo> recipeList = new ArrayList<>();
 			if(!single) {
 				for(InventoryEncoderPattern inv : patternInventories) {
@@ -94,23 +96,20 @@ public class TileEncoder extends TileBase {
 					recipeList.add(inv.recipeInfo);
 				}
 			}
-			IRecipeList recipeListItem = ((IRecipeListItem)stack.getItem()).getRecipeList(stack);
-			recipeListItem.setRecipeList(recipeList);
-			NBTTagCompound nbt = recipeListItem.writeToNBT(new NBTTagCompound());
-			stack.setTagCompound(nbt);
+			recipeListObj.setRecipeList(recipeList);
+			recipeListItem.setRecipeList(stack, recipeListObj);
 		}
 	}
 
-	public void loadRecipeList(boolean single) {
+	public void loadRecipeList(boolean single, boolean clear) {
 		ItemStack stack = inventory.getStackInSlot(0);
 		if(stack.getItem() instanceof IRecipeListItem) {
-			IRecipeList recipeListItem = ((IRecipeListItem)stack.getItem()).getRecipeList(stack);
-			List<IRecipeInfo> recipeList = recipeListItem.getRecipeList();
+			IRecipeList recipeListObj = ((IRecipeListItem)stack.getItem()).getRecipeList(stack);
+			List<IRecipeInfo> recipeList = recipeListObj.getRecipeList();
 			if(single) {
 				InventoryEncoderPattern inv = patternInventories[patternIndex];
-				if(!recipeList.isEmpty()) {
-					int i = recipeList.size() > patternIndex ? patternIndex : 0;
-					IRecipeInfo recipe = recipeList.get(i);
+				if(!clear && !recipeList.isEmpty()) {
+					IRecipeInfo recipe = recipeList.get(0);
 					inv.recipeType = recipe.getRecipeType();
 					if(recipe.isValid()) {
 						inv.setRecipe(recipe.getEncoderStacks());
@@ -122,7 +121,7 @@ public class TileEncoder extends TileBase {
 			}
 			else for(int i = 0; i < patternInventories.length; ++i) {
 				InventoryEncoderPattern inv = patternInventories[i];
-				if(i < recipeList.size()) {
+				if(!clear && i < recipeList.size()) {
 					IRecipeInfo recipe = recipeList.get(i);
 					inv.recipeType = recipe.getRecipeType();
 					if(recipe.isValid()) {

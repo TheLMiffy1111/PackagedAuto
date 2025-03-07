@@ -1,0 +1,41 @@
+{
+	"name": "Packager",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:packager",
+	"pages": [
+		{
+			"type": "text",
+			"text": "The $(item)Packager/$ packages items into $(l:core/package)Recipe Packages/$, which then can be unpackaged in an $(l:core/unpackager)Unpackager/$.$(p)This machine requires power."
+		},
+		{
+			"type": "spotlight",
+			"item": "packagedauto:packager",
+			"link_recipe": true,
+			"title": "Usage",
+			"text": "To use the $(item)Packager/$, put an encoded $(l:core/recipe_holder)Package Recipe Holder/$ inside. The machine will then be able to create $(l:core/package)Recipe Packages/$ for the encoded recipes. Created packages will be ejected into adjacent inventories.$(p)You may extract inputs out from the top side."
+		},
+		{
+			"type": "text",
+			"title": "Modes",
+			"text": "$(thing)Require Exact/$: Make the first package that exactly matches inventory contents.$(p)$(thing)Require Disjoint/$: Checks if packages have no overlap and make the package that can be made from inventory contents, otherwise fallback to $(thing)Require Exact/$.$(p)$(thing)First Match/$: Make the first package that can be made from inventory contents."
+		},
+		{
+			"type": "text",
+			"title": "Settings Cloning",
+			"text": "Using the $(l:core/settings_cloner)Packaging Settings Cloner/$, you can copy and paste the mode setting and the current available recipes.$(p)To paste recipes, the target $(item)Packager/$ should not have recipes, and you must have an empty $(l:core/recipe_holder)Package Recipe Holder/$ in your inventory."
+		},
+		{
+			"type": "text",
+			"flag": "mod:appliedenergistics2",
+			"title": "AE2 Integration",
+			"text": "The $(item)Packager/$ can be connected to an $(thing)ME Network/$, requiring a channel.$(p)It will extract power to use, provide packaging as autocrafting, and instead eject created $(l:core/package)Recipe Packages/$ into the network."
+		},
+		{
+			"type": "crafting",
+			"recipe": "packagedauto:packager",
+			"title": "Crafting"
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 7
+}

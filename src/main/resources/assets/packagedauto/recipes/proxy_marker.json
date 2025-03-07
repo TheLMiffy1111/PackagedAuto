@@ -1,0 +1,23 @@
+{
+	"type": "forge:ore_shapeless",
+	"result": {
+		"item": "packagedauto:proxy_marker",
+		"count": 1
+	},
+	"ingredients": [
+		{
+			"item": "packagedauto:package_component"
+		},
+		{
+			"type": "forge:ore_dict",
+			"ore": "enderpearl"
+		},
+		{
+			"type": "forge:ore_dict",
+			"ore": "obsidian"
+		},
+		{
+			"item": "minecraft:blaze_powder"
+		}
+	]
+}

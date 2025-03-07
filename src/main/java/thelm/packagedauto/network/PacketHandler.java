@@ -7,15 +7,17 @@ import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
 import net.minecraftforge.fml.common.network.simpleimpl.SimpleNetworkWrapper;
 import net.minecraftforge.fml.relauncher.Side;
 import thelm.packagedauto.PackagedAuto;
+import thelm.packagedauto.network.packet.PacketBeam;
 import thelm.packagedauto.network.packet.PacketChangeBlocking;
 import thelm.packagedauto.network.packet.PacketChangePackaging;
 import thelm.packagedauto.network.packet.PacketCycleRecipeType;
-import thelm.packagedauto.network.packet.PacketDistributorBeam;
+import thelm.packagedauto.network.packet.PacketDirectionalMarker;
 import thelm.packagedauto.network.packet.PacketLoadRecipeList;
 import thelm.packagedauto.network.packet.PacketSaveRecipeList;
 import thelm.packagedauto.network.packet.PacketSetItemStack;
 import thelm.packagedauto.network.packet.PacketSetPatternIndex;
 import thelm.packagedauto.network.packet.PacketSetRecipe;
+import thelm.packagedauto.network.packet.PacketSizedMarker;
 import thelm.packagedauto.network.packet.PacketSyncEnergy;
 import thelm.packagedauto.network.packet.PacketTrackerCount;
 
@@ -35,7 +37,9 @@ public class PacketHandler<REQ extends ISelfHandleMessage<? extends IMessage>> i
 		INSTANCE.registerMessage(get(), PacketSetItemStack.class, id++, Side.SERVER);
 		INSTANCE.registerMessage(get(), PacketChangePackaging.class, id++, Side.SERVER);
 		INSTANCE.registerMessage(get(), PacketTrackerCount.class, id++, Side.SERVER);
-		INSTANCE.registerMessage(get(), PacketDistributorBeam.class, id++, Side.CLIENT);
+		INSTANCE.registerMessage(get(), PacketBeam.class, id++, Side.CLIENT);
+		INSTANCE.registerMessage(get(), PacketDirectionalMarker.class, id++, Side.CLIENT);
+		INSTANCE.registerMessage(get(), PacketSizedMarker.class, id++, Side.CLIENT);
 	}
 
 	public static <REQ extends ISelfHandleMessage<? extends IMessage>> PacketHandler<REQ> get() {

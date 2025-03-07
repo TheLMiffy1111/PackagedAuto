@@ -11,6 +11,7 @@ import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
@@ -44,9 +45,25 @@ public class ItemRecipeHolder extends Item implements IRecipeListItem, IModelReg
 	}
 
 	@Override
+	public void setRecipeList(ItemStack stack, IRecipeList recipeList) {
+		if(!stack.hasTagCompound()) {
+			stack.setTagCompound(new NBTTagCompound());
+		}
+		stack.getTagCompound().removeTag("Recipes");
+		if(recipeList != null) {
+			recipeList.writeToNBT(stack.getTagCompound());
+		}
+		if(stack.getTagCompound().isEmpty()) {
+			stack.setTagCompound(null);
+		}
+	}
+
+	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
 		if(!worldIn.isRemote && playerIn.isSneaking()) {
-			return new ActionResult<>(EnumActionResult.SUCCESS, new ItemStack(INSTANCE, playerIn.getHeldItem(handIn).getCount()));
+			ItemStack stack = playerIn.getHeldItem(handIn).copy();
+			setRecipeList(stack, null);
+			return new ActionResult<>(EnumActionResult.SUCCESS, stack);
 		}
 		return super.onItemRightClick(worldIn, playerIn, handIn);
 	}
@@ -67,10 +84,15 @@ public class ItemRecipeHolder extends Item implements IRecipeListItem, IModelReg
 		super.addInformation(stack, worldIn, tooltip, flagIn);
 	}
 
+	public boolean isFilled(ItemStack stack) {
+		NBTTagCompound nbt = stack.getTagCompound();
+		return nbt != null && !nbt.getTagList("Recipes", 10).isEmpty();
+	}
+
 	@SideOnly(Side.CLIENT)
 	@Override
 	public void registerModels() {
-		ModelLoader.setCustomMeshDefinition(this, stack->stack.hasTagCompound() ? MODEL_LOCATION_FILLED : MODEL_LOCATION);
+		ModelLoader.setCustomMeshDefinition(this, stack->isFilled(stack) ? MODEL_LOCATION_FILLED : MODEL_LOCATION);
 		ModelBakery.registerItemVariants(this, MODEL_LOCATION, MODEL_LOCATION_FILLED);
 	}
 }

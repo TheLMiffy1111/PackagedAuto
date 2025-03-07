@@ -4,6 +4,7 @@ import com.google.common.primitives.Ints;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.Vec3i;
 import thelm.packagedauto.api.DirectionalGlobalPos;
 import thelm.packagedauto.api.IDistributorMarkerItem;
@@ -32,6 +33,11 @@ public class InventoryDistributor extends InventoryTileBase {
 	}
 
 	@Override
+	public int getInventoryStackLimit() {
+		return 1;
+	}
+
+	@Override
 	public boolean isItemValidForSlot(int slot, ItemStack stack) {
 		return stack.getItem() instanceof IDistributorMarkerItem && ((IDistributorMarkerItem)stack.getItem()).getDirectionalGlobalPos(stack) != null;
 	}
@@ -42,6 +48,16 @@ public class InventoryDistributor extends InventoryTileBase {
 		for(int i = 0; i < 81; ++i) {
 			loadMarker(i);
 		}
+	}
+
+	@Override
+	public boolean canInsertItem(int index, ItemStack itemStackIn, EnumFacing direction) {
+		return false;
+	}
+
+	@Override
+	public boolean canExtractItem(int index, ItemStack stack, EnumFacing direction) {
+		return false;
 	}
 
 	public void loadMarker(int slot) {

@@ -69,8 +69,7 @@ public class GuiPackagerExtension extends GuiContainerTileBase<ContainerPackager
 		}
 
 		@Override
-		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-			super.drawButton(mc, mouseX, mouseY, partialTicks);
+		protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
 			GlStateManager.color(1, 1, 1, 1);
 			mc.renderEngine.bindTexture(BACKGROUND);
 			drawTexturedModalRect(x+1, y+2, 176, 56+14*container.tile.mode.ordinal(), 14, 14);

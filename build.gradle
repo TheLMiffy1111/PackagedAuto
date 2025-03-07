@@ -66,7 +66,7 @@ def specVersion = "1"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "1.0.15.58"
+version = "1.0.16.59"
 
 archivesBaseName = "${modName}-${mcVersion}"
 
@@ -117,10 +117,10 @@ dependencies {
 	modImplementation "curse.maven:mekanism-268560:2835175"
 
 	// Performance
-	implementation("zone.rong:mixinbooter:10.2") {transitive = false}
+	implementation("zone.rong:mixinbooter:10.5") {transitive = false}
 	modImplementation "curse.maven:reid-629017:5502915"
-	modImplementation "curse.maven:vintagefix-871198:5536276"
-	modImplementation "curse.maven:lolasm-460609:5257348"
+	modImplementation "curse.maven:vintagefix-871198:6217171"
+	modImplementation "curse.maven:lolasm-460609:6217170"
 }
 
 def replacements = [
@@ -169,13 +169,13 @@ publishMods {
 		accessToken = providers.gradleProperty("curseforge.token")
 		projectId = "308380"
 		minecraftVersions.add(mcVersion)
-		optional "applied-energistics-2"
+		optional "applied-energistics-2", "jei", "patchouli"
 	}
 
 	modrinth {
 		accessToken = providers.gradleProperty("modrinth.token")
 		projectId = "ugIdhQx4"
 		minecraftVersions.add(mcVersion)
-		optional "ae2"
+		optional "ae2", "jei", "patchouli"
 	}
 }

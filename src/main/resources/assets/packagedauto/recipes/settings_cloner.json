@@ -1,0 +1,24 @@
+{
+	"type": "forge:ore_shapeless",
+	"result": {
+		"item": "packagedauto:settings_cloner",
+		"count": 1
+	},
+	"ingredients": [
+		{
+			"item": "packagedauto:package_component"
+		},
+		{
+			"type": "forge:ore_dict",
+			"ore": "dustRedstone"
+		},
+		{
+			"type": "forge:ore_dict",
+			"ore": "gemQuartz"
+		},
+		{
+			"type": "forge:ore_dict",
+			"ore": "gemQuartz"
+		}
+	]
+}

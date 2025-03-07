@@ -8,9 +8,6 @@ import com.google.common.collect.Lists;
 
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
-import appeng.api.networking.crafting.ICraftingPatternDetails;
-import appeng.api.networking.crafting.ICraftingProvider;
-import appeng.api.networking.crafting.ICraftingProviderHelper;
 import appeng.api.networking.security.IActionHost;
 import appeng.api.util.AECableType;
 import appeng.api.util.AEPartLocation;
@@ -19,7 +16,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryBasic;
-import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
@@ -40,30 +36,29 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
-import thelm.packagedauto.api.IRecipeListItem;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.client.gui.GuiPackagerExtension;
 import thelm.packagedauto.container.ContainerPackagerExtension;
 import thelm.packagedauto.energy.EnergyStorage;
 import thelm.packagedauto.integration.appeng.networking.HostHelperTilePackagerExtension;
-import thelm.packagedauto.integration.appeng.recipe.PackageCraftingPatternHelper;
 import thelm.packagedauto.inventory.InventoryPackagerExtension;
-import thelm.packagedauto.tile.TilePackager.Mode;
 
 @Optional.InterfaceList({
 	@Optional.Interface(iface="appeng.api.networking.IGridHost", modid="appliedenergistics2"),
 	@Optional.Interface(iface="appeng.api.networking.security.IActionHost", modid="appliedenergistics2"),
-	@Optional.Interface(iface="appeng.api.networking.crafting.ICraftingProvider", modid="appliedenergistics2")
 })
-public class TilePackagerExtension extends TileBase implements ITickable, IGridHost, IActionHost, ICraftingProvider {
+public class TilePackagerExtension extends TileBase implements ITickable, ISettingsCloneable, IGridHost, IActionHost {
 
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
 	public static int energyUsage = 100;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
+	public TilePackager packager;
 	public IInventory listStackInventory = new InventoryBasic("Recipe List", false, 1);
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
@@ -84,6 +79,11 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	@Override
 	protected String getLocalizedName() {
 		return I18n.translateToLocal("tile.packagedauto.packager_extension.name");
+	}
+
+	@Override
+	public String getConfigTypeName() {
+		return "tile.packagedauto.packager.name";
 	}
 
 	@Override
@@ -116,7 +116,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 					}
 				}
 			}
-			else if(world.getTotalWorldTime() % 8 == 0) {
+			else if(world.getTotalWorldTime() % refreshInterval == 0) {
 				if(canStart()) {
 					startProcess();
 					tickProcess();
@@ -124,7 +124,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 				}
 			}
 			chargeEnergy();
-			if(world.getTotalWorldTime() % 8 == 0) {
+			if(world.getTotalWorldTime() % refreshInterval == 0) {
 				if(hostHelper != null && hostHelper.isActive()) {
 					if(!inventory.getStackInSlot(9).isEmpty()) {
 						hostHelper.ejectItem();
@@ -177,7 +177,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		}
 		ItemStack slotStack = inventory.getStackInSlot(9);
 		ItemStack outputStack = currentPattern.getOutput();
-		return slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && slotStack.getItemDamage() == outputStack.getItemDamage() && ItemStack.areItemStackShareTagsEqual(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
+		return slotStack.isEmpty() || slotStack.isItemEqual(outputStack) && ItemStack.areItemStackShareTagsEqual(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
 	}
 
 	protected boolean canFinish() {
@@ -216,29 +216,17 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	}
 
 	public void updatePatternList() {
+		packager = null;
+		listStackInventory.clear();
 		patternList.clear();
 		if(world != null) {
 			for(BlockPos posP : BlockPos.getAllInBoxMutable(pos.add(-1, -1, -1), pos.add(1, 1, 1))) {
 				TileEntity te = world.getTileEntity(posP);
 				if(te instanceof TilePackager) {
-					TilePackager packager = (TilePackager)te;
+					packager = (TilePackager)te;
 					ItemStack listStack = packager.inventory.getStackInSlot(10);
 					listStackInventory.setInventorySlotContents(0, listStack);
-					if(listStack.getItem() instanceof IRecipeListItem) {
-						((IRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList().stream().
-						filter(IRecipeInfo::isValid).forEach(recipe->{
-							recipe.getPatterns().forEach(patternList::add);
-							recipe.getExtraPatterns().forEach(patternList::add);
-						});
-					}
-					else if(listStack.getItem() instanceof IPackageItem) {
-						IPackageItem packageItem = (IPackageItem)listStack.getItem();
-						IRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
-						int index = packageItem.getIndex(listStack);
-						if(recipe != null && recipe.isValid() && recipe.validPatternIndex(index)) {
-							patternList.add(recipe.getPatterns().get(index));
-						}
-					}
+					patternList.addAll(packager.patternList);
 					switch(mode) {
 					case EXACT:
 						disjoint = false;
@@ -252,9 +240,6 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 					}
 					break;
 				}
-			}
-			if(!world.isRemote && hostHelper != null) {
-				hostHelper.postPatternChange();
 			}
 		}
 	}
@@ -420,37 +405,20 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		return hostHelper.getNode();
 	}
 
-	@Optional.Method(modid="appliedenergistics2")
-	@Override
-	public boolean pushPattern(ICraftingPatternDetails patternDetails, InventoryCrafting table) {
-		if(!isBusy() && patternDetails instanceof PackageCraftingPatternHelper) {
-			PackageCraftingPatternHelper pattern = (PackageCraftingPatternHelper)patternDetails;
-			ItemStack slotStack = inventory.getStackInSlot(9);
-			ItemStack outputStack = pattern.pattern.getOutput();
-			if(slotStack.isEmpty() || slotStack.getItem() == outputStack.getItem() && slotStack.getItemDamage() == outputStack.getItemDamage() && ItemStack.areItemStackShareTagsEqual(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
-				currentPattern = pattern.pattern;
-				lockPattern = true;
-				for(int i = 0; i < table.getSizeInventory() && i < 9; ++i) {
-					inventory.setInventorySlotContents(i, table.getStackInSlot(i).copy());
-				}
-				return true;
-			}
-		}
-		return false;
+	public boolean canPushPattern() {
+		return !isWorking && inventory.stacks.subList(0, 9).stream().allMatch(ItemStack::isEmpty);
 	}
 
-	@Optional.Method(modid="appliedenergistics2")
 	@Override
-	public boolean isBusy() {
-		return isWorking || !inventory.stacks.subList(0, 9).stream().allMatch(ItemStack::isEmpty);
+	public boolean loadConfig(NBTTagCompound nbt, EntityPlayer player) {
+		mode = TilePackager.Mode.values()[nbt.getByte("Mode")];
+		return true;
 	}
 
-	@Optional.Method(modid="appliedenergistics2")
 	@Override
-	public void provideCrafting(ICraftingProviderHelper craftingTracker) {
-		for(IPackagePattern pattern : patternList) {
-			craftingTracker.addCraftingOption(this, new PackageCraftingPatternHelper(pattern));
-		}
+	public boolean saveConfig(NBTTagCompound nbt, EntityPlayer player) {
+		nbt.setByte("Mode", (byte)mode.ordinal());
+		return true;
 	}
 
 	@Override
@@ -458,7 +426,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 		if(hostHelper != null) {
 			hostHelper.readFromNBT(nbt);
 		}
-		mode = Mode.values()[nbt.getByte("Mode")];
+		mode = TilePackager.Mode.values()[nbt.getByte("Mode")];
 		super.readFromNBT(nbt);
 		updatePatternList();
 		isWorking = nbt.getBoolean("Working");
@@ -499,7 +467,7 @@ public class TilePackagerExtension extends TileBase implements ITickable, IGridH
 	}
 
 	public void changePackagingMode() {
-		mode = Mode.values()[((mode.ordinal()+1) % 3)];
+		mode = TilePackager.Mode.values()[((mode.ordinal()+1) % 3)];
 		updatePatternList();
 		markDirty();
 	}

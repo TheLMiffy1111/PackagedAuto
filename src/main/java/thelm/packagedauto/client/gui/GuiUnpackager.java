@@ -95,8 +95,7 @@ public class GuiUnpackager extends GuiContainerTileBase<ContainerUnpackager> {
 		}
 
 		@Override
-		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-			super.drawButton(mc, mouseX, mouseY, partialTicks);
+		protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
 			GlStateManager.color(1, 1, 1, 1);
 			mc.renderEngine.bindTexture(BACKGROUND);
 			drawTexturedModalRect(x+1, y+2, 176, container.tile.blocking ? 64 : 50, 14, 14);
@@ -115,8 +114,7 @@ public class GuiUnpackager extends GuiContainerTileBase<ContainerUnpackager> {
 		}
 
 		@Override
-		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
-			super.drawButton(mc, mouseX, mouseY, partialTicks);
+		protected void mouseDragged(Minecraft mc, int mouseX, int mouseY) {
 			GlStateManager.color(1, 1, 1, 1);
 			mc.renderEngine.bindTexture(BACKGROUND);
 			drawTexturedModalRect(x+1, y+2, id == 0 ? 176 : 182, 78, 6, 14);

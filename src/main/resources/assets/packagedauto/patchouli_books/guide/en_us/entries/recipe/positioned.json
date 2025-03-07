@@ -1,0 +1,47 @@
+{
+	"name": "Positioned Processing",
+	"category": "packagedauto:recipe",
+	"icon": "packagedauto:distributor",
+	"pages": [
+		{
+			"type": "text",
+			"text": "$(thing)Positioned Processing/$ is a processing/crafting recipe type that uses $(item)Positioned Package Distributors/$ to distribute items into separate inventories.$(p)When encoded, outputs will be sorted and stacked.$(p)When unpackaged, items will be inserted into target inventories in the encoded order."
+		},
+		{
+			"type": "packagedauto:spotlight2",
+			"item1": "packagedauto:distributor_marker",
+			"item2": "packagedauto:distributor",
+			"title": "Usage",
+			"text": "To use, bind $(item)Distributor Markers/$ to inventories, and put the markers into the slots of the distributor corresponding to the encoded input slots."
+		},
+		{
+			"type": "text",
+			"title": "Usage (cont.)",
+			"text": "You can $(thing)$(k:sneak) + $(k:use)/$ a bound marker to unbind it.$(p)You can $(thing)$(k:sneak) + $(k:use)/$ with an empty hand on a distributor to show its current range and targets.$(p)You can combine a bound $(item)Distributor Marker/$ with unbound ones in a crafting grid to copy contents."
+		},
+		{
+			"type": "text",
+			"title": "Usage (cont.)",
+			"text": "If placed next to an $(l:core/unpackager)Unpackager/$, the $(item)Positioned Package Distributor/$ will respect its blocking mode settings; if used with a $(l:recipe/crafting_proxy)Package Crafting Machine Proxy/$, blocking mode will be off.$(p)If any target inventories become invalid, the distributor will eject all pending items on top of itself."
+		},
+		{
+			"type": "text",
+			"title": "Settings Cloning",
+			"text": "Using the $(l:core/settings_cloner)Packaging Settings Cloner/$, you can copy and paste current target setting of a $(item)Positioned Package Distributor/$.$(p)To paste target settings, you must have a sufficient amount of empty $(item)Distributor Markers/$ in your inventory."
+		},
+		{
+			"type": "text",
+			"flag": "mod:appliedenergistics2",
+			"title": "AE2 Integration",
+			"text": "The $(item)Positioned Package Distributor/$ can be connected to an $(thing)ME Network/$.$(p)It will instead eject pending items into the network if any target inventory becomes invalid."
+		},
+		{
+			"type": "crafting",
+			"recipe": "packagedauto:distributor_marker",
+			"recipe2": "packagedauto:distributor",
+			"title": "Crafting"
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 103
+}

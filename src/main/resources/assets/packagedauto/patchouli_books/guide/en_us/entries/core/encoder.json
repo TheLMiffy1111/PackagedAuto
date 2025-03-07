@@ -1,0 +1,36 @@
+{
+	"name": "Package Recipe Encoder",
+	"category": "packagedauto:core",
+	"icon": "packagedauto:encoder",
+	"pages": [
+		{
+			"type": "text",
+			"text": "The $(item)Package Recipe Encoder/$ encodes recipes into $(l:core/recipe_holder)Package Recipe Holders/$, which then provides recipe data for machines."
+		},
+		{
+			"type": "spotlight",
+			"item": "packagedauto:encoder",
+			"link_recipe": true,
+			"title": "Usage",
+			"text": "To encode recipes, select a $(thing)recipe type/$.$(p)Depending on the recipe type, you can then set the inputs and outputs and their counts.$(p)Finally, put $(l:core/recipe_holder)Package Recipe Holders/$ inside, and press the $(thing)save button/$ to encode recipes."
+		},
+		{
+			"type": "text",
+			"title": "Usage (cont.)",
+			"text": "You can load recipes from encoded $(l:core/recipe_holder)Package Recipe Holders/$ by pressing the $(thing)load button/$.$(p)Up to 20 recipes can be encoded in $(l:core/recipe_holder)Package Recipe Holders/$ by selecting recipe slots at the top of the GUI.$(p)What $(l:core/package)Recipe Packages/$ are made can be previewed on the right."
+		},
+		{
+			"type": "text",
+			"flag": "mod:jei",
+			"title": "JEI Integration",
+			"text": "You can show all recipes applicable to the current recipe type by pressing the arrow, and you can press the $(thing)Move Items/$ button to quickly encode recipes."
+		},
+		{
+			"type": "crafting",
+			"recipe": "packagedauto:encoder",
+			"title": "Crafting"
+		}
+	],
+	"read_by_default": true,
+	"sortnum": 6
+}

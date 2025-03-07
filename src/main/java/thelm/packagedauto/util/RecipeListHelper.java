@@ -37,25 +37,16 @@ public class RecipeListHelper implements IRecipeList {
 	public void readFromNBT(NBTTagCompound nbt) {
 		recipeList.clear();
 		if(nbt != null) {
-			NBTTagList tagList = nbt.getTagList("Recipes", 10);
-			for(int i = 0; i < tagList.tagCount(); ++i) {
-				NBTTagCompound tag = tagList.getCompoundTagAt(i);
-				IRecipeInfo recipe = MiscUtil.readRecipeFromNBT(tag);
-				if(recipe != null) {
-					recipeList.add(recipe);
-				}
-			}
+			recipeList.addAll(MiscUtil.readRecipeListFromNBT(nbt.getTagList("Recipes", 10)));
 		}
 	}
 
 	@Override
 	public NBTTagCompound writeToNBT(NBTTagCompound nbt) {
-		NBTTagList tagList = new NBTTagList();
-		for(IRecipeInfo recipe : recipeList) {
-			NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), recipe);
-			tagList.appendTag(tag);
+		NBTTagList tagList = MiscUtil.writeRecipeListToNBT(new NBTTagList(), recipeList);
+		if(!tagList.isEmpty()) {
+			nbt.setTag("Recipes", tagList);
 		}
-		nbt.setTag("Recipes", tagList);
 		return nbt;
 	}
 }

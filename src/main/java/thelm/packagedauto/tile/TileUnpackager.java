@@ -2,6 +2,7 @@ package thelm.packagedauto.tile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,15 +13,17 @@ import appeng.api.networking.IGridNode;
 import appeng.api.networking.crafting.ICraftingPatternDetails;
 import appeng.api.networking.crafting.ICraftingProvider;
 import appeng.api.networking.crafting.ICraftingProviderHelper;
+import appeng.api.networking.events.MENetworkChannelsChanged;
+import appeng.api.networking.events.MENetworkEventSubscribe;
+import appeng.api.networking.events.MENetworkPowerStatusChange;
 import appeng.api.networking.security.IActionHost;
 import appeng.api.util.AECableType;
 import appeng.api.util.AEPartLocation;
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.booleans.BooleanList;
-import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
@@ -41,6 +44,8 @@ import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IRecipeInfo;
+import thelm.packagedauto.api.IRecipeList;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.client.gui.GuiUnpackager;
 import thelm.packagedauto.container.ContainerUnpackager;
@@ -49,16 +54,18 @@ import thelm.packagedauto.integration.appeng.AppEngUtil;
 import thelm.packagedauto.integration.appeng.networking.HostHelperTileUnpackager;
 import thelm.packagedauto.integration.appeng.recipe.RecipeCraftingPatternHelper;
 import thelm.packagedauto.inventory.InventoryUnpackager;
+import thelm.packagedauto.item.ItemRecipeHolder;
 
 @Optional.InterfaceList({
 	@Optional.Interface(iface="appeng.api.networking.IGridHost", modid="appliedenergistics2"),
 	@Optional.Interface(iface="appeng.api.networking.security.IActionHost", modid="appliedenergistics2"),
 	@Optional.Interface(iface="appeng.api.networking.crafting.ICraftingProvider", modid="appliedenergistics2")
 })
-public class TileUnpackager extends TileBase implements ITickable, IGridHost, IActionHost, ICraftingProvider {
+public class TileUnpackager extends TileBase implements ITickable, ISettingsCloneable, IGridHost, IActionHost, ICraftingProvider {
 
 	public static int energyCapacity = 5000;
 	public static int energyUsage = 50;
+	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
 	public final PackageTracker[] trackers = new PackageTracker[10];
@@ -66,6 +73,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	public boolean powered = false;
 	public boolean blocking = false;
 	public int trackerCount = 6;
+	public int roundRobinIndex = 0;
 
 	public TileUnpackager() {
 		setInventory(new InventoryUnpackager(this));
@@ -84,6 +92,11 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	}
 
 	@Override
+	public String getConfigTypeName() {
+		return "tile.packagedauto.unpackager.name";
+	}
+
+	@Override
 	public void onLoad() {
 		updatePowered();
 	}
@@ -92,7 +105,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	public void update() {
 		if(!world.isRemote) {
 			chargeEnergy();
-			if(world.getTotalWorldTime() % 8 == 0) {
+			if(world.getTotalWorldTime() % refreshInterval == 0) {
 				fillTrackers();
 				emptyTrackers();
 				if(drawMEEnergy && hostHelper != null && hostHelper.isActive()) {
@@ -152,7 +165,9 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	}
 
 	protected void emptyTrackers() {
-		for(EnumFacing facing : EnumFacing.VALUES) {
+		List<EnumFacing> directions = Lists.newArrayList(EnumFacing.VALUES);
+		Collections.rotate(directions, roundRobinIndex);
+		for(EnumFacing facing : directions) {
 			TileEntity tile = world.getTileEntity(pos.offset(facing));
 			if(tile instanceof IPackageCraftingMachine) {
 				IPackageCraftingMachine machine = (IPackageCraftingMachine)tile;
@@ -160,6 +175,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 					if(tracker.isFilled() && tracker.recipe != null && tracker.recipe.getRecipeType().hasMachine()) {
 						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), facing.getOpposite())) {
 							tracker.clearRecipe();
+							roundRobinIndex = (roundRobinIndex+1) % 6;
 							markDirty();
 							break;
 						}
@@ -169,7 +185,9 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			}
 		}
 		if(!powered) {
-			for(EnumFacing facing : EnumFacing.VALUES) {
+			directions = Lists.newArrayList(EnumFacing.VALUES);
+			Collections.rotate(directions, roundRobinIndex);
+			for(EnumFacing facing : directions) {
 				TileEntity tile = world.getTileEntity(pos.offset(facing));
 				if(!validSendTarget(tile, facing.getOpposite())) {
 					continue;
@@ -197,7 +215,9 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 				trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
 				if(acceptsAll) {
 					trackerToEmpty.facing = facing;
+					roundRobinIndex = (roundRobinIndex+1) % 6;
 				}
+				markDirty();
 			}
 		}
 		for(EnumFacing facing : EnumFacing.VALUES) {
@@ -237,6 +257,7 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 
 	protected boolean validSendTarget(TileEntity tile, EnumFacing facing) {
 		return tile != null &&
+				!(tile instanceof IPackageCraftingMachine) &&
 				!(tile instanceof TilePackager) &&
 				!(tile instanceof TilePackagerExtension) &&
 				!(tile instanceof TileUnpackager) &&
@@ -311,26 +332,15 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public boolean pushPattern(ICraftingPatternDetails patternDetails, InventoryCrafting table) {
-		if(!isBusy() && patternDetails instanceof RecipeCraftingPatternHelper) {
-			IntList emptySlots = new IntArrayList();
-			for(int i = 0; i < 9; ++i) {
-				if(inventory.getStackInSlot(i).isEmpty()) {
-					emptySlots.add(i);
-				}
+		if(hostHelper.isActive() && !isBusy() && patternDetails instanceof RecipeCraftingPatternHelper) {
+			RecipeCraftingPatternHelper pattern = (RecipeCraftingPatternHelper)patternDetails;
+			int energyReq = energyUsage*pattern.recipe.getPatterns().size();
+			if(energyStorage.getEnergyStored() >= energyReq) {
+				PackageTracker tracker = Arrays.stream(trackers).limit(trackerCount).filter(PackageTracker::isEmpty).findFirst().get();
+				tracker.fillRecipe(pattern.recipe);
+				energyStorage.extractEnergy(energyReq, false);
+				return true;
 			}
-			IntList requiredSlots = new IntArrayList();
-			for(int i = 0; i < table.getSizeInventory(); ++i) {
-				if(!table.getStackInSlot(i).isEmpty()) {
-					requiredSlots.add(i);
-				}
-			}
-			if(requiredSlots.size() > emptySlots.size()) {
-				return false;
-			}
-			for(int i = 0; i < requiredSlots.size(); ++i) {
-				inventory.setInventorySlotContents(emptySlots.getInt(i), table.getStackInSlot(requiredSlots.getInt(i)).copy());
-			}
-			return true;
 		}
 		return false;
 	}
@@ -338,17 +348,31 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public boolean isBusy() {
-		return Arrays.stream(trackers).noneMatch(PackageTracker::isEmpty);
+		return Arrays.stream(trackers).limit(trackerCount).noneMatch(PackageTracker::isEmpty);
 	}
 
 	@Optional.Method(modid="appliedenergistics2")
 	@Override
 	public void provideCrafting(ICraftingProviderHelper craftingTracker) {
-		for(IRecipeInfo pattern : recipeList) {
-			if(!pattern.getOutputs().isEmpty()) {
-				craftingTracker.addCraftingOption(this, new RecipeCraftingPatternHelper(pattern));
+		if(hostHelper.isActive()) {
+			for(IRecipeInfo pattern : recipeList) {
+				if(!pattern.getOutputs().isEmpty()) {
+					craftingTracker.addCraftingOption(this, new RecipeCraftingPatternHelper(pattern));
+				}
 			}
 		}
+	}
+
+	@Optional.Method(modid="appliedenergistics2")
+	@MENetworkEventSubscribe
+	public void onChannelsChanged(MENetworkChannelsChanged event) {
+		hostHelper.postPatternChange();
+	}
+
+	@Optional.Method(modid="appliedenergistics2")
+	@MENetworkEventSubscribe
+	public void onPowerStatusChange(MENetworkPowerStatusChange event) {
+		hostHelper.postPatternChange();
 	}
 
 	protected boolean isInterface(TileEntity tile, EnumFacing facing) {
@@ -363,6 +387,38 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 			return 0;
 		}
 		return scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored();
+	}
+
+	@Override
+	public boolean loadConfig(NBTTagCompound nbt, EntityPlayer player) {
+		blocking = nbt.getBoolean("Blocking");
+		trackerCount = nbt.getByte("Trackers");
+		if(nbt.hasKey("Recipes") && inventory.getStackInSlot(9).isEmpty()) {
+			InventoryPlayer playerInventory = player.inventory;
+			for(int i = 0; i < playerInventory.getSizeInventory(); ++i) {
+				ItemStack stack = playerInventory.getStackInSlot(i);
+				if(!stack.isEmpty() && stack.getItem() == ItemRecipeHolder.INSTANCE && !stack.hasTagCompound()) {
+					ItemStack stackCopy = stack.splitStack(1);
+					IRecipeList recipeListObj = ItemRecipeHolder.INSTANCE.getRecipeList(stackCopy);
+					List<IRecipeInfo> recipeList = MiscUtil.readRecipeListFromNBT(nbt.getTagList("Recipes", 10));
+					recipeListObj.setRecipeList(recipeList);
+					ItemRecipeHolder.INSTANCE.setRecipeList(stackCopy, recipeListObj);
+					inventory.setInventorySlotContents(9, stackCopy);
+					break;
+				}
+			}
+		}
+		return true;
+	}
+
+	@Override
+	public boolean saveConfig(NBTTagCompound nbt, EntityPlayer player) {
+		nbt.setBoolean("Blocking", blocking);
+		nbt.setByte("Trackers", (byte)trackerCount);
+		if(!recipeList.isEmpty()) {
+			nbt.setTag("Recipes", MiscUtil.writeRecipeListToNBT(new NBTTagList(), recipeList));
+		}
+		return true;
 	}
 
 	@Override
@@ -426,16 +482,25 @@ public class TileUnpackager extends TileBase implements ITickable, IGridHost, IA
 		public List<ItemStack> toSend = new ArrayList<>();
 		public EnumFacing facing;
 
-		public void setRecipe(IRecipeInfo recipe) {
-			this.recipe = recipe;
-		}
-
 		public void clearRecipe() {
 			clearRejectedIndexes();
 			recipe = null;
 			amount = 0;
 			received.clear();
 			facing = null;
+			if(world != null && !world.isRemote) {
+				markDirty();
+			}
+		}
+
+		public void fillRecipe(IRecipeInfo recipe) {
+			this.recipe = recipe;
+			amount = recipe.getPatterns().size();
+			received.clear();
+			received.size(amount);
+			for(int i = 0; i < received.size(); ++i) {
+				received.set(i, true);
+			}
 			if(world != null && !world.isRemote) {
 				markDirty();
 			}

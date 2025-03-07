@@ -14,12 +14,12 @@ import thelm.packagedauto.network.ISelfHandleMessage;
 
 public class PacketSetRecipe implements ISelfHandleMessage<IMessage> {
 
-	private Int2ObjectMap<ItemStack> map = new Int2ObjectOpenHashMap<>();
+	private Int2ObjectMap<ItemStack> map;
 
 	public PacketSetRecipe() {}
 
 	public PacketSetRecipe(Int2ObjectMap<ItemStack> map) {
-		this.map.putAll(map);
+		this.map = map;
 	}
 
 	public PacketSetRecipe addItem(int index, ItemStack stack) {
@@ -38,8 +38,8 @@ public class PacketSetRecipe implements ISelfHandleMessage<IMessage> {
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		map.clear();
 		int size = buf.readByte();
+		map = new Int2ObjectOpenHashMap<>(size);
 		for(int i = 0; i < size; ++i) {
 			int index = buf.readByte();
 			ItemStack stack = MiscUtil.readItemWithLargeCount(buf);

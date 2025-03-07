@@ -1,0 +1,27 @@
+{
+	"name": "Crafting",
+	"category": "packagedauto:recipe",
+	"icon": "packagedauto:crafter",
+	"pages": [
+		{
+			"type": "text",
+			"text": "$(thing)Crafting/$ is a crafting recipe type that uses the $(item)Package Crafter/$ to craft recipes craftable in a crafting table.$(p)Items crafted by the $(item)Package Crafter/$ will be ejected into adjacent inventories.$(p)The $(item)Package Crafter/$ requires power."
+		},
+		{
+			"type": "spotlight",
+			"flag": "mod:appliedenergistics2",
+			"item": "packagedauto:crafter",
+			"link_recipe": true,
+			"title": "AE2 Integration",
+			"text": "The $(item)Package Crafter/$ can be connected to an $(thing)ME Network/$.$(p)It will extract power to use, and instead eject crafted items into the network."
+		},
+		{
+			"type": "crafting",
+			"recipe": "packagedauto:crafter",
+			"title": "Crafting"
+		}
+	],
+	"flag": "packagedauto:crafter",
+	"read_by_default": true,
+	"sortnum": 104
+}

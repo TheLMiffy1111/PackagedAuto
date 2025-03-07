@@ -300,6 +300,24 @@ public class MiscUtil {
 		return null;
 	}
 
+	public static NBTTagList writeRecipeListToNBT(NBTTagList tagList, List<IRecipeInfo> recipes) {
+		for(IRecipeInfo recipe : recipes) {
+			tagList.appendTag(writeRecipeToNBT(new NBTTagCompound(), recipe));
+		}
+		return tagList;
+	}
+
+	public static List<IRecipeInfo> readRecipeListFromNBT(NBTTagList tagList) {
+		List<IRecipeInfo> recipes = new ArrayList<>(tagList.tagCount());
+		for(int i = 0; i < tagList.tagCount(); ++i) {
+			IRecipeInfo recipe = readRecipeFromNBT(tagList.getCompoundTagAt(i));
+			if(recipe != null) {
+				recipes.add(recipe);
+			}
+		}
+		return recipes;
+	}
+
 	public static boolean recipeEquals(IRecipeInfo recipeA, Object recipeInternalA, IRecipeInfo recipeB, Object recipeInternalB) {
 		if(!Objects.equals(recipeInternalA, recipeInternalB)) {
 			return false;
@@ -345,8 +363,7 @@ public class MiscUtil {
 		List<ItemStack> condensedOffered = condenseStacks(offered, true);
 		f:for(ItemStack req : condensedRequired) {
 			for(ItemStack offer : condensedOffered) {
-				if(req.getCount() <= offer.getCount() && req.getItem() == offer.getItem() &&
-						offer.getItemDamage() == req.getItemDamage() &&
+				if(req.getCount() <= offer.getCount() && req.isItemEqual(offer) &&
 						(!req.hasTagCompound() || ItemStack.areItemStackShareTagsEqual(req, offer))) {
 					continue f;
 				}
@@ -360,8 +377,7 @@ public class MiscUtil {
 			int count = req.getCount();
 			for(ItemStack offer : offered) {
 				if(!offer.isEmpty()) {
-					if(req.getItem() == offer.getItem() && offer.getItemDamage() == req.getItemDamage() &&
-							(!req.hasTagCompound() || ItemStack.areItemStackShareTagsEqual(req, offer))) {
+					if(req.isItemEqual(offer) && (!req.hasTagCompound() || ItemStack.areItemStackShareTagsEqual(req, offer))) {
 						int toRemove = Math.min(count, offer.getCount());
 						offer.shrink(toRemove);
 						count -= toRemove;

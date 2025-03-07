@@ -11,21 +11,25 @@ import thelm.packagedauto.network.ISelfHandleMessage;
 public class PacketLoadRecipeList implements ISelfHandleMessage<IMessage> {
 
 	private boolean single;
+	private boolean clear;
 
 	public PacketLoadRecipeList() {}
 
-	public PacketLoadRecipeList(boolean single) {
+	public PacketLoadRecipeList(boolean single, boolean clear) {
 		this.single = single;
+		this.clear = clear;
 	}
 
 	@Override
 	public void toBytes(ByteBuf buf) {
 		buf.writeBoolean(single);
+		buf.writeBoolean(clear);
 	}
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
 		single = buf.readBoolean();
+		clear = buf.readBoolean();
 	}
 
 	@Override
@@ -35,7 +39,7 @@ public class PacketLoadRecipeList implements ISelfHandleMessage<IMessage> {
 		world.addScheduledTask(()->{
 			if(player.openContainer instanceof ContainerEncoder) {
 				ContainerEncoder container = (ContainerEncoder)player.openContainer;
-				container.tile.loadRecipeList(single);
+				container.tile.loadRecipeList(single, clear);
 			}
 		});
 		return null;
