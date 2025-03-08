@@ -12,7 +12,7 @@ import net.minecraftforge.network.NetworkEvent;
 import thelm.packagedauto.slot.FalseCopySlot;
 import thelm.packagedauto.util.MiscHelper;
 
-public record SetItemStackPacket(short containerSlot, ItemStack stack) {
+public record SetItemStackPacket(int containerSlot, ItemStack stack) {
 
 	public void encode(FriendlyByteBuf buf) {
 		buf.writeShort(containerSlot);
@@ -20,7 +20,7 @@ public record SetItemStackPacket(short containerSlot, ItemStack stack) {
 	}
 
 	public static SetItemStackPacket decode(FriendlyByteBuf buf) {
-		return new SetItemStackPacket(buf.readShort(), MiscHelper.INSTANCE.readItemWithLargeCount(buf));
+		return new SetItemStackPacket(buf.readUnsignedShort(), MiscHelper.INSTANCE.readItemWithLargeCount(buf));
 	}
 
 	public void handle(Supplier<NetworkEvent.Context> ctx) {

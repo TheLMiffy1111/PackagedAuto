@@ -21,6 +21,7 @@ import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.api.IVolumePackageItem;
 import thelm.packagedauto.block.FluidPackageFillerBlock;
 import thelm.packagedauto.energy.EnergyStorage;
@@ -28,7 +29,7 @@ import thelm.packagedauto.inventory.FluidPackageFillerItemHandler;
 import thelm.packagedauto.menu.FluidPackageFillerMenu;
 import thelm.packagedauto.util.MiscHelper;
 
-public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
+public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements ISettingsCloneable {
 
 	public static final BlockEntityType<FluidPackageFillerBlockEntity> TYPE_INSTANCE = (BlockEntityType<FluidPackageFillerBlockEntity>)BlockEntityType.Builder.
 			of(FluidPackageFillerBlockEntity::new, FluidPackageFillerBlock.INSTANCE).
@@ -57,6 +58,11 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	@Override
 	protected Component getDefaultName() {
 		return new TranslatableComponent("block.packagedauto.fluid_package_filler");
+	}
+
+	@Override
+	public String getConfigTypeName() {
+		return "block.packagedauto.fluid_package_filler";
 	}
 
 	@Override
@@ -231,6 +237,18 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 			return 15;
 		}
 		return 0;
+	}
+
+	@Override
+	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, Player player) {
+		requiredAmount = nbt.getInt("AmountReq");
+		return ISettingsCloneable.Result.success();
+	}
+
+	@Override
+	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, Player player) {
+		nbt.putInt("AmountReq", requiredAmount);
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

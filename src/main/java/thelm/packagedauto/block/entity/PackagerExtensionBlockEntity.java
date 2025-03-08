@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.player.Inventory;
@@ -26,6 +27,7 @@ import net.minecraftforge.items.ItemStackHandler;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
+import thelm.packagedauto.api.IPackageRecipeListItem;
 import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.block.PackagerExtensionBlock;
 import thelm.packagedauto.energy.EnergyStorage;
@@ -334,15 +336,22 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 	}
 
 	@Override
-	public boolean loadConfig(CompoundTag nbt, Player player) {
+	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, Player player) {
 		mode = PackagerBlockEntity.Mode.values()[nbt.getByte("Mode")];
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public boolean saveConfig(CompoundTag nbt, Player player) {
+	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, Player player) {
 		nbt.putByte("Mode", (byte)mode.ordinal());
-		return true;
+		ItemStack listStack = listStackItemHandler.getStackInSlot(0);
+		if(listStack.getItem() instanceof IPackageRecipeListItem recipeListItem) {
+			List<IPackageRecipeInfo> recipeList = recipeListItem.getRecipeList(listStack).getRecipeList();
+			if(!recipeList.isEmpty()) {
+				nbt.put("Recipes", MiscHelper.INSTANCE.saveRecipeList(new ListTag(), recipeList));
+			}
+		}
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

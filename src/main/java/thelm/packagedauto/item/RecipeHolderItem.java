@@ -49,7 +49,7 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-		if(!level.isClientSide && player.isShiftKeyDown()) {
+		if(!level.isClientSide && player.isShiftKeyDown() && isFilled(player.getItemInHand(hand))) {
 			ItemStack stack = player.getItemInHand(hand).copy();
 			setRecipeList(stack, null);
 			return InteractionResultHolder.success(stack);
