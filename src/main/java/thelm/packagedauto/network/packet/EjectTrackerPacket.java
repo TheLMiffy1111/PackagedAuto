@@ -5,13 +5,13 @@ import java.util.function.Supplier;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
-import thelm.packagedauto.container.EncoderContainer;
+import thelm.packagedauto.container.UnpackagerContainer;
 
-public class SetPatternIndexPacket {
+public class EjectTrackerPacket {
 
 	private final int index;
 
-	public SetPatternIndexPacket(int index) {
+	public EjectTrackerPacket(int index) {
 		this.index = index;
 	}
 
@@ -19,17 +19,16 @@ public class SetPatternIndexPacket {
 		buf.writeByte(index);
 	}
 
-	public static SetPatternIndexPacket decode(PacketBuffer buf) {
-		return new SetPatternIndexPacket(buf.readUnsignedByte());
+	public static EjectTrackerPacket decode(PacketBuffer buf) {
+		return new EjectTrackerPacket(buf.readUnsignedByte());
 	}
 
 	public void handle(Supplier<NetworkEvent.Context> ctx) {
 		ServerPlayerEntity player = ctx.get().getSender();
 		ctx.get().enqueueWork(()->{
-			if(player.containerMenu instanceof EncoderContainer) {
-				EncoderContainer container = (EncoderContainer)player.containerMenu;
-				container.tile.setPatternIndex(index);
-				container.setupSlots();
+			if(player.containerMenu instanceof UnpackagerContainer) {
+				UnpackagerContainer container = (UnpackagerContainer)player.containerMenu;
+				container.tile.trackers[index].ejectItems();
 			}
 		});
 		ctx.get().setPacketHandled(true);

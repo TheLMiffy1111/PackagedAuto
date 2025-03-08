@@ -41,24 +41,16 @@ public class SettingsClonerItem extends Item implements ISettingsClonerItem {
 	public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
 		World world = context.getLevel();
 		PlayerEntity player = context.getPlayer();
-		if(!world.isClientSide && !player.isShiftKeyDown()) {
-			BlockPos pos = context.getClickedPos();
-			TileEntity tile = world.getBlockEntity(pos);
-			if(tile instanceof ISettingsCloneable) {
-				ISettingsCloneable settable = (ISettingsCloneable)tile;
-				String configName = settable.getConfigTypeName();
-				SettingsClonerData data = getData(stack);
-				if(data != null) {
-					if(configName.equals(data.type()) && settable.loadConfig(data.data(), player)) {
-						player.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.loaded"), Util.NIL_UUID);
-					}
-					else {
-						player.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.not_loaded").withStyle(TextFormatting.RED), Util.NIL_UUID);
-					}
-				}
-				else {
+		BlockPos pos = context.getClickedPos();
+		TileEntity tile = world.getBlockEntity(pos);
+		if(tile instanceof ISettingsCloneable) {
+			ISettingsCloneable settable = (ISettingsCloneable)tile;
+			String configName = settable.getConfigTypeName();
+			if(player.isShiftKeyDown()) {
+				if(!world.isClientSide) {
 					CompoundNBT dataTag = new CompoundNBT();
-					if(settable.saveConfig(dataTag, player)) {
+					ISettingsCloneable.Result result = settable.saveConfig(dataTag, player);
+					if(result.type != ISettingsCloneable.ResultType.FAIL) {
 						CompoundNBT tag = stack.getOrCreateTag();
 						tag.putString("Type", configName);
 						tag.put("Data", dataTag);
@@ -67,7 +59,31 @@ public class SettingsClonerItem extends Item implements ISettingsClonerItem {
 						player.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.saved"), Util.NIL_UUID);
 					}
 					else {
-						player.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.not_saved").withStyle(TextFormatting.RED), Util.NIL_UUID);
+						player.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.not_saved", result.message).withStyle(TextFormatting.RED), Util.NIL_UUID);
+					}
+				}
+				return ActionResultType.SUCCESS;
+			}
+			SettingsClonerData data = getData(stack);
+			if(data != null) {
+				if(!world.isClientSide) {
+					if(configName.equals(data.type())) {
+						ISettingsCloneable.Result result = settable.loadConfig(data.data(), player);
+						switch(result.type) {
+						case SUCCESS:
+							player.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.loaded"), Util.NIL_UUID);
+							break;
+						case PARTIAL:
+							player.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.partial_loaded", result.message), Util.NIL_UUID);
+							break;
+						case FAIL:
+							player.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.not_loaded", result.message).withStyle(TextFormatting.RED), Util.NIL_UUID);
+							break;
+						}
+					}
+					else {
+						ITextComponent errorMessage = new TranslationTextComponent("item.packagedauto.settings_cloner.incompatible");
+						player.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.not_loaded", errorMessage).withStyle(TextFormatting.RED), Util.NIL_UUID);
 					}
 				}
 				return ActionResultType.SUCCESS;
@@ -78,22 +94,18 @@ public class SettingsClonerItem extends Item implements ISettingsClonerItem {
 
 	@Override
 	public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
-		if(!worldIn.isClientSide && playerIn.isShiftKeyDown()) {
+		if(!worldIn.isClientSide && playerIn.isShiftKeyDown() && hasData(playerIn.getItemInHand(handIn))) {
 			ItemStack stack = playerIn.getItemInHand(handIn).copy();
-			if(getData(stack) != null) {
-				playerIn.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.cleared"), Util.NIL_UUID);
+			CompoundNBT nbt = stack.getTag();
+			nbt.remove("Type");
+			nbt.remove("Data");
+			nbt.remove("Dimension");
+			nbt.remove("Position");
+			if(nbt.isEmpty()) {
+				stack.setTag(null);
 			}
-			if(stack.hasTag()) {
-				CompoundNBT nbt = stack.getTag();
-				nbt.remove("Type");
-				nbt.remove("Data");
-				nbt.remove("Dimension");
-				nbt.remove("Position");
-				if(nbt.isEmpty()) {
-					stack.setTag(null);
-				}
-			}
-			return ActionResult.success(new ItemStack(INSTANCE, playerIn.getItemInHand(handIn).getCount()));
+			playerIn.sendMessage(new TranslationTextComponent("item.packagedauto.settings_cloner.cleared"), Util.NIL_UUID);
+			return ActionResult.success(stack);
 		}
 		return super.use(worldIn, playerIn, handIn);
 	}

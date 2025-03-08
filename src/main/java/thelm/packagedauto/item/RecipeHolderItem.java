@@ -46,7 +46,7 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 
 	@Override
 	public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
-		if(!worldIn.isClientSide && playerIn.isShiftKeyDown()) {
+		if(!worldIn.isClientSide && playerIn.isShiftKeyDown() && isFilled(playerIn.getItemInHand(handIn))) {
 			ItemStack stack = playerIn.getItemInHand(handIn).copy();
 			setRecipeList(stack, null);
 			return ActionResult.success(stack);

@@ -34,7 +34,8 @@ public abstract class MarkerItem extends Item implements IMarkerItem {
 	@Override
 	public ActionResultType onItemUseFirst(ItemStack stack, ItemUseContext context) {
 		World world = context.getLevel();
-		if(!world.isClientSide) {
+		PlayerEntity player = context.getPlayer();
+		if(!world.isClientSide && !player.isShiftKeyDown()) {
 			if(getDirectionalGlobalPos(stack) != null) {
 				return super.onItemUseFirst(stack, context);
 			}
@@ -45,7 +46,6 @@ public abstract class MarkerItem extends Item implements IMarkerItem {
 			if(stack.getCount() > 1) {
 				ItemStack stack1 = stack.split(1);
 				setDirectionalGlobalPos(stack1, globalPos);
-				PlayerEntity player = context.getPlayer();
 				if(!player.inventory.add(stack1)) {
 					ItemEntity item = new ItemEntity(world, player.getX(), player.getY(), player.getZ(), stack1);
 					item.setThrower(player.getUUID());
@@ -62,7 +62,7 @@ public abstract class MarkerItem extends Item implements IMarkerItem {
 
 	@Override
 	public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
-		if(!worldIn.isClientSide && playerIn.isShiftKeyDown()) {
+		if(!worldIn.isClientSide && playerIn.isShiftKeyDown() && isBound(playerIn.getItemInHand(handIn))) {
 			ItemStack stack = playerIn.getItemInHand(handIn).copy();
 			setDirectionalGlobalPos(stack, null);
 			return ActionResult.success(stack);

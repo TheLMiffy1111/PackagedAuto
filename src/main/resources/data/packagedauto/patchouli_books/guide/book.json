@@ -3,6 +3,7 @@
 	"landing_text": "item.packagedauto.guide.landing",
 	"model": "packagedauto:guide",
 	"show_progress": false,
+	"subtitle": "item.packagedauto.guide.subtitle",
 	"creative_tab": "packagedauto",
 	"show_toasts": false
 }

@@ -1,5 +1,7 @@
 package thelm.packagedauto.client.screen;
 
+import java.util.Arrays;
+
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -9,10 +11,12 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import thelm.packagedauto.container.UnpackagerContainer;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.ChangeBlockingPacket;
+import thelm.packagedauto.network.packet.EjectTrackerPacket;
 import thelm.packagedauto.network.packet.TrackerCountPacket;
 import thelm.packagedauto.tile.UnpackagerTile.PackageTracker;
 
@@ -34,6 +38,9 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 		buttons.clear();
 		super.init();
 		addButton(new ButtonChangeBlocking(leftPos+98, topPos+16));
+		for(int i = 0; i < 10; ++i) {
+			addButton(new ButtonTracker(i, leftPos+115, topPos+16+6*i));
+		}
 		addButton(new ButtonTrackerCount(true, leftPos+98, topPos+34));
 		addButton(new ButtonTrackerCount(false, leftPos+106, topPos+34));
 	}
@@ -101,6 +108,33 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerContainer> {
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(ChangeBlockingPacket.INSTANCE);
+		}
+	}
+
+	class ButtonTracker extends Widget {
+
+		final int id;
+
+		ButtonTracker(int id, int x, int y) {
+			super(x, y, 54, 5, StringTextComponent.EMPTY);
+			this.id = id;
+		}
+
+		@Override
+		public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {}
+
+		@Override
+		public void renderToolTip(MatrixStack matrixStack, int mouseX, int mouseY) {
+			ITextComponent line0 = new TranslationTextComponent("block.packagedauto.unpackager.tracker", id);
+			ITextComponent line1 = new TranslationTextComponent("block.packagedauto.unpackager.tracker.eject").withStyle(TextFormatting.GRAY);
+			renderComponentTooltip(matrixStack, Arrays.asList(line0, line1), mouseX, mouseY);
+		}
+
+		@Override
+		public void onClick(double mouseX, double mouseY) {
+			if(hasShiftDown()) {
+				PacketHandler.INSTANCE.sendToServer(new EjectTrackerPacket(id));
+			}
 		}
 	}
 

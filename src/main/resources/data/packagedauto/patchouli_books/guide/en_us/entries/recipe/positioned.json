@@ -11,14 +11,13 @@
 			"type": "packagedauto:spotlight2",
 			"item1": "packagedauto:distributor_marker",
 			"item2": "packagedauto:distributor",
-			"link_recipe": true,
 			"title": "Usage",
 			"text": "To use, bind $(item)Distributor Markers/$ to inventories, and put the markers into the slots of the distributor corresponding to the encoded input slots."
 		},
 		{
 			"type": "patchouli:text",
 			"title": "Usage (cont.)",
-			"text": "You can $(thing)$(k:sneak) + $(k:use)/$ a bound marker to unbind it.$(p)You can $(thing)$(k:sneak) + $(k:use)/$ with an empty hand on a distributor to show its current range and targets.$(p)You can combine a bound $(item)Distributor Marker/$ with unbound ones in a crafting grid to copy contents."
+			"text": "You can $(thing)$(k:sneak) + $(k:use)/$ a bound $(item)Distributor Marker/$ or place in a crafting grid to unbind.$(p)You can $(thing)$(k:sneak) + $(k:use)/$ with an empty hand on a $(item)Positioned Package Distributor/$ to show its current range and targets.$(p)You can combine a bound $(item)Distributor Marker/$ with unbound ones in a crafting grid to copy contents."
 		},
 		{
 			"type": "patchouli:text",
@@ -28,7 +27,7 @@
 		{
 			"type": "patchouli:text",
 			"title": "Settings Cloning",
-			"text": "Using the $(l:core/settings_cloner)Packaging Settings Cloner/$, you can copy and paste current target setting of a $(item)Positioned Package Distributor/$.$(p)To paste target settings, you must have a sufficient amount of empty $(item)Distributor Markers/$ in your inventory."
+			"text": "Using the $(l:core/settings_cloner)Packaging Settings Cloner/$, you can copy and paste current target setting of a $(item)Positioned Package Distributor/$.$(p)To paste target settings, you must have enough empty $(item)Distributor Markers/$ in your inventory."
 		},
 		{
 			"type": "patchouli:text",

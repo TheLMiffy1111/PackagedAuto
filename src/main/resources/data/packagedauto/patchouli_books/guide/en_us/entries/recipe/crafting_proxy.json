@@ -17,7 +17,7 @@
 		{
 			"type": "patchouli:text",
 			"title": "Usage (cont.)",
-			"text": "You can $(thing)$(k:sneak) + $(k:use)/$ a bound $(item)Proxy Marker/$ to unbind it.$(p)You can $(thing)$(k:sneak) + $(k:use)/$ with an empty hand on a $(item)Package Crafting Machine Proxy/$ to show its current range and target.$(p)You can combine a bound $(item)Proxy Marker/$ with unbound ones in a crafting grid to copy contents."
+			"text": "You can $(thing)$(k:sneak) + $(k:use)/$ a bound $(item)Proxy Marker/$ or place in a crafting grid to unbind.$(p)You can $(thing)$(k:sneak) + $(k:use)/$ with an empty hand on a $(item)Package Crafting Machine Proxy/$ to show its current range and target.$(p)You can combine a bound $(item)Proxy Marker/$ with unbound ones in a crafting grid to copy contents."
 		},
 		{
 			"type": "patchouli:text",

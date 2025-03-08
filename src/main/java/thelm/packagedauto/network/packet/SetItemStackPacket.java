@@ -14,10 +14,10 @@ import thelm.packagedauto.util.MiscHelper;
 
 public class SetItemStackPacket {
 
-	private final short containerSlot;
+	private final int containerSlot;
 	private final ItemStack stack;
 
-	public SetItemStackPacket(short containerSlot, ItemStack stack) {
+	public SetItemStackPacket(int containerSlot, ItemStack stack) {
 		this.containerSlot = containerSlot;
 		this.stack = stack;
 	}
@@ -28,7 +28,7 @@ public class SetItemStackPacket {
 	}
 
 	public static SetItemStackPacket decode(PacketBuffer buf) {
-		return new SetItemStackPacket(buf.readShort(), MiscHelper.INSTANCE.readItemWithLargeCount(buf));
+		return new SetItemStackPacket(buf.readUnsignedShort(), MiscHelper.INSTANCE.readItemWithLargeCount(buf));
 	}
 
 	public void handle(Supplier<NetworkEvent.Context> ctx) {

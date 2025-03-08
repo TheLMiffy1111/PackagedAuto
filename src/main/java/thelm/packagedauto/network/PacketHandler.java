@@ -11,6 +11,7 @@ import thelm.packagedauto.network.packet.ChangeBlockingPacket;
 import thelm.packagedauto.network.packet.ChangePackagingPacket;
 import thelm.packagedauto.network.packet.CycleRecipeTypePacket;
 import thelm.packagedauto.network.packet.DirectionalMarkerPacket;
+import thelm.packagedauto.network.packet.EjectTrackerPacket;
 import thelm.packagedauto.network.packet.LoadRecipeListPacket;
 import thelm.packagedauto.network.packet.SaveRecipeListPacket;
 import thelm.packagedauto.network.packet.SetItemStackPacket;
@@ -68,5 +69,8 @@ public class PacketHandler {
 		INSTANCE.registerMessage(id++, SizedMarkerPacket.class,
 				SizedMarkerPacket::encode, SizedMarkerPacket::decode,
 				SizedMarkerPacket::handle, Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+		INSTANCE.registerMessage(id++, EjectTrackerPacket.class,
+				EjectTrackerPacket::encode, EjectTrackerPacket::decode,
+				EjectTrackerPacket::handle, Optional.of(NetworkDirection.PLAY_TO_SERVER));
 	}
 }

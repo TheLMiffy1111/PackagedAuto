@@ -120,33 +120,31 @@ public class CraftingProxyTile extends BaseTile implements IPackageCraftingMachi
 	}
 
 	@Override
-	public boolean loadConfig(CompoundNBT nbt, PlayerEntity player) {
+	public ISettingsCloneable.Result loadConfig(CompoundNBT nbt, PlayerEntity player) {
 		if(!nbt.contains("Target")) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TranslationTextComponent("item.packagedauto.settings_cloner.invalid"));
 		}
-		int availableCount = 0;
+		int availableCount = 0;	
 		PlayerInventory playerInventory = player.inventory;
 		if(!itemHandler.getStackInSlot(0).isEmpty()) {
 			if(itemHandler.getStackInSlot(0).getItem() == ProxyMarkerItem.INSTANCE) {
 				availableCount += itemHandler.getStackInSlot(0).getCount();
 			}
 			else {
-				return false;
+				return ISettingsCloneable.Result.fail(new TranslationTextComponent("block.packagedauto.crafting_proxy.non_marker_present"));
 			}
 		}
-		if(availableCount < 1) {
+		f:if(availableCount < 1) {
 			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
 				ItemStack stack = playerInventory.getItem(i);
 				if(!stack.isEmpty() && stack.getItem() == ProxyMarkerItem.INSTANCE && !stack.hasTag()) {
 					availableCount += stack.getCount();
 				}
 				if(availableCount >= 1) {
-					break;
+					break f;
 				}
 			}
-		}
-		if(availableCount < 1) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TranslationTextComponent("block.packagedauto.crafting_proxy.no_markers"));
 		}
 		int removedCount = itemHandler.getStackInSlot(0).getCount();
 		itemHandler.setStackInSlot(0, ItemStack.EMPTY);
@@ -178,20 +176,20 @@ public class CraftingProxyTile extends BaseTile implements IPackageCraftingMachi
 		ItemStack stack = new ItemStack(ProxyMarkerItem.INSTANCE);
 		ProxyMarkerItem.INSTANCE.setDirectionalGlobalPos(stack, globalPos);
 		itemHandler.setStackInSlot(0, stack);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public boolean saveConfig(CompoundNBT nbt, PlayerEntity player) {
+	public ISettingsCloneable.Result saveConfig(CompoundNBT nbt, PlayerEntity player) {
 		if(target == null) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TranslationTextComponent("block.packagedauto.crafting_proxy.empty"));
 		}
 		CompoundNBT targetTag = new CompoundNBT();
 		targetTag.putString("Dimension", target.dimension().location().toString());
 		targetTag.putIntArray("Position", new int[] {target.x(), target.y(), target.z()});
 		targetTag.putByte("Direction", (byte)target.direction().get3DDataValue());
 		nbt.put("Target", targetTag);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

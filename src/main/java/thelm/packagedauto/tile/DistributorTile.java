@@ -232,10 +232,10 @@ public class DistributorTile extends BaseTile implements ITickableTileEntity, IP
 	}
 
 	@Override
-	public boolean loadConfig(CompoundNBT nbt, PlayerEntity player) {
+	public ISettingsCloneable.Result loadConfig(CompoundNBT nbt, PlayerEntity player) {
 		ListNBT positionsTag = nbt.getList("Positions", 10);
 		if(positionsTag.isEmpty()) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TranslationTextComponent("item.packagedauto.settings_cloner.invalid"));
 		}
 		int requiredCount = positionsTag.size();
 		int availableCount = 0;
@@ -247,23 +247,21 @@ public class DistributorTile extends BaseTile implements ITickableTileEntity, IP
 					availableCount += stack.getCount();
 				}
 				else {
-					return false;
+					return ISettingsCloneable.Result.fail(new TranslationTextComponent("block.packagedauto.distributor.non_marker_present"));
 				}
 			}
 		}
-		if(availableCount < requiredCount) {
+		f:if(availableCount < requiredCount) {
 			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
 				ItemStack stack = playerInventory.getItem(i);
 				if(!stack.isEmpty() && stack.getItem() == DistributorMarkerItem.INSTANCE && !stack.hasTag()) {
 					availableCount += stack.getCount();
 				}
 				if(availableCount >= requiredCount) {
-					break;
+					break f;
 				}
 			}
-		}
-		if(availableCount < requiredCount) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TranslationTextComponent("block.packagedauto.distributor.no_markers"));
 		}
 		int removedCount = 0;
 		for(int i = 0; i < itemHandler.getSlots(); ++i) {
@@ -301,13 +299,13 @@ public class DistributorTile extends BaseTile implements ITickableTileEntity, IP
 			DistributorMarkerItem.INSTANCE.setDirectionalGlobalPos(stack, globalPos);
 			itemHandler.setStackInSlot(index, stack);
 		}
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public boolean saveConfig(CompoundNBT nbt, PlayerEntity player) {
+	public ISettingsCloneable.Result saveConfig(CompoundNBT nbt, PlayerEntity player) {
 		if(positions.isEmpty()) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TranslationTextComponent("block.packagedauto.distributor.empty"));
 		}
 		ListNBT positionsTag = new ListNBT();
 		for(Int2ObjectMap.Entry<DirectionalGlobalPos> entry : positions.int2ObjectEntrySet()) {
@@ -320,7 +318,7 @@ public class DistributorTile extends BaseTile implements ITickableTileEntity, IP
 			positionsTag.add(positionTag);
 		}
 		nbt.put("Positions", positionsTag);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
