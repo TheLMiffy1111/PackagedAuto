@@ -28,58 +28,58 @@ public class RecipeHolderCloningRecipe extends CustomRecipe {
 	@Override
 	public boolean matches(CraftingInput input, Level level) {
 		List<IPackageRecipeInfo> template = null;
-		int copyCount = 0;
+		int count = 0;
 		for(int i = 0; i < input.size(); ++i) {
 			ItemStack stack = input.getItem(i);
 			if(!stack.isEmpty()) {
 				if(stack.is(PackagedAutoItems.RECIPE_HOLDER)) {
-					if(stack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
-						if(template != null) {
-							return false;
+					if(template == null) {
+						if(stack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
+							template = stack.get(PackagedAutoDataComponents.RECIPE_LIST);
 						}
-						template = stack.get(PackagedAutoDataComponents.RECIPE_LIST);
 					}
-					else {
-						++copyCount;
-					}
+					++count;
 				}
 				else {
 					return false;
 				}
 			}
 		}
-		return template != null && copyCount > 0;
+		return template != null && count > 0;
 	}
 
 	@Override
 	public ItemStack assemble(CraftingInput input, HolderLookup.Provider registry) {
 		List<IPackageRecipeInfo> template = null;
-		int copyCount = 0;
+		boolean clearing = false;
+		int count = 0;
 		for(int i = 0; i < input.size(); ++i) {
 			ItemStack stack = input.getItem(i);
 			if(!stack.isEmpty()) {
 				if(stack.is(PackagedAutoItems.RECIPE_HOLDER)) {
 					if(stack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
-						if(template != null) {
-							return ItemStack.EMPTY;
+						if(template == null) {
+							template = stack.get(PackagedAutoDataComponents.RECIPE_LIST);
 						}
-						template = stack.get(PackagedAutoDataComponents.RECIPE_LIST);
+						else {
+							clearing = true;
+						}
 					}
-					else {
-						++copyCount;
-					}
+					++count;
 				}
 				else {
 					return ItemStack.EMPTY;
 				}
 			}
 		}
-		if(template != null && copyCount > 0) {
-			ItemStack result = PackagedAutoItems.RECIPE_HOLDER.toStack(copyCount+1);
-			DataComponentPatch patch = DataComponentPatch.builder().
-					set(PackagedAutoDataComponents.RECIPE_LIST.get(), template).
-					build();
-			result.applyComponents(patch);
+		if(template != null && count > 0) {
+			ItemStack result = PackagedAutoItems.RECIPE_HOLDER.toStack(count);
+			if(!clearing && count > 1) {
+				DataComponentPatch patch = DataComponentPatch.builder().
+						set(PackagedAutoDataComponents.RECIPE_LIST.get(), template).
+						build();
+				result.applyComponents(patch);
+			}
 			return result;
 		}
 		else {
@@ -89,6 +89,6 @@ public class RecipeHolderCloningRecipe extends CustomRecipe {
 
 	@Override
 	public boolean canCraftInDimensions(int width, int height) {
-		return width*height >= 2;
+		return true;
 	}
 }

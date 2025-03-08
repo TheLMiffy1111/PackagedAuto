@@ -224,10 +224,10 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 	}
 
 	@Override
-	public boolean loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
 		ListTag positionsTag = nbt.getList("positions", 10);
 		if(positionsTag.isEmpty()) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("item.packagedauto.settings_cloner.invalid"));
 		}
 		int requiredCount = positionsTag.size();
 		int availableCount = 0;
@@ -239,23 +239,21 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 					availableCount += stack.getCount();
 				}
 				else {
-					return false;
+					return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.distributor.non_marker_present"));
 				}
 			}
 		}
-		if(availableCount < requiredCount) {
+		f:if(availableCount < requiredCount) {
 			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
 				ItemStack stack = playerInventory.getItem(i);
 				if(!stack.isEmpty() && stack.is(PackagedAutoItems.DISTRIBUTOR_MARKER) && stack.isComponentsPatchEmpty()) {
 					availableCount += stack.getCount();
 				}
 				if(availableCount >= requiredCount) {
-					break;
+					break f;
 				}
 			}
-		}
-		if(availableCount < requiredCount) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.distributor.no_markers"));
 		}
 		int removedCount = 0;
 		for(int i = 0; i < itemHandler.getSlots(); ++i) {
@@ -292,13 +290,13 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 			stack.applyComponents(patch);
 			itemHandler.setStackInSlot(index, stack);
 		}
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public boolean saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
 		if(positions.isEmpty()) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.distributor.empty"));
 		}
 		ListTag positionsTag = new ListTag();
 		for(Int2ObjectMap.Entry<DirectionalGlobalPos> entry : positions.int2ObjectEntrySet()) {
@@ -308,7 +306,7 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 			positionsTag.add(positionTag);
 		}
 		nbt.put("positions", positionsTag);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

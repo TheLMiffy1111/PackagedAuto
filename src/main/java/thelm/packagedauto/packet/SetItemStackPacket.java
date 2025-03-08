@@ -13,11 +13,11 @@ import net.neoforged.neoforge.items.ItemStackHandler;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import thelm.packagedauto.slot.FalseCopySlot;
 
-public record SetItemStackPacket(short containerSlot, ItemStack stack) implements CustomPacketPayload {
+public record SetItemStackPacket(int containerSlot, ItemStack stack) implements CustomPacketPayload {
 
 	public static final Type<SetItemStackPacket> TYPE = new Type<>(ResourceLocation.parse("packagedauto:set_item_stack"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, SetItemStackPacket> STREAM_CODEC = StreamCodec.composite(
-			ByteBufCodecs.SHORT, SetItemStackPacket::containerSlot,
+			ByteBufCodecs.UNSIGNED_SHORT, SetItemStackPacket::containerSlot,
 			ItemStack.OPTIONAL_STREAM_CODEC, SetItemStackPacket::stack,
 			SetItemStackPacket::new);
 

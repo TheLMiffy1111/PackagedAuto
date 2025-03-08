@@ -1,10 +1,6 @@
 package thelm.packagedauto.block;
 
-import java.util.List;
-
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.Containers;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -14,7 +10,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
-import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 import thelm.packagedauto.block.entity.PackagedAutoBlockEntities;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
@@ -42,21 +37,7 @@ public class UnpackagerBlock extends BaseBlock {
 			if(level.getBlockEntity(pos) instanceof UnpackagerBlockEntity blockEntity) {
 				for(PackageTracker tracker : blockEntity.trackers) {
 					if(!tracker.isEmpty()) {
-						if(!tracker.toSend.isEmpty()) {
-							for(ItemStack stack : tracker.toSend) {
-								if(!stack.isEmpty()) {
-									Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
-								}
-							}
-						}
-						else {
-							List<IPackagePattern> patterns = tracker.recipe.getPatterns();
-							for(int i = 0; i < tracker.received.size() && i < patterns.size(); ++i) {
-								if(tracker.received.getBoolean(i)) {
-									Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), patterns.get(i).getOutput());
-								}
-							}
-						}
+						tracker.ejectItems();
 					}
 				}
 			}

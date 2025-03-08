@@ -32,23 +32,15 @@ public class SettingsClonerItem extends Item {
 	public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
 		Level level = context.getLevel();
 		Player player = context.getPlayer();
-		if(!level.isClientSide && !player.isShiftKeyDown()) {
-			BlockPos pos = context.getClickedPos();
-			BlockEntity blockEntity = level.getBlockEntity(pos);
-			if(blockEntity instanceof ISettingsCloneable settable) {
-				String configName = settable.getConfigTypeName();
-				if(stack.has(PackagedAutoDataComponents.CLONER_DATA)) {
-					SettingsClonerData data = stack.get(PackagedAutoDataComponents.CLONER_DATA);
-					if(configName.equals(data.type()) && settable.loadConfig(data.data(), level.registryAccess(), player)) {
-						player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.loaded"));
-					}
-					else {
-						player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.not_loaded").withStyle(ChatFormatting.RED));
-					}
-				}
-				else {
+		BlockPos pos = context.getClickedPos();
+		BlockEntity blockEntity = level.getBlockEntity(pos);
+		if(blockEntity instanceof ISettingsCloneable settable) {
+			String configName = settable.getConfigTypeName();
+			if(player.isShiftKeyDown()) {
+				if(!level.isClientSide) {
 					CompoundTag dataTag = new CompoundTag();
-					if(settable.saveConfig(dataTag, level.registryAccess(), player)) {
+					ISettingsCloneable.Result result = settable.saveConfig(dataTag, level.registryAccess(), player);
+					if(result.type() != ISettingsCloneable.ResultType.FAIL) {
 						SettingsClonerData data = new SettingsClonerData(configName, dataTag, level.dimension(), pos);
 						DataComponentPatch patch = DataComponentPatch.builder().
 								set(PackagedAutoDataComponents.CLONER_DATA.get(), data).
@@ -57,7 +49,25 @@ public class SettingsClonerItem extends Item {
 						player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.saved"));
 					}
 					else {
-						player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.not_saved").withStyle(ChatFormatting.RED));
+						player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.not_saved", result.message()).withStyle(ChatFormatting.RED));
+					}
+				}
+				return InteractionResult.SUCCESS;
+			}
+			if(stack.has(PackagedAutoDataComponents.CLONER_DATA)) {
+				if(!level.isClientSide) {
+					SettingsClonerData data = stack.get(PackagedAutoDataComponents.CLONER_DATA);
+					if(configName.equals(data.type())) {
+						ISettingsCloneable.Result result = settable.loadConfig(data.data(), level.registryAccess(), player);
+						switch(result.type()) {
+						case SUCCESS -> player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.loaded"));
+						case PARTIAL -> player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.partial_loaded", result.message()));
+						case FAIL -> player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.not_loaded", result.message()).withStyle(ChatFormatting.RED));
+						}
+					}
+					else {
+						Component errorMessage = Component.translatable("item.packagedauto.settings_cloner.incompatible");
+						player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.not_loaded", errorMessage).withStyle(ChatFormatting.RED));
 					}
 				}
 				return InteractionResult.SUCCESS;
@@ -68,16 +78,14 @@ public class SettingsClonerItem extends Item {
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-		if(!level.isClientSide && player.isShiftKeyDown()) {
+		if(!level.isClientSide && player.isShiftKeyDown() && player.getItemInHand(hand).has(PackagedAutoDataComponents.CLONER_DATA)) {
 			ItemStack stack = player.getItemInHand(hand).copy();
-			if(stack.has(PackagedAutoDataComponents.CLONER_DATA)) {
-				player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.cleared"));
-				DataComponentPatch patch = DataComponentPatch.builder().
-						remove(PackagedAutoDataComponents.CLONER_DATA.get()).
-						build();
-				stack.applyComponents(patch);
-				return InteractionResultHolder.success(stack);
-			}
+			player.sendSystemMessage(Component.translatable("item.packagedauto.settings_cloner.cleared"));
+			DataComponentPatch patch = DataComponentPatch.builder().
+					remove(PackagedAutoDataComponents.CLONER_DATA.get()).
+					build();
+			stack.applyComponents(patch);
+			return InteractionResultHolder.success(stack);
 		}
 		return super.use(level, player, hand);
 	}

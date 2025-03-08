@@ -32,6 +32,7 @@ import thelm.packagedauto.packet.ChangePackagingPacket;
 import thelm.packagedauto.packet.ChangeProvidingPacket;
 import thelm.packagedauto.packet.CycleRecipeTypePacket;
 import thelm.packagedauto.packet.DirectionalMarkerPacket;
+import thelm.packagedauto.packet.EjectTrackerPacket;
 import thelm.packagedauto.packet.LoadRecipeListPacket;
 import thelm.packagedauto.packet.SaveRecipeListPacket;
 import thelm.packagedauto.packet.SetFluidAmountPacket;
@@ -137,6 +138,7 @@ public class CommonEventHandler {
 		registrar.playToClient(DirectionalMarkerPacket.TYPE, DirectionalMarkerPacket.STREAM_CODEC, DirectionalMarkerPacket::handle);
 		registrar.playToClient(SizedMarkerPacket.TYPE, SizedMarkerPacket.STREAM_CODEC, SizedMarkerPacket::handle);
 		registrar.playToServer(ChangeProvidingPacket.TYPE, ChangeProvidingPacket.STREAM_CODEC, ChangeProvidingPacket::handle);
+		registrar.playToServer(EjectTrackerPacket.TYPE, EjectTrackerPacket.STREAM_CODEC, EjectTrackerPacket::handle);
 	}
 
 	@SubscribeEvent

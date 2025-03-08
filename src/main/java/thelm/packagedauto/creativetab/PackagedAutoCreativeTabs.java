@@ -32,7 +32,7 @@ public class PackagedAutoCreativeTabs {
 				}
 				output.accept(PackagedAutoItems.RECIPE_HOLDER);
 				output.accept(PackagedAutoItems.DISTRIBUTOR_MARKER);
-				output.accept(PackagedAutoItems.proxy_marker);
+				output.accept(PackagedAutoItems.PROXY_MARKER);
 				output.accept(PackagedAutoItems.SETTINGS_CLONER);
 				output.accept(PackagedAutoItems.PACKAGE_COMPONENT);
 				if(ModList.get().isLoaded("ae2")) {

@@ -27,7 +27,8 @@ public class MarkerItem extends Item {
 	@Override
 	public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
 		Level level = context.getLevel();
-		if(!level.isClientSide) {
+		Player player = context.getPlayer();
+		if(!level.isClientSide && !player.isShiftKeyDown()) {
 			if(stack.has(PackagedAutoDataComponents.MARKER_POS)) {
 				return super.onItemUseFirst(stack, context);
 			}
@@ -38,7 +39,6 @@ public class MarkerItem extends Item {
 			if(stack.getCount() > 1) {
 				ItemStack stack1 = stack.split(1);
 				stack1.applyComponents(patch);
-				Player player = context.getPlayer();
 				if(!player.getInventory().add(stack1)) {
 					ItemEntity item = new ItemEntity(level, player.getX(), player.getY(), player.getZ(), stack1);
 					item.setThrower(player);
@@ -55,7 +55,7 @@ public class MarkerItem extends Item {
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-		if(!level.isClientSide && player.isShiftKeyDown()) {
+		if(!level.isClientSide && player.isShiftKeyDown() && player.getItemInHand(hand).has(PackagedAutoDataComponents.MARKER_POS)) {
 			ItemStack stack = player.getItemInHand(hand).copy();
 			DataComponentPatch patch = DataComponentPatch.builder().
 					remove(PackagedAutoDataComponents.MARKER_POS.get()).

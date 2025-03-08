@@ -22,7 +22,7 @@ public class PackagedAutoItems {
 
 	public static final DeferredItem<RecipeHolderItem> RECIPE_HOLDER = ITEMS.register("recipe_holder", RecipeHolderItem::new);
 	public static final DeferredItem<MarkerItem> DISTRIBUTOR_MARKER = ITEMS.registerItem("distributor_marker", MarkerItem::new);
-	public static final DeferredItem<MarkerItem> proxy_marker = ITEMS.registerItem("proxy_marker", MarkerItem::new);
+	public static final DeferredItem<MarkerItem> PROXY_MARKER = ITEMS.registerItem("proxy_marker", MarkerItem::new);
 	public static final DeferredItem<SettingsClonerItem> SETTINGS_CLONER = ITEMS.register("settings_cloner", SettingsClonerItem::new);
 	public static final DeferredItem<PackageItem> PACKAGE = ITEMS.register("package", PackageItem::new);
 	public static final DeferredItem<VolumePackageItem> VOLUME_PACKAGE = ITEMS.register("volume_package", VolumePackageItem::new);

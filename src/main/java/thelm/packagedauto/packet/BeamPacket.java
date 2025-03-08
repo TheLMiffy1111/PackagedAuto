@@ -20,7 +20,7 @@ public record BeamPacket(Vec3 source, List<Vec3> deltas, int color, int lifetime
 	public static final StreamCodec<RegistryFriendlyByteBuf, BeamPacket> STREAM_CODEC = StreamCodec.composite(
 			PacketStreamCodecs.VEC3, BeamPacket::source,
 			PacketStreamCodecs.VEC3.apply(ByteBufCodecs.list()), BeamPacket::deltas,
-			PacketStreamCodecs.MEDIUM, BeamPacket::color,
+			PacketStreamCodecs.UNSIGNED_MEDIUM, BeamPacket::color,
 			ByteBufCodecs.UNSIGNED_SHORT, BeamPacket::lifetime,
 			ByteBufCodecs.BOOL, BeamPacket::fadeout,
 			BeamPacket::new);

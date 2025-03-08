@@ -25,7 +25,7 @@ public class RecipeHolderItem extends Item {
 
 	@Override
 	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-		if(!level.isClientSide && player.isShiftKeyDown()) {
+		if(!level.isClientSide && player.isShiftKeyDown() && player.getItemInHand(hand).has(PackagedAutoDataComponents.RECIPE_LIST)) {
 			ItemStack stack = player.getItemInHand(hand).copy();
 			DataComponentPatch patch = DataComponentPatch.builder().
 					remove(PackagedAutoDataComponents.RECIPE_LIST.get()).

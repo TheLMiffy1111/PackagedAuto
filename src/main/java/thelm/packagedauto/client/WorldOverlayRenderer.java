@@ -67,7 +67,7 @@ public class WorldOverlayRenderer {
 			if(stack.is(PackagedAutoItems.DISTRIBUTOR_MARKER) && stack.has(PackagedAutoDataComponents.MARKER_POS)) {
 				addDirectionalMarkers(List.of(stack.get(PackagedAutoDataComponents.MARKER_POS)), 0x00FFFF, 1);
 			}
-			if(stack.is(PackagedAutoItems.proxy_marker) && stack.has(PackagedAutoDataComponents.MARKER_POS)) {
+			if(stack.is(PackagedAutoItems.PROXY_MARKER) && stack.has(PackagedAutoDataComponents.MARKER_POS)) {
 				addDirectionalMarkers(List.of(stack.get(PackagedAutoDataComponents.MARKER_POS)), 0xFF7F00, 1);
 			}
 		}

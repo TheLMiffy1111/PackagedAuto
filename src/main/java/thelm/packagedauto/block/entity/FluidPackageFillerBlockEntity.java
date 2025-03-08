@@ -19,6 +19,7 @@ import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
+import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.block.PackagedAutoBlocks;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
 import thelm.packagedauto.energy.EnergyStorage;
@@ -26,7 +27,7 @@ import thelm.packagedauto.inventory.FluidPackageFillerItemHandler;
 import thelm.packagedauto.menu.FluidPackageFillerMenu;
 import thelm.packagedauto.util.MiscHelper;
 
-public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
+public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements ISettingsCloneable {
 
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
@@ -51,6 +52,11 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 	@Override
 	protected Component getDefaultName() {
 		return Component.translatable("block.packagedauto.fluid_package_filler");
+	}
+
+	@Override
+	public String getConfigTypeName() {
+		return "block.packagedauto.fluid_package_filler";
 	}
 
 	@Override
@@ -226,6 +232,18 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity {
 			return 15;
 		}
 		return 0;
+	}
+
+	@Override
+	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+		requiredAmount = nbt.getInt("amount_req");
+		return ISettingsCloneable.Result.success();
+	}
+
+	@Override
+	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+		nbt.putInt("amount_req", requiredAmount);
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

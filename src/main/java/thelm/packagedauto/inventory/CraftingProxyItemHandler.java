@@ -33,7 +33,7 @@ public class CraftingProxyItemHandler extends BaseItemHandler<CraftingProxyBlock
 
 	@Override
 	public boolean isItemValid(int slot, ItemStack stack) {
-		return stack.is(PackagedAutoItems.proxy_marker);
+		return stack.is(PackagedAutoItems.PROXY_MARKER);
 	}
 
 	@Override

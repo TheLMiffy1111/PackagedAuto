@@ -17,7 +17,7 @@ public record SizedMarkerPacket(Vec3 lowerCorner, Vec3 size, int color, int life
 	public static final StreamCodec<RegistryFriendlyByteBuf, SizedMarkerPacket> STREAM_CODEC = StreamCodec.composite(
 			PacketStreamCodecs.VEC3, SizedMarkerPacket::lowerCorner,
 			PacketStreamCodecs.VEC3, SizedMarkerPacket::size,
-			PacketStreamCodecs.MEDIUM, SizedMarkerPacket::color,
+			PacketStreamCodecs.UNSIGNED_MEDIUM, SizedMarkerPacket::color,
 			ByteBufCodecs.UNSIGNED_SHORT, SizedMarkerPacket::lifetime,
 			SizedMarkerPacket::new);
 

@@ -45,7 +45,7 @@ public class ClientEventHandler {
 					ResourceLocation.parse("packagedauto:bound"), (stack, world, living, seed)->{
 						return stack.has(PackagedAutoDataComponents.MARKER_POS) ? 1F : 0F;
 					});
-			ItemProperties.register(PackagedAutoItems.proxy_marker.get(),
+			ItemProperties.register(PackagedAutoItems.PROXY_MARKER.get(),
 					ResourceLocation.parse("packagedauto:bound"), (stack, world, living, seed)->{
 						return stack.has(PackagedAutoDataComponents.MARKER_POS) ? 1F : 0F;
 					});

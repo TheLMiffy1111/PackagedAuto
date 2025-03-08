@@ -112,40 +112,38 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 	}
 
 	@Override
-	public boolean loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
 		if(!nbt.contains("target")) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("item.packagedauto.settings_cloner.invalid"));
 		}
 		int availableCount = 0;
 		Inventory playerInventory = player.getInventory();
 		if(!itemHandler.getStackInSlot(0).isEmpty()) {
-			if(itemHandler.getStackInSlot(0).is(PackagedAutoItems.proxy_marker)) {
+			if(itemHandler.getStackInSlot(0).is(PackagedAutoItems.PROXY_MARKER)) {
 				availableCount += itemHandler.getStackInSlot(0).getCount();
 			}
 			else {
-				return false;
+				return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.crafting_proxy.non_marker_present"));
 			}
 		}
-		if(availableCount < 1) {
+		f:if(availableCount < 1) {
 			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
 				ItemStack stack = playerInventory.getItem(i);
-				if(!stack.isEmpty() && stack.is(PackagedAutoItems.proxy_marker) && stack.isComponentsPatchEmpty()) {
+				if(!stack.isEmpty() && stack.is(PackagedAutoItems.PROXY_MARKER) && stack.isComponentsPatchEmpty()) {
 					availableCount += stack.getCount();
 				}
 				if(availableCount >= 1) {
-					break;
+					break f;
 				}
 			}
-		}
-		if(availableCount < 1) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.crafting_proxy.no_markers"));
 		}
 		int removedCount = itemHandler.getStackInSlot(0).getCount();
 		itemHandler.setStackInSlot(0, ItemStack.EMPTY);
 		if(removedCount < 1) {
 			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
 				ItemStack stack = playerInventory.getItem(i);
-				if(!stack.isEmpty() && stack.is(PackagedAutoItems.proxy_marker) && stack.isComponentsPatchEmpty()) {
+				if(!stack.isEmpty() && stack.is(PackagedAutoItems.PROXY_MARKER) && stack.isComponentsPatchEmpty()) {
 					removedCount += stack.split(1).getCount();
 				}
 				if(removedCount >= 1) {
@@ -154,7 +152,7 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 			}
 		}
 		if(removedCount > 1) {
-			ItemStack stack = PackagedAutoItems.proxy_marker.toStack(removedCount-1);
+			ItemStack stack = PackagedAutoItems.PROXY_MARKER.toStack(removedCount-1);
 			if(!playerInventory.add(stack)) {
 				ItemEntity item = new ItemEntity(level, player.getX(), player.getY(), player.getZ(), stack);
 				item.setThrower(player);
@@ -163,23 +161,23 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 		}
 		Tag targetTag = nbt.get("target");
 		DirectionalGlobalPos globalPos = DirectionalGlobalPos.CODEC.parse(NbtOps.INSTANCE, targetTag).result().get();
-		ItemStack stack = PackagedAutoItems.proxy_marker.toStack();
+		ItemStack stack = PackagedAutoItems.PROXY_MARKER.toStack();
 		DataComponentPatch patch = DataComponentPatch.builder().
 				set(PackagedAutoDataComponents.MARKER_POS.get(), globalPos).
 				build();
 		stack.applyComponents(patch);
 		itemHandler.setStackInSlot(0, stack);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public boolean saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
 		if(target == null) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.crafting_proxy.empty"));
 		}
 		Tag targetTag = DirectionalGlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, target).result().get();
 		nbt.put("target", targetTag);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

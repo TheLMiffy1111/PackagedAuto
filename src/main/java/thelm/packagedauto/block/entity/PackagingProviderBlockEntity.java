@@ -107,34 +107,42 @@ public class PackagingProviderBlockEntity extends BaseBlockEntity implements ISe
 	public void postPatternChange() {}
 
 	@Override
-	public boolean loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
 		blocking = nbt.getBoolean("blocking");
 		provideDirect = nbt.getBoolean("direct");
 		providePackaging = nbt.getBoolean("packaging");
 		provideUnpackaging = nbt.getBoolean("unpackaging");
-		if(nbt.contains("recipes") && itemHandler.getStackInSlot(0).isEmpty()) {
-			Inventory playerInventory = player.getInventory();
-			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
-				ItemStack stack = playerInventory.getItem(i);
-				if(!stack.isEmpty() && stack.is(PackagedAutoItems.RECIPE_HOLDER) && !stack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
-					ItemStack stackCopy = stack.split(1);
-					List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.loadRecipeList(nbt.getList("recipes", 10), registries);
-					if(!recipeList.isEmpty()) {
-						DataComponentPatch patch = DataComponentPatch.builder().
-								set(PackagedAutoDataComponents.RECIPE_LIST.get(), recipeList).
-								build();
-						stackCopy.applyComponents(patch);
+		Component message = null;
+		if(nbt.contains("recipes")) {
+			f:if(itemHandler.getStackInSlot(0).isEmpty()) {
+				Inventory playerInventory = player.getInventory();
+				for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
+					ItemStack stack = playerInventory.getItem(i);
+					if(!stack.isEmpty() && stack.is(PackagedAutoItems.RECIPE_HOLDER) && !stack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
+						ItemStack stackCopy = stack.split(1);
+						List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.loadRecipeList(nbt.getList("recipes", 10), registries);
+						if(!recipeList.isEmpty()) {
+							DataComponentPatch patch = DataComponentPatch.builder().
+									set(PackagedAutoDataComponents.RECIPE_LIST.get(), recipeList).
+									build();
+							stackCopy.applyComponents(patch);
+						}
+						itemHandler.setStackInSlot(0, stackCopy);
+						break f;
 					}
-					itemHandler.setStackInSlot(0, stackCopy);
-					break;
 				}
 			}
 		}
-		return true;
+		if(message != null) {
+			return ISettingsCloneable.Result.partial(message);
+		}
+		else {
+			return ISettingsCloneable.Result.success();
+		}
 	}
 
 	@Override
-	public boolean saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
 		nbt.putBoolean("blocking", blocking);
 		nbt.putBoolean("direct", provideDirect);
 		nbt.putBoolean("packaging", providePackaging);
@@ -142,7 +150,7 @@ public class PackagingProviderBlockEntity extends BaseBlockEntity implements ISe
 		if(!recipeList.isEmpty()) {
 			nbt.put("recipes", MiscHelper.INSTANCE.saveRecipeList(new ListTag(), recipeList, registries));
 		}
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

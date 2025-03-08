@@ -18,7 +18,7 @@ public record DirectionalMarkerPacket(List<DirectionalGlobalPos> positions, int 
 	public static final Type<DirectionalMarkerPacket> TYPE = new Type<>(ResourceLocation.parse("packagedauto:directional_marker"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, DirectionalMarkerPacket> STREAM_CODEC = StreamCodec.composite(
 			DirectionalGlobalPos.STREAM_CODEC.apply(ByteBufCodecs.list()), DirectionalMarkerPacket::positions,
-			PacketStreamCodecs.MEDIUM, DirectionalMarkerPacket::color,
+			PacketStreamCodecs.UNSIGNED_MEDIUM, DirectionalMarkerPacket::color,
 			ByteBufCodecs.UNSIGNED_SHORT, DirectionalMarkerPacket::lifetime,
 			DirectionalMarkerPacket::new);
 

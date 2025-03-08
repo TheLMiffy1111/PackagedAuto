@@ -44,7 +44,7 @@ public class ItemAmountSpecifyingScreen extends AmountSpecifyingScreen<ItemAmoun
 			int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
 			ItemStack newStack = stack.copy();
 			newStack.setCount(amount);
-			PacketDistributor.sendToServer(new SetItemStackPacket((short)containerSlot, newStack));
+			PacketDistributor.sendToServer(new SetItemStackPacket(containerSlot, newStack));
 			close();
 		}
 		catch(NumberFormatException e) {
