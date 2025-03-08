@@ -26,57 +26,57 @@ public class ProxyMarkerCloningRecipe extends CustomRecipe {
 	@Override
 	public boolean matches(CraftingContainer container, Level level) {
 		DirectionalGlobalPos template = null;
-		int copyCount = 0;
+		int count = 0;
 		for(int i = 0; i < container.getContainerSize(); ++i) {
 			ItemStack stack = container.getItem(i);
 			if(!stack.isEmpty()) {
 				if(stack.is(ProxyMarkerItem.INSTANCE)) {
-					DirectionalGlobalPos globalPos = ProxyMarkerItem.INSTANCE.getDirectionalGlobalPos(stack);
-					if(globalPos != null) {
-						if(template != null) {
-							return false;
+					if(template == null) {
+						DirectionalGlobalPos globalPos = ProxyMarkerItem.INSTANCE.getDirectionalGlobalPos(stack);
+						if(globalPos != null) {
+							template = globalPos;
 						}
-						template = globalPos;
 					}
-					else {
-						++copyCount;
-					}
+					++count;
 				}
 				else {
 					return false;
 				}
 			}
 		}
-		return template != null && copyCount > 0;
+		return template != null && count > 0;
 	}
 
 	@Override
 	public ItemStack assemble(CraftingContainer container) {
 		DirectionalGlobalPos template = null;
-		int copyCount = 0;
+		boolean clearing = false;
+		int count = 0;
 		for(int i = 0; i < container.getContainerSize(); ++i) {
 			ItemStack stack = container.getItem(i);
 			if(!stack.isEmpty()) {
 				if(stack.is(ProxyMarkerItem.INSTANCE)) {
 					DirectionalGlobalPos globalPos = ProxyMarkerItem.INSTANCE.getDirectionalGlobalPos(stack);
 					if(globalPos != null) {
-						if(template != null) {
-							return ItemStack.EMPTY;
+						if(template == null) {
+							template = globalPos;
 						}
-						template = globalPos;
+						else {
+							clearing = true;
+						}
 					}
-					else {
-						++copyCount;
-					}
+					++count;
 				}
 				else {
 					return ItemStack.EMPTY;
 				}
 			}
 		}
-		if(template != null && copyCount > 0) {
-			ItemStack result = new ItemStack(ProxyMarkerItem.INSTANCE, copyCount+1);
-			ProxyMarkerItem.INSTANCE.setDirectionalGlobalPos(result, template);
+		if(template != null && count > 0) {
+			ItemStack result = new ItemStack(ProxyMarkerItem.INSTANCE, count);
+			if(!clearing && count > 1) {
+				ProxyMarkerItem.INSTANCE.setDirectionalGlobalPos(result, template);
+			}
 			return result;
 		}
 		else {
@@ -86,6 +86,6 @@ public class ProxyMarkerCloningRecipe extends CustomRecipe {
 
 	@Override
 	public boolean canCraftInDimensions(int width, int height) {
-		return width*height >= 2;
+		return true;
 	}
 }

@@ -26,57 +26,57 @@ public class RecipeHolderCloningRecipe extends CustomRecipe {
 	@Override
 	public boolean matches(CraftingContainer container, Level level) {
 		IPackageRecipeList template = null;
-		int copyCount = 0;
+		int count = 0;
 		for(int i = 0; i < container.getContainerSize(); ++i) {
 			ItemStack stack = container.getItem(i);
 			if(!stack.isEmpty()) {
 				if(stack.is(RecipeHolderItem.INSTANCE)) {
-					IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stack);
-					if(!recipeListObj.getRecipeList().isEmpty()) {
-						if(template != null) {
-							return false;
+					if(template == null) {
+						IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stack);
+						if(!recipeListObj.getRecipeList().isEmpty()) {
+							template = recipeListObj;
 						}
-						template = recipeListObj;
 					}
-					else {
-						++copyCount;
-					}
+					++count;
 				}
 				else {
 					return false;
 				}
 			}
 		}
-		return template != null && copyCount > 0;
+		return template != null && count > 0;
 	}
 
 	@Override
 	public ItemStack assemble(CraftingContainer container) {
 		IPackageRecipeList template = null;
-		int copyCount = 0;
+		boolean clearing = false;
+		int count = 0;
 		for(int i = 0; i < container.getContainerSize(); ++i) {
 			ItemStack stack = container.getItem(i);
 			if(!stack.isEmpty()) {
 				if(stack.is(RecipeHolderItem.INSTANCE)) {
 					IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stack);
 					if(!recipeListObj.getRecipeList().isEmpty()) {
-						if(template != null) {
-							return ItemStack.EMPTY;
+						if(template == null) {
+							template = recipeListObj;
 						}
-						template = recipeListObj;
+						else {
+							clearing = true;
+						}
 					}
-					else {
-						++copyCount;
-					}
+					++count;
 				}
 				else {
 					return ItemStack.EMPTY;
 				}
 			}
 		}
-		if(template != null && copyCount > 0) {
-			ItemStack result = new ItemStack(RecipeHolderItem.INSTANCE, copyCount+1);
-			RecipeHolderItem.INSTANCE.setRecipeList(result, template);
+		if(template != null && count > 0) {
+			ItemStack result = new ItemStack(RecipeHolderItem.INSTANCE, count);
+			if(!clearing && count > 1) {
+				RecipeHolderItem.INSTANCE.setRecipeList(result, template);
+			}
 			return result;
 		}
 		else {
@@ -86,6 +86,6 @@ public class RecipeHolderCloningRecipe extends CustomRecipe {
 
 	@Override
 	public boolean canCraftInDimensions(int width, int height) {
-		return width*height >= 2;
+		return true;
 	}
 }

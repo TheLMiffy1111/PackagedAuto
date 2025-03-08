@@ -245,10 +245,10 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 	}
 
 	@Override
-	public boolean loadConfig(CompoundTag nbt, Player player) {
+	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, Player player) {
 		ListTag positionsTag = nbt.getList("Positions", 10);
 		if(positionsTag.isEmpty()) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("item.packagedauto.settings_cloner.invalid"));
 		}
 		int requiredCount = positionsTag.size();
 		int availableCount = 0;
@@ -260,23 +260,21 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 					availableCount += stack.getCount();
 				}
 				else {
-					return false;
+					return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.distributor.non_marker_present"));
 				}
 			}
 		}
-		if(availableCount < requiredCount) {
+		f:if(availableCount < requiredCount) {
 			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
 				ItemStack stack = playerInventory.getItem(i);
 				if(!stack.isEmpty() && stack.is(DistributorMarkerItem.INSTANCE) && !stack.hasTag()) {
 					availableCount += stack.getCount();
 				}
 				if(availableCount >= requiredCount) {
-					break;
+					break f;
 				}
 			}
-		}
-		if(availableCount < requiredCount) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.distributor.no_markers"));
 		}
 		int removedCount = 0;
 		for(int i = 0; i < itemHandler.getSlots(); ++i) {
@@ -314,13 +312,13 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 			DistributorMarkerItem.INSTANCE.setDirectionalGlobalPos(stack, globalPos);
 			itemHandler.setStackInSlot(index, stack);
 		}
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public boolean saveConfig(CompoundTag nbt, Player player) {
+	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, Player player) {
 		if(positions.isEmpty()) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.distributor.empty"));
 		}
 		ListTag positionsTag = new ListTag();
 		for(Int2ObjectMap.Entry<DirectionalGlobalPos> entry : positions.int2ObjectEntrySet()) {
@@ -333,7 +331,7 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 			positionsTag.add(positionTag);
 		}
 		nbt.put("Positions", positionsTag);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

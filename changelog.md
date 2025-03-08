@@ -1,17 +1,5 @@
-Added the Packaging Settings Cloner  
-Added the Package Crafting Machine Proxy  
-Added a Patchouli guide book (English only)  
-Added recipes to copy recipe holders and distributor markers in a crafting grid  
-Reworked encoder GUI buttons  
-Reworked encoder slot click behavior  
-Moved packager extension autocrafting handling to packager  
-Added basic round-robin to unpackager and packaging provider  
-Made autocrafting directly insert into unpackager trackers  
-Added ability to shift-right click distributors to show currently targeted blocks  
-Made tile refresh interval 4 ticks instead of 8 ticks  
-Made tile refresh interval configurable  
-Changed rendering timer to increment at client tick start  
-Fixed machines providing/accepting autocrafting when missing channel  
-Fixed packaging provider not using power  
-Fixed distributor not ticking correctly  
-Optimized images with oxipng  
+Added detailed messages to settings cloning  
+Added ability to eject unpackager trackers  
+Added ability to clear recipe holders and markers in crafting grid  
+Added settings cloning to fluid package filler  
+Changed saving settings to cloner to use shift-right click  

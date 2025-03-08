@@ -121,9 +121,9 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 	}
 
 	@Override
-	public boolean loadConfig(CompoundTag nbt, Player player) {
+	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, Player player) {
 		if(!nbt.contains("Target")) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("item.packagedauto.settings_cloner.invalid"));
 		}
 		int availableCount = 0;
 		Inventory playerInventory = player.getInventory();
@@ -132,22 +132,20 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 				availableCount += itemHandler.getStackInSlot(0).getCount();
 			}
 			else {
-				return false;
+				return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.crafting_proxy.non_marker_present"));
 			}
 		}
-		if(availableCount < 1) {
+		f:if(availableCount < 1) {
 			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
 				ItemStack stack = playerInventory.getItem(i);
 				if(!stack.isEmpty() && stack.is(ProxyMarkerItem.INSTANCE) && !stack.hasTag()) {
 					availableCount += stack.getCount();
 				}
 				if(availableCount >= 1) {
-					break;
+					break f;
 				}
 			}
-		}
-		if(availableCount < 1) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.crafting_proxy.no_markers"));
 		}
 		int removedCount = itemHandler.getStackInSlot(0).getCount();
 		itemHandler.setStackInSlot(0, ItemStack.EMPTY);
@@ -179,20 +177,20 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 		ItemStack stack = new ItemStack(ProxyMarkerItem.INSTANCE);
 		ProxyMarkerItem.INSTANCE.setDirectionalGlobalPos(stack, globalPos);
 		itemHandler.setStackInSlot(0, stack);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public boolean saveConfig(CompoundTag nbt, Player player) {
+	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, Player player) {
 		if(target == null) {
-			return false;
+			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.crafting_proxy.empty"));
 		}
 		CompoundTag targetTag = new CompoundTag();
 		targetTag.putString("Dimension", target.dimension().location().toString());
 		targetTag.putIntArray("Position", new int[] {target.x(), target.y(), target.z()});
 		targetTag.putByte("Direction", (byte)target.direction().get3DDataValue());
 		nbt.put("Target", targetTag);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

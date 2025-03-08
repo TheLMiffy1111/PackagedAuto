@@ -320,28 +320,40 @@ public class PackagerBlockEntity extends BaseBlockEntity implements ISettingsClo
 	public void postPatternChange() {}
 
 	@Override
-	public boolean loadConfig(CompoundTag nbt, Player player) {
+	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, Player player) {
 		mode = Mode.values()[nbt.getByte("Mode")];
-		if(nbt.contains("Recipes") && itemHandler.getStackInSlot(10).isEmpty()) {
-			Inventory playerInventory = player.getInventory();
-			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
-				ItemStack stack = playerInventory.getItem(i);
-				if(!stack.isEmpty() && stack.is(RecipeHolderItem.INSTANCE) && !stack.hasTag()) {
-					ItemStack stackCopy = stack.split(1);
-					IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stackCopy);
-					List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.loadRecipeList(nbt.getList("Recipes", 10));
-					recipeListObj.setRecipeList(recipeList);
-					RecipeHolderItem.INSTANCE.setRecipeList(stackCopy, recipeListObj);
-					itemHandler.setStackInSlot(10, stackCopy);
-					break;
+		Component message = null;
+		if(nbt.contains("Recipes")) {
+			f:if(itemHandler.getStackInSlot(10).isEmpty()) {
+				Inventory playerInventory = player.getInventory();
+				for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
+					ItemStack stack = playerInventory.getItem(i);
+					if(!stack.isEmpty() && stack.is(RecipeHolderItem.INSTANCE) && !stack.hasTag()) {
+						ItemStack stackCopy = stack.split(1);
+						IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stackCopy);
+						List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.loadRecipeList(nbt.getList("Recipes", 10));
+						recipeListObj.setRecipeList(recipeList);
+						RecipeHolderItem.INSTANCE.setRecipeList(stackCopy, recipeListObj);
+						itemHandler.setStackInSlot(10, stackCopy);
+						break f;
+					}
 				}
+				message = Component.translatable("block.packagedauto.packager.no_holders");
+			}
+			else {
+				message = Component.translatable("block.packagedauto.packager.holder_present");
 			}
 		}
-		return true;
+		if(message != null) {
+			return ISettingsCloneable.Result.partial(message);
+		}
+		else {
+			return ISettingsCloneable.Result.success();
+		}
 	}
 
 	@Override
-	public boolean saveConfig(CompoundTag nbt, Player player) {
+	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, Player player) {
 		nbt.putByte("Mode", (byte)mode.ordinal());
 		ItemStack listStack = itemHandler.getStackInSlot(10);
 		if(listStack.getItem() instanceof IPackageRecipeListItem recipeListItem) {
@@ -350,7 +362,7 @@ public class PackagerBlockEntity extends BaseBlockEntity implements ISettingsClo
 				nbt.put("Recipes", MiscHelper.INSTANCE.saveRecipeList(new ListTag(), recipeList));
 			}
 		}
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

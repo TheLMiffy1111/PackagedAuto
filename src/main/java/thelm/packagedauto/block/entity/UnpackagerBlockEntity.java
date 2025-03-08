@@ -15,6 +15,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -27,6 +28,7 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
+import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeList;
 import thelm.packagedauto.api.ISettingsCloneable;
@@ -295,35 +297,47 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 	}
 
 	@Override
-	public boolean loadConfig(CompoundTag nbt, Player player) {
+	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, Player player) {
 		blocking = nbt.getBoolean("Blocking");
 		trackerCount = nbt.getByte("Trackers");
-		if(nbt.contains("Recipes") && itemHandler.getStackInSlot(9).isEmpty()) {
-			Inventory playerInventory = player.getInventory();
-			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
-				ItemStack stack = playerInventory.getItem(i);
-				if(!stack.isEmpty() && stack.is(RecipeHolderItem.INSTANCE) && !stack.hasTag()) {
-					ItemStack stackCopy = stack.split(1);
-					IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stackCopy);
-					List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.loadRecipeList(nbt.getList("Recipes", 10));
-					recipeListObj.setRecipeList(recipeList);
-					RecipeHolderItem.INSTANCE.setRecipeList(stackCopy, recipeListObj);
-					itemHandler.setStackInSlot(9, stackCopy);
-					break;
+		Component message = null;
+		if(nbt.contains("Recipes")) {
+			f:if(itemHandler.getStackInSlot(9).isEmpty()) {
+				Inventory playerInventory = player.getInventory();
+				for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
+					ItemStack stack = playerInventory.getItem(i);
+					if(!stack.isEmpty() && stack.is(RecipeHolderItem.INSTANCE) && !stack.hasTag()) {
+						ItemStack stackCopy = stack.split(1);
+						IPackageRecipeList recipeListObj = RecipeHolderItem.INSTANCE.getRecipeList(stackCopy);
+						List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.loadRecipeList(nbt.getList("Recipes", 10));
+						recipeListObj.setRecipeList(recipeList);
+						RecipeHolderItem.INSTANCE.setRecipeList(stackCopy, recipeListObj);
+						itemHandler.setStackInSlot(9, stackCopy);
+						break f;
+					}
 				}
+				message = Component.translatable("block.packagedauto.unpackager.no_holders");
+			}
+			else {
+				message = Component.translatable("block.packagedauto.unpackager.holder_present");
 			}
 		}
-		return true;
+		if(message != null) {
+			return ISettingsCloneable.Result.partial(message);
+		}
+		else {
+			return ISettingsCloneable.Result.success();
+		}
 	}
 
 	@Override
-	public boolean saveConfig(CompoundTag nbt, Player player) {
+	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, Player player) {
 		nbt.putBoolean("Blocking", blocking);
 		nbt.putByte("Trackers", (byte)trackerCount);
 		if(!recipeList.isEmpty()) {
 			nbt.put("Recipes", MiscHelper.INSTANCE.saveRecipeList(new ListTag(), recipeList));
 		}
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
@@ -396,6 +410,37 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 			}
 			if(level != null && !level.isClientSide) {
 				setChanged();
+			}
+		}
+
+		public void ejectItems() {
+			if(level != null && !isEmpty()) {
+				if(!toSend.isEmpty()) {
+					for(ItemStack stack : toSend) {
+						if(!stack.isEmpty()) {
+							double dx = level.random.nextFloat()/2+0.25;
+							double dy = level.random.nextFloat()/2+0.75;
+							double dz = level.random.nextFloat()/2+0.25;
+							ItemEntity itemEntity = new ItemEntity(level, worldPosition.getX()+dx, worldPosition.getY()+dy, worldPosition.getZ()+dz, stack);
+							itemEntity.setDefaultPickUpDelay();
+							level.addFreshEntity(itemEntity);
+						}
+					}
+				}
+				else {
+					List<IPackagePattern> patterns = recipe.getPatterns();
+					for(int i = 0; i < received.size() && i < patterns.size(); ++i) {
+						if(received.getBoolean(i)) {
+							double dx = level.random.nextFloat()/2+0.25;
+							double dy = level.random.nextFloat()/2+0.75;
+							double dz = level.random.nextFloat()/2+0.25;
+							ItemEntity itemEntity = new ItemEntity(level, worldPosition.getX()+dx, worldPosition.getY()+dy, worldPosition.getZ()+dz, patterns.get(i).getOutput());
+							itemEntity.setDefaultPickUpDelay();
+							level.addFreshEntity(itemEntity);
+						}
+					}
+				}
+				clearRecipe();
 			}
 		}
 

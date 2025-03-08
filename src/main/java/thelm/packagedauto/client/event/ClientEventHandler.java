@@ -70,7 +70,7 @@ public class ClientEventHandler {
 					});
 			ItemProperties.register(SettingsClonerItem.INSTANCE,
 					new ResourceLocation("packagedauto", "filled"), (stack, world, living, seed)->{
-						return SettingsClonerItem.INSTANCE.isFilled(stack) ? 1F : 0F;
+						return SettingsClonerItem.INSTANCE.hasData(stack) ? 1F : 0F;
 					});
 		});
 	}

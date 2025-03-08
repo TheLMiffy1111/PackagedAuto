@@ -1,8 +1,11 @@
 package thelm.packagedauto.client.screen;
 
+import java.util.Arrays;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -14,6 +17,7 @@ import thelm.packagedauto.block.entity.UnpackagerBlockEntity.PackageTracker;
 import thelm.packagedauto.menu.UnpackagerMenu;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.ChangeBlockingPacket;
+import thelm.packagedauto.network.packet.EjectTrackerPacket;
 import thelm.packagedauto.network.packet.TrackerCountPacket;
 
 public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
@@ -34,6 +38,9 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		clearWidgets();
 		super.init();
 		addRenderableWidget(new ButtonChangeBlocking(leftPos+98, topPos+16));
+		for(int i = 0; i < 10; ++i) {
+			addRenderableWidget(new ButtonTracker(i, leftPos+115, topPos+16+6*i));
+		}
 		addRenderableWidget(new ButtonTrackerCount(true, leftPos+98, topPos+34));
 		addRenderableWidget(new ButtonTrackerCount(false, leftPos+106, topPos+34));
 	}
@@ -101,6 +108,36 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		@Override
 		public void onClick(double mouseX, double mouseY) {
 			PacketHandler.INSTANCE.sendToServer(ChangeBlockingPacket.INSTANCE);
+		}
+
+		@Override
+		public void updateNarration(NarrationElementOutput narrationElementOutput) {}
+	}
+
+	class ButtonTracker extends AbstractWidget {
+
+		final int id;
+
+		ButtonTracker(int id, int x, int y) {
+			super(x, y, 54, 5, Component.empty());
+			this.id = id;
+		}
+
+		@Override
+		public void renderButton(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {}
+
+		@Override
+		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
+			Component line0 = Component.translatable("block.packagedauto.unpackager.tracker", id);
+			Component line1 = Component.translatable("block.packagedauto.unpackager.tracker.eject").withStyle(ChatFormatting.GRAY);
+			renderComponentTooltip(poseStack, Arrays.asList(line0, line1), mouseX, mouseY);
+		}
+
+		@Override
+		public void onClick(double mouseX, double mouseY) {
+			if(hasShiftDown()) {
+				PacketHandler.INSTANCE.sendToServer(new EjectTrackerPacket(id));
+			}
 		}
 
 		@Override
