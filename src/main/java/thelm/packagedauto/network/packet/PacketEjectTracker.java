@@ -5,16 +5,16 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldServer;
 import net.minecraftforge.fml.common.network.simpleimpl.IMessage;
 import net.minecraftforge.fml.common.network.simpleimpl.MessageContext;
-import thelm.packagedauto.container.ContainerEncoder;
+import thelm.packagedauto.container.ContainerUnpackager;
 import thelm.packagedauto.network.ISelfHandleMessage;
 
-public class PacketSetPatternIndex implements ISelfHandleMessage<IMessage> {
+public class PacketEjectTracker implements ISelfHandleMessage<IMessage> {
 
 	private int index;
 
-	public PacketSetPatternIndex() {}
+	public PacketEjectTracker() {}
 
-	public PacketSetPatternIndex(int index) {
+	public PacketEjectTracker(int index) {
 		this.index = index;
 	}
 
@@ -33,10 +33,9 @@ public class PacketSetPatternIndex implements ISelfHandleMessage<IMessage> {
 		EntityPlayerMP player = ctx.getServerHandler().player;
 		WorldServer world = player.getServerWorld();
 		world.addScheduledTask(()->{
-			if(player.openContainer instanceof ContainerEncoder) {
-				ContainerEncoder container = (ContainerEncoder)player.openContainer;
-				container.tile.setPatternIndex(index);
-				container.setupSlots();
+			if(player.openContainer instanceof ContainerUnpackager) {
+				ContainerUnpackager container = (ContainerUnpackager)player.openContainer;
+				container.tile.trackers[index].ejectItems();
 			}
 		});
 		return null;

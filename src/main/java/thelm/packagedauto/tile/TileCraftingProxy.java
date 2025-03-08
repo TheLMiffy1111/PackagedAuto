@@ -26,6 +26,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Optional;
@@ -178,9 +179,9 @@ public class TileCraftingProxy extends TileBase implements ITickable, IPackageCr
 	}
 
 	@Override
-	public boolean loadConfig(NBTTagCompound nbt, EntityPlayer player) {
+	public ISettingsCloneable.Result loadConfig(NBTTagCompound nbt, EntityPlayer player) {
 		if(!nbt.hasKey("Target")) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TextComponentTranslation("item.packagedauto.settings_cloner.invalid"));
 		}
 		int availableCount = 0;
 		InventoryPlayer playerInventory = player.inventory;
@@ -189,22 +190,20 @@ public class TileCraftingProxy extends TileBase implements ITickable, IPackageCr
 				availableCount += inventory.getStackInSlot(0).getCount();
 			}
 			else {
-				return false;
+				return ISettingsCloneable.Result.fail(new TextComponentTranslation("tile.packagedauto.crafting_proxy.non_marker_present"));
 			}
 		}
-		if(availableCount < 1) {
+		f:if(availableCount < 1) {
 			for(int i = 0; i < playerInventory.getSizeInventory(); ++i) {
 				ItemStack stack = playerInventory.getStackInSlot(i);
 				if(!stack.isEmpty() && stack.getItem() == ItemProxyMarker.INSTANCE && !stack.hasTagCompound()) {
 					availableCount += stack.getCount();
 				}
 				if(availableCount >= 1) {
-					break;
+					break f;
 				}
 			}
-		}
-		if(availableCount < 1) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TextComponentTranslation("tile.packagedauto.crafting_proxy.no_markers"));
 		}
 		int removedCount = inventory.getStackInSlot(0).getCount();
 		inventory.setInventorySlotContents(0, ItemStack.EMPTY);
@@ -236,20 +235,20 @@ public class TileCraftingProxy extends TileBase implements ITickable, IPackageCr
 		ItemStack stack = new ItemStack(ItemProxyMarker.INSTANCE);
 		ItemProxyMarker.INSTANCE.setDirectionalGlobalPos(stack, globalPos);
 		inventory.setInventorySlotContents(0, stack);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public boolean saveConfig(NBTTagCompound nbt, EntityPlayer player) {
+	public ISettingsCloneable.Result saveConfig(NBTTagCompound nbt, EntityPlayer player) {
 		if(target == null) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TextComponentTranslation("tile.packagedauto.crafting_proxy.empty"));
 		}
 		NBTTagCompound targetTag = new NBTTagCompound();
 		targetTag.setInteger("Dimension", target.dimension());
 		targetTag.setIntArray("Position", new int[] {target.x(), target.y(), target.z()});
 		targetTag.setByte("Direction", (byte)target.direction().getIndex());
 		nbt.setTag("Target", targetTag);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

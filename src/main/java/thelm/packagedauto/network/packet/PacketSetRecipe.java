@@ -41,7 +41,7 @@ public class PacketSetRecipe implements ISelfHandleMessage<IMessage> {
 		int size = buf.readByte();
 		map = new Int2ObjectOpenHashMap<>(size);
 		for(int i = 0; i < size; ++i) {
-			int index = buf.readByte();
+			int index = buf.readUnsignedByte();
 			ItemStack stack = MiscUtil.readItemWithLargeCount(buf);
 			map.put(index, stack);
 		}

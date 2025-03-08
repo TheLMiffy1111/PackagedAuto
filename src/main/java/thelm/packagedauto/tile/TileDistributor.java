@@ -30,6 +30,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.Optional;
@@ -285,10 +286,10 @@ public class TileDistributor extends TileBase implements ITickable, IPackageCraf
 	}
 
 	@Override
-	public boolean loadConfig(NBTTagCompound nbt, EntityPlayer player) {
+	public ISettingsCloneable.Result loadConfig(NBTTagCompound nbt, EntityPlayer player) {
 		NBTTagList positionsTag = nbt.getTagList("Positions", 10);
 		if(positionsTag.isEmpty()) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TextComponentTranslation("item.packagedauto.settings_cloner.invalid"));
 		}
 		int requiredCount = positionsTag.tagCount();
 		int availableCount = 0;
@@ -300,23 +301,21 @@ public class TileDistributor extends TileBase implements ITickable, IPackageCraf
 					availableCount += stack.getCount();
 				}
 				else {
-					return false;
+					return ISettingsCloneable.Result.fail(new TextComponentTranslation("tile.packagedauto.distributor.non_marker_present"));
 				}
 			}
 		}
-		if(availableCount < requiredCount) {
+		f:if(availableCount < requiredCount) {
 			for(int i = 0; i < playerInventory.getSizeInventory(); ++i) {
 				ItemStack stack = playerInventory.getStackInSlot(i);
 				if(!stack.isEmpty() && stack.getItem() == ItemDistributorMarker.INSTANCE && !stack.hasTagCompound()) {
 					availableCount += stack.getCount();
 				}
 				if(availableCount >= requiredCount) {
-					break;
+					break f;
 				}
 			}
-		}
-		if(availableCount < requiredCount) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TextComponentTranslation("tile.packagedauto.distributor.no_markers"));
 		}
 		int removedCount = 0;
 		for(int i = 0; i < inventory.getSizeInventory(); ++i) {
@@ -354,13 +353,13 @@ public class TileDistributor extends TileBase implements ITickable, IPackageCraf
 			ItemDistributorMarker.INSTANCE.setDirectionalGlobalPos(stack, globalPos);
 			inventory.setInventorySlotContents(index, stack);
 		}
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public boolean saveConfig(NBTTagCompound nbt, EntityPlayer player) {
+	public ISettingsCloneable.Result saveConfig(NBTTagCompound nbt, EntityPlayer player) {
 		if(positions.isEmpty()) {
-			return false;
+			return ISettingsCloneable.Result.fail(new TextComponentTranslation("tile.packagedauto.distributor.empty"));
 		}
 		NBTTagList positionsTag = new NBTTagList();
 		for(Int2ObjectMap.Entry<DirectionalGlobalPos> entry : positions.int2ObjectEntrySet()) {
@@ -373,7 +372,7 @@ public class TileDistributor extends TileBase implements ITickable, IPackageCraf
 			positionsTag.appendTag(positionTag);
 		}
 		nbt.setTag("Positions", positionsTag);
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

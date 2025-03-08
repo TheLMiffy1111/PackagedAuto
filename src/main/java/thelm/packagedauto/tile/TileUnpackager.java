@@ -22,6 +22,7 @@ import appeng.api.util.AEPartLocation;
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.booleans.BooleanList;
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -33,6 +34,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.common.Loader;
@@ -43,6 +46,7 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
+import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeList;
 import thelm.packagedauto.api.ISettingsCloneable;
@@ -390,35 +394,47 @@ public class TileUnpackager extends TileBase implements ITickable, ISettingsClon
 	}
 
 	@Override
-	public boolean loadConfig(NBTTagCompound nbt, EntityPlayer player) {
+	public ISettingsCloneable.Result loadConfig(NBTTagCompound nbt, EntityPlayer player) {
 		blocking = nbt.getBoolean("Blocking");
 		trackerCount = nbt.getByte("Trackers");
-		if(nbt.hasKey("Recipes") && inventory.getStackInSlot(9).isEmpty()) {
-			InventoryPlayer playerInventory = player.inventory;
-			for(int i = 0; i < playerInventory.getSizeInventory(); ++i) {
-				ItemStack stack = playerInventory.getStackInSlot(i);
-				if(!stack.isEmpty() && stack.getItem() == ItemRecipeHolder.INSTANCE && !stack.hasTagCompound()) {
-					ItemStack stackCopy = stack.splitStack(1);
-					IRecipeList recipeListObj = ItemRecipeHolder.INSTANCE.getRecipeList(stackCopy);
-					List<IRecipeInfo> recipeList = MiscUtil.readRecipeListFromNBT(nbt.getTagList("Recipes", 10));
-					recipeListObj.setRecipeList(recipeList);
-					ItemRecipeHolder.INSTANCE.setRecipeList(stackCopy, recipeListObj);
-					inventory.setInventorySlotContents(9, stackCopy);
-					break;
+		ITextComponent message = null;
+		if(nbt.hasKey("Recipes")) {
+			f:if(inventory.getStackInSlot(9).isEmpty()) {
+				InventoryPlayer playerInventory = player.inventory;
+				for(int i = 0; i < playerInventory.getSizeInventory(); ++i) {
+					ItemStack stack = playerInventory.getStackInSlot(i);
+					if(!stack.isEmpty() && stack.getItem() == ItemRecipeHolder.INSTANCE && !stack.hasTagCompound()) {
+						ItemStack stackCopy = stack.splitStack(1);
+						IRecipeList recipeListObj = ItemRecipeHolder.INSTANCE.getRecipeList(stackCopy);
+						List<IRecipeInfo> recipeList = MiscUtil.readRecipeListFromNBT(nbt.getTagList("Recipes", 10));
+						recipeListObj.setRecipeList(recipeList);
+						ItemRecipeHolder.INSTANCE.setRecipeList(stackCopy, recipeListObj);
+						inventory.setInventorySlotContents(9, stackCopy);
+						break f;
+					}
 				}
+				message = new TextComponentTranslation("tile.packagedauto.unpackager.no_holders");
+			}
+			else {
+				message = new TextComponentTranslation("tile.packagedauto.unpackager.holder_present");
 			}
 		}
-		return true;
+		if(message != null) {
+			return ISettingsCloneable.Result.partial(message);
+		}
+		else {
+			return ISettingsCloneable.Result.success();
+		}
 	}
 
 	@Override
-	public boolean saveConfig(NBTTagCompound nbt, EntityPlayer player) {
+	public ISettingsCloneable.Result saveConfig(NBTTagCompound nbt, EntityPlayer player) {
 		nbt.setBoolean("Blocking", blocking);
 		nbt.setByte("Trackers", (byte)trackerCount);
 		if(!recipeList.isEmpty()) {
 			nbt.setTag("Recipes", MiscUtil.writeRecipeListToNBT(new NBTTagList(), recipeList));
 		}
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
@@ -503,6 +519,37 @@ public class TileUnpackager extends TileBase implements ITickable, ISettingsClon
 			}
 			if(world != null && !world.isRemote) {
 				markDirty();
+			}
+		}
+
+		public void ejectItems() {
+			if(world != null && !isEmpty()) {
+				if(!toSend.isEmpty()) {
+					for(ItemStack stack : toSend) {
+						if(!stack.isEmpty()) {
+							double dx = world.rand.nextFloat()/2+0.25;
+							double dy = world.rand.nextFloat()/2+0.75;
+							double dz = world.rand.nextFloat()/2+0.25;
+							EntityItem entityitem = new EntityItem(world, pos.getX()+dx, pos.getY()+dy, pos.getZ()+dz, stack);
+							entityitem.setDefaultPickupDelay();
+							world.spawnEntity(entityitem);
+						}
+					}
+				}
+				else {
+					List<IPackagePattern> patterns = recipe.getPatterns();
+					for(int i = 0; i < received.size() && i < patterns.size(); ++i) {
+						if(received.getBoolean(i)) {
+							double dx = world.rand.nextFloat()/2+0.25;
+							double dy = world.rand.nextFloat()/2+0.75;
+							double dz = world.rand.nextFloat()/2+0.25;
+							EntityItem entityitem = new EntityItem(world, pos.getX()+dx, pos.getY()+dy, pos.getZ()+dz, patterns.get(i).getOutput());
+							entityitem.setDefaultPickupDelay();
+							world.spawnEntity(entityitem);
+						}
+					}
+				}
+				clearRecipe();
 			}
 		}
 

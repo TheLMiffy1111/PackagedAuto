@@ -59,7 +59,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<Gu
 		public void accept(I ingredient) {
 			ItemStack stack = wrapStack(ingredient);
 			if(!stack.isEmpty()) {
-				PacketHandler.INSTANCE.sendToServer(new PacketSetItemStack((short)slot.slotNumber, stack));
+				PacketHandler.INSTANCE.sendToServer(new PacketSetItemStack(slot.slotNumber, stack));
 			}
 		}
 	}

@@ -31,6 +31,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.translation.I18n;
 import net.minecraftforge.common.crafting.IngredientNBT;
 import net.minecraftforge.common.util.RecipeMatcher;
@@ -470,37 +472,49 @@ public class TilePackager extends TileBase implements ITickable, ISettingsClonea
 	}
 
 	@Override
-	public boolean loadConfig(NBTTagCompound nbt, EntityPlayer player) {
+	public ISettingsCloneable.Result loadConfig(NBTTagCompound nbt, EntityPlayer player) {
 		mode = Mode.values()[nbt.getByte("Mode")];
-		if(nbt.hasKey("Recipes") && inventory.getStackInSlot(10).isEmpty()) {
-			InventoryPlayer playerInventory = player.inventory;
-			for(int i = 0; i < playerInventory.getSizeInventory(); ++i) {
-				ItemStack stack = playerInventory.getStackInSlot(i);
-				if(!stack.isEmpty() && stack.getItem() == ItemRecipeHolder.INSTANCE && !stack.hasTagCompound()) {
-					ItemStack stackCopy = stack.splitStack(1);
-					IRecipeList recipeListObj = ItemRecipeHolder.INSTANCE.getRecipeList(stackCopy);
-					List<IRecipeInfo> recipeList = MiscUtil.readRecipeListFromNBT(nbt.getTagList("Recipes", 10));
-					recipeListObj.setRecipeList(recipeList);
-					ItemRecipeHolder.INSTANCE.setRecipeList(stackCopy, recipeListObj);
-					inventory.setInventorySlotContents(10, stackCopy);
-					break;
+		ITextComponent message = null;
+		if(nbt.hasKey("Recipes")) {
+			f:if(inventory.getStackInSlot(10).isEmpty()) {
+				InventoryPlayer playerInventory = player.inventory;
+				for(int i = 0; i < playerInventory.getSizeInventory(); ++i) {
+					ItemStack stack = playerInventory.getStackInSlot(i);
+					if(!stack.isEmpty() && stack.getItem() == ItemRecipeHolder.INSTANCE && !stack.hasTagCompound()) {
+						ItemStack stackCopy = stack.splitStack(1);
+						IRecipeList recipeListObj = ItemRecipeHolder.INSTANCE.getRecipeList(stackCopy);
+						List<IRecipeInfo> recipeList = MiscUtil.readRecipeListFromNBT(nbt.getTagList("Recipes", 10));
+						recipeListObj.setRecipeList(recipeList);
+						ItemRecipeHolder.INSTANCE.setRecipeList(stackCopy, recipeListObj);
+						inventory.setInventorySlotContents(10, stackCopy);
+						break f;
+					}
 				}
+				message = new TextComponentTranslation("tile.packagedauto.packager.no_holders");
+			}
+			else {
+				message = new TextComponentTranslation("tile.packagedauto.packager.holder_present");
 			}
 		}
-		return true;
+		if(message != null) {
+			return ISettingsCloneable.Result.partial(message);
+		}
+		else {
+			return ISettingsCloneable.Result.success();
+		}
 	}
 
 	@Override
-	public boolean saveConfig(NBTTagCompound nbt, EntityPlayer player) {
+	public ISettingsCloneable.Result saveConfig(NBTTagCompound nbt, EntityPlayer player) {
 		nbt.setByte("Mode", (byte)mode.ordinal());
-		ItemStack listStack = inventory.getStackInSlot(9);
+		ItemStack listStack = inventory.getStackInSlot(10);
 		if(listStack.getItem() instanceof IRecipeListItem) {
 			List<IRecipeInfo> recipeList = ((IRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList();
 			if(!recipeList.isEmpty()) {
 				nbt.setTag("Recipes", MiscUtil.writeRecipeListToNBT(new NBTTagList(), recipeList));
 			}
 		}
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

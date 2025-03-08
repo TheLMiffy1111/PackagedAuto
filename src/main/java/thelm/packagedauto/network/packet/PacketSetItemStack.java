@@ -15,12 +15,12 @@ import thelm.packagedauto.slot.SlotFalseCopy;
 
 public class PacketSetItemStack implements ISelfHandleMessage<IMessage> {
 
-	private short containerSlot;
+	private int containerSlot;
 	private ItemStack stack;
 
 	public PacketSetItemStack() {}
 
-	public PacketSetItemStack(short containerSlot, ItemStack stack) {
+	public PacketSetItemStack(int containerSlot, ItemStack stack) {
 		this.containerSlot = containerSlot;
 		this.stack = stack;
 	}
@@ -33,7 +33,7 @@ public class PacketSetItemStack implements ISelfHandleMessage<IMessage> {
 
 	@Override
 	public void fromBytes(ByteBuf buf) {
-		containerSlot = buf.readShort();
+		containerSlot = buf.readUnsignedShort();
 		stack = MiscUtil.readItemWithLargeCount(buf);
 	}
 

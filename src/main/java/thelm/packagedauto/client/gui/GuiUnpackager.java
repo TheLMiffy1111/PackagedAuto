@@ -1,15 +1,18 @@
 package thelm.packagedauto.client.gui;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.translation.I18n;
 import thelm.packagedauto.container.ContainerUnpackager;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.PacketChangeBlocking;
+import thelm.packagedauto.network.packet.PacketEjectTracker;
 import thelm.packagedauto.network.packet.PacketTrackerCount;
 import thelm.packagedauto.tile.TileUnpackager.PackageTracker;
 
@@ -31,6 +34,9 @@ public class GuiUnpackager extends GuiContainerTileBase<ContainerUnpackager> {
 		buttonList.clear();
 		super.initGui();
 		addButton(new GuiButtonChangeBlocking(0, guiLeft+98, guiTop+16));
+		for(int i = 0; i < 10; ++i) {
+			addButton(new GuiButtonTracker(i, guiLeft+115, guiTop+16+6*i));
+		}
 		addButton(new GuiButtonTrackerCount(0, guiLeft+98, guiTop+34));
 		addButton(new GuiButtonTrackerCount(1, guiLeft+106, guiTop+34));
 	}
@@ -83,6 +89,11 @@ public class GuiUnpackager extends GuiContainerTileBase<ContainerUnpackager> {
 		if(button instanceof GuiButtonChangeBlocking) {
 			PacketHandler.INSTANCE.sendToServer(new PacketChangeBlocking());
 		}
+		if(button instanceof GuiButtonTracker) {
+			if(isShiftKeyDown()) {
+				PacketHandler.INSTANCE.sendToServer(new PacketEjectTracker(button.id));
+			}
+		}
 		if(button instanceof GuiButtonTrackerCount) {
 			PacketHandler.INSTANCE.sendToServer(new PacketTrackerCount(button.id == 0));
 		}
@@ -104,6 +115,27 @@ public class GuiUnpackager extends GuiContainerTileBase<ContainerUnpackager> {
 		@Override
 		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
 			drawHoveringText(I18n.translateToLocal("tile.packagedauto.unpackager.blocking."+container.tile.blocking), mouseX, mouseY);
+		}
+	}
+
+	class GuiButtonTracker extends GuiButton {
+
+		GuiButtonTracker(int buttonId, int x, int y) {
+			super(buttonId, x, y, 54, 5, "");
+		}
+
+		@Override
+		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+			if(visible) {
+				hovered = mouseX >= x && mouseY >= y && mouseX < x + width && mouseY < y + height;
+			}
+		}
+
+		@Override
+		public void drawButtonForegroundLayer(int mouseX, int mouseY) {
+			String line0 = I18n.translateToLocalFormatted("tile.packagedauto.unpackager.tracker", id);
+			String line1 = TextFormatting.GRAY+I18n.translateToLocal("tile.packagedauto.unpackager.tracker.eject");
+			drawHoveringText(Arrays.asList(line0, line1), mouseX, mouseY);
 		}
 	}
 

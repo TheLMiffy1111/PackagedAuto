@@ -19,6 +19,7 @@ import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
@@ -36,6 +37,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IRecipeInfo;
+import thelm.packagedauto.api.IRecipeListItem;
 import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.api.MiscUtil;
 import thelm.packagedauto.client.gui.GuiPackagerExtension;
@@ -410,15 +412,22 @@ public class TilePackagerExtension extends TileBase implements ITickable, ISetti
 	}
 
 	@Override
-	public boolean loadConfig(NBTTagCompound nbt, EntityPlayer player) {
+	public ISettingsCloneable.Result loadConfig(NBTTagCompound nbt, EntityPlayer player) {
 		mode = TilePackager.Mode.values()[nbt.getByte("Mode")];
-		return true;
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public boolean saveConfig(NBTTagCompound nbt, EntityPlayer player) {
+	public ISettingsCloneable.Result saveConfig(NBTTagCompound nbt, EntityPlayer player) {
 		nbt.setByte("Mode", (byte)mode.ordinal());
-		return true;
+		ItemStack listStack = listStackInventory.getStackInSlot(0);
+		if(listStack.getItem() instanceof IRecipeListItem) {
+			List<IRecipeInfo> recipeList = ((IRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList();
+			if(!recipeList.isEmpty()) {
+				nbt.setTag("Recipes", MiscUtil.writeRecipeListToNBT(new NBTTagList(), recipeList));
+			}
+		}
+		return ISettingsCloneable.Result.success();
 	}
 
 	@Override

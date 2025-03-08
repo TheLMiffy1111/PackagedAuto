@@ -50,7 +50,7 @@ public class GuiItemAmountSpecifying extends GuiAmountSpecifying<ContainerItemAm
 			int amount = MathHelper.clamp(Integer.parseInt(amountField.getText()), 0, maxAmount);
 			ItemStack newStack = stack.copy();
 			newStack.setCount(amount);
-			PacketHandler.INSTANCE.sendToServer(new PacketSetItemStack((short)containerSlot, newStack));
+			PacketHandler.INSTANCE.sendToServer(new PacketSetItemStack(containerSlot, newStack));
 			close();
 		}
 		catch(NumberFormatException e) {

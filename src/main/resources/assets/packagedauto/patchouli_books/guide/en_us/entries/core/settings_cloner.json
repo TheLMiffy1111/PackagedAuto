@@ -12,7 +12,7 @@
 			"item": "packagedauto:settings_cloner",
 			"link_recipe": true,
 			"title": "Usage",
-			"text": "To use the $(item)Packaging Settings Cloner/$, $(thing)$(k:use)/$ on a supported machine to copy its settings.$(p)You can then $(thing)$(k:use)/$ on the same type of machine to paste settings.$(p)You can $(thing)$(k:sneak) + $(k:use)/$ an filled $(item)Packaging Settings Cloner/$ to clear it."
+			"text": "To use the $(item)Packaging Settings Cloner/$, $(thing)$(k:sneak) + $(k:use)/$ on a supported machine to copy its settings.$(p)You can then $(thing)$(k:use)/$ on the same type of machine to paste settings.$(p)To clear, $(thing)$(k:sneak) + $(k:use)/$ on air or blocks other than supported machines."
 		},
 		{
 			"type": "crafting",

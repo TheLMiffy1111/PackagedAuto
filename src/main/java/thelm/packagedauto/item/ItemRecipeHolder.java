@@ -60,7 +60,7 @@ public class ItemRecipeHolder extends Item implements IRecipeListItem, IModelReg
 
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-		if(!worldIn.isRemote && playerIn.isSneaking()) {
+		if(!worldIn.isRemote && playerIn.isSneaking() && isFilled(playerIn.getHeldItem(handIn))) {
 			ItemStack stack = playerIn.getHeldItem(handIn).copy();
 			setRecipeList(stack, null);
 			return new ActionResult<>(EnumActionResult.SUCCESS, stack);

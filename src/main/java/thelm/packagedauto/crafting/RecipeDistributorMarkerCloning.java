@@ -19,57 +19,57 @@ public class RecipeDistributorMarkerCloning extends IForgeRegistryEntry.Impl<IRe
 	@Override
 	public boolean matches(InventoryCrafting inv, World worldIn) {
 		DirectionalGlobalPos template = null;
-		int copyCount = 0;
+		int count = 0;
 		for(int i = 0; i < inv.getSizeInventory(); ++i) {
 			ItemStack stack = inv.getStackInSlot(i);
 			if(!stack.isEmpty()) {
 				if(stack.getItem() == ItemDistributorMarker.INSTANCE) {
-					DirectionalGlobalPos globalPos = ItemDistributorMarker.INSTANCE.getDirectionalGlobalPos(stack);
-					if(globalPos != null) {
-						if(template != null) {
-							return false;
+					if(template == null) {
+						DirectionalGlobalPos globalPos = ItemDistributorMarker.INSTANCE.getDirectionalGlobalPos(stack);
+						if(globalPos != null) {
+							template = globalPos;
 						}
-						template = globalPos;
 					}
-					else {
-						++copyCount;
-					}
+					++count;
 				}
 				else {
 					return false;
 				}
 			}
 		}
-		return template != null && copyCount > 0;
+		return template != null && count > 0;
 	}
 
 	@Override
 	public ItemStack getCraftingResult(InventoryCrafting inv) {
 		DirectionalGlobalPos template = null;
-		int copyCount = 0;
+		boolean clearing = false;
+		int count = 0;
 		for(int i = 0; i < inv.getSizeInventory(); ++i) {
 			ItemStack stack = inv.getStackInSlot(i);
 			if(!stack.isEmpty()) {
 				if(stack.getItem() == ItemDistributorMarker.INSTANCE) {
 					DirectionalGlobalPos globalPos = ItemDistributorMarker.INSTANCE.getDirectionalGlobalPos(stack);
 					if(globalPos != null) {
-						if(template != null) {
-							return ItemStack.EMPTY;
+						if(template == null) {
+							template = globalPos;
 						}
-						template = globalPos;
+						else {
+							clearing = true;
+						}
 					}
-					else {
-						++copyCount;
-					}
+					++count;
 				}
 				else {
 					return ItemStack.EMPTY;
 				}
 			}
 		}
-		if(template != null && copyCount > 0) {
-			ItemStack result = new ItemStack(ItemDistributorMarker.INSTANCE, copyCount+1);
-			ItemDistributorMarker.INSTANCE.setDirectionalGlobalPos(result, template);
+		if(template != null && count > 0) {
+			ItemStack result = new ItemStack(ItemDistributorMarker.INSTANCE, count);
+			if(!clearing && count > 1) {
+				ItemDistributorMarker.INSTANCE.setDirectionalGlobalPos(result, template);
+			}
 			return result;
 		}
 		else {
@@ -79,7 +79,7 @@ public class RecipeDistributorMarkerCloning extends IForgeRegistryEntry.Impl<IRe
 
 	@Override
 	public boolean canFit(int width, int height) {
-		return width*height >= 2;
+		return true;
 	}
 
 	@Override

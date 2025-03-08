@@ -15,6 +15,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
@@ -34,6 +35,7 @@ public class ItemSettingsCloner extends Item implements ISettingsClonerItem, IMo
 	public static final ItemSettingsCloner INSTANCE = new ItemSettingsCloner();
 	public static final ModelResourceLocation MODEL_LOCATION = new ModelResourceLocation("packagedauto:settings_cloner#inventory");
 	public static final ModelResourceLocation MODEL_LOCATION_FILLED = new ModelResourceLocation("packagedauto:settings_cloner_filled#inventory");
+	public static final Style ERROR_STYLE = new Style().setColor(TextFormatting.RED);
 
 	protected ItemSettingsCloner() {
 		setTranslationKey("packagedauto.settings_cloner");
@@ -44,24 +46,16 @@ public class ItemSettingsCloner extends Item implements ISettingsClonerItem, IMo
 
 	@Override
 	public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand) {
-		if(!world.isRemote && !player.isSneaking()) {
-			TileEntity tile = world.getTileEntity(pos);
-			if(tile instanceof ISettingsCloneable) {
-				ISettingsCloneable settable = (ISettingsCloneable)tile;
-				String configName = settable.getConfigTypeName();
-				ItemStack stack = player.getHeldItem(hand);
-				SettingsClonerData data = getData(stack);
-				if(data != null) {
-					if(configName.equals(data.type()) && settable.loadConfig(data.data(), player)) {
-						player.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.loaded"));
-					}
-					else {
-						player.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.not_loaded").setStyle(new Style().setColor(TextFormatting.RED)));
-					}
-				}
-				else {
+		TileEntity tile = world.getTileEntity(pos);
+		if(tile instanceof ISettingsCloneable) {
+			ItemStack stack = player.getHeldItem(hand);
+			ISettingsCloneable settable = (ISettingsCloneable)tile;
+			String configName = settable.getConfigTypeName();
+			if(player.isSneaking()) {
+				if(!world.isRemote) {
 					NBTTagCompound dataTag = new NBTTagCompound();
-					if(settable.saveConfig(dataTag, player)) {
+					ISettingsCloneable.Result result = settable.saveConfig(dataTag, player);
+					if(result.type != ISettingsCloneable.ResultType.FAIL) {
 						if(!stack.hasTagCompound()) {
 							stack.setTagCompound(new NBTTagCompound());
 						}
@@ -73,7 +67,31 @@ public class ItemSettingsCloner extends Item implements ISettingsClonerItem, IMo
 						player.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.saved"));
 					}
 					else {
-						player.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.not_saved").setStyle(new Style().setColor(TextFormatting.RED)));
+						player.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.not_saved", result.message).setStyle(ERROR_STYLE));
+					}
+				}
+				return EnumActionResult.SUCCESS;
+			}
+			SettingsClonerData data = getData(stack);
+			if(data != null) {
+				if(!world.isRemote) {
+					if(configName.equals(data.type())) {
+						ISettingsCloneable.Result result = settable.loadConfig(data.data(), player);
+						switch(result.type) {
+						case SUCCESS:
+							player.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.loaded"));
+							break;
+						case PARTIAL:
+							player.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.partial_loaded", result.message));
+							break;
+						case FAIL:
+							player.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.not_loaded", result.message).setStyle(new Style().setColor(TextFormatting.RED)));
+							break;
+						}
+					}
+					else {
+						ITextComponent errorMessage = new TextComponentTranslation("item.packagedauto.settings_cloner.incompatible");
+						player.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.not_loaded", errorMessage).setStyle(ERROR_STYLE));
 					}
 				}
 				return EnumActionResult.SUCCESS;
@@ -84,21 +102,17 @@ public class ItemSettingsCloner extends Item implements ISettingsClonerItem, IMo
 
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-		if(!worldIn.isRemote && playerIn.isSneaking()) {
+		if(!worldIn.isRemote && playerIn.isSneaking() && hasData(playerIn.getHeldItem(handIn))) {
 			ItemStack stack = playerIn.getHeldItem(handIn).copy();
-			if(getData(stack) != null) {
-				playerIn.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.cleared"));
+			NBTTagCompound nbt = stack.getTagCompound();
+			nbt.removeTag("Type");
+			nbt.removeTag("Data");
+			nbt.removeTag("Dimension");
+			nbt.removeTag("Position");
+			if(nbt.isEmpty()) {
+				stack.setTagCompound(null);
 			}
-			if(stack.hasTagCompound()) {
-				NBTTagCompound nbt = stack.getTagCompound();
-				nbt.removeTag("Type");
-				nbt.removeTag("Data");
-				nbt.removeTag("Dimension");
-				nbt.removeTag("Position");
-				if(nbt.isEmpty()) {
-					stack.setTagCompound(null);
-				}
-			}
+			playerIn.sendMessage(new TextComponentTranslation("item.packagedauto.settings_cloner.cleared"));
 			return new ActionResult<>(EnumActionResult.SUCCESS, stack);
 		}
 		return super.onItemRightClick(worldIn, playerIn, handIn);
@@ -119,7 +133,7 @@ public class ItemSettingsCloner extends Item implements ISettingsClonerItem, IMo
 
 	@Override
 	public SettingsClonerData getData(ItemStack stack) {
-		if(isFilled(stack)) {
+		if(hasData(stack)) {
 			NBTTagCompound nbt = stack.getTagCompound();
 			String type = nbt.getString("Type");
 			NBTTagCompound data = nbt.getCompoundTag("Data");
@@ -131,7 +145,7 @@ public class ItemSettingsCloner extends Item implements ISettingsClonerItem, IMo
 		return null;
 	}
 
-	public boolean isFilled(ItemStack stack) {
+	public boolean hasData(ItemStack stack) {
 		NBTTagCompound nbt = stack.getTagCompound();
 		return nbt != null && nbt.hasKey("Type") && nbt.hasKey("Data") && nbt.hasKey("Dimension") && nbt.hasKey("Position");
 	}
@@ -139,7 +153,7 @@ public class ItemSettingsCloner extends Item implements ISettingsClonerItem, IMo
 	@SideOnly(Side.CLIENT)
 	@Override
 	public void registerModels() {
-		ModelLoader.setCustomMeshDefinition(this, stack->isFilled(stack) ? MODEL_LOCATION_FILLED : MODEL_LOCATION);
+		ModelLoader.setCustomMeshDefinition(this, stack->hasData(stack) ? MODEL_LOCATION_FILLED : MODEL_LOCATION);
 		ModelBakery.registerItemVariants(this, MODEL_LOCATION, MODEL_LOCATION_FILLED);
 	}
 }

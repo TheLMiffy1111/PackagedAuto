@@ -23,7 +23,7 @@ public abstract class ItemMarker extends Item implements IMarkerItem, IModelRegi
 
 	@Override
 	public EnumActionResult onItemUseFirst(EntityPlayer player, World world, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ, EnumHand hand) {
-		if(!world.isRemote) {
+		if(!world.isRemote && !player.isSneaking()) {
 			ItemStack stack = player.getHeldItem(hand);
 			if(getDirectionalGlobalPos(stack) != null) {
 				return super.onItemUseFirst(player, world, pos, side, hitX, hitY, hitZ, hand);
@@ -49,7 +49,7 @@ public abstract class ItemMarker extends Item implements IMarkerItem, IModelRegi
 
 	@Override
 	public ActionResult<ItemStack> onItemRightClick(World worldIn, EntityPlayer playerIn, EnumHand handIn) {
-		if(!worldIn.isRemote && playerIn.isSneaking()) {
+		if(!worldIn.isRemote && playerIn.isSneaking() && isBound(playerIn.getHeldItem(handIn))) {
 			ItemStack stack = playerIn.getHeldItem(handIn).copy();
 			setDirectionalGlobalPos(stack, null);
 			return new ActionResult<>(EnumActionResult.SUCCESS, stack);

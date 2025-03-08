@@ -19,57 +19,57 @@ public class RecipeRecipeHolderCloning extends IForgeRegistryEntry.Impl<IRecipe>
 	@Override
 	public boolean matches(InventoryCrafting inv, World worldIn) {
 		IRecipeList template = null;
-		int copyCount = 0;
+		int count = 0;
 		for(int i = 0; i < inv.getSizeInventory(); ++i) {
 			ItemStack stack = inv.getStackInSlot(i);
 			if(!stack.isEmpty()) {
 				if(stack.getItem() == ItemRecipeHolder.INSTANCE) {
-					IRecipeList recipeListObj = ItemRecipeHolder.INSTANCE.getRecipeList(stack);
-					if(!recipeListObj.getRecipeList().isEmpty()) {
-						if(template != null) {
-							return false;
+					if(template == null) {
+						IRecipeList recipeListObj = ItemRecipeHolder.INSTANCE.getRecipeList(stack);
+						if(!recipeListObj.getRecipeList().isEmpty()) {
+							template = recipeListObj;
 						}
-						template = recipeListObj;
 					}
-					else {
-						++copyCount;
-					}
+					++count;
 				}
 				else {
 					return false;
 				}
 			}
 		}
-		return template != null && copyCount > 0;
+		return template != null && count > 0;
 	}
 
 	@Override
 	public ItemStack getCraftingResult(InventoryCrafting inv) {
 		IRecipeList template = null;
-		int copyCount = 0;
+		boolean clearing = false;
+		int count = 0;
 		for(int i = 0; i < inv.getSizeInventory(); ++i) {
 			ItemStack stack = inv.getStackInSlot(i);
 			if(!stack.isEmpty()) {
 				if(stack.getItem() == ItemRecipeHolder.INSTANCE) {
 					IRecipeList recipeListObj = ItemRecipeHolder.INSTANCE.getRecipeList(stack);
 					if(!recipeListObj.getRecipeList().isEmpty()) {
-						if(template != null) {
-							return ItemStack.EMPTY;
+						if(template == null) {
+							template = recipeListObj;
 						}
-						template = recipeListObj;
+						else {
+							clearing = true;
+						}
 					}
-					else {
-						++copyCount;
-					}
+					++count;
 				}
 				else {
 					return ItemStack.EMPTY;
 				}
 			}
 		}
-		if(template != null && copyCount > 0) {
-			ItemStack result = new ItemStack(ItemRecipeHolder.INSTANCE, copyCount+1);
-			ItemRecipeHolder.INSTANCE.setRecipeList(result, template);
+		if(template != null && count > 0) {
+			ItemStack result = new ItemStack(ItemRecipeHolder.INSTANCE, count);
+			if(!clearing && count > 1) {
+				ItemRecipeHolder.INSTANCE.setRecipeList(result, template);
+			}
 			return result;
 		}
 		else {
@@ -79,7 +79,7 @@ public class RecipeRecipeHolderCloning extends IForgeRegistryEntry.Impl<IRecipe>
 
 	@Override
 	public boolean canFit(int width, int height) {
-		return width*height >= 2;
+		return true;
 	}
 
 	@Override
