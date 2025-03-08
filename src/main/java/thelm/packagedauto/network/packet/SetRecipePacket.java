@@ -30,7 +30,7 @@ public record SetRecipePacket(Int2ObjectMap<ItemStack> map) {
 		int size = buf.readByte();
 		Int2ObjectMap<ItemStack> map = new Int2ObjectOpenHashMap<>(size);
 		for(int i = 0; i < size; ++i) {
-			int index = buf.readByte();
+			int index = buf.readUnsignedByte();
 			ItemStack stack = MiscHelper.INSTANCE.readItemWithLargeCount(buf);
 			map.put(index, stack);
 		}

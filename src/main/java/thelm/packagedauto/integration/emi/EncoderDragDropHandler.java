@@ -84,7 +84,7 @@ public class EncoderDragDropHandler implements EmiDragDropHandler<EncoderScreen>
 		public void accept(EmiIngredient emiIngredient) {
 			ItemStack stack = wrapStack(emiIngredient);
 			if(!stack.isEmpty()) {
-				PacketHandler.INSTANCE.sendToServer(new SetItemStackPacket((short)slot.index, stack));
+				PacketHandler.INSTANCE.sendToServer(new SetItemStackPacket(slot.index, stack));
 			}
 		}
 	}

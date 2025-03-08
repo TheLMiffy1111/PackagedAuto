@@ -1,18 +1,23 @@
 package thelm.packagedauto.client.screen;
 
+import java.util.List;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity.PackageTracker;
 import thelm.packagedauto.menu.UnpackagerMenu;
 import thelm.packagedauto.network.PacketHandler;
 import thelm.packagedauto.network.packet.ChangeBlockingPacket;
+import thelm.packagedauto.network.packet.EjectTrackerPacket;
 import thelm.packagedauto.network.packet.TrackerCountPacket;
 
 public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
@@ -33,6 +38,9 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		clearWidgets();
 		super.init();
 		addRenderableWidget(new ButtonChangeBlocking(leftPos+98, topPos+16));
+		for(int i = 0; i < 10; ++i) {
+			addRenderableWidget(new ButtonTracker(i, leftPos+115, topPos+16+6*i));
+		}
 		addRenderableWidget(new ButtonTrackerCount(true, leftPos+98, topPos+34));
 		addRenderableWidget(new ButtonTrackerCount(false, leftPos+106, topPos+34));
 	}
@@ -102,6 +110,32 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		@Override
 		public void onPress() {
 			PacketHandler.INSTANCE.sendToServer(ChangeBlockingPacket.INSTANCE);
+		}
+	}
+
+	class ButtonTracker extends AbstractButton {
+
+		final int id;
+
+		ButtonTracker(int id, int x, int y) {
+			super(x, y, 54, 5, Component.empty());
+			this.id = id;
+			Component line0 = Component.translatable("block.packagedauto.unpackager.tracker", id);
+			Component line1 = Component.translatable("block.packagedauto.unpackager.tracker.eject").withStyle(ChatFormatting.GRAY);
+			setTooltip(Tooltip.create(ComponentUtils.formatList(List.of(line0, line1), Component.literal("\n"))));
+		}
+
+		@Override
+		protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {}
+
+		@Override
+		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
+
+		@Override
+		public void onPress() {
+			if(hasShiftDown()) {
+				PacketHandler.INSTANCE.sendToServer(new EjectTrackerPacket(id));
+			}
 		}
 	}
 
