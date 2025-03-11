@@ -1,4 +1,1 @@
-Added detailed messages to settings cloning  
-Added ability to eject unpackager trackers  
-Added ability to clear recipe holders and markers in crafting grid  
-Changed saving settings to cloner to use shift-right click  
+Fix the Patchouli double spotlight template  

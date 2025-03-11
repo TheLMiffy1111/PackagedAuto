@@ -1,7 +1,7 @@
 {
 	"components": [
 		{
-			"type": "patchouli:item",
+			"type": "item",
 			"x": 35,
 			"y": 15,
 			"item": "#item1",
@@ -9,7 +9,7 @@
 			"link_recipe": true
 		},
 		{
-			"type": "patchouli:item",
+			"type": "item",
 			"x": 65,
 			"y": 15,
 			"item": "#item2",
@@ -17,13 +17,13 @@
 			"link_recipe": true
 		},
 		{
-			"type": "patchouli:header",
+			"type": "header",
 			"x": -1,
 			"y": -1,
 			"text": "#title"
 		},
 		{
-			"type": "patchouli:text",
+			"type": "text",
 			"y": 40,
 			"text": "#text"
 		}
