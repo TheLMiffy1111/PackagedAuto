@@ -1,1 +1,2 @@
-Fix Patchouli guide not showing up in creative tab  
+Change package nbt format  
+Copy items when getting item display names for tooltips  

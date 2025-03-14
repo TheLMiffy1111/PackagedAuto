@@ -31,9 +31,11 @@ public class PackageItem extends Item implements IPackageItem {
 
 	public static ItemStack makePackage(IPackageRecipeInfo recipeInfo, int index) {
 		ItemStack stack = new ItemStack(INSTANCE);
-		CompoundTag tag = MiscHelper.INSTANCE.saveRecipe(new CompoundTag(), recipeInfo);
-		tag.putByte("Index", (byte)index);
-		stack.setTag(tag);
+		if(recipeInfo != null && recipeInfo.validPatternIndex(index)) {
+			CompoundTag tag = MiscHelper.INSTANCE.saveRecipe(new CompoundTag(), recipeInfo);
+			tag.putByte("Index", (byte)index);
+			stack.setTag(tag);
+		}
 		return stack;
 	}
 
@@ -75,7 +77,7 @@ public class PackageItem extends Item implements IPackageItem {
 							append(ComponentUtils.wrapInSquareBrackets(vs.getDisplayName())));
 				}
 				else {
-					tooltip.add(Component.literal(is.getCount()+" ").append(is.getDisplayName()));
+					tooltip.add(Component.literal(is.getCount()+" ").append(is.copy().getDisplayName()));
 				}
 			}
 			tooltip.add(Component.translatable("item.packagedauto.package.index", index));
@@ -89,7 +91,7 @@ public class PackageItem extends Item implements IPackageItem {
 							append(ComponentUtils.wrapInSquareBrackets(vs.getDisplayName())));
 				}
 				else {
-					tooltip.add(Component.literal(is.getCount()+" ").append(is.getDisplayName()));
+					tooltip.add(Component.literal(is.getCount()+" ").append(is.copy().getDisplayName()));
 				}
 			}
 		}
