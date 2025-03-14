@@ -76,7 +76,7 @@ public class ItemRecipeHolder extends Item implements IRecipeListItem, IModelReg
 			for(IRecipeInfo recipe : recipeList) {
 				StringBuilder sb = new StringBuilder();
 				sb.append(recipe.getRecipeType().getLocalizedName()).append(": ");
-				List<String> stackNames = recipe.getOutputs().stream().map(is->is.getCount()+" "+is.getDisplayName()).collect(Collectors.toList());
+				List<String> stackNames = recipe.getOutputs().stream().map(is->is.getCount()+" "+is.copy().getDisplayName()).collect(Collectors.toList());
 				sb.append(StringUtils.abbreviate(StringUtils.join(stackNames, ", "), 64));
 				tooltip.add(sb.toString());
 			}

@@ -1,5 +1,2 @@
-Added detailed messages to settings cloning  
-Added ability to eject unpackager trackers  
-Added ability to clear recipe holders and markers in crafting grid  
-Changed saving settings to cloner to use shift-right click  
-Fixed Packager recipe holder copy and pasting 
+Change package nbt format  
+Copy items when getting item display names for tooltips  

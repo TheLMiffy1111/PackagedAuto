@@ -44,9 +44,11 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister, I
 
 	public static ItemStack makePackage(IRecipeInfo recipeInfo, int index) {
 		ItemStack stack = new ItemStack(INSTANCE);
-		NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), recipeInfo);
-		tag.setByte("Index", (byte)index);
-		stack.setTagCompound(tag);
+		if(recipeInfo != null && recipeInfo.validPatternIndex(index)) {
+			NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), recipeInfo);
+			tag.setByte("Index", (byte)index);
+			stack.setTagCompound(tag);
+		}
 		return stack;
 	}
 
@@ -80,14 +82,14 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister, I
 		if(recipe != null && recipe.validPatternIndex(index)) {
 			tooltip.add(recipe.getRecipeType().getLocalizedName()+": ");
 			for(ItemStack is : recipe.getOutputs()) {
-				tooltip.add(is.getCount()+" "+is.getDisplayName());
+				tooltip.add(is.getCount()+" "+is.copy().getDisplayName());
 			}
 			tooltip.add(I18n.translateToLocalFormatted("item.packagedauto.package.index", index));
 			tooltip.add(I18n.translateToLocal("item.packagedauto.package.items"));
 			List<ItemStack> recipeInputs = recipe.getInputs();
 			List<ItemStack> packageItems = recipeInputs.subList(9*index, Math.min(9*index+9, recipeInputs.size()));
 			for(ItemStack is : packageItems) {
-				tooltip.add(is.getCount()+" "+is.getDisplayName());
+				tooltip.add(is.getCount()+" "+is.copy().getDisplayName());
 			}
 		}
 		super.addInformation(stack, worldIn, tooltip, flagIn);
