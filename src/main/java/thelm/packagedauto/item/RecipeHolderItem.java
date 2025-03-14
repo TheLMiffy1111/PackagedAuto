@@ -66,7 +66,7 @@ public class RecipeHolderItem extends Item implements IPackageRecipeListItem {
 						component.append(", ");
 					}
 					ItemStack is = recipe.getOutputs().get(i);
-					component.append(is.getCount()+" ").append(is.getDisplayName());
+					component.append(is.getCount()+" ").append(is.copy().getDisplayName());
 				}
 				tooltip.add(component);
 			}
