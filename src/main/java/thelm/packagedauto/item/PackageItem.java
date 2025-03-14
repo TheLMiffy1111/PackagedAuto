@@ -27,11 +27,13 @@ public class PackageItem extends Item {
 
 	public static ItemStack makePackage(IPackageRecipeInfo recipeInfo, int index) {
 		ItemStack stack = PackagedAutoItems.PACKAGE.toStack();
-		DataComponentPatch patch = DataComponentPatch.builder().
-				set(PackagedAutoDataComponents.PACKAGE_INDEX.get(), index).
-				set(PackagedAutoDataComponents.RECIPE.get(), recipeInfo).
-				build();
-		stack.applyComponents(patch);
+		if(recipeInfo != null && recipeInfo.validPatternIndex(index)) {
+			DataComponentPatch patch = DataComponentPatch.builder().
+					set(PackagedAutoDataComponents.PACKAGE_INDEX.get(), index).
+					set(PackagedAutoDataComponents.RECIPE.get(), recipeInfo).
+					build();
+			stack.applyComponents(patch);
+		}
 		return stack;
 	}
 
@@ -75,7 +77,7 @@ public class PackageItem extends Item {
 								append(ComponentUtils.wrapInSquareBrackets(vs.getDisplayName())));
 					}
 					else {
-						tooltip.add(Component.literal(is.getCount()+" ").append(is.getDisplayName()));
+						tooltip.add(Component.literal(is.getCount()+" ").append(is.copy().getDisplayName()));
 					}
 				}
 				tooltip.add(Component.translatable("item.packagedauto.package.index", index));
@@ -89,7 +91,7 @@ public class PackageItem extends Item {
 								append(ComponentUtils.wrapInSquareBrackets(vs.getDisplayName())));
 					}
 					else {
-						tooltip.add(Component.literal(is.getCount()+" ").append(is.getDisplayName()));
+						tooltip.add(Component.literal(is.getCount()+" ").append(is.copy().getDisplayName()));
 					}
 				}
 			}

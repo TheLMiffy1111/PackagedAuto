@@ -1,1 +1,1 @@
-Fix Patchouli guide not showing up in creative tab  
+Copy items when getting item display names for tooltips  
