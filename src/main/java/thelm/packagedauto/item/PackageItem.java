@@ -30,7 +30,7 @@ public class PackageItem extends Item implements IPackageItem {
 
 	public static ItemStack makePackage(IPackageRecipeInfo recipeInfo, int index) {
 		ItemStack stack = new ItemStack(INSTANCE);
-		if(recipeInfo != null && recipeInfo.validPatternIndex(index)) {
+		if(recipeInfo != null) {
 			CompoundNBT tag = MiscHelper.INSTANCE.writeRecipe(new CompoundNBT(), recipeInfo);
 			tag.putByte("Index", (byte)index);
 			stack.setTag(tag);
