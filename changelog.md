@@ -1,1 +1,1 @@
-Copy items when getting item display names for tooltips  
+Do not check pattern index when creating package  

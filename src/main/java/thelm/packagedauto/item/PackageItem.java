@@ -27,7 +27,7 @@ public class PackageItem extends Item {
 
 	public static ItemStack makePackage(IPackageRecipeInfo recipeInfo, int index) {
 		ItemStack stack = PackagedAutoItems.PACKAGE.toStack();
-		if(recipeInfo != null && recipeInfo.validPatternIndex(index)) {
+		if(recipeInfo != null) {
 			DataComponentPatch patch = DataComponentPatch.builder().
 					set(PackagedAutoDataComponents.PACKAGE_INDEX.get(), index).
 					set(PackagedAutoDataComponents.RECIPE.get(), recipeInfo).
