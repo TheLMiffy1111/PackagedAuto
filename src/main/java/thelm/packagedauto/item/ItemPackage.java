@@ -44,7 +44,7 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister, I
 
 	public static ItemStack makePackage(IRecipeInfo recipeInfo, int index) {
 		ItemStack stack = new ItemStack(INSTANCE);
-		if(recipeInfo != null && recipeInfo.validPatternIndex(index)) {
+		if(recipeInfo != null) {
 			NBTTagCompound tag = MiscUtil.writeRecipeToNBT(new NBTTagCompound(), recipeInfo);
 			tag.setByte("Index", (byte)index);
 			stack.setTagCompound(tag);
