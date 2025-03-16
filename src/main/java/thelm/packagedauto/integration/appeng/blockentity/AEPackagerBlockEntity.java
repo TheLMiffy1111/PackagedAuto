@@ -141,10 +141,10 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 					if(extension.packager == this && extension.getMainNode().isActive() && getMainNode().getGrid() == extension.getMainNode().getGrid() && extension.canPushPattern()) {
 						ItemStack slotStack = extension.getItemHandler().getStackInSlot(9);
 						if(slotStack.isEmpty() || ItemStack.isSameItemSameComponents(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize()) {
-							currentPattern = pattern.pattern;
-							lockPattern = true;
+							extension.currentPattern = pattern.pattern;
+							extension.lockPattern = true;
 							for(int i = 0; i < inputs.size(); ++i) {
-								itemHandler.setStackInSlot(i, inputs.get(i).copy());
+								extension.getItemHandler().setStackInSlot(i, inputs.get(i).copy());
 							}
 							return true;
 						}
