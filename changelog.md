@@ -1,1 +1,1 @@
-Do not check pattern index when creating package  
+Fix packager not properly sending items to extensions  
