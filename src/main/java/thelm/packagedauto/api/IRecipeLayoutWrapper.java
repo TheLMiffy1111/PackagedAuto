@@ -12,6 +12,8 @@ public interface IRecipeLayoutWrapper {
 
 	Class<?> getCategoryRecipeClass();
 
+	Object getRecipe();
+
 	Map<Integer, IGuiIngredientWrapper<ItemStack>> getItemStackIngredients();
 
 	Map<Integer, IGuiIngredientWrapper<FluidStack>> getFluidStackIngredients();

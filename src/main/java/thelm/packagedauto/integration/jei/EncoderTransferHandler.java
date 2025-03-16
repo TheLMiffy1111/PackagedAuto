@@ -33,7 +33,7 @@ public class EncoderTransferHandler implements IRecipeTransferHandler<EncoderCon
 		if(!recipeType.getJEICategories().contains(category)) {
 			return transferHelper.createInternalError();
 		}
-		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(new RecipeLayoutWrapper(recipeLayout));
+		Int2ObjectMap<ItemStack> map = recipeType.getRecipeTransferMap(new RecipeLayoutWrapper(recipe, recipeLayout));
 		if(map == null || map.isEmpty()) {
 			return transferHelper.createInternalError();
 		}

@@ -36,7 +36,7 @@ public class PackageRecipeTransferHandler implements IRecipeTransferHandler<Enco
 			map = recipeInfo.getEncoderStacks();
 		}
 		else if(recipeType.getJEICategories().contains(PackageRecipeCategory.UID)) {
-			map = recipeType.getRecipeTransferMap(new RecipeLayoutWrapper(recipeLayout));
+			map = recipeType.getRecipeTransferMap(new RecipeLayoutWrapper(recipe, recipeLayout));
 		}
 		else {
 			return transferHelper.createInternalError();

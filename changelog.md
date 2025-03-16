@@ -1,1 +1,1 @@
-Do not check pattern index when creating package  
+Added recipe object access to recipe layout wrapper  

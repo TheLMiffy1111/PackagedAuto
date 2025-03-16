@@ -13,9 +13,11 @@ import thelm.packagedauto.api.IRecipeLayoutWrapper;
 
 public class RecipeLayoutWrapper implements IRecipeLayoutWrapper {
 
+	private final Object recipe;
 	private final IRecipeLayout recipeLayout;
 
-	public RecipeLayoutWrapper(IRecipeLayout recipeLayout) {
+	public RecipeLayoutWrapper(Object recipe, IRecipeLayout recipeLayout) {
+		this.recipe = recipe;
 		this.recipeLayout = recipeLayout;
 	}
 
@@ -27,6 +29,11 @@ public class RecipeLayoutWrapper implements IRecipeLayoutWrapper {
 	@Override
 	public Class<?> getCategoryRecipeClass() {
 		return recipeLayout.getRecipeCategory().getRecipeClass();
+	}
+
+	@Override
+	public Object getRecipe() {
+		return recipe;
 	}
 
 	@Override
