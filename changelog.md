@@ -1,1 +1,1 @@
-Do not check pattern index when creating package  
+Added optional recipe wrapper access to recipe transfer  

@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import mezz.jei.api.gui.IRecipeLayout;
+import mezz.jei.api.recipe.IRecipeWrapper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.Optional;
@@ -40,6 +41,11 @@ public interface IRecipeType {
 
 	default List<String> getJEICategories() {
 		return Collections.emptyList();
+	}
+
+	@Optional.Method(modid="jei")
+	default Int2ObjectMap<ItemStack> getRecipeTransferMap(IRecipeWrapper recipeWrapper, IRecipeLayout recipeLayout, String category) {
+		return getRecipeTransferMap(recipeLayout, category);
 	}
 
 	@Optional.Method(modid="jei")
