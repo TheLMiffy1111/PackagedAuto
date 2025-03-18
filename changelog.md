@@ -1,1 +1,1 @@
-Added recipe object access to recipe layout wrapper  
+Fix crash when invalid JEI categories are provided  

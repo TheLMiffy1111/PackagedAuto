@@ -3,6 +3,7 @@ package thelm.packagedauto.integration.jei;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import mezz.jei.api.gui.handlers.IGuiClickableArea;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
@@ -17,7 +18,9 @@ public class EncoderGuiHandler implements IGuiContainerHandler<EncoderScreen> {
 	@Override
 	public Collection<IGuiClickableArea> getGuiClickableAreas(EncoderScreen containerScreen, double mouseX, double mouseY) {
 		Rectangle2d area = new Rectangle2d(172, 129, 22, 16);
-		List<ResourceLocation> categories = containerScreen.menu.patternItemHandler.recipeType.getJEICategories();
+		List<ResourceLocation> allCategories = PackagedAutoJEIPlugin.getAllRecipeCategories();
+		List<ResourceLocation> categories = containerScreen.menu.patternItemHandler.recipeType.getJEICategories().stream().
+				filter(allCategories::contains).collect(Collectors.toList());
 		if(!categories.isEmpty()) {
 			return Collections.singleton(new IGuiClickableArea() {
 				@Override
