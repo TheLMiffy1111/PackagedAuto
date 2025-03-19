@@ -135,7 +135,7 @@ public class WorldOverlayRenderer {
 		RenderSystem.enableDepthTest();
 
 		lineBuffer = buffers.getBuffer(RenderTypeHelper.MARKER_LINE_4);
-		
+
 		for(SizedMarkerInfo marker : sizedMarkers) {
 			Vector3d lowerCorner = marker.lowerCorner;
 
@@ -151,9 +151,9 @@ public class WorldOverlayRenderer {
 		}
 
 		buffers.endBatch();
-		
+
 		lineBuffer = buffers.getBuffer(RenderTypeHelper.BEAM_LINE_3);
-		
+
 		for(BeamInfo beam : beams) {
 			Vector3d source = beam.source;
 

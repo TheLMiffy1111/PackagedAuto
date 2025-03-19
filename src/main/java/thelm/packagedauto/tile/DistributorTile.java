@@ -169,7 +169,7 @@ public class DistributorTile extends BaseTile implements ITickableTileEntity, IP
 			}
 			if(stackRem.getCount() < stack.getCount()) {
 				Vector3d delta = Vector3d.atLowerCornerOf(pos.subtract(worldPosition)).add(Vector3d.atLowerCornerOf(dir.getNormal()).scale(0.5));
-				deltas.add(delta);	
+				deltas.add(delta);
 			}
 			if(stackRem.isEmpty()) {
 				pending.remove(i);

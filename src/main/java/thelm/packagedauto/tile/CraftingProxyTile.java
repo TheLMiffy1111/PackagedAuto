@@ -124,7 +124,7 @@ public class CraftingProxyTile extends BaseTile implements IPackageCraftingMachi
 		if(!nbt.contains("Target")) {
 			return ISettingsCloneable.Result.fail(new TranslationTextComponent("item.packagedauto.settings_cloner.invalid"));
 		}
-		int availableCount = 0;	
+		int availableCount = 0;
 		PlayerInventory playerInventory = player.inventory;
 		if(!itemHandler.getStackInSlot(0).isEmpty()) {
 			if(itemHandler.getStackInSlot(0).getItem() == ProxyMarkerItem.INSTANCE) {
