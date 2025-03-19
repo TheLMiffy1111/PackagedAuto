@@ -35,7 +35,7 @@ public class ClientEventHandler {
 	}
 
 	@SubscribeEvent
-	public void onClientSetup(FMLClientSetupEvent event) { 
+	public void onClientSetup(FMLClientSetupEvent event) {
 		event.enqueueWork(()->{
 			ItemProperties.register(PackagedAutoItems.RECIPE_HOLDER.get(),
 					ResourceLocation.parse("packagedauto:filled"), (stack, world, living, seed)->{

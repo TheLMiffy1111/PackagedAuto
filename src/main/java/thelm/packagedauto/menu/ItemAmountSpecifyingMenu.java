@@ -11,7 +11,7 @@ public class ItemAmountSpecifyingMenu extends BaseMenu<BaseBlockEntity> {
 	public ItemAmountSpecifyingMenu(Inventory inventory, ItemStack stack) {
 		super(null, 0, inventory, null);
 		ItemStackHandler itemInventory = new ItemStackHandler(1);
-		itemInventory.setStackInSlot(0, stack.copyWithCount(1));	
+		itemInventory.setStackInSlot(0, stack.copyWithCount(1));
 		addSlot(new PreviewSlot(itemInventory, 0, 89, 48));
 	}
 
