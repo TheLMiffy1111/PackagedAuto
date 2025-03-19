@@ -1,6 +1,6 @@
 package thelm.packagedauto.client.screen;
 
-import java.util.Arrays;
+import java.util.List;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -132,7 +132,7 @@ public class UnpackagerScreen extends BaseScreen<UnpackagerMenu> {
 		public void renderToolTip(PoseStack poseStack, int mouseX, int mouseY) {
 			Component line0 = new TranslatableComponent("block.packagedauto.unpackager.tracker", id);
 			Component line1 = new TranslatableComponent("block.packagedauto.unpackager.tracker.eject").withStyle(ChatFormatting.GRAY);
-			renderComponentTooltip(poseStack, Arrays.asList(line0, line1), mouseX, mouseY);
+			renderComponentTooltip(poseStack, List.of(line0, line1), mouseX, mouseY);
 		}
 
 		@Override

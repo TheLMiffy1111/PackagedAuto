@@ -80,7 +80,7 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 				Direction dir = target.direction();
 				Vec3 source = Vec3.atCenterOf(worldPosition);
 				Vec3 delta = Vec3.atLowerCornerOf(target.blockPos().subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getNormal()).scale(0.5));
-				BeamPacket.sendBeams(source, Collections.singletonList(delta), 0xFF7F00, 6, true, level.dimension(), 32);
+				BeamPacket.sendBeams(source, List.of(delta), 0xFF7F00, 6, true, level.dimension(), 32);
 				return true;
 			}
 		}
@@ -113,8 +113,8 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 				Direction dir = target.direction();
 				Vec3 source = Vec3.atCenterOf(worldPosition);
 				Vec3 delta = Vec3.atLowerCornerOf(target.blockPos().subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getNormal()).scale(0.5));
-				DirectionalMarkerPacket.sendDirectionalMarkers(player, Collections.singletonList(target), 0xFFFF00, 200);
-				BeamPacket.sendBeams(player, source, Collections.singletonList(delta), 0xFFFF00, 200, false);
+				DirectionalMarkerPacket.sendDirectionalMarkers(player, List.of(target), 0xFFFF00, 200);
+				BeamPacket.sendBeams(player, source, List.of(delta), 0xFFFF00, 200, false);
 			}
 			Vec3 lowerCorner = Vec3.atLowerCornerOf(worldPosition).subtract(range, range, range);
 			Vec3 size = new Vec3(range*2+1, range*2+1, range*2+1);
