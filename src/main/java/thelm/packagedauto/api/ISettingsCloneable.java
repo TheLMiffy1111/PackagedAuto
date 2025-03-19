@@ -37,7 +37,7 @@ public interface ISettingsCloneable {
 			return new Result(ResultType.FAIL, message);
 		}
 	}
-	
+
 	enum ResultType {
 		SUCCESS, PARTIAL, FAIL;
 	}

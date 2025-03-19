@@ -61,7 +61,7 @@ public class PackageProcessingCategory implements IRecipeCategory<PackageProcess
 				int index = i*3+j;
 				stacks.init(index, true, j*18, 10+i*18);
 				if(index < patterns.size()) {
-					stacks.set(index, patterns.get(index).getOutput()); 
+					stacks.set(index, patterns.get(index).getOutput());
 				}
 			}
 		}
@@ -71,7 +71,7 @@ public class PackageProcessingCategory implements IRecipeCategory<PackageProcess
 				int slot = 9+index;
 				stacks.init(slot, false, 86+j*18, 10+i*18);
 				if(index < outputs.size()) {
-					stacks.set(slot, outputs.get(index)); 
+					stacks.set(slot, outputs.get(index));
 				}
 			}
 		}

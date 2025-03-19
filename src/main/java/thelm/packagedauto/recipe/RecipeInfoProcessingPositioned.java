@@ -50,7 +50,7 @@ public class RecipeInfoProcessingPositioned implements IRecipeInfoProcessingPosi
 		NBTTagList matrixTag = MiscUtil.saveAllItems(new NBTTagList(), matrixList);
 		nbt.setTag("Matrix", matrixTag);
 		NBTTagList outputTag = MiscUtil.saveAllItems(new NBTTagList(), output);
-		nbt.setTag("Output", outputTag);		
+		nbt.setTag("Output", outputTag);
 		return nbt;
 	}
 
