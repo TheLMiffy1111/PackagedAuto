@@ -44,7 +44,7 @@ public record BeamPacket(Vec3 source, List<Vec3> deltas, int color, int lifetime
 
 	public void handle(Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(()->{
-			WorldOverlayRenderer.INSTANCE.addBeams(source, deltas, color, lifetime, fadeout);	
+			WorldOverlayRenderer.INSTANCE.addBeams(source, deltas, color, lifetime, fadeout);
 		});
 		ctx.get().setPacketHandled(true);
 	}
