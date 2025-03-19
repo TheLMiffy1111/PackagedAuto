@@ -182,7 +182,7 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 			}
 			if(stackRem.getCount() < stack.getCount()) {
 				Vec3 delta = Vec3.atLowerCornerOf(pos.subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getNormal()).scale(0.5));
-				deltas.add(delta);	
+				deltas.add(delta);
 			}
 			if(stackRem.isEmpty()) {
 				pending.remove(i);

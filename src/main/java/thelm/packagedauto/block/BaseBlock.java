@@ -76,7 +76,7 @@ public abstract class BaseBlock extends Block implements EntityBlock {
 		}
 		super.onRemove(state, level, pos, newState, isMoving);
 	}
-	
+
 	@Override
 	public boolean hasAnalogOutputSignal(BlockState state) {
 		return true;

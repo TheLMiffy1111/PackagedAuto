@@ -50,7 +50,7 @@ public class PositionedProcessingPackageRecipeInfo implements IPositionedProcess
 		ListTag matrixTag = MiscHelper.INSTANCE.saveAllItems(new ListTag(), matrixList);
 		nbt.put("Matrix", matrixTag);
 		ListTag outputTag = MiscHelper.INSTANCE.saveAllItems(new ListTag(), output);
-		nbt.put("Output", outputTag);		
+		nbt.put("Output", outputTag);
 	}
 
 	@Override

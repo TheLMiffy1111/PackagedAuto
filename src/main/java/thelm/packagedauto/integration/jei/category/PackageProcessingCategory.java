@@ -66,7 +66,7 @@ public class PackageProcessingCategory implements IRecipeCategory<IPackageRecipe
 				int index = i*3+j;
 				slot = builder.addSlot(RecipeIngredientRole.INPUT, 1+j*18, 11+i*18);
 				if(index < patterns.size()) {
-					slot.addItemStack(patterns.get(index).getOutput()); 
+					slot.addItemStack(patterns.get(index).getOutput());
 				}
 			}
 		}
@@ -75,7 +75,7 @@ public class PackageProcessingCategory implements IRecipeCategory<IPackageRecipe
 				int index = i*3+j;
 				slot = builder.addSlot(RecipeIngredientRole.OUTPUT, 87+j*18, 11+i*18);
 				if(index < outputs.size()) {
-					slot.addItemStack(outputs.get(index)); 
+					slot.addItemStack(outputs.get(index));
 				}
 			}
 		}
