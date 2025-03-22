@@ -56,10 +56,6 @@ repositories {
 	}
 }
 
-sourceSets {
-	main
-}
-
 def mcVersion = "1.16.5"
 def modName = "PackagedAuto"
 def modId = "packagedauto"
@@ -71,8 +67,15 @@ version = "2.0.12.51"
 
 archivesBaseName = "${modName}-${mcVersion}"
 
+sourceSets {
+	main
+}
+
 java {
-	toolchain.languageVersion = JavaLanguageVersion.of(8)
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(8)
+		vendor = JvmVendorSpec.AZUL
+	}
 	withSourcesJar()
 }
 
