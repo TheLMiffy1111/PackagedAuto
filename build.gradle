@@ -1,5 +1,5 @@
 plugins {
-	id "com.crystaelix.loom" version "1.9.0"
+	id "com.crystaelix.loom" version "1.10.0"
 	id "eclipse"
 	id "idea"
 	id "maven-publish"
@@ -102,7 +102,7 @@ loom {
 
 dependencies {
 	// Log4j
-	implementation "org.apache.logging.log4j:log4j-core:2.24.1"
+	implementation "org.apache.logging.log4j:log4j-core:2.24.3"
 
 	// Minecraft
 	minecraft "com.mojang:minecraft:1.12.2"
@@ -122,10 +122,10 @@ dependencies {
 	modImplementation "curse.maven:mekanism-268560:2835175"
 
 	// Performance
-	implementation("zone.rong:mixinbooter:10.5") {transitive = false}
-	modImplementation "curse.maven:reid-629017:5502915"
-	modImplementation "curse.maven:vintagefix-871198:6217171"
-	modImplementation "curse.maven:lolasm-460609:6217170"
+	implementation("zone.rong:mixinbooter:10.6") {transitive = false}
+	modImplementation "curse.maven:reid-629017:6292779"
+	modImplementation "curse.maven:vintagefix-871198:6300725"
+	modImplementation "curse.maven:lolasm-460609:6333774"
 }
 
 def replacements = [
