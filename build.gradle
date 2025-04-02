@@ -1,5 +1,5 @@
 plugins {
-	id "com.crystaelix.loom" version "1.9.0"
+	id "com.crystaelix.loom" version "1.10.0"
 	id "eclipse"
 	id "idea"
 	id "maven-publish"
@@ -106,29 +106,29 @@ loom {
 
 dependencies {
 	// Log4j
-	implementation "org.apache.logging.log4j:log4j-core:2.24.1"
+	implementation "org.apache.logging.log4j:log4j-core:2.24.3"
 
 	// Minecraft
 	minecraft "com.mojang:minecraft:1.21.1"
 	mappings loom.layered {
 		officialMojangMappings()
-		parchment "org.parchmentmc.data:parchment-1.21:2024.07.28@zip"
+		parchment "org.parchmentmc.data:parchment-1.21.1:2024.11.17@zip"
 	}
-	neoForge "net.neoforged:neoforge:21.1.132"
+	neoForge "net.neoforged:neoforge:21.1.143"
 
 	// Dependencies
 	implementation("mezz.jei:jei-1.21.1-neoforge:19.21.0.247") {transitive = false}
-	implementation "dev.emi:emi-neoforge:1.1.20+1.21.1"
-	implementation "org.appliedenergistics:appliedenergistics2:19.2.4"
+	implementation "dev.emi:emi-neoforge:1.1.21+1.21.1"
+	implementation "org.appliedenergistics:guideme:21.1.6"
+	implementation "org.appliedenergistics:appliedenergistics2:19.2.7"
 	implementation "curse.maven:ae2-jei-integration-1074338:5748513"
 	implementation "vazkii.patchouli:Patchouli:1.21-88-NEOFORGE"
-	implementation "org.appliedenergistics:guideme:21.1.1"
 	implementation "curse.maven:mouse-tweaks-60089:5437296"
 
 	// Testing
-	implementation "curse.maven:cucumber-272335:6228644"
-	implementation "curse.maven:extended-crafting-268387:6227166"
-	implementation "mekanism:Mekanism:1.21.1-10.7.9.72"
+	implementation "curse.maven:cucumber-272335:6373317"
+	implementation "curse.maven:extended-crafting-268387:6373323"
+	implementation "mekanism:Mekanism:1.21.1-10.7.13.78"
 	implementation "curse.maven:applied-mekanistics-574300:5978711"
 
 	//Performance
