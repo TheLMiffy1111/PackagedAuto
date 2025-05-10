@@ -118,7 +118,7 @@ dependencies {
 
 	// Dependencies
 	modImplementation("mezz.jei:jei-1.19.2-forge:11.8.1.1034") {transitive = false}
-	modImplementation "dev.emi:emi-forge:1.1.21+1.19.2"
+	modImplementation "dev.emi:emi-forge:1.1.22+1.19.2"
 	modImplementation "appeng:appliedenergistics2-forge:12.9.12"
 	modImplementation "vazkii.patchouli:Patchouli:1.19.2-77"
 	modImplementation "curse.maven:mouse-tweaks-60089:3871353"
