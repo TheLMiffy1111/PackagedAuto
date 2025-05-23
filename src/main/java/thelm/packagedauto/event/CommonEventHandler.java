@@ -57,9 +57,9 @@ public class CommonEventHandler {
 
 	public void onConstruct(IEventBus modEventBus, ModContainer modContainer) {
 		modEventBus.register(this);
-		if(ModList.get().isLoaded("ae2")) {
+		MiscHelper.INSTANCE.conditionalRunnable(()->ModList.get().isLoaded("ae2"), ()->()->{
 			modEventBus.register(AppEngEventHandler.getInstance());
-		}
+		}, ()->()->{}).run();
 		NeoForge.EVENT_BUS.addListener(this::onServerAboutToStart);
 		PackagedAutoConfig.registerConfig(modContainer);
 
