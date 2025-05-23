@@ -74,9 +74,9 @@ public class CommonEventHandler {
 	public void onConstruct() {
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modEventBus.register(this);
-		if(ModList.get().isLoaded("ae2")) {
+		MiscHelper.INSTANCE.conditionalRunnable(()->ModList.get().isLoaded("ae2"), ()->()->{
 			modEventBus.register(AppEngEventHandler.getInstance());
-		}
+		}, ()->()->{}).run();
 		MinecraftForge.EVENT_BUS.addListener(this::onServerAboutToStart);
 		PackagedAutoConfig.registerConfig();
 
