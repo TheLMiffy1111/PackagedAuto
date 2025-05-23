@@ -1,6 +1,5 @@
 package thelm.packagedauto.event;
 
-import appeng.api.crafting.PatternDetailsHelper;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -9,6 +8,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.config.ModConfigEvent;
@@ -37,7 +37,7 @@ import thelm.packagedauto.config.PackagedAutoConfig;
 import thelm.packagedauto.crafting.DistributorMarkerCloningRecipe;
 import thelm.packagedauto.crafting.ProxyMarkerCloningRecipe;
 import thelm.packagedauto.crafting.RecipeHolderCloningRecipe;
-import thelm.packagedauto.integration.appeng.recipe.PackagePatternDetailsDecoder;
+import thelm.packagedauto.integration.appeng.AppEngEventHandler;
 import thelm.packagedauto.item.DistributorMarkerItem;
 import thelm.packagedauto.item.MiscItem;
 import thelm.packagedauto.item.PackageItem;
@@ -72,7 +72,11 @@ public class CommonEventHandler {
 	}
 
 	public void onConstruct() {
-		FMLJavaModLoadingContext.get().getModEventBus().register(this);
+		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+		modEventBus.register(this);
+		if(ModList.get().isLoaded("ae2")) {
+			modEventBus.register(AppEngEventHandler.getInstance());
+		}
 		MinecraftForge.EVENT_BUS.addListener(this::onServerAboutToStart);
 		PackagedAutoConfig.registerConfig();
 	}
@@ -159,10 +163,6 @@ public class CommonEventHandler {
 		ApiImpl.INSTANCE.registerRecipeType(CraftingPackageRecipeType.INSTANCE);
 
 		PacketHandler.registerPackets();
-
-		MiscHelper.INSTANCE.conditionalRunnable(()->ModList.get().isLoaded("ae2"), ()->()->{
-			PatternDetailsHelper.registerDecoder(PackagePatternDetailsDecoder.INSTANCE);
-		}, ()->()->{}).run();
 	}
 
 	@SubscribeEvent

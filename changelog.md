@@ -1,1 +1,1 @@
-Fix packager not properly sending items to extensions  
+Move AE2-related setup actions to a separate event handler class  
