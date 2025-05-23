@@ -1,7 +1,5 @@
 package thelm.packagedauto.event;
 
-import appeng.api.AECapabilities;
-import appeng.api.crafting.PatternDetailsHelper;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -22,8 +20,7 @@ import thelm.packagedauto.component.PackagedAutoDataComponents;
 import thelm.packagedauto.config.PackagedAutoConfig;
 import thelm.packagedauto.crafting.PackagedAutoRecipeSerializers;
 import thelm.packagedauto.creativetab.PackagedAutoCreativeTabs;
-import thelm.packagedauto.integration.appeng.AppEngUtil;
-import thelm.packagedauto.integration.appeng.recipe.PackagePatternDetailsDecoder;
+import thelm.packagedauto.integration.appeng.AppEngEventHandler;
 import thelm.packagedauto.item.PackagedAutoItems;
 import thelm.packagedauto.menu.PackagedAutoMenus;
 import thelm.packagedauto.packet.BeamPacket;
@@ -60,6 +57,9 @@ public class CommonEventHandler {
 
 	public void onConstruct(IEventBus modEventBus, ModContainer modContainer) {
 		modEventBus.register(this);
+		if(ModList.get().isLoaded("ae2")) {
+			modEventBus.register(AppEngEventHandler.getInstance());
+		}
 		NeoForge.EVENT_BUS.addListener(this::onServerAboutToStart);
 		PackagedAutoConfig.registerConfig(modContainer);
 
@@ -80,10 +80,6 @@ public class CommonEventHandler {
 		ApiImpl.INSTANCE.registerRecipeType(OrderedProcessingPackageRecipeType.INSTANCE);
 		ApiImpl.INSTANCE.registerRecipeType(PositionedProcessingPackageRecipeType.INSTANCE);
 		ApiImpl.INSTANCE.registerRecipeType(CraftingPackageRecipeType.INSTANCE);
-
-		MiscHelper.INSTANCE.conditionalRunnable(()->ModList.get().isLoaded("ae2"), ()->()->{
-			PatternDetailsHelper.registerDecoder(PackagePatternDetailsDecoder.INSTANCE);
-		}, ()->()->{}).run();
 	}
 
 	@SubscribeEvent
@@ -99,16 +95,6 @@ public class CommonEventHandler {
 		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, PackagedAutoBlockEntities.UNPACKAGER.get(), BaseBlockEntity::getEnergyStorage);
 		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, PackagedAutoBlockEntities.CRAFTER.get(), BaseBlockEntity::getEnergyStorage);
 		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, PackagedAutoBlockEntities.FLUID_PACKAGE_FILLER.get(), BaseBlockEntity::getEnergyStorage);
-
-		MiscHelper.INSTANCE.conditionalRunnable(()->ModList.get().isLoaded("ae2"), ()->()->{
-			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.PACKAGER.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
-			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.PACKAGER_EXTENSION.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
-			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.UNPACKAGER.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
-			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.DISTRIBUTOR.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
-			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.CRAFTING_PROXY.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
-			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.CRAFTER.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
-			event.registerBlockEntity(AECapabilities.IN_WORLD_GRID_NODE_HOST, PackagedAutoBlockEntities.PACKAGING_PROVIDER.get(), (be, v)->AppEngUtil.getAsInWorldGridNodeHost(be));
-		}, ()->()->{}).run();
 
 		for(IVolumeType volumeType : ApiImpl.INSTANCE.getVolumeTypeRegistry().values()) {
 			event.registerItem(volumeType.getItemCapability(), (stack, ctx)->{
