@@ -117,7 +117,7 @@ dependencies {
 	forge "net.minecraftforge:forge:1.20.1-47.3.7"
 
 	// Dependencies
-	modImplementation("mezz.jei:jei-1.20.1-forge:15.20.0.106") {transitive = false}
+	modImplementation("mezz.jei:jei-1.20.1-forge:15.20.0.108") {transitive = false}
 	modImplementation "dev.emi:emi-forge:1.1.22+1.20.1"
 	modImplementation "org.appliedenergistics:guideme:20.1.7"
 	modImplementation "appeng:appliedenergistics2-forge:15.4.2"
