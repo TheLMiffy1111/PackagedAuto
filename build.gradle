@@ -117,7 +117,7 @@ dependencies {
 	// Testing
 	modImplementation "curse.maven:cucumber-272335:2645867"
 	modImplementation "curse.maven:extended-crafting-268387:2777071"
-	modImplementation "MCMultiPart2:MCMultiPart:2.5.3"
+	modImplementation "curse.maven:mcmultipart-239431:2615930"
 	modImplementation "curse.maven:mekanism-268560:2835175"
 
 	// Performance
