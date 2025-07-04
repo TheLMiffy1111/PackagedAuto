@@ -25,7 +25,7 @@ public class PackagingProviderBlock extends BaseBlock {
 	public static final Item ITEM_INSTANCE = new BlockItem(INSTANCE, new Item.Properties().tab(ModList.get().isLoaded("ae2") ? PackagedAuto.CREATIVE_TAB : null)).setRegistryName("packagedauto:packaging_provider");
 
 	protected PackagingProviderBlock() {
-		super(BlockBehaviour.Properties.of(Material.METAL).strength(15F, 25F).sound(SoundType.METAL));
+		super(BlockBehaviour.Properties.of(Material.METAL).strength(10F, 15F).sound(SoundType.METAL));
 		setRegistryName("packagedauto:packaging_provider");
 	}
 
