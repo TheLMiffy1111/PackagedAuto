@@ -72,7 +72,7 @@ def specVersion = "4"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "4.0.4.11"
+version = "4.0.4.12"
 
 archivesBaseName = "${modName}-${mcVersion}"
 
@@ -113,13 +113,13 @@ dependencies {
 		officialMojangMappings()
 		parchment "org.parchmentmc.data:parchment-1.21.1:2024.11.17@zip"
 	}
-	neoForge "net.neoforged:neoforge:21.1.170"
+	neoForge "net.neoforged:neoforge:21.1.180"
 
 	// Dependencies
-	implementation("mezz.jei:jei-1.21.1-neoforge:19.21.1.305") {transitive = false}
+	implementation("mezz.jei:jei-1.21.1-neoforge:19.21.2.313") {transitive = false}
 	implementation "dev.emi:emi-neoforge:1.1.22+1.21.1"
-	implementation "org.appliedenergistics:guideme:21.1.9"
-	implementation "org.appliedenergistics:appliedenergistics2:19.2.10"
+	implementation "org.appliedenergistics:guideme:21.1.10"
+	implementation "org.appliedenergistics:appliedenergistics2:19.2.12"
 	implementation "curse.maven:ae2-jei-integration-1074338:5748513"
 	implementation "vazkii.patchouli:Patchouli:1.21-88-NEOFORGE"
 	implementation "curse.maven:mouse-tweaks-60089:5437296"
@@ -132,7 +132,7 @@ dependencies {
 
 	//Performance
 	implementation "curse.maven:yeetusexperimentus-635427:5444189"
-	implementation "curse.maven:modernfix-790626:6392739"
+	implementation "curse.maven:modernfix-790626:6609557"
 	implementation "curse.maven:ferritecore-429235:5850121"
 }
 
