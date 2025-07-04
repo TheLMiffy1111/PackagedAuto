@@ -62,7 +62,7 @@ def specVersion = "1"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "1.0.18.63"
+version = "1.0.18.64"
 
 archivesBaseName = "${modName}-${mcVersion}"
 
@@ -123,7 +123,7 @@ dependencies {
 	// Performance
 	implementation("zone.rong:mixinbooter:10.6") {transitive = false}
 	modImplementation "curse.maven:reid-629017:6292779"
-	modImplementation "curse.maven:vintagefix-871198:6412986"
+	modImplementation "curse.maven:vintagefix-871198:6609247"
 	modImplementation "curse.maven:lolasm-460609:6333774"
 }
 

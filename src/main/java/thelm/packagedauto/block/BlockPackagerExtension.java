@@ -25,7 +25,7 @@ public class BlockPackagerExtension extends BlockBase {
 
 	protected BlockPackagerExtension() {
 		super(Material.IRON);
-		setHardness(15F);
+		setHardness(10F);
 		setResistance(25F);
 		setSoundType(SoundType.METAL);
 		setTranslationKey("packagedauto.packager_extension");

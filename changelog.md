@@ -1,1 +1,1 @@
-Added optional recipe wrapper access to recipe transfer  
+Adjust block strength values  

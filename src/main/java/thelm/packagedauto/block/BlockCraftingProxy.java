@@ -28,7 +28,7 @@ public class BlockCraftingProxy extends BlockBase {
 
 	protected BlockCraftingProxy() {
 		super(Material.IRON);
-		setHardness(15F);
+		setHardness(10F);
 		setResistance(25F);
 		setSoundType(SoundType.METAL);
 		setTranslationKey("packagedauto.crafting_proxy");

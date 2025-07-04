@@ -21,7 +21,7 @@ public class BlockEncoder extends BlockBase {
 
 	protected BlockEncoder() {
 		super(Material.IRON);
-		setHardness(15F);
+		setHardness(10F);
 		setResistance(25F);
 		setSoundType(SoundType.METAL);
 		setTranslationKey("packagedauto.encoder");
