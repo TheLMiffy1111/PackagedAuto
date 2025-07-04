@@ -1,1 +1,1 @@
-Fix crash when invalid JEI categories are provided  
+Adjust block strength values  
