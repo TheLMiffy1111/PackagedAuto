@@ -1,1 +1,1 @@
-Adjust block strength values  
+Texture update with help from MHanHanBing  
