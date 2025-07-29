@@ -2,6 +2,7 @@ package thelm.packagedauto.container;
 
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ContainerType;
+import net.minecraft.inventory.container.Slot;
 import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.items.SlotItemHandler;
 import thelm.packagedauto.container.factory.PositionalTileContainerFactory;
@@ -20,37 +21,53 @@ public class EncoderContainer extends BaseContainer<EncoderTile> {
 
 	public EncoderContainer(int windowId, PlayerInventory playerInventory, EncoderTile tile) {
 		super(TYPE_INSTANCE, windowId, playerInventory, tile);
-		setupSlots();
+		setupSlots(true);
 	}
 
 	public void setupSlots() {
-		slots.clear();
-		patternItemHandler = tile.patternItemHandlers[tile.patternIndex];
-		addSlot(new SlotItemHandler(itemHandler, 0, 8, 26));
-		for(int i = 0; i < 9; ++i) {
-			for(int j = 0; j < 9; ++j) {
-				addSlot(patternItemHandler, i*9+j, 8+j*18, 57+i*18);
-			}
-		}
-		for(int i = 0; i < 3; ++i) {
-			for(int j = 0; j < 3; ++j) {
-				addSlot(patternItemHandler, 81+i*3+j, 198+j*18, 111+i*18);
-			}
-		}
-		for(int i = 0; i < 3; ++i) {
-			for(int j = 0; j < 3; ++j) {
-				addSlot(patternItemHandler, 90+i*3+j, 198+j*18, 165+i*18);
-			}
-		}
-		setupPlayerInventory();
+		setupSlots();
 	}
 
-	public void addSlot(EncoderPatternItemHandler patternItemHandler, int index, int x, int y) {
+	protected void setupSlots(boolean init) {
+		patternItemHandler = tile.patternItemHandlers[tile.patternIndex];
+		if(init) {
+			addSlot(new SlotItemHandler(itemHandler, 0, 8, 26));
+		}
+		for(int i = 0; i < 9; ++i) {
+			for(int j = 0; j < 9; ++j) {
+				addPatternSlot(patternItemHandler, i*9+j, 8+j*18, 57+i*18, init);
+			}
+		}
+		for(int i = 0; i < 3; ++i) {
+			for(int j = 0; j < 3; ++j) {
+				addPatternSlot(patternItemHandler, 81+i*3+j, 198+j*18, 111+i*18, init);
+			}
+		}
+		for(int i = 0; i < 3; ++i) {
+			for(int j = 0; j < 3; ++j) {
+				addPatternSlot(patternItemHandler, 90+i*3+j, 198+j*18, 165+i*18, init);
+			}
+		}
+		if(init) {
+			setupPlayerInventory();
+		}
+	}
+
+	protected void addPatternSlot(EncoderPatternItemHandler patternItemHandler, int index, int x, int y, boolean init) {
+		Slot slot;
+		int slotIndex = index + 1;
 		if((index < 81 || index < 90 && patternItemHandler.recipeType.canSetOutput()) && patternItemHandler.recipeType.getEnabledSlots().contains(index)) {
-			addSlot(new FalseCopySlot(patternItemHandler, index, x, y));
+			slot = new FalseCopySlot(patternItemHandler, index, x, y);
 		}
 		else {
-			addSlot(new PreviewSlot(patternItemHandler, index, x, y));
+			slot = new PreviewSlot(patternItemHandler, index, x, y);
+		}
+		slot.index = slotIndex;
+		if(init) {
+			addSlot(slot);
+		}
+		else {
+			slots.set(slotIndex, slot);
 		}
 	}
 

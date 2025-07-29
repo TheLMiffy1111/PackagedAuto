@@ -38,7 +38,7 @@ public class BaseContainer<T extends BaseTile> extends Container {
 		return 84;
 	}
 
-	public void setupPlayerInventory() {
+	protected void setupPlayerInventory() {
 		int xOffset = getPlayerInvX();
 		int yOffset = getPlayerInvY();
 		for(int i = 0; i < 3; i++) {
