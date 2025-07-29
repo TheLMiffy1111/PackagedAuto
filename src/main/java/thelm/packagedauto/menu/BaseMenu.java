@@ -38,7 +38,7 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 		return 84;
 	}
 
-	public void setupPlayerInventory() {
+	protected void setupPlayerInventory() {
 		int xOffset = getPlayerInvX();
 		int yOffset = getPlayerInvY();
 		for(int i = 0; i < 3; i++) {
