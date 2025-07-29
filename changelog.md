@@ -1,1 +1,2 @@
-Texture update with help from MHanHanBing  
+Change how encoder slots are reset  
+Fix marker tooltip  

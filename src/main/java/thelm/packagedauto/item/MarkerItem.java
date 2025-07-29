@@ -71,11 +71,11 @@ public class MarkerItem extends Item {
 		if(stack.has(PackagedAutoDataComponents.MARKER_POS)) {
 			DirectionalGlobalPos pos = stack.get(PackagedAutoDataComponents.MARKER_POS);
 			Component dimComponent = Component.literal(pos.dimension().location().toString());
-			tooltip.add(Component.translatable("item.packagedauto.distributor_marker.dimension", dimComponent));
+			tooltip.add(Component.translatable("misc.packagedauto.dimension", dimComponent));
 			Component posComponent = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pos.x(), pos.y(), pos.z()));
-			tooltip.add(Component.translatable("item.packagedauto.distributor_marker.position", posComponent));
+			tooltip.add(Component.translatable("misc.packagedauto.position", posComponent));
 			Component dirComponent = Component.translatable("misc.packagedauto."+pos.direction().getName());
-			tooltip.add(Component.translatable("item.packagedauto.distributor_marker.direction", dirComponent));
+			tooltip.add(Component.translatable("misc.packagedauto.direction", dirComponent));
 		}
 		super.appendHoverText(stack, context, tooltip, isAdvanced);
 	}
