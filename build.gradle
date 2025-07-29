@@ -119,21 +119,21 @@ dependencies {
 	// Dependencies
 	modImplementation("mezz.jei:jei-1.20.1-forge:15.20.0.112") {transitive = false}
 	modImplementation "dev.emi:emi-forge:1.1.22+1.20.1"
-	modImplementation "org.appliedenergistics:guideme:20.1.9"
-	modImplementation "appeng:appliedenergistics2-forge:15.4.5"
+	modImplementation "org.appliedenergistics:guideme:20.1.11"
+	modImplementation "appeng:appliedenergistics2-forge:15.4.6"
 	modImplementation "vazkii.patchouli:Patchouli:1.20.1-84.1-FORGE"
 	modImplementation "curse.maven:mouse-tweaks-60089:5338457"
 
 	// Testing
-	modImplementation "curse.maven:cucumber-272335:5587888"
-	modImplementation "curse.maven:extended-crafting-268387:6034128"
+	modImplementation "curse.maven:cucumber-272335:6680445"
+	modImplementation "curse.maven:extended-crafting-268387:6714365"
 	modImplementation "mekanism:Mekanism:1.20.1-10.4.16.80"
 	modImplementation "curse.maven:applied-mekanistics-574300:4842281"
 
 	//Performance
 	modImplementation "curse.maven:yeetusexperimentus-635427:4680832"
 	implementation "io.github.llamalad7:mixinextras-forge:0.4.1"
-	modImplementation "curse.maven:modernfix-790626:6609555"
+	modImplementation "curse.maven:modernfix-790626:6766127"
 	modImplementation "curse.maven:ferritecore-429235:4810975"
 }
 
