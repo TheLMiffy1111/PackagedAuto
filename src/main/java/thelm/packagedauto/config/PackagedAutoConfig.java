@@ -58,6 +58,7 @@ public class PackagedAutoConfig {
 	public static ForgeConfigSpec.IntValue fluidPackageFillerEnergyUsage;
 	public static ForgeConfigSpec.IntValue fluidPackageFillerRefreshInterval;
 
+	@SuppressWarnings("removal")
 	public static void registerConfig() {
 		buildConfig();
 		ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, serverSpec);

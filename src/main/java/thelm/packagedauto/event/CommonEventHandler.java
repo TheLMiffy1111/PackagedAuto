@@ -72,6 +72,7 @@ public class CommonEventHandler {
 	}
 
 	public void onConstruct() {
+		@SuppressWarnings("removal")
 		IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 		modEventBus.register(this);
 		MiscHelper.INSTANCE.conditionalRunnable(()->ModList.get().isLoaded("ae2"), ()->()->{
