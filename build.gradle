@@ -116,7 +116,7 @@ dependencies {
 	neoForge "net.neoforged:neoforge:21.1.194"
 
 	// Dependencies
-	implementation("mezz.jei:jei-1.21.1-neoforge:19.22.0.315") {transitive = false}
+	implementation("mezz.jei:jei-1.21.1-neoforge:19.22.1.316") {transitive = false}
 	implementation "dev.emi:emi-neoforge:1.1.22+1.21.1"
 	implementation "org.appliedenergistics:guideme:21.1.14"
 	implementation "org.appliedenergistics:appliedenergistics2:19.2.13"
