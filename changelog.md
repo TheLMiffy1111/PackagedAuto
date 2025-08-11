@@ -1,1 +1,1 @@
-Change how encoder slots are reset  
+Fixed config spec  
