@@ -1,6 +1,6 @@
 package thelm.packagedauto.config;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.ImmutableSet;
@@ -65,7 +65,7 @@ public class PackagedAutoConfig {
 		builder.comment("How many pattern slots should the Package Recipe Encoder have.", "Warning: Changing this value when world is running may cause client crashes.");
 		encoderPatternSlots = builder.defineInRange("pattern_slots", 20, 1, 20);
 		builder.comment("The list of recipe types to disable in the Package Recipe Encoder.");
-		encoderDisabledRecipeTypes = builder.defineList("disabled_recipe_types", ArrayList<String>::new, s->true);
+		encoderDisabledRecipeTypes = builder.defineList("disabled_recipe_types", Collections::emptyList, String.class::isInstance);
 		builder.pop();
 
 		builder.push("packager");
@@ -110,10 +110,12 @@ public class PackagedAutoConfig {
 		distributorRange = builder.defineInRange("range", 16, 1, Integer.MAX_VALUE);
 		builder.comment("How many ticks should the Positioned Package Distributor wait between each refresh.");
 		distributorRefreshInterval = builder.defineInRange("refresh_interval", 4, 1, 40);
+		builder.pop();
 
 		builder.push("crafting_proxy");
 		builder.comment("How large the range of the Package Crafting Machine Proxy should be.");
 		craftingProxyRange = builder.defineInRange("range", 8, 1, Integer.MAX_VALUE);
+		builder.pop();
 
 		builder.push("crafter");
 		builder.comment("How much FE the Package Crafter should hold.");
