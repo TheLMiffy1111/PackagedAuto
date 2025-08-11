@@ -1,2 +1,1 @@
-Change how encoder slots are reset  
-Fix marker tooltip  
+Fixed config spec  
