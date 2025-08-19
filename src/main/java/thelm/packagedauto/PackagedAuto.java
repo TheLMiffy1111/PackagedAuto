@@ -9,8 +9,8 @@ import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 import net.minecraftforge.fml.relauncher.Side;
 import net.minecraftforge.fml.relauncher.SideOnly;
+import thelm.packagedauto.event.CommonEventHandler;
 import thelm.packagedauto.item.ItemPackage;
-import thelm.packagedauto.proxy.CommonProxy;
 
 @Mod(
 		modid = PackagedAuto.MOD_ID,
@@ -32,18 +32,18 @@ public class PackagedAuto {
 		}
 	};
 	@SidedProxy(
-			clientSide = "thelm.packagedauto.proxy.ClientProxy",
-			serverSide = "thelm.packagedauto.proxy.CommonProxy",
-			modId = PackagedAuto.MOD_ID)
-	public static CommonProxy proxy;
+			clientSide = "thelm.packagedauto.client.event.ClientEventHandler",
+			serverSide = "thelm.packagedauto.event.CommonEventHandler",
+			modId = MOD_ID)
+	public static CommonEventHandler eventHandler;
 
 	@EventHandler
-	public void firstMovement(FMLPreInitializationEvent event) {
-		proxy.register(event);
+	public void onPreInit(FMLPreInitializationEvent event) {
+		eventHandler.onPreInit(event);
 	}
 
 	@EventHandler
-	public void secondMovement(FMLInitializationEvent event) {
-		proxy.register(event);
+	public void onInit(FMLInitializationEvent event) {
+		eventHandler.onInit(event);
 	}
 }

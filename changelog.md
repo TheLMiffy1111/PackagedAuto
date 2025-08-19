@@ -1,1 +1,1 @@
-Change how encoder slots are reset  
+Refactor lifecycle event handler names  

@@ -1,8 +1,9 @@
-package thelm.packagedauto.proxy;
+package thelm.packagedauto.event;
 
 import net.minecraft.block.Block;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.fml.common.Loader;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -44,7 +45,7 @@ import thelm.packagedauto.tile.TilePackager;
 import thelm.packagedauto.tile.TilePackagerExtension;
 import thelm.packagedauto.tile.TileUnpackager;
 
-public class CommonProxy {
+public class CommonEventHandler {
 
 	public void registerBlock(Block block) {
 		ForgeRegistries.BLOCKS.register(block);
@@ -54,17 +55,16 @@ public class CommonProxy {
 		ForgeRegistries.ITEMS.register(item);
 	}
 
-	public void register(FMLPreInitializationEvent event) {
+	public void onPreInit(FMLPreInitializationEvent event) {
 		registerConfig(event);
 		registerBlocks();
 		registerItems();
-		registerModels();
 		registerTileEntities();
 		registerRecipeTypes();
 		registerNetwork();
 	}
 
-	public void register(FMLInitializationEvent event) {
+	public void onInit(FMLInitializationEvent event) {
 		registerRecipes();
 		MiscUtil.conditionalRunnable(()->Loader.isModLoaded("patchouli"), ()->()->{
 			PackagedAutoPatchouliHandler.init();
@@ -106,8 +106,6 @@ public class CommonProxy {
 		registerItem(ItemMisc.PACKAGE_COMPONENT);
 		registerItem(ItemMisc.ME_PACKAGE_COMPONENT);
 	}
-
-	protected void registerModels() {}
 
 	protected void registerTileEntities() {
 		GameRegistry.registerTileEntity(TilePackager.class, new ResourceLocation("packagedauto:packager"));
