@@ -25,7 +25,7 @@ public class EncoderContainer extends BaseContainer<EncoderTile> {
 	}
 
 	public void setupSlots() {
-		setupSlots();
+		setupSlots(false);
 	}
 
 	protected void setupSlots(boolean init) {

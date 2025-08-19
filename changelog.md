@@ -1,1 +1,1 @@
-Fixed config spec  
+Fix StackOverflowError in encoder  
