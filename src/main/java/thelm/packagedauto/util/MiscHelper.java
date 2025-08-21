@@ -19,9 +19,8 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 
-import it.unimi.dsi.fastutil.Hash;
-import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenCustomHashMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
@@ -102,16 +101,7 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public List<ItemStack> condenseStacks(List<ItemStack> stacks, boolean ignoreStackSize) {
-		Object2IntLinkedOpenCustomHashMap<Pair<Item, CompoundTag>> map = new Object2IntLinkedOpenCustomHashMap<>(new Hash.Strategy<>() {
-			@Override
-			public int hashCode(Pair<Item, CompoundTag> o) {
-				return Objects.hash(Item.getId(o.getLeft()), o.getRight());
-			}
-			@Override
-			public boolean equals(Pair<Item, CompoundTag> a, Pair<Item, CompoundTag> b) {
-				return a.equals(b);
-			}
-		});
+		Object2LongLinkedOpenHashMap<Pair<Item, CompoundTag>> map = new Object2LongLinkedOpenHashMap<>();
 		for(ItemStack stack : stacks) {
 			if(stack.isEmpty()) {
 				continue;
@@ -123,25 +113,18 @@ public class MiscHelper implements IMiscHelper {
 			map.addTo(pair, stack.getCount());
 		}
 		List<ItemStack> list = new ArrayList<>();
-		for(Object2IntMap.Entry<Pair<Item, CompoundTag>> entry : map.object2IntEntrySet()) {
+		for(Object2LongMap.Entry<Pair<Item, CompoundTag>> entry : map.object2LongEntrySet()) {
 			Pair<Item, CompoundTag> pair = entry.getKey();
-			int count = entry.getIntValue();
+			long count = entry.getLongValue();
 			Item item = pair.getLeft();
 			CompoundTag nbt = pair.getRight();
-			if(ignoreStackSize) {
-				ItemStack toAdd = new ItemStack(item, count);
+			while(count > 0) {
+				ItemStack toAdd = new ItemStack(item, 1);
 				toAdd.setTag(nbt);
+				int limit = ignoreStackSize ? 1000000000 : item.getMaxStackSize(toAdd);
+				toAdd.setCount((int)Math.min(count, limit));
 				list.add(toAdd);
-			}
-			else {
-				while(count > 0) {
-					ItemStack toAdd = new ItemStack(item, 1);
-					toAdd.setTag(nbt);
-					int limit = item.getMaxStackSize(toAdd);
-					toAdd.setCount(Math.min(count, limit));
-					list.add(toAdd);
-					count -= limit;
-				}
+				count -= limit;
 			}
 		}
 		map.clear();
@@ -207,7 +190,7 @@ public class MiscHelper implements IMiscHelper {
 			nbt.putShort("Count", (short)count);
 		}
 		else {
-			nbt.putInt("Count", (short)count);
+			nbt.putInt("Count", count);
 		}
 		return nbt;
 	}

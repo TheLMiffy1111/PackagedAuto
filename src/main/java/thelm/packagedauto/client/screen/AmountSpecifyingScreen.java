@@ -2,6 +2,7 @@ package thelm.packagedauto.client.screen;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.google.common.primitives.Longs;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -10,7 +11,6 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import thelm.packagedauto.menu.BaseMenu;
 
@@ -35,6 +35,8 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 	protected abstract int getMaxAmount();
 
 	protected abstract int[] getIncrements();
+
+	protected abstract int[] getMultipliers();
 
 	@Override
 	protected ResourceLocation getBackgroundTexture() {
@@ -68,22 +70,20 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		addRenderableWidget(amountField);
 
 		int[] increments = getIncrements();
-
+		int[] multipliers = getMultipliers();
 		int xx = 7;
-		int width = 34;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
-			String text = "+" + increment;
-			addRenderableWidget(new ButtonIncrement(increment, leftPos+xx, topPos+20, Component.literal(text)));
-			xx += width;
+			int multiplier = multipliers[i];
+			addRenderableWidget(new ButtonAmount(increment, multiplier, false, leftPos+xx, topPos+20));
+			xx += 34;
 		}
-
 		xx = 7;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
-			String text = "-" + increment;
-			addRenderableWidget(new ButtonIncrement(-increment, leftPos+xx, topPos+imageHeight-20-7, Component.literal(text)));
-			xx += width;
+			int multiplier = multipliers[i];
+			addRenderableWidget(new ButtonAmount(increment, multiplier, true, leftPos+xx, topPos+imageHeight-20-7));
+			xx += 34;
 		}
 	}
 
@@ -118,15 +118,22 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		return super.keyPressed(key, scanCode, modifiers);
 	}
 
-	private void onIncrementButtonClicked(int increment) {
-		int oldAmount = 0;
+	protected void onAmountButtonClicked(int increment, int multiplier, boolean inverse, boolean shiftDown) {
+		long oldAmount = 0;
 		try {
 			oldAmount = Integer.parseInt(amountField.getValue());
 		}
 		catch(NumberFormatException e) {
 			// NO OP
 		}
-		int newAmount = Mth.clamp(oldAmount+increment, 0, getMaxAmount());
+		long newAmount;
+		if(!shiftDown) {
+			newAmount = !inverse ? oldAmount+increment : oldAmount-increment;
+		}
+		else {
+			newAmount = !inverse ? oldAmount*multiplier : oldAmount/multiplier;
+		}
+		newAmount = Longs.constrainToRange(newAmount, 0, getMaxAmount());
 		amountField.setValue(String.valueOf(newAmount));
 	}
 
@@ -170,18 +177,42 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		public void updateNarration(NarrationElementOutput pNarrationElementOutput) {}
 	}
 
-	class ButtonIncrement extends AbstractWidget {
+	class ButtonAmount extends AbstractWidget {
 
 		int increment;
+		int multiplier;
+		boolean inverse;
 
-		public ButtonIncrement(int increment, int x, int y, Component text) {
-			super(x, y, 34, 20, text);
+		Component addComponent;
+		Component subComponent;
+		Component mulComponent;
+		Component divComponent;
+
+		public ButtonAmount(int increment, int multiplier, boolean inverse, int x, int y) {
+			super(x, y, 34, 20, Component.empty());
 			this.increment = increment;
+			this.multiplier = multiplier;
+			this.inverse = inverse;
+
+			addComponent = Component.literal("+" + increment);
+			subComponent = Component.literal("-" + increment);
+			mulComponent = Component.literal("×" + multiplier);
+			divComponent = Component.literal("÷" + multiplier);
+		}
+
+		@Override
+		public Component getMessage() {
+			if(!hasShiftDown()) {
+				return !inverse ? addComponent : subComponent;
+			}
+			else {
+				return !inverse ? mulComponent : divComponent;
+			}
 		}
 
 		@Override
 		public void onClick(double mouseX, double mouseY) {
-			onIncrementButtonClicked(increment);
+			onAmountButtonClicked(increment, multiplier, inverse, hasShiftDown());
 		}
 
 		@Override
