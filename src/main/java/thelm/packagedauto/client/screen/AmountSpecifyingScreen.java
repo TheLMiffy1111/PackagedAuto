@@ -2,6 +2,7 @@ package thelm.packagedauto.client.screen;
 
 import org.lwjgl.glfw.GLFW;
 
+import com.google.common.primitives.Longs;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -9,7 +10,6 @@ import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -36,6 +36,8 @@ public abstract class AmountSpecifyingScreen<C extends BaseContainer<?>> extends
 	protected abstract int getMaxAmount();
 
 	protected abstract int[] getIncrements();
+
+	protected abstract int[] getMultipliers();
 
 	@Override
 	protected ResourceLocation getBackgroundTexture() {
@@ -69,18 +71,19 @@ public abstract class AmountSpecifyingScreen<C extends BaseContainer<?>> extends
 		addButton(amountField);
 
 		int[] increments = getIncrements();
+		int[] multipliers = getMultipliers();
 		int xx = 7;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
-			String text = "+" + increment;
-			addButton(new ButtonIncrement(increment, leftPos+xx, topPos+20, new StringTextComponent(text)));
+			int multiplier = multipliers[i];
+			addButton(new ButtonAmount(increment, multiplier, false, leftPos+xx, topPos+20));
 			xx += 34;
 		}
 		xx = 7;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
-			String text = "-" + increment;
-			addButton(new ButtonIncrement(-increment, leftPos+xx, topPos+imageHeight-20-7, new StringTextComponent(text)));
+			int multiplier = multipliers[i];
+			addButton(new ButtonAmount(increment, multiplier, true, leftPos+xx, topPos+imageHeight-20-7));
 			xx += 34;
 		}
 	}
@@ -116,15 +119,22 @@ public abstract class AmountSpecifyingScreen<C extends BaseContainer<?>> extends
 		return super.keyPressed(key, scanCode, modifiers);
 	}
 
-	protected void onIncrementButtonClicked(int increment) {
-		int oldAmount = 0;
+	protected void onIncrementButtonClicked(int increment, int multiplier, boolean inverse, boolean shiftDown) {
+		long oldAmount = 0;
 		try {
 			oldAmount = Integer.parseInt(amountField.getValue());
 		}
 		catch(NumberFormatException e) {
 			// NO OP
 		}
-		int newAmount = MathHelper.clamp(oldAmount+increment, 0, getMaxAmount());
+		long newAmount;
+		if(!shiftDown) {
+			newAmount = !inverse ? oldAmount+increment : oldAmount-increment;
+		}
+		else {
+			newAmount = !inverse ? oldAmount*multiplier : oldAmount/multiplier;
+		}
+		newAmount = Longs.constrainToRange(newAmount, 0, getMaxAmount());
 		amountField.setValue(String.valueOf(newAmount));
 	}
 
@@ -162,18 +172,42 @@ public abstract class AmountSpecifyingScreen<C extends BaseContainer<?>> extends
 		}
 	}
 
-	class ButtonIncrement extends Widget {
+	class ButtonAmount extends Widget {
 
 		int increment;
+		int multiplier;
+		boolean inverse;
 
-		public ButtonIncrement(int increment, int x, int y, ITextComponent text) {
-			super(x, y, 34, 20, text);
+		ITextComponent addComponent;
+		ITextComponent subComponent;
+		ITextComponent mulComponent;
+		ITextComponent divComponent;
+
+		public ButtonAmount(int increment, int multiplier, boolean inverse, int x, int y) {
+			super(x, y, 34, 20, StringTextComponent.EMPTY);
 			this.increment = increment;
+			this.multiplier = multiplier;
+			this.inverse = inverse;
+
+			addComponent = new StringTextComponent("+" + increment);
+			subComponent = new StringTextComponent("-" + increment);
+			mulComponent = new StringTextComponent("×" + multiplier);
+			divComponent = new StringTextComponent("÷" + multiplier);
+		}
+
+		@Override
+		public ITextComponent getMessage() {
+			if(!hasShiftDown()) {
+				return !inverse ? addComponent : subComponent;
+			}
+			else {
+				return !inverse ? mulComponent : divComponent;
+			}
 		}
 
 		@Override
 		public void onClick(double mouseX, double mouseY) {
-			onIncrementButtonClicked(increment);
+			onIncrementButtonClicked(increment, multiplier, inverse, hasShiftDown());
 		}
 	}
 }

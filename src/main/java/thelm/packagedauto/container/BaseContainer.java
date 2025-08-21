@@ -1,5 +1,8 @@
 package thelm.packagedauto.container;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.ClickType;
@@ -164,9 +167,31 @@ public class BaseContainer<T extends BaseTile> extends Container {
 		return successful;
 	}
 
+	protected int dragCount = 0;
+	protected List<Slot> dragSlots = new ArrayList<>();
+
 	@Override
-	public ItemStack clicked(int slotId, int mouseButton, ClickType clickType, PlayerEntity player) {
-		if(slotId >= 0) {
+	public ItemStack clicked(int slotId, int clickSubtype, ClickType clickType, PlayerEntity player) {
+		if(clickType == ClickType.QUICK_CRAFT) {
+			if(clickSubtype == 1 && slotId >= 0) {
+				dragCount++;
+				Slot slot = slots.get(slotId);
+				if(slot instanceof FalseCopySlot) {
+					dragSlots.add(slot);
+					return player.inventory.getCarried();
+				}
+			}
+			else if(clickSubtype == 2 && !dragSlots.isEmpty()) {
+				ItemStack toPut = player.inventory.getCarried().copy();
+				toPut.setCount(toPut.getCount()/dragCount);
+				for(Slot slot : dragSlots) {
+					slot.set(toPut.copy());
+				}
+				dragCount = 0;
+				dragSlots.clear();
+			}
+		}
+		else if(clickType != ClickType.CLONE && slotId >= 0) {
 			Slot slot = slots.get(slotId);
 			if(slot instanceof FalseCopySlot) {
 				if(clickType == ClickType.QUICK_MOVE) {
@@ -175,12 +200,10 @@ public class BaseContainer<T extends BaseTile> extends Container {
 				else {
 					ItemStack toPut = player.inventory.getCarried().copy();
 					ItemStack stack = slot.getItem().copy();
-					switch(mouseButton) {
-					case 0: {
+					if(clickSubtype == 0) {
 						slot.set(toPut);
-						break;
 					}
-					case 1: {
+					else if(clickSubtype == 1) {
 						if(stack.isEmpty()) {
 							if(!toPut.isEmpty()) {
 								toPut.setCount(1);
@@ -195,14 +218,12 @@ public class BaseContainer<T extends BaseTile> extends Container {
 							stack.shrink(1);
 							slot.set(stack);
 						}
-						break;
-					}
 					}
 				}
 				return player.inventory.getCarried();
 			}
 		}
-		return super.clicked(slotId, mouseButton, clickType, player);
+		return super.clicked(slotId, clickSubtype, clickType, player);
 	}
 
 	@Override

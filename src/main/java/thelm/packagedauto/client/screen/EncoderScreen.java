@@ -112,7 +112,7 @@ public class EncoderScreen extends BaseScreen<EncoderContainer> {
 
 	@Override
 	public int getItemAmountSpecificationLimit(Slot slot) {
-		return slot.getItem().getMaxStackSize();
+		return Math.min(slot.getItem().getMaxStackSize(), 1000000000);
 	}
 
 	class ButtonPatternSlot extends Widget {
