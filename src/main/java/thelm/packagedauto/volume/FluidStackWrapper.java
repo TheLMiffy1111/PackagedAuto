@@ -83,7 +83,7 @@ public record FluidStackWrapper(FluidStack stack) implements IFluidStackWrapper 
 
 	@Override
 	public Component getAmountDesc() {
-		return Component.literal(stack.getAmount()+"mB");
+		return Component.translatable("amount.packagedauto.mb", stack.getAmount());
 	}
 
 	@Override

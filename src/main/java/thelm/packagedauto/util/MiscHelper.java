@@ -21,8 +21,7 @@ import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import it.unimi.dsi.fastutil.Hash;
-import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenCustomHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.client.Minecraft;
@@ -106,16 +105,7 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public List<ItemStack> condenseStacks(List<ItemStack> stacks, boolean ignoreStackSize) {
-		Object2IntLinkedOpenCustomHashMap<Pair<Item, DataComponentPatch>> map = new Object2IntLinkedOpenCustomHashMap<>(new Hash.Strategy<>() {
-			@Override
-			public int hashCode(Pair<Item, DataComponentPatch> o) {
-				return Objects.hash(Item.getId(o.getLeft()), o.getRight());
-			}
-			@Override
-			public boolean equals(Pair<Item, DataComponentPatch> a, Pair<Item, DataComponentPatch> b) {
-				return a.equals(b);
-			}
-		});
+		Object2IntLinkedOpenHashMap<Pair<Item, DataComponentPatch>> map = new Object2IntLinkedOpenHashMap<>();
 		for(ItemStack stack : stacks) {
 			if(stack.isEmpty()) {
 				continue;
@@ -132,20 +122,13 @@ public class MiscHelper implements IMiscHelper {
 			int count = entry.getIntValue();
 			Item item = pair.getLeft();
 			DataComponentPatch patch = pair.getRight();
-			if(ignoreStackSize) {
-				ItemStack toAdd = new ItemStack(item, count);
+			while(count > 0) {
+				ItemStack toAdd = new ItemStack(item, 1);
 				toAdd.applyComponents(patch);
+				int limit = ignoreStackSize ? 1000000000 : item.getMaxStackSize(toAdd);
+				toAdd.setCount(Math.min(count, limit));
 				list.add(toAdd);
-			}
-			else {
-				while(count > 0) {
-					ItemStack toAdd = new ItemStack(item, 1);
-					toAdd.applyComponents(patch);
-					int limit = item.getMaxStackSize(toAdd);
-					toAdd.setCount(Math.min(count, limit));
-					list.add(toAdd);
-					count -= limit;
-				}
+				count -= limit;
 			}
 		}
 		map.clear();

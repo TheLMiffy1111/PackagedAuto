@@ -1,8 +1,5 @@
 package thelm.packagedauto.menu;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
 import net.neoforged.neoforge.items.SlotItemHandler;

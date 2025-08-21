@@ -47,7 +47,7 @@ public class FluidPackageFillerScreen extends BaseScreen<FluidPackageFillerMenu>
 			}
 			try {
 				int amount = Integer.parseInt(s);
-				return amount >= 1 && amount <= 1000000;
+				return amount >= 1 && amount <= 1000000000;
 			}
 			catch(NumberFormatException e) {
 				return false;
@@ -55,7 +55,7 @@ public class FluidPackageFillerScreen extends BaseScreen<FluidPackageFillerMenu>
 		});
 		amountField.setResponder(s->{
 			try {
-				int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 1, 1000000);
+				int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 1, 1000000000);
 				if(amount != menu.blockEntity.requiredAmount) {
 					PacketDistributor.sendToServer(new SetFluidAmountPacket(amount));
 				}

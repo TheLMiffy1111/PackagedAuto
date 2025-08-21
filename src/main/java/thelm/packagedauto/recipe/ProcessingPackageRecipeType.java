@@ -35,7 +35,7 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 	public static final ResourceLocation NAME = ResourceLocation.parse("packagedauto:processing");
 	public static final IntSet SLOTS;
 	public static final Vec3i COLOR = new Vec3i(139, 139, 139);
-	public static final Vec3i COLOR_HIGHLIGHT =new Vec3i(139, 139, 179);
+	public static final Vec3i COLOR_HIGHLIGHT = new Vec3i(139, 139, 179);
 
 	static {
 		SLOTS = new IntRBTreeSet();

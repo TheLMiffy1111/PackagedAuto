@@ -34,9 +34,12 @@ public class VolumeAmountSpecifyingScreen extends AmountSpecifyingScreen<VolumeA
 
 	@Override
 	protected int[] getIncrements() {
-		return new int[] {
-				100, 500, 1000,
-		};
+		return stack.getVolumeType().getIncrements();
+	}
+
+	@Override
+	protected int[] getMultipliers() {
+		return stack.getVolumeType().getMultipliers();
 	}
 
 	@Override
