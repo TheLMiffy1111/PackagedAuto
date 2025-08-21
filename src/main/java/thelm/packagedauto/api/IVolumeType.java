@@ -57,4 +57,12 @@ public interface IVolumeType {
 	IVolumeStackWrapper drain(ICapabilityProvider capProvider, Direction direction, IVolumeStackWrapper resource, boolean simulate);
 
 	void render(GuiGraphics graphics, int i, int j, IVolumeStackWrapper stack);
+
+	default int[] getIncrements() {
+		return new int[] {100, 500, 1000};
+	}
+
+	default int[] getMultipliers() {
+		return new int[] {2, 3, 5};
+	}
 }

@@ -107,7 +107,7 @@ public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContaine
 	}
 
 	public int getVolumeAmountSpecificationLimit(Slot slot) {
-		return 1000000;
+		return 1000000000;
 	}
 
 	public boolean inBounds(int x, int y, int w, int h, double ox, double oy) {
