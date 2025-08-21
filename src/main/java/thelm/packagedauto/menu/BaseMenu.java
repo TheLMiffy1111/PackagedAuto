@@ -1,5 +1,8 @@
 package thelm.packagedauto.menu;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -164,18 +167,40 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 		return successful;
 	}
 
+	protected int dragCount = 0;
+	protected List<Slot> dragSlots = new ArrayList<>();
+
 	@Override
-	public void clicked(int slotId, int mouseButton, ClickType clickType, Player player) {
-		if(slotId >= 0 && slots.get(slotId) instanceof FalseCopySlot slot) {
+	public void clicked(int slotId, int clickSubtype, ClickType clickType, Player player) {
+		if(clickType == ClickType.QUICK_CRAFT) {
+			if(clickSubtype == 1 && slotId >= 0) {
+				dragCount++;
+				if(slots.get(slotId) instanceof FalseCopySlot slot) {
+					dragSlots.add(slot);
+					return;
+				}
+			}
+			else if(clickSubtype == 2 && !dragSlots.isEmpty()) {
+				ItemStack toPut = getCarried().copy();
+				toPut.setCount(toPut.getCount()/dragCount);
+				for(Slot slot : dragSlots) {
+					slot.set(toPut.copy());
+				}
+				dragCount = 0;
+				dragSlots.clear();
+			}
+		}
+		else if(clickType != ClickType.CLONE && slotId >= 0 && slots.get(slotId) instanceof FalseCopySlot slot) {
 			if(clickType == ClickType.QUICK_MOVE) {
 				slot.set(ItemStack.EMPTY);
 			}
 			else {
 				ItemStack toPut = getCarried().copy();
 				ItemStack stack = slot.getItem().copy();
-				switch(mouseButton) {
-				case 0 -> slot.set(toPut);
-				case 1 -> {
+				if(clickSubtype == 0) {
+					slot.set(toPut);
+				}
+				else if(clickSubtype == 1) {
 					if(stack.isEmpty()) {
 						if(!toPut.isEmpty()) {
 							toPut.setCount(1);
@@ -191,12 +216,10 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 						slot.set(stack);
 					}
 				}
-				}
 			}
+			return;
 		}
-		else {
-			super.clicked(slotId, mouseButton, clickType, player);
-		}
+		super.clicked(slotId, clickSubtype, clickType, player);
 	}
 
 	@Override

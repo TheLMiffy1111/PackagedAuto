@@ -83,6 +83,8 @@
 
 	"volume.packagedauto.minecraft.fluid": "流体",
 
+	"amount.packagedauto.mb": "%smB",
+
 	"gui.packagedauto.item_amount_specifying": "物品数量",
 	"gui.packagedauto.volume_amount_specifying": "体积量以mB为单位",
 

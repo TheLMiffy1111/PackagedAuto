@@ -4,7 +4,7 @@ import java.util.List;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraftforge.fluids.FluidStack;
 import thelm.packagedauto.api.IFluidStackWrapper;
 import thelm.packagedauto.api.IVolumeStackWrapper;
@@ -66,7 +66,7 @@ public record FluidStackWrapper(FluidStack stack) implements IFluidStackWrapper 
 
 	@Override
 	public Component getAmountDesc() {
-		return new TextComponent(stack.getAmount()+"mB");
+		return new TranslatableComponent("amount.packagedauto.mb", stack.getAmount());
 	}
 
 	@Override
