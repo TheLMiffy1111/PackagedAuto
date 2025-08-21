@@ -55,7 +55,7 @@ public class ApiImpl extends PackagedAutoApi {
 		return IDS.getId(type);
 	}
 
-	private void computeIds() {
+	private synchronized void computeIds() {
 		if(IDS.size() == 0) {
 			ORDER.forEach((mod, type)->IDS.add(type));
 		}
