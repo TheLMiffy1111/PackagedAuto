@@ -125,7 +125,7 @@ public class MiscHelper implements IMiscHelper {
 			while(count > 0) {
 				ItemStack toAdd = new ItemStack(item, 1);
 				toAdd.applyComponents(patch);
-				int limit = ignoreStackSize ? 1000000000 : item.getMaxStackSize(toAdd);
+				int limit = ignoreStackSize ? 1000000000 : Math.min(item.getMaxStackSize(toAdd), 1000000000);
 				toAdd.setCount(Math.min(count, limit));
 				list.add(toAdd);
 				count -= limit;
