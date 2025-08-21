@@ -33,9 +33,12 @@ public class GuiItemAmountSpecifying extends GuiAmountSpecifying<ContainerItemAm
 
 	@Override
 	protected int[] getIncrements() {
-		return new int[] {
-				1, 10, 64,
-		};
+		return new int[] {1, 10, 64};
+	}
+
+	@Override
+	protected int[] getMultipliers() {
+		return new int[] {2, 3, 5};
 	}
 
 	@Override

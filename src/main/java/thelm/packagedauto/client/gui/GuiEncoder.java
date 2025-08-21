@@ -115,8 +115,7 @@ public class GuiEncoder extends GuiContainerTileBase<ContainerEncoder> {
 
 	@Override
 	public int getItemAmountSpecificationLimit(Slot slot) {
-		int stackLimit = slot.getStack().getMaxStackSize();
-		return slot.slotNumber > 81 ? Math.max(stackLimit, 999) : stackLimit;
+		return slot.slotNumber > 81 ? 1000000000 : Math.min(slot.getStack().getMaxStackSize(), 1000000000);
 	}
 
 	@Override

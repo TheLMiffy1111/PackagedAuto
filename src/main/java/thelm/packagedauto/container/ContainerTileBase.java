@@ -1,5 +1,8 @@
 package thelm.packagedauto.container;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import it.unimi.dsi.fastutil.ints.Int2IntMap;
 import it.unimi.dsi.fastutil.ints.Int2IntRBTreeMap;
 import net.minecraft.entity.player.EntityPlayer;
@@ -157,9 +160,31 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 		return successful;
 	}
 
+	protected int dragCount = 0;
+	protected List<Slot> dragSlots = new ArrayList<>();
+
 	@Override
-	public ItemStack slotClick(int slotId, int mouseButton, ClickType clickType, EntityPlayer player) {
-		if(slotId >= 0) {
+	public ItemStack slotClick(int slotId, int clickSubtype, ClickType clickType, EntityPlayer player) {
+		if(clickType == ClickType.QUICK_CRAFT) {
+			if(clickSubtype == 1 && slotId >= 0) {
+				dragCount++;
+				Slot slot = inventorySlots.get(slotId);
+				if(slot instanceof SlotFalseCopy) {
+					dragSlots.add(slot);
+					return player.inventory.getItemStack();
+				}
+			}
+			else if(clickSubtype == 2 && !dragSlots.isEmpty()) {
+				ItemStack toPut = player.inventory.getItemStack().copy();
+				toPut.setCount(toPut.getCount()/dragCount);
+				for(Slot slot : dragSlots) {
+					slot.putStack(toPut.copy());
+				}
+				dragCount = 0;
+				dragSlots.clear();
+			}
+		}
+		else if(clickType != ClickType.CLONE && slotId >= 0) {
 			Slot slot = inventorySlots.get(slotId);
 			if(slot instanceof SlotFalseCopy) {
 				if(clickType == ClickType.QUICK_MOVE) {
@@ -168,12 +193,10 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 				else {
 					ItemStack toPut = player.inventory.getItemStack().copy();
 					ItemStack stack = slot.getStack().copy();
-					switch(mouseButton) {
-					case 0: {
+					if(clickSubtype == 0) {
 						slot.putStack(toPut);
-						break;
 					}
-					case 1: {
+					else if(clickSubtype == 1) {
 						if(stack.isEmpty()) {
 							if(!toPut.isEmpty()) {
 								toPut.setCount(1);
@@ -188,14 +211,12 @@ public class ContainerTileBase<TILE extends TileBase> extends Container {
 							stack.shrink(1);
 							slot.putStack(stack);
 						}
-						break;
-					}
 					}
 				}
 				return player.inventory.getItemStack();
 			}
 		}
-		return super.slotClick(slotId, mouseButton, clickType, player);
+		return super.slotClick(slotId, clickSubtype, clickType, player);
 	}
 
 	@Override

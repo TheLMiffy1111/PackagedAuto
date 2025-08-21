@@ -4,10 +4,12 @@ import java.io.IOException;
 
 import org.lwjgl.input.Keyboard;
 
+import com.google.common.primitives.Longs;
+
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiTextField;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.translation.I18n;
 import thelm.packagedauto.container.ContainerTileBase;
 
@@ -32,6 +34,8 @@ public abstract class GuiAmountSpecifying<C extends ContainerTileBase<?>> extend
 	protected abstract int getMaxAmount();
 
 	protected abstract int[] getIncrements();
+
+	protected abstract int[] getMultipliers();
 
 	@Override
 	protected ResourceLocation getBackgroundTexture() {
@@ -65,18 +69,19 @@ public abstract class GuiAmountSpecifying<C extends ContainerTileBase<?>> extend
 		});
 
 		int[] increments = getIncrements();
+		int[] multipliers = getMultipliers();
 		int xx = 7;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
-			String text = "+" + increment;
-			addButton(new ButtonIncrement(i, guiLeft+xx, guiTop+20, text));
+			int multiplier = multipliers[i];
+			addButton(new ButtonAmount(i, increment, multiplier, guiLeft+xx, guiTop+20));
 			xx += 34;
 		}
 		xx = 7;
 		for(int i = 0; i < 3; ++i) {
 			int increment = increments[i];
-			String text = "-" + increment;
-			addButton(new ButtonIncrement(i+3, guiLeft+xx, guiTop+ySize-20-7, text));
+			int multiplier = multipliers[i];
+			addButton(new ButtonAmount(i+3, increment, multiplier, guiLeft+xx, guiTop+ySize-20-7));
 			xx += 34;
 		}
 	}
@@ -120,21 +125,27 @@ public abstract class GuiAmountSpecifying<C extends ContainerTileBase<?>> extend
 		if(button instanceof ButtonCancel) {
 			close();
 		}
-		if(button instanceof ButtonIncrement) {
-			int increment = getIncrements()[button.id % 3];
-			onIncrementButtonClicked(increment * (button.id / 3 == 0 ? 1 : -1));
+		if(button instanceof ButtonAmount) {
+			onAmountButtonClicked(((ButtonAmount)button).increment, ((ButtonAmount)button).multiplier, button.id >= 3, isShiftKeyDown());
 		}
 	}
 
-	protected void onIncrementButtonClicked(int increment) {
-		int oldAmount = 0;
+	protected void onAmountButtonClicked(int increment, int multiplier, boolean inverse, boolean shiftDown) {
+		long oldAmount = 0;
 		try {
 			oldAmount = Integer.parseInt(amountField.getText());
 		}
 		catch(NumberFormatException e) {
 			// NO OP
 		}
-		int newAmount = MathHelper.clamp(oldAmount+increment, 0, getMaxAmount());
+		long newAmount;
+		if(!shiftDown) {
+			newAmount = !inverse ? oldAmount+increment : oldAmount-increment;
+		}
+		else {
+			newAmount = !inverse ? oldAmount*multiplier : oldAmount/multiplier;
+		}
+		newAmount = Longs.constrainToRange(newAmount, 0, getMaxAmount());
 		amountField.setText(String.valueOf(newAmount));
 	}
 
@@ -162,10 +173,26 @@ public abstract class GuiAmountSpecifying<C extends ContainerTileBase<?>> extend
 		}
 	}
 
-	static class ButtonIncrement extends GuiButton {
+	static class ButtonAmount extends GuiButton {
 
-		public ButtonIncrement(int buttonId, int x, int y, String text) {
-			super(buttonId, x, y, 34, 20, text);
+		int increment;
+		int multiplier;
+
+		public ButtonAmount(int buttonId, int increment, int multiplier, int x, int y) {
+			super(buttonId, x, y, 34, 20, "");
+			this.increment = increment;
+			this.multiplier = multiplier;
+		}
+
+		@Override
+		public void drawButton(Minecraft mc, int mouseX, int mouseY, float partialTicks) {
+			if(!isShiftKeyDown()) {
+				displayString = (id < 3 ? "+" : "-") + increment;
+			}
+			else {
+				displayString = (id < 3 ? "×" : "÷") + multiplier;
+			}
+			super.drawButton(mc, mouseX, mouseY, partialTicks);
 		}
 	}
 }

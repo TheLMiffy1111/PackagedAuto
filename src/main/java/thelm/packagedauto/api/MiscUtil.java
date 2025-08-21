@@ -22,8 +22,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 
 import io.netty.buffer.ByteBuf;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntRBTreeMap;
+import it.unimi.dsi.fastutil.objects.Object2LongLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
@@ -76,8 +76,7 @@ public class MiscUtil {
 	}
 
 	public static List<ItemStack> condenseStacks(List<ItemStack> stacks, boolean ignoreStackSize) {
-		Object2IntRBTreeMap<Triple<Item, Integer, NBTTagCompound>> map = new Object2IntRBTreeMap<>(
-				Comparator.comparing(triple->Triple.of(triple.getLeft().getRegistryName(), triple.getMiddle(), ""+triple.getRight())));
+		Object2LongLinkedOpenHashMap<Triple<Item, Integer, NBTTagCompound>> map = new Object2LongLinkedOpenHashMap<>();
 		for(ItemStack stack : stacks) {
 			if(stack.isEmpty()) {
 				continue;
@@ -89,26 +88,19 @@ public class MiscUtil {
 			map.addTo(triple, stack.getCount());
 		}
 		List<ItemStack> list = new ArrayList<>();
-		for(Object2IntMap.Entry<Triple<Item, Integer, NBTTagCompound>> entry : map.object2IntEntrySet()) {
+		for(Object2LongMap.Entry<Triple<Item, Integer, NBTTagCompound>> entry : map.object2LongEntrySet()) {
 			Triple<Item, Integer, NBTTagCompound> triple = entry.getKey();
-			int count = entry.getIntValue();
+			long count = entry.getLongValue();
 			Item item = triple.getLeft();
 			int meta = triple.getMiddle();
 			NBTTagCompound nbt = triple.getRight();
-			if(ignoreStackSize) {
-				ItemStack toAdd = new ItemStack(item, count, meta);
+			while(count > 0) {
+				ItemStack toAdd = new ItemStack(item, 1, meta);
 				toAdd.setTagCompound(nbt);
+				int limit = ignoreStackSize ? 1000000000 : item.getItemStackLimit(toAdd);
+				toAdd.setCount((int)Math.min(count, limit));
 				list.add(toAdd);
-			}
-			else {
-				while(count > 0) {
-					ItemStack toAdd = new ItemStack(item, 1, meta);
-					toAdd.setTagCompound(nbt);
-					int limit = item.getItemStackLimit(toAdd);
-					toAdd.setCount(Math.min(count, limit));
-					list.add(toAdd);
-					count -= limit;
-				}
+				count -= limit;
 			}
 		}
 		map.clear();
@@ -169,7 +161,7 @@ public class MiscUtil {
 			nbt.setShort("Count", (short)count);
 		}
 		else {
-			nbt.setInteger("Count", (short)count);
+			nbt.setInteger("Count", count);
 		}
 		return nbt;
 	}
