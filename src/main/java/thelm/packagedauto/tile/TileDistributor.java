@@ -126,15 +126,13 @@ public class TileDistributor extends TileBase implements ITickable, IPackageCraf
 				ItemStack stack = entry.getValue().copy();
 				EnumFacing dir = positions.get(entry.getIntKey()).direction();
 				IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, dir);
-				if(itemHandler != null) {
-					if(blocking && !MiscUtil.isEmpty(itemHandler)) {
-						return false;
-					}
-					if(!ItemHandlerHelper.insertItem(itemHandler, stack, true).isEmpty()) {
-						return false;
-					}
+				if(itemHandler == null) {
+					return false;
 				}
-				else {
+				if(blocking && !MiscUtil.isEmpty(itemHandler)) {
+					return false;
+				}
+				if(!ItemHandlerHelper.insertItem(itemHandler, stack, true).isEmpty()) {
 					return false;
 				}
 			}

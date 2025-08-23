@@ -46,6 +46,7 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.ItemHandlerHelper;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
+import thelm.packagedauto.api.IPackageProvidingMachine;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeList;
 import thelm.packagedauto.api.IRecipeListItem;
@@ -64,7 +65,7 @@ import thelm.packagedauto.item.ItemRecipeHolder;
 	@Optional.Interface(iface="appeng.api.networking.security.IActionHost", modid="appliedenergistics2"),
 	@Optional.Interface(iface="appeng.api.networking.crafting.ICraftingProvider", modid="appliedenergistics2")
 })
-public class TilePackager extends TileBase implements ITickable, ISettingsCloneable, IGridHost, IActionHost, ICraftingProvider {
+public class TilePackager extends TileBase implements ITickable, IPackageProvidingMachine, ISettingsCloneable, IGridHost, IActionHost, ICraftingProvider {
 
 	public static int energyCapacity = 5000;
 	public static int energyReq = 500;
@@ -147,6 +148,16 @@ public class TilePackager extends TileBase implements ITickable, ISettingsClonea
 				}
 			}
 		}
+	}
+
+	@Override
+	public ItemStack getPatternStack() {
+		return inventory.getStackInSlot(10);
+	}
+
+	@Override
+	public void setPatternStack(ItemStack stack) {
+		inventory.setInventorySlotContents(10, stack);
 	}
 
 	protected static Ingredient getIngredient(ItemStack stack) {

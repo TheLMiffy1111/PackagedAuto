@@ -47,6 +47,7 @@ import net.minecraftforge.items.IItemHandler;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageItem;
 import thelm.packagedauto.api.IPackagePattern;
+import thelm.packagedauto.api.IPackageProvidingMachine;
 import thelm.packagedauto.api.IRecipeInfo;
 import thelm.packagedauto.api.IRecipeList;
 import thelm.packagedauto.api.ISettingsCloneable;
@@ -65,7 +66,7 @@ import thelm.packagedauto.item.ItemRecipeHolder;
 	@Optional.Interface(iface="appeng.api.networking.security.IActionHost", modid="appliedenergistics2"),
 	@Optional.Interface(iface="appeng.api.networking.crafting.ICraftingProvider", modid="appliedenergistics2")
 })
-public class TileUnpackager extends TileBase implements ITickable, ISettingsCloneable, IGridHost, IActionHost, ICraftingProvider {
+public class TileUnpackager extends TileBase implements ITickable, IPackageProvidingMachine, ISettingsCloneable, IGridHost, IActionHost, ICraftingProvider {
 
 	public static int energyCapacity = 5000;
 	public static int energyUsage = 50;
@@ -117,6 +118,16 @@ public class TileUnpackager extends TileBase implements ITickable, ISettingsClon
 				}
 			}
 		}
+	}
+
+	@Override
+	public ItemStack getPatternStack() {
+		return inventory.getStackInSlot(9);
+	}
+
+	@Override
+	public void setPatternStack(ItemStack stack) {
+		inventory.setInventorySlotContents(9, stack);
 	}
 
 	protected void fillTrackers() {
@@ -196,10 +207,10 @@ public class TileUnpackager extends TileBase implements ITickable, ISettingsClon
 				if(!validSendTarget(tile, facing.getOpposite())) {
 					continue;
 				}
-				if(!tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
+				IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
+				if(itemHandler == null) {
 					continue;
 				}
-				IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
 				if(blocking && !MiscUtil.isEmpty(itemHandler)) {
 					continue;
 				}
@@ -241,11 +252,11 @@ public class TileUnpackager extends TileBase implements ITickable, ISettingsClon
 				trackerToEmpty.facing = null;
 				continue;
 			}
-			if(!tile.hasCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite())) {
+			IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
+			if(itemHandler == null) {
 				trackerToEmpty.facing = null;
 				continue;
 			}
-			IItemHandler itemHandler = tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, facing.getOpposite());
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 				ItemStack stack = trackerToEmpty.toSend.get(i);
 				ItemStack stackRem = MiscUtil.insertItem(itemHandler, stack, ordered, false);
