@@ -18,7 +18,7 @@ public class FluidPackageFillerItemHandler extends BaseItemHandler<FluidPackageF
 		return switch(index) {
 		case 1 -> false;
 		case 2 -> stack.getCapability(Capabilities.EnergyStorage.ITEM) != null;
-		default -> (blockEntity.isWorking ? !getStackInSlot(index).isEmpty() : true) && FluidUtil.getFluidHandler(stack).isPresent();
+		default -> (!blockEntity.isWorking || !getStackInSlot(index).isEmpty()) && FluidUtil.getFluidHandler(stack).isPresent();
 		};
 	}
 
