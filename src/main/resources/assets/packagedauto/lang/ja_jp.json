@@ -83,8 +83,6 @@
 
 	"volume.packagedauto.minecraft.fluid": "液体",
 
-	"amount.packagedauto.mb": "%smB",
-
 	"gui.packagedauto.item_amount_specifying": "アイテム個数",
 	"gui.packagedauto.volume_amount_specifying": "体積量 (mB)",
 
