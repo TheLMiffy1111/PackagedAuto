@@ -140,10 +140,10 @@ public class PackagedAutoConfig {
 		fluidPackageFillerEnergyCapacity = builder.defineInRange("energy_capacity", 5000, 0, Integer.MAX_VALUE);
 		builder.comment("How much total FE the Fluid Package Filler should use per operation.");
 		fluidPackageFillerEnergyReq = builder.defineInRange("energy_req", 500, 0, Integer.MAX_VALUE);
-		builder.comment("How many ticks should the Fluid Package Filler wait between each refresh.");
-		fluidPackageFillerRefreshInterval = builder.defineInRange("refresh_interval", 4, 1, 40);
 		builder.comment("How much FE/t maximum the Fluid Package Filler can use.");
 		fluidPackageFillerEnergyUsage = builder.defineInRange("energy_usage", 100, 0, Integer.MAX_VALUE);
+		builder.comment("How many ticks should the Fluid Package Filler wait between each refresh.");
+		fluidPackageFillerRefreshInterval = builder.defineInRange("refresh_interval", 4, 1, 40);
 		builder.pop();
 
 		serverSpec = builder.build();
