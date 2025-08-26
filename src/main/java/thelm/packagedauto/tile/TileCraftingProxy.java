@@ -87,9 +87,14 @@ public class TileCraftingProxy extends TileBase implements ITickable, IPackageCr
 
 	@Override
 	public boolean acceptPackage(IRecipeInfo recipeInfo, List<ItemStack> stacks, EnumFacing facing) {
+		return acceptPackage(recipeInfo, stacks, facing, false);
+	}
+
+	@Override
+	public boolean acceptPackage(IRecipeInfo recipeInfo, List<ItemStack> stacks, EnumFacing facing, boolean blocking) {
 		if(!isBusy()) {
 			IPackageCraftingMachine machine = (IPackageCraftingMachine)world.getTileEntity(target.blockPos());
-			if(machine.acceptPackage(recipeInfo, stacks, target.direction())) {
+			if(machine.acceptPackage(recipeInfo, stacks, target.direction(), blocking)) {
 				EnumFacing dir = target.direction();
 				Vec3d source = new Vec3d(pos).add(0.5, 0.5, 0.5);
 				Vec3d delta = new Vec3d(target.blockPos().subtract(pos)).add(new Vec3d(dir.getDirectionVec()).scale(0.5));

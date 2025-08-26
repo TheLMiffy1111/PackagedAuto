@@ -1,2 +1,1 @@
-Use null check instead of hasCapability when getting item handlers  
-Add the IPackageProvidingMachine interface  
+Add optional blocking argument to crafting machines, allowing blocking mode to properly work with distributors  

@@ -103,13 +103,13 @@ public class TileDistributor extends TileBase implements ITickable, IPackageCraf
 
 	@Override
 	public boolean acceptPackage(IRecipeInfo recipeInfo, List<ItemStack> stacks, EnumFacing facing) {
+		return acceptPackage(recipeInfo, stacks, facing, false);
+	}
+
+	@Override
+	public boolean acceptPackage(IRecipeInfo recipeInfo, List<ItemStack> stacks, EnumFacing facing, boolean blocking) {
 		if(!isBusy() && recipeInfo instanceof IRecipeInfoProcessingPositioned) {
 			IRecipeInfoProcessingPositioned recipe = (IRecipeInfoProcessingPositioned)recipeInfo;
-			boolean blocking = false;
-			TileEntity unpackager = world.getTileEntity(pos.offset(facing));
-			if(unpackager instanceof TileUnpackager) {
-				blocking = ((TileUnpackager)unpackager).blocking;
-			}
 			Int2ObjectMap<ItemStack> matrix = recipe.getMatrix();
 			if(!positions.keySet().containsAll(matrix.keySet())) {
 				return false;

@@ -188,7 +188,7 @@ public class TileUnpackager extends TileBase implements ITickable, IPackageProvi
 				IPackageCraftingMachine machine = (IPackageCraftingMachine)tile;
 				for(PackageTracker tracker : trackers) {
 					if(tracker.isFilled() && tracker.recipe != null && tracker.recipe.getRecipeType().hasMachine()) {
-						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), facing.getOpposite())) {
+						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), facing.getOpposite(), blocking)) {
 							tracker.clearRecipe();
 							roundRobinIndex = (roundRobinIndex+1) % 6;
 							markDirty();
