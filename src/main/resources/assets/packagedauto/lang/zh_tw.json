@@ -36,7 +36,7 @@
 	"block.packagedauto.crafting_proxy.no_markers": "無可使用的代理標記",
 	"block.packagedauto.crafting_proxy.empty": "沒有目標",
 	"block.packagedauto.crafter": "封包合成器",
-	"block.packagedauto.fluid_package_filler": "液體封包填充機",
+	"block.packagedauto.fluid_package_filler": "流體封包填充機",
 	"block.packagedauto.fluid_package_filler.redstone": "以紅石訊號啟動",
 	"block.packagedauto.packaging_provider": "ME 封包供應器",
 	"block.packagedauto.packaging_provider.direct.false": "不供應徑直配方",
@@ -81,7 +81,7 @@
 	"recipe.packagedauto.crafting": "合成",
 	"recipe.packagedauto.crafting.short": "合成",
 
-	"volume.packagedauto.minecraft.fluid": "液體",
+	"volume.packagedauto.minecraft.fluid": "流體",
 
 	"gui.packagedauto.item_amount_specifying": "物品數量",
 	"gui.packagedauto.volume_amount_specifying": "體積量以mB為單位",
@@ -101,6 +101,6 @@
 	"jei.category.packagedauto.packaging": "封包",
 	"jei.category.packagedauto.package_processing": "封包處理",
 	"jei.category.packagedauto.package_contents": "封包內容",
-	"jei.category.packagedauto.fluid_package_filling": "液體封包填充",
-	"jei.category.packagedauto.fluid_package_contents": "液體封包內容"
+	"jei.category.packagedauto.fluid_package_filling": "流體封包填充",
+	"jei.category.packagedauto.fluid_package_contents": "流體封包內容"
 }
