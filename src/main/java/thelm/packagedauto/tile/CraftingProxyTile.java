@@ -71,9 +71,14 @@ public class CraftingProxyTile extends BaseTile implements IPackageCraftingMachi
 
 	@Override
 	public boolean acceptPackage(IPackageRecipeInfo recipeInfo, List<ItemStack> stacks, Direction direction) {
+		return acceptPackage(recipeInfo, stacks, direction, false);
+	}
+
+	@Override
+	public boolean acceptPackage(IPackageRecipeInfo recipeInfo, List<ItemStack> stacks, Direction direction, boolean blocking) {
 		if(!isBusy()) {
 			IPackageCraftingMachine machine = (IPackageCraftingMachine)level.getBlockEntity(target.blockPos());
-			if(machine.acceptPackage(recipeInfo, stacks, target.direction())) {
+			if(machine.acceptPackage(recipeInfo, stacks, target.direction(), blocking)) {
 				Direction dir = target.direction();
 				Vector3d source = Vector3d.atCenterOf(worldPosition);
 				Vector3d delta = Vector3d.atLowerCornerOf(target.blockPos().subtract(worldPosition)).add(Vector3d.atLowerCornerOf(dir.getNormal()).scale(0.5));
