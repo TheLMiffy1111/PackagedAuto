@@ -22,7 +22,7 @@
 		{
 			"type": "patchouli:text",
 			"title": "Usage (cont.)",
-			"text": "If placed next to an $(l:core/unpackager)Unpackager/$, the $(item)Positioned Package Distributor/$ will respect its blocking mode settings; if used with a $(l:recipe/crafting_proxy)Package Crafting Machine Proxy/$, blocking mode will be off.$(p)If any target inventories become invalid, the distributor will eject all pending items on top of itself."
+			"text": "The $(item)Positioned Package Distributor/$ respects blocking mode settings of the origin $(l:core/unpackager)Unpackager/$.$(p)If any target inventories become invalid, the distributor will eject all pending items on top of itself."
 		},
 		{
 			"type": "patchouli:text",

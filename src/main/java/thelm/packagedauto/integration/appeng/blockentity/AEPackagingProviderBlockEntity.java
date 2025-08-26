@@ -244,7 +244,7 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 					Collections.rotate(directions, roundRobinIndex);
 					for(Direction direction : Direction.values()) {
 						if(level.getBlockEntity(worldPosition.relative(direction)) instanceof IPackageCraftingMachine machine) {
-							if(!machine.isBusy() && machine.acceptPackage(recipe, Lists.transform(recipe.getInputs(), ItemStack::copy), direction.getOpposite())) {
+							if(!machine.isBusy() && machine.acceptPackage(recipe, Lists.transform(recipe.getInputs(), ItemStack::copy), direction.getOpposite(), blocking)) {
 								energyService.extractAEPower(request, Actionable.MODULATE, PowerMultiplier.CONFIG);
 								roundRobinIndex = (roundRobinIndex+1) % 6;
 								return true;
