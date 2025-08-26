@@ -71,9 +71,14 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 
 	@Override
 	public boolean acceptPackage(IPackageRecipeInfo recipeInfo, List<ItemStack> stacks, Direction direction) {
+		return acceptPackage(recipeInfo, stacks, direction, false);
+	}
+
+	@Override
+	public boolean acceptPackage(IPackageRecipeInfo recipeInfo, List<ItemStack> stacks, Direction direction, boolean blocking) {
 		if(!isBusy()) {
 			IPackageCraftingMachine machine = (IPackageCraftingMachine)level.getBlockEntity(target.blockPos());
-			if(machine.acceptPackage(recipeInfo, stacks, target.direction())) {
+			if(machine.acceptPackage(recipeInfo, stacks, target.direction(), blocking)) {
 				Direction dir = target.direction();
 				Vec3 source = Vec3.atCenterOf(worldPosition);
 				Vec3 delta = Vec3.atLowerCornerOf(target.blockPos().subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getNormal()).scale(0.5));

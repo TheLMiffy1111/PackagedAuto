@@ -91,11 +91,12 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 
 	@Override
 	public boolean acceptPackage(IPackageRecipeInfo recipeInfo, List<ItemStack> stacks, Direction direction) {
+		return acceptPackage(recipeInfo, stacks, direction, false);
+	}
+
+	@Override
+	public boolean acceptPackage(IPackageRecipeInfo recipeInfo, List<ItemStack> stacks, Direction direction, boolean blocking) {
 		if(!isBusy() && recipeInfo instanceof IPositionedProcessingPackageRecipeInfo recipe) {
-			boolean blocking = false;
-			if(level.getBlockEntity(worldPosition.relative(direction)) instanceof UnpackagerBlockEntity unpackager) {
-				blocking = unpackager.blocking;
-			}
 			Int2ObjectMap<ItemStack> matrix = recipe.getMatrix();
 			if(!positions.keySet().containsAll(matrix.keySet())) {
 				return false;
