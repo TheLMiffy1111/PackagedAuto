@@ -9,5 +9,9 @@ public interface IPackageCraftingMachine {
 
 	boolean acceptPackage(IPackageRecipeInfo recipeInfo, List<ItemStack> stacks, Direction direction);
 
+	default boolean acceptPackage(IPackageRecipeInfo recipeInfo, List<ItemStack> stacks, Direction direction, boolean blocking) {
+		return acceptPackage(recipeInfo, stacks, direction);
+	}
+
 	boolean isBusy();
 }

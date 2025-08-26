@@ -1,3 +1,1 @@
-Fix zh_tw "fluid" translation  
-Remove unnecessary fluid package filler item condition  
-Revert adding mB translation key  
+Add optional blocking argument to crafting machines, allowing blocking mode to properly work with distributors  

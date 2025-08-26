@@ -154,7 +154,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 			if(level.getBlockEntity(worldPosition.relative(direction)) instanceof IPackageCraftingMachine machine) {
 				for(PackageTracker tracker : trackers) {
 					if(tracker.isFilled() && tracker.recipe != null && tracker.recipe.getRecipeType().hasMachine()) {
-						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), direction.getOpposite())) {
+						if(!machine.isBusy() && machine.acceptPackage(tracker.recipe, Lists.transform(tracker.recipe.getInputs(), ItemStack::copy), direction.getOpposite(), blocking)) {
 							tracker.clearRecipe();
 							roundRobinIndex = (roundRobinIndex+1) % 6;
 							setChanged();
