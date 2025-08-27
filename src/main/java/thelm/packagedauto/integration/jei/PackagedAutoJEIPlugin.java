@@ -11,6 +11,7 @@ import mezz.jei.api.registration.IGuiHandlerRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
+import mezz.jei.api.registration.ISubtypeRegistration;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -29,6 +30,8 @@ import thelm.packagedauto.integration.jei.category.PackageContentsCategory;
 import thelm.packagedauto.integration.jei.category.PackageProcessingCategory;
 import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
 import thelm.packagedauto.integration.jei.category.PackagingCategory;
+import thelm.packagedauto.item.PackageItem;
+import thelm.packagedauto.item.VolumePackageItem;
 
 @JeiPlugin
 public class PackagedAutoJEIPlugin implements IModPlugin {
@@ -42,6 +45,11 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 	@Override
 	public ResourceLocation getPluginUid() {
 		return UID;
+	}
+
+	@Override
+	public void registerItemSubtypes(ISubtypeRegistration registration) {
+		registration.useNbtForSubtypes(PackageItem.INSTANCE, VolumePackageItem.INSTANCE);
 	}
 
 	@Override
