@@ -2,6 +2,7 @@ package thelm.packagedauto.integration.jei.category;
 
 import java.util.List;
 
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
@@ -60,7 +61,10 @@ public class PackagingCategory implements IRecipeCategory<IPackagePattern> {
 	}
 
 	@Override
-	public void setIngredients(IPackagePattern recipe, IIngredients ingredients) {}
+	public void setIngredients(IPackagePattern recipe, IIngredients ingredients) {
+		ingredients.setInputs(VanillaTypes.ITEM, recipe.getInputs());
+		ingredients.setOutput(VanillaTypes.ITEM, recipe.getOutput());
+	}
 
 	@Override
 	public void setRecipe(IRecipeLayout recipeLayout, IPackagePattern recipe, IIngredients ingredients) {
@@ -77,5 +81,6 @@ public class PackagingCategory implements IRecipeCategory<IPackagePattern> {
 		}
 		stacks.init(9, false, 90, 18);
 		stacks.set(9, recipe.getOutput());
+		stacks.set(ingredients);
 	}
 }

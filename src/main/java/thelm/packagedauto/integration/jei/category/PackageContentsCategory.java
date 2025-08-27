@@ -1,7 +1,6 @@
 package thelm.packagedauto.integration.jei.category;
 
-import java.util.List;
-
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
@@ -60,23 +59,22 @@ public class PackageContentsCategory implements IRecipeCategory<IPackagePattern>
 	}
 
 	@Override
-	public void setIngredients(IPackagePattern recipe, IIngredients ingredients) {}
+	public void setIngredients(IPackagePattern recipe, IIngredients ingredients) {
+		ingredients.setInput(VanillaTypes.ITEM, recipe.getOutput());
+		ingredients.setOutputs(VanillaTypes.ITEM, recipe.getInputs());
+	}
 
 	@Override
 	public void setRecipe(IRecipeLayout recipeLayout, IPackagePattern recipe, IIngredients ingredients) {
 		IGuiItemStackGroup stacks = recipeLayout.getItemStacks();
-		List<ItemStack> inputs = recipe.getInputs();
 		stacks.init(0, true, 0, 18);
-		stacks.set(0, recipe.getOutput());
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
 				int index = i*3+j;
 				int slot = 1+index;
 				stacks.init(slot, false, 50+j*18, i*18);
-				if(index < inputs.size()) {
-					stacks.set(slot, inputs.get(index));
-				}
 			}
 		}
+		stacks.set(ingredients);
 	}
 }

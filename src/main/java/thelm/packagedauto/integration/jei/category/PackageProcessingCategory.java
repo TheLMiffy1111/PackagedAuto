@@ -1,9 +1,9 @@
 package thelm.packagedauto.integration.jei.category;
 
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
@@ -65,20 +65,18 @@ public class PackageProcessingCategory implements IRecipeCategory<IPackageRecipe
 	}
 
 	@Override
-	public void setIngredients(IPackageRecipeInfo recipe, IIngredients ingredients) {}
+	public void setIngredients(IPackageRecipeInfo recipe, IIngredients ingredients) {
+		ingredients.setInputs(VanillaTypes.ITEM, Lists.transform(recipe.getPatterns(), IPackagePattern::getOutput));
+		ingredients.setOutputs(VanillaTypes.ITEM, recipe.getOutputs());
+	}
 
 	@Override
 	public void setRecipe(IRecipeLayout recipeLayout, IPackageRecipeInfo recipe, IIngredients ingredients) {
 		IGuiItemStackGroup stacks = recipeLayout.getItemStacks();
-		List<IPackagePattern> patterns = recipe.getPatterns();
-		List<ItemStack> outputs = recipe.getOutputs();
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
 				int index = i*3+j;
 				stacks.init(index, true, j*18, 10+i*18);
-				if(index < patterns.size()) {
-					stacks.set(index, patterns.get(index).getOutput());
-				}
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
@@ -86,11 +84,9 @@ public class PackageProcessingCategory implements IRecipeCategory<IPackageRecipe
 				int index = i*3+j;
 				int slot = 9+index;
 				stacks.init(slot, false, 86+j*18, 10+i*18);
-				if(index < outputs.size()) {
-					stacks.set(slot, outputs.get(index));
-				}
 			}
 		}
+		stacks.set(ingredients);
 	}
 
 	@Override

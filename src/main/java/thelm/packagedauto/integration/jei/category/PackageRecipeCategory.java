@@ -1,11 +1,13 @@
 package thelm.packagedauto.integration.jei.category;
 
-import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
@@ -70,31 +72,29 @@ public class PackageRecipeCategory implements IRecipeCategory<IPackageRecipeInfo
 	}
 
 	@Override
-	public void setIngredients(IPackageRecipeInfo recipe, IIngredients ingredients) {}
+	public void setIngredients(IPackageRecipeInfo recipe, IIngredients ingredients) {
+		Int2ObjectMap<ItemStack> map = recipe.getEncoderStacks();
+		map.defaultReturnValue(ItemStack.EMPTY);
+		ingredients.setInputs(VanillaTypes.ITEM, IntStream.range(0, 81).mapToObj(map::get).collect(Collectors.toList()));
+		ingredients.setOutputs(VanillaTypes.ITEM, recipe.getOutputs());
+	}
 
 	@Override
 	public void setRecipe(IRecipeLayout recipeLayout, IPackageRecipeInfo recipe, IIngredients ingredients) {
 		IGuiItemStackGroup stacks = recipeLayout.getItemStacks();
 		IPackageRecipeType recipeType = recipe.getRecipeType();
-		Int2ObjectMap<ItemStack> map = recipe.getEncoderStacks();
-		List<ItemStack> outputs = recipe.getOutputs();
 		for(int i = 0; i < 9; ++i) {
 			for(int j = 0; j < 9; ++j) {
 				int index = i*9+j;
 				stacks.init(index, true, j*18, 10+i*18);
 				stacks.setBackground(index, new ColoredSlot(recipeType.getSlotColor(index)));
-				if(map.containsKey(index)) {
-					stacks.set(index, map.get(index));
-				}
 			}
 		}
 		for(int index = 0; index < 9; ++index) {
 			int slot = 81+index;
 			stacks.init(slot, false, index*18, 190);
-			if(index < outputs.size()) {
-				stacks.set(slot, outputs.get(index));
-			}
 		}
+		stacks.set(ingredients);
 	}
 
 	@Override
