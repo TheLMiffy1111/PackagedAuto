@@ -1,6 +1,7 @@
 package thelm.packagedauto.integration.jei.category;
 
 import mezz.jei.api.ingredients.IIngredients;
+import mezz.jei.api.ingredients.VanillaTypes;
 import mezz.jei.api.recipe.IRecipeWrapper;
 import thelm.packagedauto.api.IPackagePattern;
 
@@ -13,5 +14,8 @@ public class PackagingWrapper implements IRecipeWrapper {
 	}
 
 	@Override
-	public void getIngredients(IIngredients ingredients) {}
+	public void getIngredients(IIngredients ingredients) {
+		ingredients.setInputs(VanillaTypes.ITEM, pattern.getInputs());
+		ingredients.setOutput(VanillaTypes.ITEM, pattern.getOutput());
+	}
 }

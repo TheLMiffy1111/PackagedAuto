@@ -1,7 +1,5 @@
 package thelm.packagedauto.integration.jei.category;
 
-import java.util.List;
-
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
 import mezz.jei.api.gui.IGuiItemStackGroup;
@@ -53,17 +51,13 @@ public class PackagingCategory implements IRecipeCategory<PackagingWrapper> {
 	@Override
 	public void setRecipe(IRecipeLayout recipeLayout, PackagingWrapper recipeWrapper, IIngredients ingredients) {
 		IGuiItemStackGroup stacks = recipeLayout.getItemStacks();
-		List<ItemStack> inputs = recipeWrapper.pattern.getInputs();
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
 				int index = i*3+j;
 				stacks.init(index, true, j*18, i*18);
-				if(index < inputs.size()) {
-					stacks.set(index, inputs.get(index));
-				}
 			}
 		}
 		stacks.init(9, false, 90, 18);
-		stacks.set(9, recipeWrapper.pattern.getOutput());
+		stacks.set(ingredients);
 	}
 }

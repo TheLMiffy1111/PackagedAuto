@@ -8,6 +8,7 @@ import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.IJeiRuntime;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.IModRegistry;
+import mezz.jei.api.ISubtypeRegistry;
 import mezz.jei.api.JEIPlugin;
 import mezz.jei.api.recipe.IRecipeCategory;
 import mezz.jei.api.recipe.IRecipeCategoryRegistration;
@@ -24,6 +25,7 @@ import thelm.packagedauto.integration.jei.category.PackageContentsCategory;
 import thelm.packagedauto.integration.jei.category.PackageProcessingCategory;
 import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
 import thelm.packagedauto.integration.jei.category.PackagingCategory;
+import thelm.packagedauto.item.ItemPackage;
 
 @JEIPlugin
 public class PackagedAutoJEIPlugin implements IModPlugin {
@@ -32,6 +34,11 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 
 	public static IJeiRuntime jeiRuntime;
 	private static List<String> allCategories;
+
+	@Override
+	public void registerItemSubtypes(ISubtypeRegistry registry) {
+		registry.useNbtForSubtypes(ItemPackage.INSTANCE);
+	}
 
 	@Override
 	public void registerCategories(IRecipeCategoryRegistration registry) {

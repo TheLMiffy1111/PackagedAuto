@@ -1,7 +1,5 @@
 package thelm.packagedauto.integration.jei.category;
 
-import java.util.List;
-
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
 import mezz.jei.api.gui.IGuiItemStackGroup;
@@ -10,7 +8,6 @@ import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.IRecipeCategory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.text.translation.I18n;
-import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.block.BlockUnpackager;
 import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
 
@@ -54,15 +51,10 @@ public class PackageProcessingCategory implements IRecipeCategory<PackageProcess
 	@Override
 	public void setRecipe(IRecipeLayout recipeLayout, PackageProcessingWrapper recipeWrapper, IIngredients ingredients) {
 		IGuiItemStackGroup stacks = recipeLayout.getItemStacks();
-		List<IPackagePattern> patterns = recipeWrapper.recipe.getPatterns();
-		List<ItemStack> outputs = recipeWrapper.recipe.getOutputs();
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
 				int index = i*3+j;
 				stacks.init(index, true, j*18, 10+i*18);
-				if(index < patterns.size()) {
-					stacks.set(index, patterns.get(index).getOutput());
-				}
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
@@ -70,10 +62,8 @@ public class PackageProcessingCategory implements IRecipeCategory<PackageProcess
 				int index = i*3+j;
 				int slot = 9+index;
 				stacks.init(slot, false, 86+j*18, 10+i*18);
-				if(index < outputs.size()) {
-					stacks.set(slot, outputs.get(index));
-				}
 			}
 		}
+		stacks.set(ingredients);
 	}
 }

@@ -1,9 +1,7 @@
 package thelm.packagedauto.integration.jei.category;
 
 import java.awt.Color;
-import java.util.List;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import mezz.jei.api.IGuiHelper;
 import mezz.jei.api.gui.IDrawable;
 import mezz.jei.api.gui.IGuiItemStackGroup;
@@ -61,25 +59,18 @@ public class PackageRecipeCategory implements IRecipeCategory<PackageRecipeWrapp
 	public void setRecipe(IRecipeLayout recipeLayout, PackageRecipeWrapper recipeWrapper, IIngredients ingredients) {
 		IGuiItemStackGroup stacks = recipeLayout.getItemStacks();
 		IRecipeType recipeType = recipeWrapper.recipe.getRecipeType();
-		Int2ObjectMap<ItemStack> map = recipeWrapper.recipe.getEncoderStacks();
-		List<ItemStack> outputs = recipeWrapper.recipe.getOutputs();
 		for(int i = 0; i < 9; ++i) {
 			for(int j = 0; j < 9; ++j) {
 				int index = i*9+j;
 				stacks.init(index, true, j*18, 10+i*18);
 				stacks.setBackground(index, new ColoredSlot(recipeType.getSlotColor(index)));
-				if(map.containsKey(index)) {
-					stacks.set(index, map.get(index));
-				}
 			}
 		}
 		for(int index = 0; index < 9; ++index) {
 			int slot = 81+index;
 			stacks.init(slot, false, index*18, 190);
-			if(index < outputs.size()) {
-				stacks.set(slot, outputs.get(index));
-			}
 		}
+		stacks.set(ingredients);
 	}
 
 	class ColoredSlot implements IDrawable {
