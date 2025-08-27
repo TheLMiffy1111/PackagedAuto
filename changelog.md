@@ -1,1 +1,1 @@
-Add optional blocking argument to crafting machines, allowing blocking mode to properly work with distributors  
+Register JEI subtype interpreters for packages  
