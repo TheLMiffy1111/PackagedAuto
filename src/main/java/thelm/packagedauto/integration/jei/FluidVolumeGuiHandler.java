@@ -21,6 +21,7 @@ public class FluidVolumeGuiHandler implements IGuiContainerHandler<AbstractConta
 		this.ingredientManager = ingredientManager;
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	public Optional<IClickableIngredient<?>> getClickableIngredientUnderMouse(AbstractContainerScreen<?> containerScreen, double mouseX, double mouseY) {
 		if(containerScreen.getSlotUnderMouse() instanceof FalseCopyVolumeSlot volumeSlot) {
