@@ -43,6 +43,7 @@ import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.api.PackagedAutoApi;
+import thelm.packagedauto.recipe.OrderedProcessingPackageRecipeType;
 
 public class MiscHelper implements IMiscHelper {
 
@@ -310,18 +311,18 @@ public class MiscHelper implements IMiscHelper {
 
 	@Override
 	public IPackageRecipeInfo readRecipe(CompoundNBT nbt) {
-		IPackageRecipeType recipeType = PackagedAutoApi.instance().getRecipeType(new ResourceLocation(nbt.getString("RecipeType")));
-		if(recipeType != null) {
-			IPackageRecipeInfo recipe = RECIPE_CACHE.getIfPresent(nbt);
-			if(recipe != null) {
-				return recipe;
-			}
-			recipe = recipeType.getNewRecipeInfo();
-			recipe.read(nbt);
-			RECIPE_CACHE.put(nbt, recipe);
+		IPackageRecipeInfo recipe = RECIPE_CACHE.getIfPresent(nbt);
+		if(recipe != null) {
 			return recipe;
 		}
-		return null;
+		IPackageRecipeType recipeType = PackagedAutoApi.instance().getRecipeType(new ResourceLocation(nbt.getString("RecipeType")));
+		if(recipeType == null) {
+			recipeType = OrderedProcessingPackageRecipeType.INSTANCE;
+		}
+		recipe = recipeType.getNewRecipeInfo();
+		recipe.read(nbt);
+		RECIPE_CACHE.put(nbt, recipe);
+		return recipe;
 	}
 
 	@Override

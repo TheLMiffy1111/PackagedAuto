@@ -1,2 +1,1 @@
-Register JEI subtype interpreters for packages  
-Use the setIngredients method in JEI categories  
+Fallback to attempt reading recipes with ordered processing if recipe type is not found  
