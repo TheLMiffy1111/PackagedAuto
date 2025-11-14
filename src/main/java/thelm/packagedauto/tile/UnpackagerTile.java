@@ -479,11 +479,11 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity, ISe
 		}
 
 		public boolean isEmpty() {
-			return recipe == null || !recipe.isValid();
+			return recipe == null;
 		}
 
 		public void setupToSend() {
-			if(isEmpty() || recipe.getRecipeType().hasMachine() || !toSend.isEmpty()) {
+			if(isEmpty() || !recipe.isValid() || recipe.getRecipeType().hasMachine() || !toSend.isEmpty()) {
 				return;
 			}
 			toSend.addAll(Lists.transform(recipe.getInputs(), ItemStack::copy));
@@ -491,15 +491,17 @@ public class UnpackagerTile extends BaseTile implements ITickableTileEntity, ISe
 
 		public void read(CompoundNBT nbt) {
 			clearRecipe();
-			CompoundNBT tag = nbt.getCompound("Recipe");
-			IPackageRecipeInfo recipe = MiscHelper.INSTANCE.readRecipe(tag);
-			if(recipe != null) {
-				this.recipe = recipe;
-				amount = nbt.getByte("Amount");
-				received.size(amount);
-				byte[] receivedArray = nbt.getByteArray("Received");
-				for(int i = 0; i < received.size(); ++i) {
-					received.set(i, receivedArray[i] != 0);
+			if(nbt.contains("Recipe")) {
+				CompoundNBT tag = nbt.getCompound("Recipe");
+				IPackageRecipeInfo recipe = MiscHelper.INSTANCE.readRecipe(tag);
+				if(recipe != null) {
+					this.recipe = recipe;
+					amount = nbt.getByte("Amount");
+					received.size(amount);
+					byte[] receivedArray = nbt.getByteArray("Received");
+					for(int i = 0; i < received.size(); ++i) {
+						received.set(i, receivedArray[i] != 0);
+					}
 				}
 			}
 			MiscHelper.INSTANCE.loadAllItems(nbt.getList("ToSend", 10), toSend);
