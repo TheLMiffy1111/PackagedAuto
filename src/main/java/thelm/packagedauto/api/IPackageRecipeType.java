@@ -22,7 +22,7 @@ public interface IPackageRecipeType {
 
 	static final Codec<IPackageRecipeType> CODEC = ResourceLocation.CODEC.comapFlatMap(
 			DataResult.partialGet(PackagedAutoApi.instance()::getRecipeType, ()->"Unknown recipe type "), IPackageRecipeType::getName).
-			orElse(PackagedAutoApi.instance().getRecipeType(ResourceLocation.parse("packagedauto:processing")));
+			orElse(PackagedAutoApi.instance().getRecipeType(ResourceLocation.parse("packagedauto:ordered_processing")));
 	static final StreamCodec<ByteBuf, IPackageRecipeType> STREAM_CODEC = ResourceLocation.STREAM_CODEC.
 			map(PackagedAutoApi.instance()::getRecipeType, IPackageRecipeType::getName);
 

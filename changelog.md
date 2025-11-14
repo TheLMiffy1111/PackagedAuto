@@ -1,1 +1,1 @@
-Register JEI subtype interpreters for packages  
+Change fallback recipe type to ordered processing  
