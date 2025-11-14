@@ -278,18 +278,18 @@ public class MiscUtil {
 	}
 
 	public static IRecipeInfo readRecipeFromNBT(NBTTagCompound nbt) {
-		IRecipeType recipeType = RecipeTypeRegistry.getRecipeType(new ResourceLocation(nbt.getString("RecipeType")));
-		if(recipeType != null) {
-			IRecipeInfo recipe = RECIPE_CACHE.getIfPresent(nbt);
-			if(recipe != null) {
-				return recipe;
-			}
-			recipe = recipeType.getNewRecipeInfo();
-			recipe.readFromNBT(nbt);
-			RECIPE_CACHE.put(nbt, recipe);
+		IRecipeInfo recipe = RECIPE_CACHE.getIfPresent(nbt);
+		if(recipe != null) {
 			return recipe;
 		}
-		return null;
+		IRecipeType recipeType = RecipeTypeRegistry.getRecipeType(new ResourceLocation(nbt.getString("RecipeType")));
+		if(recipeType == null) {
+			recipeType = RecipeTypeRegistry.getRecipeType(new ResourceLocation("packagedauto:processing_ordered"));
+		}
+		recipe = recipeType.getNewRecipeInfo();
+		recipe.readFromNBT(nbt);
+		RECIPE_CACHE.put(nbt, recipe);
+		return recipe;
 	}
 
 	public static NBTTagList writeRecipeListToNBT(NBTTagList tagList, List<IRecipeInfo> recipes) {
