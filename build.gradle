@@ -4,7 +4,7 @@ plugins {
 	id "idea"
 	id "maven-publish"
 	id "com.crystaelix.blossom" version "1.3.2"
-	id "me.modmuss50.mod-publish-plugin" version "1.0.0"
+	id "me.modmuss50.mod-publish-plugin" version "1.1.0"
 }
 
 repositories {
@@ -103,7 +103,7 @@ dependencies {
 	// Minecraft
 	minecraft "com.mojang:minecraft:1.12.2"
 	mappings "de.oceanlabs.mcp:mcp_stable:39-1.12"
-	legacyForge "net.minecraftforge:forge:1.12.2-14.23.5.2860"
+	legacyForge "net.minecraftforge:forge:1.12.2-14.23.5.2864"
 
 	// Dependencies
 	modImplementation "mezz.jei:jei_1.12.2:4.16.1.1013"
@@ -121,7 +121,7 @@ dependencies {
 	implementation("zone.rong:mixinbooter:10.7") {transitive = false}
 	modImplementation "curse.maven:reid-629017:6761278"
 	modImplementation "curse.maven:vintagefix-871198:6609247"
-	modImplementation "curse.maven:lolasm-460609:6333774"
+	modImplementation "curse.maven:lolasm-460609:7267368"
 }
 
 def replacements = [
