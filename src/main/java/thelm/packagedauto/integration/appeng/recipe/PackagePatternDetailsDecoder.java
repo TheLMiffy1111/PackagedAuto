@@ -32,19 +32,19 @@ public class PackagePatternDetailsDecoder implements IPatternDetailsDecoder {
 			case PACKAGE -> {
 				IPackageRecipeInfo recipe = what.get(PackagedAutoDataComponents.RECIPE);
 				int index = what.get(PackagedAutoDataComponents.PACKAGE_INDEX);
-				if(recipe.isValid() && recipe.validPatternIndex(index)) {
+				if(recipe.isPackageable() && recipe.validPatternIndex(index)) {
 					return new PackageCraftingPatternDetails(recipe.getPatterns().get(index), level.registryAccess());
 				}
 			}
 			case RECIPE -> {
 				IPackageRecipeInfo recipe = what.get(PackagedAutoDataComponents.RECIPE);
-				if(recipe.isValid()) {
+				if(recipe.isCraftable()) {
 					return new RecipeCraftingPatternDetails(recipe, level.registryAccess());
 				}
 			}
 			case DIRECT -> {
 				IPackageRecipeInfo recipe = what.get(PackagedAutoDataComponents.RECIPE);
-				if(recipe.isValid()) {
+				if(recipe.isCraftable()) {
 					return new DirectCraftingPatternDetails(recipe, level.registryAccess());
 				}
 			}

@@ -1,2 +1,1 @@
-Change fallback recipe type to ordered processing  
-Make invalid recipes not count as empty in unpackager trackers  
+Use better validity checks in core recipe handling  

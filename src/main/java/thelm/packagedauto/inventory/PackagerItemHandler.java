@@ -92,7 +92,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 		ItemStack listStack = getStackInSlot(10);
 		if(listStack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
 			listStack.get(PackagedAutoDataComponents.RECIPE_LIST).stream().
-			filter(IPackageRecipeInfo::isValid).forEach(recipe->{
+			filter(IPackageRecipeInfo::isPackageable).forEach(recipe->{
 				recipe.getPatterns().forEach(blockEntity.patternList::add);
 				recipe.getExtraPatterns().forEach(blockEntity.patternList::add);
 			});
@@ -100,7 +100,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 		else if(MiscHelper.INSTANCE.isPackage(listStack)) {
 			IPackageRecipeInfo recipe = listStack.get(PackagedAutoDataComponents.RECIPE);
 			int index = listStack.get(PackagedAutoDataComponents.PACKAGE_INDEX);
-			if(recipe.isValid() && recipe.validPatternIndex(index)) {
+			if(recipe.isPackageable() && recipe.validPatternIndex(index)) {
 				blockEntity.patternList.add(recipe.getPatterns().get(index));
 			}
 		}

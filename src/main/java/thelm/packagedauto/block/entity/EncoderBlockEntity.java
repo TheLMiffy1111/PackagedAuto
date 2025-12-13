@@ -118,7 +118,7 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 				if(!clear && !recipeList.isEmpty()) {
 					IPackageRecipeInfo recipe = recipeList.get(0);
 					inv.recipeType = recipe.getRecipeType();
-					if(recipe.isValid()) {
+					if(recipe.isPackageable()) {
 						inv.setRecipe(recipe.getEncoderStacks());
 					}
 				}
@@ -131,7 +131,7 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 				if(!clear && i < recipeList.size()) {
 					IPackageRecipeInfo recipe = recipeList.get(i);
 					inv.recipeType = recipe.getRecipeType();
-					if(recipe.isValid()) {
+					if(recipe.isPackageable()) {
 						inv.setRecipe(recipe.getEncoderStacks());
 					}
 				}

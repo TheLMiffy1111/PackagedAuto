@@ -329,18 +329,18 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 			List<IPatternDetails> patterns = new ArrayList<>();
 			RegistryAccess registry = level.registryAccess();
 			if(provideDirect) {
-				recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).
+				recipeList.stream().filter(IPackageRecipeInfo::isCraftable).
 				map(pattern->new DirectCraftingPatternDetails(pattern, registry)).
 				forEach(patterns::add);
 			}
 			if(providePackaging) {
-				recipeList.stream().filter(IPackageRecipeInfo::isValid).
+				recipeList.stream().filter(IPackageRecipeInfo::isPackageable).
 				flatMap(recipe->Streams.concat(recipe.getPatterns().stream(), recipe.getExtraPatterns().stream())).
 				map(pattern->new PackageCraftingPatternDetails(pattern, registry)).
 				forEach(patterns::add);
 			}
 			if(provideUnpackaging) {
-				recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).
+				recipeList.stream().filter(IPackageRecipeInfo::isCraftable).
 				map(pattern->new RecipeCraftingPatternDetails(pattern, registry)).
 				forEach(patterns::add);
 			}
