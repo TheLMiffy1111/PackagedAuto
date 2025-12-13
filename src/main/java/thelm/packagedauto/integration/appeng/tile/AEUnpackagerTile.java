@@ -142,7 +142,7 @@ public class AEUnpackagerTile extends UnpackagerTile implements IGridHost, IActi
 	public void provideCrafting(ICraftingProviderHelper craftingTracker) {
 		if(getActionableNode().isActive()) {
 			for(IPackageRecipeInfo pattern : recipeList) {
-				if(!pattern.getOutputs().isEmpty()) {
+				if(pattern.isCraftable()) {
 					craftingTracker.addCraftingOption(this, new RecipeCraftingPatternDetails(pattern).toAEInternal(level));
 				}
 			}
