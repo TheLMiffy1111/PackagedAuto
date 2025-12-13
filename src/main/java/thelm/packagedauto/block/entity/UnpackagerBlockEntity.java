@@ -450,7 +450,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 			}
 			IPackageRecipeInfo recipe = packageItem.getRecipeInfo(stack);
 			int index = packageItem.getIndex(stack);
-			if(recipe != null && recipe.isValid() && recipe.validPatternIndex(index)) {
+			if(recipe != null && recipe.isPackageable() && recipe.validPatternIndex(index)) {
 				if(this.recipe == null) {
 					this.recipe = recipe;
 					amount = recipe.getPatterns().size();
@@ -498,7 +498,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 		}
 
 		public void setupToSend() {
-			if(isEmpty() || !recipe.isValid() || recipe.getRecipeType().hasMachine() || !toSend.isEmpty()) {
+			if(isEmpty() || !recipe.isPackageable() || recipe.getRecipeType().hasMachine() || !toSend.isEmpty()) {
 				return;
 			}
 			toSend.addAll(Lists.transform(recipe.getInputs(), ItemStack::copy));

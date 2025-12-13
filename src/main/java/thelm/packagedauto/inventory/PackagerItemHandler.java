@@ -92,7 +92,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 		ItemStack listStack = getStackInSlot(10);
 		if(listStack.getItem() instanceof IPackageRecipeListItem listItem) {
 			listItem.getRecipeList(listStack).getRecipeList().stream().
-			filter(IPackageRecipeInfo::isValid).forEach(recipe->{
+			filter(IPackageRecipeInfo::isPackageable).forEach(recipe->{
 				recipe.getPatterns().forEach(blockEntity.patternList::add);
 				recipe.getExtraPatterns().forEach(blockEntity.patternList::add);
 			});
@@ -100,7 +100,7 @@ public class PackagerItemHandler extends BaseItemHandler<PackagerBlockEntity> {
 		else if(listStack.getItem() instanceof IPackageItem packageItem) {
 			IPackageRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
 			int index = packageItem.getIndex(listStack);
-			if(recipe != null && recipe.isValid() && recipe.validPatternIndex(index)) {
+			if(recipe != null && recipe.isPackageable() && recipe.validPatternIndex(index)) {
 				blockEntity.patternList.add(recipe.getPatterns().get(index));
 			}
 		}
