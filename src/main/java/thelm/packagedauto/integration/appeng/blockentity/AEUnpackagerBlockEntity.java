@@ -28,6 +28,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.block.UnpackagerBlock;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
 import thelm.packagedauto.integration.appeng.AppEngUtil;
@@ -141,7 +142,9 @@ public class AEUnpackagerBlockEntity extends UnpackagerBlockEntity implements II
 	@Override
 	public List<IPatternDetails> getAvailablePatterns() {
 		if(getMainNode().isActive()) {
-			return recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).<IPatternDetails>map(pattern->new RecipeCraftingPatternDetails(pattern)).toList();
+			return recipeList.stream().filter(IPackageRecipeInfo::isCraftable).
+					<IPatternDetails>map(RecipeCraftingPatternDetails::new).
+					toList();
 		}
 		else {
 			return List.of();

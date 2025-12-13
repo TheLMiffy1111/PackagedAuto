@@ -45,6 +45,14 @@ public interface IPackageRecipeInfo {
 		return index >= 0 && index < getPatterns().size();
 	}
 
+	default boolean isPackageable() {
+		return isValid() && !getInputs().isEmpty();
+	}
+
+	default boolean isCraftable() {
+		return isPackageable() && !getOutputs().isEmpty();
+	}
+
 	@Override
 	boolean equals(Object obj);
 

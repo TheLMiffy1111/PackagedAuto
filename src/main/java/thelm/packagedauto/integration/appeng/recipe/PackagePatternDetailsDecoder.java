@@ -34,19 +34,19 @@ public class PackagePatternDetailsDecoder implements IPatternDetailsDecoder {
 				case PACKAGE -> {
 					IPackageRecipeInfo recipe = packageItem.getRecipeInfo(what);
 					int index = packageItem.getIndex(what);
-					if(recipe != null && recipe.isValid() && recipe.validPatternIndex(index)) {
+					if(recipe != null && recipe.isPackageable() && recipe.validPatternIndex(index)) {
 						return new PackageCraftingPatternDetails(recipe.getPatterns().get(index));
 					}
 				}
 				case RECIPE -> {
 					IPackageRecipeInfo recipe = packageItem.getRecipeInfo(what);
-					if(recipe != null && recipe.isValid()) {
+					if(recipe != null && recipe.isCraftable()) {
 						return new RecipeCraftingPatternDetails(recipe);
 					}
 				}
 				case DIRECT -> {
 					IPackageRecipeInfo recipe = packageItem.getRecipeInfo(what);
-					if(recipe != null && recipe.isValid()) {
+					if(recipe != null && recipe.isCraftable()) {
 						return new DirectCraftingPatternDetails(recipe);
 					}
 				}
