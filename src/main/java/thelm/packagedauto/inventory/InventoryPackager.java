@@ -120,7 +120,7 @@ public class InventoryPackager extends InventoryTileBase {
 		ItemStack listStack = getStackInSlot(10);
 		if(listStack.getItem() instanceof IRecipeListItem) {
 			((IRecipeListItem)listStack.getItem()).getRecipeList(listStack).getRecipeList().stream().
-			filter(IRecipeInfo::isValid).forEach(recipe->{
+			filter(IRecipeInfo::isPackageable).forEach(recipe->{
 				recipe.getPatterns().forEach(tile.patternList::add);
 				recipe.getExtraPatterns().forEach(tile.patternList::add);
 			});
@@ -129,7 +129,7 @@ public class InventoryPackager extends InventoryTileBase {
 			IPackageItem packageItem = (IPackageItem)listStack.getItem();
 			IRecipeInfo recipe = packageItem.getRecipeInfo(listStack);
 			int index = packageItem.getIndex(listStack);
-			if(recipe != null && recipe.isValid() && recipe.validPatternIndex(index)) {
+			if(recipe != null && recipe.isPackageable() && recipe.validPatternIndex(index)) {
 				tile.patternList.add(recipe.getPatterns().get(index));
 			}
 		}

@@ -111,7 +111,7 @@ public class TileEncoder extends TileBase {
 				if(!clear && !recipeList.isEmpty()) {
 					IRecipeInfo recipe = recipeList.get(0);
 					inv.recipeType = recipe.getRecipeType();
-					if(recipe.isValid()) {
+					if(recipe.isPackageable()) {
 						inv.setRecipe(recipe.getEncoderStacks());
 					}
 				}
@@ -124,7 +124,7 @@ public class TileEncoder extends TileBase {
 				if(!clear && i < recipeList.size()) {
 					IRecipeInfo recipe = recipeList.get(i);
 					inv.recipeType = recipe.getRecipeType();
-					if(recipe.isValid()) {
+					if(recipe.isPackageable()) {
 						inv.setRecipe(recipe.getEncoderStacks());
 					}
 				}

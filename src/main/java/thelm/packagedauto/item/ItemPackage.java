@@ -129,14 +129,14 @@ public class ItemPackage extends Item implements IPackageItem, IModelRegister, I
 			case PACKAGE: {
 				IRecipeInfo recipe = getRecipeInfo(stack);
 				int index = getIndex(stack);
-				if(recipe != null && recipe.isValid() && recipe.validPatternIndex(index)) {
+				if(recipe != null && recipe.isPackageable() && recipe.validPatternIndex(index)) {
 					return new PackageCraftingPatternHelper(recipe.getPatterns().get(index));
 				}
 				break;
 			}
 			case RECIPE: {
 				IRecipeInfo recipe = getRecipeInfo(stack);
-				if(recipe != null && recipe.isValid()) {
+				if(recipe != null && recipe.isCraftable()) {
 					return new RecipeCraftingPatternHelper(recipe);
 				}
 				break;

@@ -72,7 +72,7 @@ public class InventoryEncoderPattern extends InventoryTileBase {
 		}
 		IRecipeInfo info = recipeType.getNewRecipeInfo();
 		info.generateFromStacks(stacks.subList(0, 81), recipeType.canSetOutput() ? stacks.subList(81, 90) : Collections.emptyList(), tile.getWorld());
-		if(info.isValid()) {
+		if(info.isPackageable()) {
 			if(recipeInfo == null || !recipeInfo.equals(info)) {
 				recipeInfo = info;
 				if(!recipeType.canSetOutput()) {
