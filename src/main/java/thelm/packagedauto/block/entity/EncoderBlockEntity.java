@@ -113,7 +113,7 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 				EncoderPatternItemHandler inv = patternItemHandlers[patternIndex];
 				if(!clear && !recipeList.isEmpty()) {
 					IPackageRecipeInfo recipe = recipeList.get(0);
-					if(recipe.isValid()) {
+					if(recipe.isPackageable()) {
 						inv.setRecipe(recipe.getEncoderStacks());
 					}
 				}
@@ -126,7 +126,7 @@ public class EncoderBlockEntity extends BaseBlockEntity {
 				if(!clear && i < recipeList.size()) {
 					IPackageRecipeInfo recipe = recipeList.get(i);
 					inv.recipeType = recipe.getRecipeType();
-					if(recipe.isValid()) {
+					if(recipe.isPackageable()) {
 						inv.setRecipe(recipe.getEncoderStacks());
 					}
 				}

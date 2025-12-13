@@ -172,7 +172,7 @@ public class AEPackagerBlockEntity extends PackagerBlockEntity implements IInWor
 	@Override
 	public List<IPatternDetails> getAvailablePatterns() {
 		if(getMainNode().isActive()) {
-			return patternList.stream().<IPatternDetails>map(pattern->new PackageCraftingPatternDetails(pattern)).toList();
+			return patternList.stream().<IPatternDetails>map(PackageCraftingPatternDetails::new).toList();
 		}
 		else {
 			return List.of();

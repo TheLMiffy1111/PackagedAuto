@@ -327,19 +327,19 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 		if(getMainNode().isActive()) {
 			List<IPatternDetails> patterns = new ArrayList<>();
 			if(provideDirect) {
-				recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).
-				map(pattern->new DirectCraftingPatternDetails(pattern)).
+				recipeList.stream().filter(IPackageRecipeInfo::isCraftable).
+				map(DirectCraftingPatternDetails::new).
 				forEach(patterns::add);
 			}
 			if(providePackaging) {
-				recipeList.stream().filter(IPackageRecipeInfo::isValid).
+				recipeList.stream().filter(IPackageRecipeInfo::isPackageable).
 				flatMap(recipe->Streams.concat(recipe.getPatterns().stream(), recipe.getExtraPatterns().stream())).
-				map(pattern->new PackageCraftingPatternDetails(pattern)).
+				map(PackageCraftingPatternDetails::new).
 				forEach(patterns::add);
 			}
 			if(provideUnpackaging) {
-				recipeList.stream().filter(pattern->!pattern.getOutputs().isEmpty()).
-				map(pattern->new RecipeCraftingPatternDetails(pattern)).
+				recipeList.stream().filter(IPackageRecipeInfo::isCraftable).
+				map(RecipeCraftingPatternDetails::new).
 				forEach(patterns::add);
 			}
 			return patterns;
