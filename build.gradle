@@ -111,10 +111,10 @@ dependencies {
 		officialMojangMappings()
 		parchment "org.parchmentmc.data:parchment-1.21.1:2024.11.17@zip"
 	}
-	neoForge "net.neoforged:neoforge:21.1.216"
+	neoForge "net.neoforged:neoforge:21.1.219"
 
 	// Dependencies
-	implementation("mezz.jei:jei-1.21.1-neoforge:19.25.1.332") {transitive = false}
+	implementation("mezz.jei:jei-1.21.1-neoforge:19.27.0.340") {transitive = false}
 	implementation "dev.emi:emi-neoforge:1.1.22+1.21.1"
 	implementation "org.appliedenergistics:guideme:21.1.15"
 	implementation "org.appliedenergistics:appliedenergistics2:19.2.17"
@@ -130,8 +130,8 @@ dependencies {
 
 	//Performance
 	implementation "curse.maven:yeetusexperimentus-635427:5444189"
-	implementation "curse.maven:modernfix-790626:7200212"
-	implementation "curse.maven:ferritecore-429235:5850121"
+	implementation "curse.maven:modernfix-790626:7509726"
+	implementation "curse.maven:ferritecore-429235:7524151"
 }
 
 def replacements = [
