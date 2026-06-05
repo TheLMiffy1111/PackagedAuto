@@ -112,26 +112,26 @@ dependencies {
 		officialMojangMappings()
 		parchment "org.parchmentmc.data:parchment-1.20.1:2023.09.03@zip"
 	}
-	forge "net.minecraftforge:forge:1.20.1-47.4.16"
+	forge "net.minecraftforge:forge:1.20.1-47.4.20"
 
 	// Dependencies
-	modImplementation("mezz.jei:jei-1.20.1-forge:15.20.0.129") {transitive = false}
+	modImplementation("mezz.jei:jei-1.20.1-forge:15.20.0.130") {transitive = false}
 	modImplementation "dev.emi:emi-forge:1.1.22+1.20.1"
 	modImplementation "org.appliedenergistics:guideme:20.1.14"
 	modImplementation "appeng:appliedenergistics2-forge:15.4.10"
-	modImplementation "vazkii.patchouli:Patchouli:1.20.1-84.1-FORGE"
+	modImplementation "vazkii.patchouli:Patchouli:1.20.1-85-FORGE"
 	modImplementation "curse.maven:mouse-tweaks-60089:5338457"
 
 	// Testing
 	modImplementation "curse.maven:cucumber-272335:7180783"
-	modImplementation "curse.maven:extended-crafting-268387:6880322"
+	modImplementation "curse.maven:extended-crafting-268387:7713530"
 	modImplementation "mekanism:Mekanism:1.20.1-10.4.16.80"
 	modImplementation "curse.maven:applied-mekanistics-574300:7244744"
 
 	//Performance
 	modImplementation "curse.maven:yeetusexperimentus-635427:4680832"
 	implementation "io.github.llamalad7:mixinextras-forge:0.5.0"
-	modImplementation "curse.maven:modernfix-790626:7515215"
+	modImplementation "curse.maven:modernfix-790626:7928686"
 	modImplementation "curse.maven:ferritecore-429235:4810975"
 }
 
