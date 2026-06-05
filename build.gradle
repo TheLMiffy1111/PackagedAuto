@@ -111,26 +111,26 @@ dependencies {
 		officialMojangMappings()
 		parchment "org.parchmentmc.data:parchment-1.21.1:2024.11.17@zip"
 	}
-	neoForge "net.neoforged:neoforge:21.1.219"
+	neoForge "net.neoforged:neoforge:21.1.227"
 
 	// Dependencies
 	implementation("mezz.jei:jei-1.21.1-neoforge:19.27.0.340") {transitive = false}
 	implementation "dev.emi:emi-neoforge:1.1.22+1.21.1"
 	implementation "org.appliedenergistics:guideme:21.1.15"
 	implementation "org.appliedenergistics:appliedenergistics2:19.2.17"
-	implementation "curse.maven:ae2-jei-integration-1074338:5748513"
-	implementation "vazkii.patchouli:Patchouli:1.21.1-92-NEOFORGE"
+	implementation "curse.maven:ae2-jei-integration-1074338:7727898"
+	implementation "vazkii.patchouli:Patchouli:1.21.1-93-NEOFORGE"
 	implementation "curse.maven:mouse-tweaks-60089:5437296"
 
 	// Testing
 	implementation "curse.maven:cucumber-272335:7180790"
-	implementation "curse.maven:extended-crafting-268387:7180800"
-	implementation "mekanism:Mekanism:1.21.1-10.7.17.83"
+	implementation "curse.maven:extended-crafting-268387:7713533"
+	implementation "mekanism:Mekanism:1.21.1-10.7.19.85"
 	implementation "curse.maven:applied-mekanistics-574300:7096962"
 
 	//Performance
 	implementation "curse.maven:yeetusexperimentus-635427:5444189"
-	implementation "curse.maven:modernfix-790626:7509726"
+	implementation "curse.maven:modernfix-790626:7917721"
 	implementation "curse.maven:ferritecore-429235:7524151"
 }
 
