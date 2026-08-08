@@ -1,0 +1,44 @@
+{
+    "itemGroup.packagedauto": "PackagedAuto",
+
+    "block.packagedauto.packager": "Empacotador",
+    "block.packagedauto.packager.mode.exact": "Modo: Exigir Exato",
+    "block.packagedauto.packager.mode.disjoint": "Modo: Exigir Disjunção",
+    "block.packagedauto.packager.mode.first": "Modo: Primeira Partida",
+    "block.packagedauto.encoder": "Codificador de Receita de Pacote",
+    "block.packagedauto.encoder.save": "Salvar",
+    "block.packagedauto.encoder.save_single": "Salvar Único",
+    "block.packagedauto.encoder.load": "Carregar",
+    "block.packagedauto.encoder.pattern_slot": "Espaço para Receita %s",
+    "block.packagedauto.encoder.change_recipe_type": "Alterar tipo de receita",
+    "block.packagedauto.unpackager": "Descompactador",
+    "block.packagedauto.unpackager.blocking.false": "Modo de bloqueio desativado",
+    "block.packagedauto.unpackager.blocking.true": "Modo de bloqueio ativado",
+    "block.packagedauto.packager_extension": "Extensão do Empacotador",
+    "block.packagedauto.crafter": "Criador de Embalagens",
+    "block.packagedauto.fluid_package_filler": "Enchedor de pacote de fluido",
+    "block.packagedauto.fluid_package_filler.redstone": "Ative com redstone para começar",
+
+    "item.packagedauto.recipe_holder": "Embalagem Porta Receitas",
+    "item.packagedauto.recipe_holder.recipes": "Receitas:",
+    "item.packagedauto.package": "Pacote de Receitas",
+    "item.packagedauto.package.index": "Índice: %d",
+    "item.packagedauto.package.items": "Items:",
+    "item.packagedauto.package_component": "Componente de embalagem",
+    "item.packagedauto.me_package_component": "Componente de Embalagem ME",
+    "item.packagedauto.volume_package": "Pacote de Volume",
+
+    "recipe.packagedauto.processing": "Processamento",
+    "recipe.packagedauto.processing.short": "Processamento",
+    "recipe.packagedauto.ordered_processing": "Processamento Ordenado",
+    "recipe.packagedauto.ordered_processing.short": "Ordenado",
+    "recipe.packagedauto.crafting": "Fabricação",
+    "recipe.packagedauto.crafting.short": "Fabricação",
+
+    "volume.packagedauto.minecraft.fluid": "Fluido",
+
+    "gui.packagedauto.item_amount_specifying": "Valor do item",
+    "gui.packagedauto.volume_amount_specifying": "Quantidade de volume em mB",
+
+    "misc.packagedauto.set": "Definir"
+}
