@@ -11,7 +11,7 @@ public class VolumeAmountSpecifyingMenu extends BaseMenu<BaseBlockEntity> {
 	public VolumeAmountSpecifyingMenu(Inventory inventory, IVolumeStackWrapper stack) {
 		super(null, 0, inventory, null);
 		BaseVolumeInventory volumeInventory = new BaseVolumeInventory(stack.getVolumeType(), 1);
-		volumeInventory.setStackInSlot(0, stack);
+		volumeInventory.setStack(0, stack);
 		addSlot(new PreviewVolumeSlot(volumeInventory, 0, 89, 48));
 	}
 

@@ -1,29 +1,29 @@
 package thelm.packagedauto.inventory;
 
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import thelm.packagedauto.block.entity.FluidPackageFillerBlockEntity;
 
-public class FluidPackageFillerItemHandler extends BaseItemHandler<FluidPackageFillerBlockEntity> {
+public class FluidPackageFillerItemHandler extends BaseItemResourceHandler<FluidPackageFillerBlockEntity> {
 
 	public FluidPackageFillerItemHandler(FluidPackageFillerBlockEntity blockEntity) {
 		super(blockEntity, 3);
 	}
 
 	@Override
-	public boolean isItemValid(int index, ItemStack stack) {
+	public boolean isValid(int index, ItemResource resource) {
 		return switch(index) {
 		case 1 -> false;
-		case 2 -> stack.getCapability(Capabilities.EnergyStorage.ITEM) != null;
-		default -> FluidUtil.getFluidHandler(stack).isPresent();
+		case 2 -> ItemAccess.forStack(resource.toStack()).getCapability(Capabilities.Energy.ITEM) != null;
+		default -> ItemAccess.forStack(resource.toStack()).getCapability(Capabilities.Fluid.ITEM) != null;
 		};
 	}
 
 	@Override
-	public IItemHandlerModifiable getWrapperForDirection(Direction side) {
+	public ResourceHandler<ItemResource> getWrapperForDirection(Direction side) {
 		return wrapperMap.computeIfAbsent(side, s->new FluidPackageFillerItemHandlerWrapper(this, s));
 	}
 
@@ -34,7 +34,7 @@ public class FluidPackageFillerItemHandler extends BaseItemHandler<FluidPackageF
 		case 1 -> blockEntity.amount;
 		case 2 -> blockEntity.remainingProgress;
 		case 3 -> blockEntity.isWorking ? 1 : 0;
-		case 4 -> blockEntity.getEnergyStorage().getEnergyStored();
+		case 4 -> blockEntity.getEnergyStorage().getAmountAsInt();
 		default -> 0;
 		};
 	}

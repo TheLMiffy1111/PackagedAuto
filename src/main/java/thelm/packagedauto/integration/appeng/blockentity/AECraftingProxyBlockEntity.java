@@ -12,10 +12,10 @@ import appeng.api.util.AECableType;
 import appeng.api.util.AEColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import thelm.packagedauto.block.PackagedAutoBlocks;
 import thelm.packagedauto.block.entity.CraftingProxyBlockEntity;
 
@@ -91,18 +91,18 @@ public class AECraftingProxyBlockEntity extends CraftingProxyBlockEntity impleme
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
-		if(nbt.contains("node")) {
-			getMainNode().loadFromNBT(nbt);
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		if(input.child("node").isPresent()) {
+			getMainNode().deserialize(input);
 		}
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
 		if(gridNode != null) {
-			gridNode.saveToNBT(nbt);
+			gridNode.serialize(output);
 		}
 	}
 }

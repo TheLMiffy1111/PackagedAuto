@@ -18,7 +18,7 @@ public class PackagedAutoCreativeTabs {
 			"tab", ()->CreativeModeTab.builder().
 			title(Component.translatable("itemGroup.packagedauto")).
 			icon(PackagedAutoItems.PACKAGE::toStack).
-			displayItems((parameters, output)->{
+			displayItems((_, output)->{
 				output.accept(PackagedAutoItems.ENCODER);
 				output.accept(PackagedAutoItems.PACKAGER);
 				output.accept(PackagedAutoItems.PACKAGER_EXTENSION);

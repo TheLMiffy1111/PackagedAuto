@@ -8,7 +8,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.client.screen.EncoderScreen;
 import thelm.packagedauto.packet.SetItemStackPacket;
@@ -32,7 +32,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<En
 	public void onComplete() {}
 
 	private static Rect2i getSlotArea(AbstractContainerScreen<?> gui, Slot slot) {
-		return new Rect2i(gui.getGuiLeft()+slot.x, gui.getGuiTop()+slot.y, 16, 16);
+		return new Rect2i(gui.getLeftPos()+slot.x, gui.getTopPos()+slot.y, 16, 16);
 	}
 
 	private static ItemStack wrapStack(Object ingredient) {
@@ -57,7 +57,7 @@ public class EncoderGhostIngredientHandler implements IGhostIngredientHandler<En
 		public void accept(I ingredient) {
 			ItemStack stack = wrapStack(ingredient);
 			if(!stack.isEmpty()) {
-				PacketDistributor.sendToServer(new SetItemStackPacket(slot.index, stack));
+				ClientPacketDistributor.sendToServer(new SetItemStackPacket(slot.index, stack));
 			}
 		}
 	}

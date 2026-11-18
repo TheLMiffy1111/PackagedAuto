@@ -2,31 +2,31 @@ package thelm.packagedauto.client.screen;
 
 import org.lwjgl.glfw.GLFW;
 
-import com.google.common.primitives.Longs;
 import com.mojang.blaze3d.platform.InputConstants;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.GuiGraphicsExtractor.HoveredTextEffects;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import thelm.packagedauto.menu.BaseMenu;
 
 // Code from Refined Storage
 public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends BaseScreen<C> {
 
-	public static final ResourceLocation BACKGROUND = ResourceLocation.parse("packagedauto:textures/gui/amount_specifying.png");
+	public static final Identifier BACKGROUND = Identifier.parse("packagedauto:textures/gui/amount_specifying.png");
 
 	private BaseScreen<?> parent;
 
 	protected EditBox amountField;
 
 	public AmountSpecifyingScreen(BaseScreen<?> parent, C menu, Inventory inventory, Component title) {
-		super(menu, inventory, title);
-		imageWidth = 172;
-		imageHeight = 99;
+		super(menu, inventory, title, 172, 99);
 		this.parent = parent;
 	}
 
@@ -39,7 +39,7 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 	protected abstract int[] getMultipliers();
 
 	@Override
-	protected ResourceLocation getBackgroundTexture() {
+	protected Identifier getBackgroundTexture() {
 		return BACKGROUND;
 	}
 
@@ -53,19 +53,19 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 
 		String amountText = amountField == null ? String.valueOf(getDefaultAmount()) : amountField.getValue();
 		amountField = new EditBox(font, leftPos+9, topPos+51, 63, font.lineHeight, Component.empty());
-		amountField.setValue(amountText);
+		amountField.setValue( amountText);
 		amountField.setBordered(false);
-		amountField.setTextColor(0xFFFFFF);
-		amountField.setFilter(s->{
-			if(s.isEmpty()) {
-				return true;
-			}
-			try {
-				int amount = Integer.parseInt(s);
-				return amount >= 0 && amount <= getMaxAmount();
-			}
-			catch(NumberFormatException e) {
-				return false;
+		amountField.setTextColor(0xFFFFFFFF);
+		amountField.setFilter(s->s.matches("[0-9]*"));
+		amountField.setResponder(s->{
+			if(!s.isEmpty()) {
+				try {
+					int amount = Integer.parseInt(s);
+					if(amount < 0 && amount > getMaxAmount()) {
+						amountField.setValue(String.valueOf(Math.clamp(amount, 0, getMaxAmount())));
+					}
+				}
+				catch(NumberFormatException e) {}
 			}
 		});
 		addRenderableWidget(amountField);
@@ -89,34 +89,28 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 	}
 
 	@Override
-	protected void renderBgAdditional(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
-		amountField.renderWidget(graphics, mouseX, mouseY, partialTicks);
+	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		graphics.text(font, getTitle(), 7, 7, 0xFF404040, false);
 	}
 
 	@Override
-	protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-		graphics.drawString(font, getTitle().getString(), 7, 7, 0x404040, false);
-		super.renderLabels(graphics, mouseX, mouseY);
-	}
-
-	@Override
-	public boolean keyPressed(int key, int scanCode, int modifiers) {
-		if(key == GLFW.GLFW_KEY_ESCAPE) {
+	public boolean keyPressed(KeyEvent event) {
+		if(event.key() == GLFW.GLFW_KEY_ESCAPE) {
 			close();
 			return true;
 		}
-		if((key == GLFW.GLFW_KEY_ENTER || key == GLFW.GLFW_KEY_KP_ENTER) && amountField.isFocused()) {
-			onOkButtonPressed(hasShiftDown());
+		if((event.key() == GLFW.GLFW_KEY_ENTER || event.key() == GLFW.GLFW_KEY_KP_ENTER) && amountField.isFocused()) {
+			onOkButtonPressed(event.hasShiftDown());
 			return true;
 		}
-		if(amountField.keyPressed(key, scanCode, modifiers)) {
+		if(amountField.keyPressed(event)) {
 			return true;
 		}
-		InputConstants.Key mouseKey = InputConstants.getKey(key, scanCode);
+		InputConstants.Key mouseKey = InputConstants.getKey(event);
 		if(minecraft.options.keyInventory.isActiveAndMatches(mouseKey) && amountField.isFocused()) {
 			return true;
 		}
-		return super.keyPressed(key, scanCode, modifiers);
+		return super.keyPressed(event);
 	}
 
 	protected void onAmountButtonClicked(int increment, int multiplier, boolean inverse, boolean shiftDown) {
@@ -155,11 +149,17 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+			extractDefaultSprite(graphics);
+			extractDefaultLabel(graphics.textRendererForWidget(this, HoveredTextEffects.NONE));
+		}
+
+		@Override
 		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {}
 
 		@Override
-		public void onPress() {
-			onOkButtonPressed(hasShiftDown());
+		public void onPress(InputWithModifiers input) {
+			onOkButtonPressed(input.hasShiftDown());
 		}
 	}
 
@@ -170,10 +170,16 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+			extractDefaultSprite(graphics);
+			extractDefaultLabel(graphics.textRendererForWidget(this, HoveredTextEffects.NONE));
+		}
+
+		@Override
 		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {}
 
 		@Override
-		public void onPress() {
+		public void onPress(InputWithModifiers input) {
 			close();
 		}
 	}
@@ -202,11 +208,17 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTick) {
+			extractDefaultSprite(graphics);
+			extractDefaultLabel(graphics.textRendererForWidget(this, HoveredTextEffects.NONE));
+		}
+
+		@Override
 		public void updateWidgetNarration(NarrationElementOutput pNarrationElementOutput) {}
 
 		@Override
 		public Component getMessage() {
-			if(!hasShiftDown()) {
+			if(!minecraft.hasShiftDown()) {
 				return !inverse ? addComponent : subComponent;
 			}
 			else {
@@ -215,8 +227,8 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		}
 
 		@Override
-		public void onPress() {
-			onAmountButtonClicked(increment, multiplier, inverse, hasShiftDown());
+		public void onPress(InputWithModifiers input) {
+			onAmountButtonClicked(increment, multiplier, inverse, input.hasShiftDown());
 		}
 	}
 }

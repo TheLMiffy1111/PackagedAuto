@@ -10,20 +10,10 @@
 		"IRI"
 	],
 	"key": {
-		"C": {
-			"item": "packagedauto:package_component"
-		},
-		"G": {
-			"item": "minecraft:glowstone"
-		},
-		"R": {
-			"item": "minecraft:comparator"
-		},
-		"T": {
-			"item": "minecraft:crafting_table"
-		},
-		"I": {
-			"tag": "c:ingots/iron"
-		}
+		"C": "packagedauto:package_component",
+		"G": "minecraft:glowstone",
+		"R": "minecraft:comparator",
+		"T": "minecraft:crafting_table",
+		"I": "#c:ingots/iron"
 	}
 }

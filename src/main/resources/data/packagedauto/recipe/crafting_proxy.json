@@ -10,23 +10,11 @@
 		"OIO"
 	],
 	"key": {
-		"C": {
-			"item": "packagedauto:package_component"
-		},
-		"M": {
-			"item": "packagedauto:proxy_marker"
-		},
-		"S": {
-			"item": "minecraft:shulker_shell"
-		},
-		"E": {
-			"tag": "c:ender_pearls"
-		},
-		"O": {
-			"tag": "c:obsidians/crying"
-		},
-		"I": {
-			"tag": "c:storage_blocks/iron"
-		}
+		"C": "packagedauto:package_component",
+		"M": "packagedauto:proxy_marker",
+		"S": "minecraft:shulker_shell",
+		"E": "#c:ender_pearls",
+		"O": "#c:obsidians/crying",
+		"I": "#c:storage_blocks/iron"
 	}
 }

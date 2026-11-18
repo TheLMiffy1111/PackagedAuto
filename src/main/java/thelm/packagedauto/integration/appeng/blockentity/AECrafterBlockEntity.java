@@ -21,11 +21,12 @@ import appeng.api.util.AECableType;
 import appeng.api.util.AEColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import thelm.packagedauto.block.PackagedAutoBlocks;
 import thelm.packagedauto.block.entity.CrafterBlockEntity;
 
@@ -47,7 +48,7 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 			getMainNode().create(level, worldPosition);
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
+		if(drawMEEnergy && !level.isClientSide() && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -112,7 +113,7 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 			MEStorage inventory = storageService.getInventory();
 			int endIndex = isWorking ? 9 : 0;
 			for(int i = 9; i >= endIndex; --i) {
-				ItemStack is = itemHandler.getStackInSlot(i);
+				ItemStack is = itemHandler.getStack(i);
 				if(is.isEmpty()) {
 					continue;
 				}
@@ -120,10 +121,10 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 				int count = is.getCount();
 				int inserted = (int)StorageHelper.poweredInsert(energyService, inventory, key, count, source, Actionable.MODULATE);
 				if(inserted == count) {
-					itemHandler.setStackInSlot(i, ItemStack.EMPTY);
+					itemHandler.setStack(i, ItemStack.EMPTY);
 				}
 				else {
-					itemHandler.setStackInSlot(i, key.toStack(count-inserted));
+					itemHandler.setStack(i, key.toStack(count-inserted));
 				}
 			}
 		}
@@ -137,27 +138,30 @@ public class AECrafterBlockEntity extends CrafterBlockEntity implements IInWorld
 			IGrid grid = getMainNode().getGrid();
 			IEnergyService energyService = grid.getEnergyService();
 			double conversion = PowerUnit.FE.convertTo(PowerUnit.AE, 1);
-			int request = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored()-energyStorage.getEnergyStored());
+			int request = Math.min(energyStorage.getMaxInsert(), energyStorage.getCapacityAsInt()-energyStorage.getAmountAsInt());
 			double available = energyService.extractAEPower((request+0.5)*conversion, Actionable.SIMULATE, PowerMultiplier.CONFIG);
 			int extract = (int)(available/conversion);
 			energyService.extractAEPower(extract*conversion, Actionable.MODULATE, PowerMultiplier.CONFIG);
-			energyStorage.receiveEnergy(extract, false);
+			try(Transaction transaction = Transaction.openRoot()) {
+				energyStorage.insert(extract, transaction);
+				transaction.commit();
+			}
 		}
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
-		if(nbt.contains("node")) {
-			getMainNode().loadFromNBT(nbt);
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		if(input.child("node").isPresent()) {
+			getMainNode().deserialize(input);
 		}
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
 		if(gridNode != null) {
-			gridNode.saveToNBT(nbt);
+			gridNode.serialize(output);
 		}
 	}
 }

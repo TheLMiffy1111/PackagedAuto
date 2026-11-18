@@ -4,9 +4,6 @@ import java.util.List;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -15,18 +12,24 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.energy.EnergyHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.block.PackagedAutoBlocks;
 import thelm.packagedauto.energy.EnergyStorage;
-import thelm.packagedauto.inventory.CrafterItemHandler;
+import thelm.packagedauto.inventory.CrafterItemResourceHandler;
 import thelm.packagedauto.menu.CrafterMenu;
 import thelm.packagedauto.recipe.ICraftingPackageRecipeInfo;
-import thelm.packagedauto.util.MiscHelper;
 
 public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraftingMachine {
 
@@ -36,14 +39,19 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
+	public final ResourceHandler<ItemResource> ejectSlots;
+	public final ResourceHandler<ItemResource> outputSlot;
+
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
 	public ICraftingPackageRecipeInfo currentRecipe;
 
 	public CrafterBlockEntity(BlockPos pos, BlockState state) {
 		super(PackagedAutoBlockEntities.CRAFTER.get(), pos, state);
-		setItemHandler(new CrafterItemHandler(this));
+		setItemHandler(new CrafterItemResourceHandler(this));
 		setEnergyStorage(new EnergyStorage(this, energyCapacity));
+		ejectSlots = RangedResourceHandler.of(this::getItemHandler, 0, 10);
+		outputSlot = RangedResourceHandler.ofSingleIndex(this::getItemHandler, 9);
 	}
 
 	@Override
@@ -53,7 +61,7 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 
 	@Override
 	public void tick() {
-		if(!level.isClientSide) {
+		if(!level.isClientSide()) {
 			if(isWorking) {
 				tickProcess();
 				if(remainingProgress <= 0) {
@@ -71,7 +79,7 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 	@Override
 	public boolean acceptPackage(IPackageRecipeInfo recipeInfo, List<ItemStack> stacks, Direction direction) {
 		if(!isBusy() && recipeInfo.isValid() && recipeInfo instanceof ICraftingPackageRecipeInfo recipe) {
-			ItemStack slotStack = itemHandler.getStackInSlot(9);
+			ItemStack slotStack = itemHandler.getStack(9);
 			ItemStack outputStack = recipe.getOutput();
 			if(slotStack.isEmpty() || ItemStack.isSameItemSameComponents(slotStack, outputStack) && slotStack.getCount()+outputStack.getCount() <= outputStack.getMaxStackSize()) {
 				currentRecipe = recipe;
@@ -80,7 +88,7 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 				CraftingInput matrix = recipe.getMatrix();
 				for(int i = 0; i < matrix.height(); ++i) {
 					for(int j = 0; j < matrix.width(); ++j) {
-						itemHandler.setStackInSlot(i*3+j, matrix.getItem(i*matrix.width()+j).copy());
+						itemHandler.setStack(i*3+j, matrix.getItem(i*matrix.width()+j).copy());
 					}
 				}
 				setChanged();
@@ -96,8 +104,11 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 	}
 
 	protected void tickProcess() {
-		int energy = energyStorage.extractEnergy(Math.min(energyUsage, remainingProgress), false);
-		remainingProgress -= energy;
+		try(Transaction transaction = Transaction.openRoot()) {
+			int energy = energyStorage.extract(Math.min(energyUsage, remainingProgress), transaction);
+			transaction.commit();
+			remainingProgress -= energy;
+		}
 	}
 
 	protected void finishProcess() {
@@ -105,17 +116,17 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 			endProcess();
 			return;
 		}
-		if(itemHandler.getStackInSlot(9).isEmpty()) {
-			itemHandler.setStackInSlot(9, currentRecipe.getOutput());
+		if(itemHandler.getStack(9).isEmpty()) {
+			itemHandler.setStack(9, currentRecipe.getOutput());
 		}
 		else {
-			itemHandler.getStackInSlot(9).grow(currentRecipe.getOutput().getCount());
+			itemHandler.getStack(9).grow(currentRecipe.getOutput().getCount());
 		}
 		List<ItemStack> remainingItems = currentRecipe.getRemainingItems();
 		CraftingInput matrix = currentRecipe.getMatrix();
 		for(int i = 0; i < matrix.height(); ++i) {
 			for(int j = 0; j < matrix.width(); ++j) {
-				itemHandler.setStackInSlot(i*3+j, remainingItems.get(i*matrix.width()+j));
+				itemHandler.setStack(i*3+j, remainingItems.get(i*matrix.width()+j));
 			}
 		}
 		endProcess();
@@ -129,33 +140,27 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 	}
 
 	protected void ejectItems() {
-		int endIndex = isWorking ? 9 : 0;
+		ResourceHandler<ItemResource> slots = isWorking ? outputSlot : ejectSlots;
 		for(Direction direction : Direction.values()) {
 			BlockPos offsetPos = worldPosition.relative(direction);
 			Block block = level.getBlockState(offsetPos).getBlock();
-			IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, offsetPos, direction.getOpposite());
+			ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, offsetPos, direction.getOpposite());
 			if(block != PackagedAutoBlocks.UNPACKAGER.get() && itemHandler != null) {
-				for(int i = 9; i >= endIndex; --i) {
-					ItemStack stack = this.itemHandler.getStackInSlot(i);
-					if(stack.isEmpty()) {
-						continue;
-					}
-					ItemStack stackRem = ItemHandlerHelper.insertItem(itemHandler, stack, false);
-					this.itemHandler.setStackInSlot(i, stackRem);
+				int moveCount = 0;
+				for(int i = 0; i < slots.size(); ++i) {
+					moveCount += slots.getAmountAsInt(i);
+				}
+				if(moveCount > 0) {
+					ResourceHandlerUtil.moveStacking(slots, itemHandler, _->true, moveCount, null);
 				}
 			}
 		}
 	}
 
 	protected void chargeEnergy() {
-		ItemStack energyStack = itemHandler.getStackInSlot(10);
-		IEnergyStorage itemEnergyStorage = energyStack.getCapability(Capabilities.EnergyStorage.ITEM);
+		EnergyHandler itemEnergyStorage = ItemAccess.forHandlerIndex(itemHandler, 10).getCapability(Capabilities.Energy.ITEM);
 		if(itemEnergyStorage != null) {
-			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(itemEnergyStorage.extractEnergy(energyRequest, false), false);
-			if(energyStack.getCount() <= 0) {
-				itemHandler.setStackInSlot(10, ItemStack.EMPTY);
-			}
+			EnergyHandlerUtil.move(itemEnergyStorage, energyStorage, energyStorage.getMaxInsert(), null);
 		}
 	}
 
@@ -171,36 +176,29 @@ public class CrafterBlockEntity extends BaseBlockEntity implements IPackageCraft
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
-		isWorking = nbt.getBoolean("working");
-		remainingProgress = nbt.getInt("progress");
-		currentRecipe = null;
-		if(nbt.contains("recipe")) {
-			CompoundTag tag = nbt.getCompound("recipe");
-			IPackageRecipeInfo recipe = MiscHelper.INSTANCE.loadRecipe(tag, registries);
-			if(recipe instanceof ICraftingPackageRecipeInfo craftingRecipe) {
-				currentRecipe = craftingRecipe;
-			}
-		}
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		isWorking = input.getBooleanOr("working", false);
+		remainingProgress = input.getIntOr("progress", 0);
+		currentRecipe = input.read("recipe", IPackageRecipeInfo.CODEC).
+				filter(ICraftingPackageRecipeInfo.class::isInstance).
+				map(ICraftingPackageRecipeInfo.class::cast).
+				orElse(null);
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
-		nbt.putBoolean("working", isWorking);
-		nbt.putInt("progress", remainingProgress);
-		if(currentRecipe != null) {
-			Tag tag = MiscHelper.INSTANCE.saveRecipe(new CompoundTag(), currentRecipe, registries);
-			nbt.put("recipe", tag);
-		}
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
+		output.putBoolean("working", isWorking);
+		output.putInt("progress", remainingProgress);
+		output.storeNullable("recipe", IPackageRecipeInfo.CODEC, currentRecipe);
 	}
 
 	public int getScaledEnergy(int scale) {
-		if(energyStorage.getMaxEnergyStored() <= 0) {
+		if(energyStorage.getCapacityAsInt() <= 0) {
 			return 0;
 		}
-		return Math.min(scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored(), scale);
+		return Math.min(scale * energyStorage.getAmountAsInt() / energyStorage.getCapacityAsInt(), scale);
 	}
 
 	public int getScaledProgress(int scale) {

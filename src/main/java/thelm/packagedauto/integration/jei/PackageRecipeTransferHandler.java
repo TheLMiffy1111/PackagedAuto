@@ -1,18 +1,17 @@
 package thelm.packagedauto.integration.jei;
 
-
 import java.util.Optional;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
-import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
+import mezz.jei.api.recipe.types.IRecipeType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.integration.jei.category.PackageRecipeCategory;
@@ -38,7 +37,7 @@ public class PackageRecipeTransferHandler implements IRecipeTransferHandler<Enco
 	}
 
 	@Override
-	public RecipeType<IPackageRecipeInfo> getRecipeType() {
+	public IRecipeType<IPackageRecipeInfo> getRecipeType() {
 		return PackageRecipeCategory.TYPE;
 	}
 
@@ -61,7 +60,7 @@ public class PackageRecipeTransferHandler implements IRecipeTransferHandler<Enco
 		if(!doTransfer) {
 			return null;
 		}
-		PacketDistributor.sendToServer(new SetRecipePacket(map));
+		ClientPacketDistributor.sendToServer(new SetRecipePacket(map));
 		return null;
 	}
 }

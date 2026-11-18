@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Functions;
+import com.mojang.logging.LogUtils;
 
 import appeng.api.crafting.IPatternDetails.IInput;
 import appeng.api.networking.IInWorldGridNodeHost;
@@ -16,9 +17,12 @@ import appeng.api.stacks.GenericStack;
 import appeng.helpers.patternprovider.PatternProviderLogicHost;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
@@ -63,9 +67,14 @@ public class AppEngUtil {
 		if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK)) {
 			IVolumeStackWrapper vStack = stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK);
 			if(!vStack.isEmpty() && vStack.getVolumeType() != null && vStack.getVolumeType().supportsAE()) {
-				AEKey key = AEKey.fromTagGeneric(registries, vStack.saveAEKey(new CompoundTag(), registries));
-				if(key != null) {
-					return new GenericStack(key, vStack.getAmount()*stack.getCount());
+				try(ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(()->"ae_key_convert", LogUtils.getLogger())) {
+					TagValueOutput output = TagValueOutput.createWithContext(reporter, registries);
+					vStack.saveAEKey(output);
+					ValueInput input = TagValueInput.create(reporter, registries, output.buildResult());
+					AEKey key = AEKey.fromTagGeneric(input);
+					if(key != null) {
+						return new GenericStack(key, vStack.getAmount()*stack.getCount());
+					}
 				}
 			}
 		}

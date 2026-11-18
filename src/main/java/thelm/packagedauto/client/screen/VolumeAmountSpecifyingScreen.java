@@ -1,9 +1,8 @@
 package thelm.packagedauto.client.screen;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.menu.VolumeAmountSpecifyingMenu;
 import thelm.packagedauto.packet.SetItemStackPacket;
@@ -47,7 +46,7 @@ public class VolumeAmountSpecifyingScreen extends AmountSpecifyingScreen<VolumeA
 		try {
 			int amount = Math.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
 			IVolumeStackWrapper newStack = stack.withAmount(amount);
-			PacketDistributor.sendToServer(new SetItemStackPacket(containerSlot, MiscHelper.INSTANCE.makeVolumePackage(newStack)));
+			ClientPacketDistributor.sendToServer(new SetItemStackPacket(containerSlot, MiscHelper.INSTANCE.makeVolumePackage(newStack)));
 			close();
 		}
 		catch(NumberFormatException e) {

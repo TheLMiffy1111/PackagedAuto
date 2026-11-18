@@ -1,9 +1,11 @@
 package thelm.packagedauto.crafting;
 
-import net.minecraft.core.HolderLookup;
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -14,13 +16,13 @@ import thelm.packagedauto.item.PackagedAutoItems;
 
 public class ProxyMarkerCloningRecipe extends CustomRecipe {
 
-	public ProxyMarkerCloningRecipe(CraftingBookCategory category) {
-		super(category);
-	}
+	public static final ProxyMarkerCloningRecipe INSTANCE = new ProxyMarkerCloningRecipe();
+	public static final MapCodec<ProxyMarkerCloningRecipe> CODEC = MapCodec.unit(INSTANCE);
+	public static final StreamCodec<RegistryFriendlyByteBuf, ProxyMarkerCloningRecipe> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
-		return PackagedAutoRecipeSerializers.proxy_marker_CLONING.get();
+	public RecipeSerializer<ProxyMarkerCloningRecipe> getSerializer() {
+		return PackagedAutoRecipeSerializers.PROXY_MARKER_CLONING.get();
 	}
 
 	@Override
@@ -47,7 +49,7 @@ public class ProxyMarkerCloningRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput input, HolderLookup.Provider registry) {
+	public ItemStack assemble(CraftingInput input) {
 		DirectionalGlobalPos template = null;
 		boolean clearing = false;
 		int count = 0;
@@ -83,10 +85,5 @@ public class ProxyMarkerCloningRecipe extends CustomRecipe {
 		else {
 			return ItemStack.EMPTY;
 		}
-	}
-
-	@Override
-	public boolean canCraftInDimensions(int width, int height) {
-		return true;
 	}
 }

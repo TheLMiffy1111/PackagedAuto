@@ -1,7 +1,7 @@
 package thelm.packagedauto.block;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.Containers;
+import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.LivingEntity;
@@ -13,12 +13,11 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.neoforged.neoforge.items.IItemHandler;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 
 public abstract class BaseBlock extends Block implements EntityBlock {
 
-	protected BaseBlock(Block.Properties properties) {
+	protected BaseBlock(Properties properties) {
 		super(properties);
 	}
 
@@ -34,7 +33,7 @@ public abstract class BaseBlock extends Block implements EntityBlock {
 		if(player.isShiftKeyDown()) {
 			return InteractionResult.PASS;
 		}
-		if(!level.isClientSide) {
+		if(!level.isClientSide()) {
 			BlockEntity blockEntity = level.getBlockEntity(pos);
 			if(blockEntity instanceof MenuProvider menuProvider) {
 				player.openMenu(menuProvider, buf->buf.writeBlockPos(pos));
@@ -45,7 +44,7 @@ public abstract class BaseBlock extends Block implements EntityBlock {
 
 	@Override
 	public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack) {
-		if(!level.isClientSide) {
+		if(!level.isClientSide()) {
 			BlockEntity blockEntity = level.getBlockEntity(pos);
 			if(blockEntity instanceof BaseBlockEntity baseBlockEntity) {
 				if(placer instanceof Player player) {
@@ -56,28 +55,12 @@ public abstract class BaseBlock extends Block implements EntityBlock {
 	}
 
 	@Override
-	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-		if(state.getBlock() != newState.getBlock()) {
-			if(level.getBlockEntity(pos) instanceof BaseBlockEntity blockEntity) {
-				IItemHandler handler = blockEntity.getItemHandler();
-				for(int i = 0; i < handler.getSlots(); ++i) {
-					ItemStack stack = handler.getStackInSlot(i);
-					if(!stack.isEmpty()) {
-						Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
-					}
-				}
-			}
-		}
-		super.onRemove(state, level, pos, newState, isMoving);
-	}
-
-	@Override
 	public boolean hasAnalogOutputSignal(BlockState state) {
 		return true;
 	}
 
 	@Override
-	public int getAnalogOutputSignal(BlockState pState, Level level, BlockPos pos) {
+	protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
 		BlockEntity blockEntity = level.getBlockEntity(pos);
 		if(blockEntity instanceof BaseBlockEntity baseBlockEntity) {
 			return baseBlockEntity.getComparatorSignal();

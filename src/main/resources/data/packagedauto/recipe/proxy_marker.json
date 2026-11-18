@@ -5,17 +5,9 @@
 		"count": 1
 	},
 	"ingredients": [
-		{
-			"item": "packagedauto:package_component"
-		},
-		{
-			"tag": "c:ender_pearls"
-		},
-		{
-			"tag": "c:obsidians/normal"
-		},
-		{
-			"item": "minecraft:blaze_powder"
-		}
+		"packagedauto:package_component",
+		"#c:ender_pearls",
+		"#c:obsidians/normal",
+		"minecraft:blaze_powder"
 	]
 }

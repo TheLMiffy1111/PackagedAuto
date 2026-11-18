@@ -5,17 +5,9 @@
 		"count": 1
 	},
 	"ingredients": [
-		{
-			"item": "packagedauto:package_component"
-		},
-		{
-			"tag": "c:dusts/redstone"
-		},
-		{
-			"tag": "c:gems/quartz"
-		},
-		{
-			"tag": "c:gems/quartz"
-		}
+		"packagedauto:package_component",
+		"#c:dusts/redstone",
+		"#c:gems/quartz",
+		"#c:gems/quartz"
 	]
 }

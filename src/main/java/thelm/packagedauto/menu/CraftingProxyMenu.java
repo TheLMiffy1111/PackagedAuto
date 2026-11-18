@@ -8,7 +8,7 @@ public class CraftingProxyMenu extends BaseMenu<CraftingProxyBlockEntity> {
 
 	public CraftingProxyMenu(int windowId, Inventory inventory, CraftingProxyBlockEntity blockEntity) {
 		super(PackagedAutoMenus.CRAFTING_PROXY.get(), windowId, inventory, blockEntity);
-		addSlot(new SingleStackSlot(itemHandler, 0, 80, 17));
+		addSlot(new SingleStackSlot(itemHandler, itemHandler, 0, 80, 17));
 		setupPlayerInventory();
 	}
 

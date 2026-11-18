@@ -14,7 +14,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -26,9 +26,9 @@ import thelm.packagedauto.api.IRecipeSlotsViewWrapper;
 public class CraftingPackageRecipeType implements IPackageRecipeType {
 
 	public static final CraftingPackageRecipeType INSTANCE = new CraftingPackageRecipeType();
-	public static final ResourceLocation NAME = ResourceLocation.parse("packagedauto:crafting");
+	public static final Identifier NAME = Identifier.parse("packagedauto:crafting");
 	public static final IntSet SLOTS;
-	public static final List<ResourceLocation> CATEGORIES = List.of(ResourceLocation.parse("minecraft:crafting"));
+	public static final List<Identifier> CATEGORIES = List.of(Identifier.parse("minecraft:crafting"));
 	public static final Vec3i COLOR = new Vec3i(139, 139, 139);
 	public static final Vec3i COLOR_DISABLED = new Vec3i(64, 64, 64);
 
@@ -44,7 +44,7 @@ public class CraftingPackageRecipeType implements IPackageRecipeType {
 	protected CraftingPackageRecipeType() {}
 
 	@Override
-	public ResourceLocation getName() {
+	public Identifier getName() {
 		return NAME;
 	}
 
@@ -84,7 +84,7 @@ public class CraftingPackageRecipeType implements IPackageRecipeType {
 	}
 
 	@Override
-	public List<ResourceLocation> getJEICategories() {
+	public List<Identifier> getJEICategories() {
 		return CATEGORIES;
 	}
 

@@ -10,20 +10,10 @@
 		"ICI"
 	],
 	"key": {
-		"C": {
-			"item": "packagedauto:package_component"
-		},
-		"G": {
-			"item": "minecraft:glowstone"
-		},
-		"T": {
-			"tag": "c:glass_blocks"
-		},
-		"I": {
-			"tag": "c:ingots/copper"
-		},
-		"R": {
-			"tag": "c:dusts/redstone"
-		}
+		"C": "packagedauto:package_component",
+		"G": "minecraft:glowstone",
+		"T": "#c:glass_blocks",
+		"I": "#c:ingots/copper",
+		"R": "#c:dusts/redstone"
 	}
 }

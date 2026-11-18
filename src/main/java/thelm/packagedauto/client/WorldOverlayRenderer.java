@@ -2,31 +2,40 @@ package thelm.packagedauto.client;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.OptionalDouble;
 
 import org.joml.Matrix4fStack;
 
 import com.google.common.primitives.Doubles;
+import com.mojang.blaze3d.pipeline.BlendFunction;
+import com.mojang.blaze3d.pipeline.ColorTargetState;
+import com.mojang.blaze3d.pipeline.DepthStencilState;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.PoseStack.Pose;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat.Mode;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.rendertype.LayeringTransform;
+import net.minecraft.client.renderer.rendertype.OutputTarget;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.ExtractLevelRenderStateEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
 import net.neoforged.neoforge.client.event.RenderLevelStageEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import thelm.packagedauto.api.DirectionalGlobalPos;
@@ -45,21 +54,30 @@ public class WorldOverlayRenderer {
 	private List<DirectionalMarkerInfo> directionalMarkers = new LinkedList<>();
 	private List<SizedMarkerInfo> sizedMarkers = new LinkedList<>();
 	private List<BeamInfo> beams = new LinkedList<>();
+	private DeltaTracker deltaTracker;
 
 	public void onConstruct() {
-		mc = Minecraft.getInstance();
 		NeoForge.EVENT_BUS.addListener(this::onClientTickPost);
+		NeoForge.EVENT_BUS.addListener(this::onExtractLevelRenderState);
 		NeoForge.EVENT_BUS.addListener(this::onRenderLevel);
 	}
 
+	public void onRegisterRenderPipelines(RegisterRenderPipelinesEvent event) {
+		event.registerPipeline(RenderTypeHelper.MARKER_LINE_PIPELINE);
+		event.registerPipeline(RenderTypeHelper.MARKER_QUAD_PIPELINE);
+	}
+
 	public void onRegisterRenderBuffers(RegisterRenderBuffersEvent event) {
-		event.registerRenderBuffer(RenderTypeHelper.MARKER_LINE_4);
+		event.registerRenderBuffer(RenderTypeHelper.MARKER_LINE);
 		event.registerRenderBuffer(RenderTypeHelper.MARKER_QUAD);
-		event.registerRenderBuffer(RenderTypeHelper.BEAM_LINE_3);
+		event.registerRenderBuffer(RenderTypeHelper.BEAM_LINE);
 	}
 
 	public void onClientTickPost(ClientTickEvent.Post event) {
-		if(mc.level == null || mc.player == null || mc.isPaused()) {
+		if(mc == null) {
+			mc = Minecraft.getInstance();
+		}
+		if(mc == null || mc.level == null || mc.player == null || mc.isPaused()) {
 			return;
 		}
 		for(InteractionHand hand : InteractionHand.values()) {
@@ -73,20 +91,18 @@ public class WorldOverlayRenderer {
 		}
 	}
 
-	public void onRenderLevel(RenderLevelStageEvent event) {
-		if(event.getStage() != RenderLevelStageEvent.Stage.AFTER_LEVEL) {
-			return;
-		}
+	public void onExtractLevelRenderState(ExtractLevelRenderStateEvent event) {
+		deltaTracker = event.getDeltaTracker();
+	}
 
+	public void onRenderLevel(RenderLevelStageEvent.AfterLevel event) {
 		Matrix4fStack matrixStack = RenderSystem.getModelViewStack();
 		matrixStack.pushMatrix();
 		matrixStack.mul(event.getModelViewMatrix());
-		RenderSystem.applyModelViewMatrix();
 
-		render(event.getPoseStack(), event.getPartialTick());
+		render(event.getPoseStack(), deltaTracker);
 
 		matrixStack.popMatrix();
-		RenderSystem.applyModelViewMatrix();
 	}
 
 	public void addDirectionalMarkers(List<DirectionalGlobalPos> positions, int color, int lifetime) {
@@ -108,11 +124,11 @@ public class WorldOverlayRenderer {
 		beams.removeIf(beam->beam.shouldRemove(currentTick));
 
 		float renderTick = currentTick+deltaTracker.getGameTimeDeltaPartialTick(true);
-		Vec3 cameraPos = mc.gameRenderer.getMainCamera().getPosition();
+		Vec3 cameraPos = mc.gameRenderer.getMainCamera().position();
 
 		MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
 		VertexConsumer quadBuffer = buffers.getBuffer(RenderTypeHelper.MARKER_QUAD);
-		VertexConsumer lineBuffer = buffers.getBuffer(RenderTypeHelper.MARKER_LINE_4);
+		VertexConsumer lineBuffer = buffers.getBuffer(RenderTypeHelper.MARKER_LINE);
 
 		for(DirectionalMarkerInfo marker : directionalMarkers) {
 			int r = marker.color>>16&0xFF;
@@ -142,11 +158,9 @@ public class WorldOverlayRenderer {
 			}
 		}
 
-		RenderSystem.disableDepthTest();
 		buffers.endBatch();
-		RenderSystem.enableDepthTest();
 
-		lineBuffer = buffers.getBuffer(RenderTypeHelper.MARKER_LINE_4);
+		lineBuffer = buffers.getBuffer(RenderTypeHelper.MARKER_LINE);
 
 		for(SizedMarkerInfo marker : sizedMarkers) {
 			Vec3 lowerCorner = marker.lowerCorner;
@@ -164,7 +178,7 @@ public class WorldOverlayRenderer {
 
 		buffers.endBatch();
 
-		lineBuffer = buffers.getBuffer(RenderTypeHelper.BEAM_LINE_3);
+		lineBuffer = buffers.getBuffer(RenderTypeHelper.BEAM_LINE);
 
 		for(BeamInfo beam : beams) {
 			Vec3 source = beam.source;
@@ -193,63 +207,63 @@ public class WorldOverlayRenderer {
 		float z = (float)delta.z;
 		if(direction == null || direction == Direction.NORTH) {
 			// Face North, Edge Bottom
-			buffer.addVertex(pose, 0, 0, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0);
-			buffer.addVertex(pose, x, 0, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0);
+			buffer.addVertex(pose, 0, 0, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0).setLineWidth(4);
+			buffer.addVertex(pose, x, 0, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0).setLineWidth(4);
 			// Face North, Edge Top
-			buffer.addVertex(pose, x, y, 0).setColor(r, g, b, a).setNormal(pose, -1, 0, 0);
-			buffer.addVertex(pose, 0, y, 0).setColor(r, g, b, a).setNormal(pose, -1, 0, 0);
+			buffer.addVertex(pose, x, y, 0).setColor(r, g, b, a).setNormal(pose, -1, 0, 0).setLineWidth(4);
+			buffer.addVertex(pose, 0, y, 0).setColor(r, g, b, a).setNormal(pose, -1, 0, 0).setLineWidth(4);
 		}
 		if(direction == null || direction == Direction.SOUTH) {
 			// Face South, Edge Bottom
-			buffer.addVertex(pose, x, 0, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0);
-			buffer.addVertex(pose, 0, 0, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0);
+			buffer.addVertex(pose, x, 0, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0).setLineWidth(4);
+			buffer.addVertex(pose, 0, 0, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0).setLineWidth(4);
 			// Face South, Edge Top
-			buffer.addVertex(pose, 0, y, z).setColor(r, g, b, a).setNormal(pose, 1, 0, 0);
-			buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, 1, 0, 0);
+			buffer.addVertex(pose, 0, y, z).setColor(r, g, b, a).setNormal(pose, 1, 0, 0).setLineWidth(4);
+			buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, 1, 0, 0).setLineWidth(4);
 		}
 		if(direction == null || direction == Direction.WEST) {
 			// Face West, Edge Bottom
-			buffer.addVertex(pose, 0, 0, 0).setColor(r, g, b, a).setNormal(pose, 0, 0, 1);
-			buffer.addVertex(pose, 0, 0, z).setColor(r, g, b, a).setNormal(pose, 0, 0, 1);
+			buffer.addVertex(pose, 0, 0, 0).setColor(r, g, b, a).setNormal(pose, 0, 0, 1).setLineWidth(4);
+			buffer.addVertex(pose, 0, 0, z).setColor(r, g, b, a).setNormal(pose, 0, 0, 1).setLineWidth(4);
 			// Face West, Edge Top
-			buffer.addVertex(pose, 0, y, z).setColor(r, g, b, a).setNormal(pose, 0, 0, -1);
-			buffer.addVertex(pose, 0, y, 0).setColor(r, g, b, a).setNormal(pose, 0, 0, -1);
+			buffer.addVertex(pose, 0, y, z).setColor(r, g, b, a).setNormal(pose, 0, 0, -1).setLineWidth(4);
+			buffer.addVertex(pose, 0, y, 0).setColor(r, g, b, a).setNormal(pose, 0, 0, -1).setLineWidth(4);
 		}
 		if(direction == null || direction == Direction.EAST) {
 			// Face East, Edge Bottom
-			buffer.addVertex(pose, x, 0, z).setColor(r, g, b, a).setNormal(pose, 0, 0, -1);
-			buffer.addVertex(pose, x, 0, 0).setColor(r, g, b, a).setNormal(pose, 0, 0, -1);
+			buffer.addVertex(pose, x, 0, z).setColor(r, g, b, a).setNormal(pose, 0, 0, -1).setLineWidth(4);
+			buffer.addVertex(pose, x, 0, 0).setColor(r, g, b, a).setNormal(pose, 0, 0, -1).setLineWidth(4);
 			// Face East, Edge Top
-			buffer.addVertex(pose, x, y, 0).setColor(r, g, b, a).setNormal(pose, 0, 0, 1);
-			buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, 0, 0, 1);
+			buffer.addVertex(pose, x, y, 0).setColor(r, g, b, a).setNormal(pose, 0, 0, 1).setLineWidth(4);
+			buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, 0, 0, 1).setLineWidth(4);
 		}
 		if(direction == Direction.DOWN) {
 			// Face Down
-			buffer.addVertex(pose, 0, 0, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0);
-			buffer.addVertex(pose, x, 0, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0);
-			buffer.addVertex(pose, x, 0, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0);
-			buffer.addVertex(pose, 0, 0, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0);
+			buffer.addVertex(pose, 0, 0, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0).setLineWidth(4);
+			buffer.addVertex(pose, x, 0, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0).setLineWidth(4);
+			buffer.addVertex(pose, x, 0, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0).setLineWidth(4);
+			buffer.addVertex(pose, 0, 0, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0).setLineWidth(4);
 		}
 		if(direction == Direction.UP) {
 			// Face Up
-			buffer.addVertex(pose, 0, y, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0);
-			buffer.addVertex(pose, x, y, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0);
-			buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0);
-			buffer.addVertex(pose, 0, y, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0);
+			buffer.addVertex(pose, 0, y, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0).setLineWidth(4);
+			buffer.addVertex(pose, x, y, 0).setColor(r, g, b, a).setNormal(pose, 1, 0, 0).setLineWidth(4);
+			buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0).setLineWidth(4);
+			buffer.addVertex(pose, 0, y, z).setColor(r, g, b, a).setNormal(pose, -1, 0, 0).setLineWidth(4);
 		}
 		if(direction == null) {
 			// Face North, Edge West
-			buffer.addVertex(pose, 0, 0, 0).setColor(r, g, b, a).setNormal(pose, 0, 1, 0);
-			buffer.addVertex(pose, 0, y, 0).setColor(r, g, b, a).setNormal(pose, 0, 1, 0);
+			buffer.addVertex(pose, 0, 0, 0).setColor(r, g, b, a).setNormal(pose, 0, 1, 0).setLineWidth(4);
+			buffer.addVertex(pose, 0, y, 0).setColor(r, g, b, a).setNormal(pose, 0, 1, 0).setLineWidth(4);
 			// Face North, Edge East
-			buffer.addVertex(pose, x, y, 0).setColor(r, g, b, a).setNormal(pose, 0, -1, 0);
-			buffer.addVertex(pose, x, 0, 0).setColor(r, g, b, a).setNormal(pose, 0, -1, 0);
+			buffer.addVertex(pose, x, y, 0).setColor(r, g, b, a).setNormal(pose, 0, -1, 0).setLineWidth(4);
+			buffer.addVertex(pose, x, 0, 0).setColor(r, g, b, a).setNormal(pose, 0, -1, 0).setLineWidth(4);
 			// Face South, Edge East
-			buffer.addVertex(pose, x, 0, z).setColor(r, g, b, a).setNormal(pose, 0, 1, 0);
-			buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, 0, 1, 0);
+			buffer.addVertex(pose, x, 0, z).setColor(r, g, b, a).setNormal(pose, 0, 1, 0).setLineWidth(4);
+			buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, 0, 1, 0).setLineWidth(4);
 			// Face South, Edge West
-			buffer.addVertex(pose, 0, y, z).setColor(r, g, b, a).setNormal(pose, 0, -1, 0);
-			buffer.addVertex(pose, 0, 0, z).setColor(r, g, b, a).setNormal(pose, 0, -1, 0);
+			buffer.addVertex(pose, 0, y, z).setColor(r, g, b, a).setNormal(pose, 0, -1, 0).setLineWidth(4);
+			buffer.addVertex(pose, 0, 0, z).setColor(r, g, b, a).setNormal(pose, 0, -1, 0).setLineWidth(4);
 		}
 	}
 
@@ -262,8 +276,8 @@ public class WorldOverlayRenderer {
 		float xn = (float)normalVec.x;
 		float yn = (float)normalVec.y;
 		float zn = (float)normalVec.z;
-		buffer.addVertex(pose, 0, 0, 0).setColor(r, g, b, a).setNormal(pose, xn, yn, zn);
-		buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, xn, yn, zn);
+		buffer.addVertex(pose, 0, 0, 0).setColor(r, g, b, a).setNormal(pose, xn, yn, zn).setLineWidth(3);
+		buffer.addVertex(pose, x, y, z).setColor(r, g, b, a).setNormal(pose, xn, yn, zn).setLineWidth(3);
 	}
 
 	public static record DirectionalMarkerInfo(List<DirectionalGlobalPos> positions, int color, int lifetime, int startTick) {
@@ -320,48 +334,42 @@ public class WorldOverlayRenderer {
 		}
 	}
 
-	public static class RenderTypeHelper extends RenderType {
+	public static class RenderTypeHelper {
 
-		private RenderTypeHelper(String name, VertexFormat format, Mode mode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setupState, Runnable clearState) {
-			super(name, format, mode, bufferSize, affectsCrumbling, sortOnUpload, setupState, clearState);
-		}
+		public static final RenderPipeline MARKER_LINE_PIPELINE =
+				RenderPipeline.builder(RenderPipelines.LINES_SNIPPET).
+				withLocation(Identifier.parse("packagedauto:pipeline/marker_line")).
+				withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)).
+				build();
+		public static final RenderPipeline MARKER_QUAD_PIPELINE =
+				RenderPipeline.builder(RenderPipelines.MATRICES_PROJECTION_SNIPPET, RenderPipelines.GLOBALS_SNIPPET).
+				withLocation(Identifier.parse("packagedauto:pipeline/marker_quad")).
+				withVertexShader("core/position_color").
+				withFragmentShader("core/position_color").
+				withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT)).
+				withVertexFormat(DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.QUADS).
+				withDepthStencilState(new DepthStencilState(CompareOp.ALWAYS_PASS, false)).
+				withCull(false).
+				build();
 
-		public static final RenderType MARKER_LINE_4;
-		public static final RenderType MARKER_QUAD;
-		public static final RenderType BEAM_LINE_3;
-
-		static {
-			MARKER_LINE_4 = create("packagedauto:marker_line_4",
-					DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 8192, false, false,
-					CompositeState.builder().
-					setShaderState(RENDERTYPE_LINES_SHADER).
-					setLineState(new LineStateShard(OptionalDouble.of(4))).
-					setLayeringState(VIEW_OFFSET_Z_LAYERING).
-					setWriteMaskState(COLOR_WRITE).
-					setDepthTestState(NO_DEPTH_TEST).
-					setCullState(NO_CULL).
-					createCompositeState(false));
-			MARKER_QUAD = create("packagedauto:marker_quad",
-					DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.QUADS, 1024, false, false,
-					CompositeState.builder().
-					setShaderState(RenderStateShard.POSITION_COLOR_SHADER).
-					setLayeringState(VIEW_OFFSET_Z_LAYERING).
-					setTransparencyState(TRANSLUCENT_TRANSPARENCY).
-					setWriteMaskState(COLOR_WRITE).
-					setDepthTestState(NO_DEPTH_TEST).
-					setCullState(NO_CULL).
-					createCompositeState(false));
-			BEAM_LINE_3 = create("packagedauto:beam_line_3",
-					DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINES, 8192, false, false,
-					CompositeState.builder().
-					setShaderState(RENDERTYPE_LINES_SHADER).
-					setLineState(new LineStateShard(OptionalDouble.of(3))).
-					setLayeringState(VIEW_OFFSET_Z_LAYERING).
-					setTransparencyState(TRANSLUCENT_TRANSPARENCY).
-					setOutputState(ITEM_ENTITY_TARGET).
-					setWriteMaskState(COLOR_DEPTH_WRITE).
-					setCullState(NO_CULL).
-					createCompositeState(false));
-		}
+		public static final RenderType MARKER_LINE = RenderType.create(
+				"packagedauto:marker_line",
+				RenderSetup.builder(MARKER_LINE_PIPELINE).
+				bufferSize(8192).
+				setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING).
+				createRenderSetup());
+		public static final RenderType MARKER_QUAD = RenderType.create(
+				"packagedauto:marker_quad",
+				RenderSetup.builder(MARKER_QUAD_PIPELINE).
+				bufferSize(1024).
+				setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING).
+				createRenderSetup());
+		public static final RenderType BEAM_LINE = RenderType.create(
+				"packagedauto:beam_line",
+				RenderSetup.builder(RenderPipelines.LINES).
+				bufferSize(8192).
+				setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING).
+				setOutputTarget(OutputTarget.ITEM_ENTITY_TARGET).
+				createRenderSetup());
 	}
 }

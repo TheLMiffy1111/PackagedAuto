@@ -2,9 +2,9 @@ package thelm.packagedauto.volume;
 
 import java.util.Optional;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponentPatch;
@@ -12,7 +12,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.FlowingFluid;
@@ -20,22 +20,23 @@ import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.ItemCapability;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
-import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
-import thelm.packagedauto.capability.StackFluidHandlerItem;
+import thelm.packagedauto.capability.VolumeFluidResourceHandler;
 import thelm.packagedauto.client.FluidRenderer;
 
 public class FluidVolumeType implements IVolumeType {
 
 	public static final FluidVolumeType INSTANCE = new FluidVolumeType();
-	public static final ResourceLocation NAME = ResourceLocation.parse("minecraft:fluid");
+	public static final Identifier NAME = Identifier.parse("minecraft:fluid");
 
 	@Override
-	public ResourceLocation getName() {
+	public Identifier getName() {
 		return NAME;
 	}
 
@@ -67,8 +68,7 @@ public class FluidVolumeType implements IVolumeType {
 			return Optional.of(fluidStack);
 		}
 		else if(volumeBase instanceof FluidStack fluidStack) {
-			fluidStack = fluidStack.copy();
-			fluidStack.setAmount(amount);
+			fluidStack = fluidStack.copyWithAmount(amount);
 			return Optional.of(fluidStack);
 		}
 		return Optional.empty();
@@ -94,23 +94,23 @@ public class FluidVolumeType implements IVolumeType {
 
 	@Override
 	public Optional<IVolumeStackWrapper> getStackContained(ItemStack container) {
-		return FluidUtil.getFluidContained(container).map(FluidStackWrapper::new);
+		FluidStack stack = FluidUtil.getFirstStackContained(container);
+		return stack.isEmpty() ? Optional.empty() : Optional.of(new FluidStackWrapper(stack));
 	}
 
 	@Override
 	public void setStack(ItemStack stack, IVolumeStackWrapper volumeStack) {
 		if(volumeStack instanceof FluidStackWrapper fluidStack) {
-			FluidUtil.getFluidHandler(stack).ifPresent(handler->{
-				if(handler instanceof StackFluidHandlerItem vHandler) {
-					vHandler.setFluid(fluidStack.stack());
-				}
-			});
+			ResourceHandler<FluidResource> handler = ItemAccess.forStack(stack).getCapability(Capabilities.Fluid.ITEM);
+			if(handler instanceof VolumeFluidResourceHandler vHandler) {
+				vHandler.setFluid(fluidStack.stack());
+			}
 		}
 	}
 
 	@Override
-	public Codec<? extends IVolumeStackWrapper> getStackCodec() {
-		return FluidStackWrapper.CODEC;
+	public MapCodec<? extends IVolumeStackWrapper> getStackCodec() {
+		return FluidStackWrapper.MAP_CODEC;
 	}
 
 	@Override
@@ -119,29 +119,29 @@ public class FluidVolumeType implements IVolumeType {
 	}
 
 	@Override
-	public IFluidHandlerItem makeItemCapability(ItemStack volumePackage) {
-		return new StackFluidHandlerItem(volumePackage);
+	public ResourceHandler<FluidResource> makeItemCapability(ItemAccess itemAccess) {
+		return new VolumeFluidResourceHandler(itemAccess);
 	}
 
 	@Override
-	public ItemCapability<IFluidHandlerItem, Void> getItemCapability() {
-		return Capabilities.FluidHandler.ITEM;
+	public ItemCapability<ResourceHandler<FluidResource>, ItemAccess> getItemCapability() {
+		return Capabilities.Fluid.ITEM;
 	}
 
 	@Override
 	public boolean hasBlockCapability(Level level, BlockPos pos, Direction direction) {
-		return level.getCapability(Capabilities.FluidHandler.BLOCK, pos, direction) != null;
+		return level.getCapability(Capabilities.Fluid.BLOCK, pos, direction) != null;
 	}
 
 	@Override
 	public boolean isEmpty(Level level, BlockPos pos, Direction direction) {
-		IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, direction);
+		ResourceHandler<FluidResource> handler = level.getCapability(Capabilities.Fluid.BLOCK, pos, direction);
 		if(handler != null) {
-			if(handler.getTanks() == 0) {
+			if(handler.size() == 0) {
 				return false;
 			}
-			for(int i = 0; i < handler.getTanks(); ++i) {
-				if(!handler.getFluidInTank(i).isEmpty()) {
+			for(int i = 0; i < handler.size(); ++i) {
+				if(handler.getAmountAsLong(i) > 0) {
 					return false;
 				}
 			}
@@ -151,31 +151,29 @@ public class FluidVolumeType implements IVolumeType {
 	}
 
 	@Override
-	public int fill(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, boolean simulate) {
+	public int insert(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, TransactionContext transaction) {
 		if(resource instanceof FluidStackWrapper fluidStack) {
-			IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, direction);
+			ResourceHandler<FluidResource> handler = level.getCapability(Capabilities.Fluid.BLOCK, pos, direction);
 			if(handler != null) {
-				FluidAction action = simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE;
-				return handler.fill(fluidStack.stack(), action);
+				return handler.insert(FluidResource.of(fluidStack.stack()), fluidStack.getAmount(), transaction);
 			}
 		}
 		return 0;
 	}
 
 	@Override
-	public IVolumeStackWrapper drain(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, boolean simulate) {
+	public int extract(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, TransactionContext transaction) {
 		if(resource instanceof FluidStackWrapper fluidStack) {
-			IFluidHandler handler = level.getCapability(Capabilities.FluidHandler.BLOCK, pos, direction);
+			ResourceHandler<FluidResource> handler = level.getCapability(Capabilities.Fluid.BLOCK, pos, direction);
 			if(handler != null) {
-				FluidAction action = simulate ? FluidAction.SIMULATE : FluidAction.EXECUTE;
-				return new FluidStackWrapper(handler.drain(fluidStack.stack(), action));
+				return handler.extract(FluidResource.of(fluidStack.stack()), fluidStack.getAmount(), transaction);
 			}
 		}
-		return FluidStackWrapper.EMPTY;
+		return 0;
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int i, int j, IVolumeStackWrapper stack) {
+	public void render(GuiGraphicsExtractor graphics, int i, int j, IVolumeStackWrapper stack) {
 		if(stack instanceof FluidStackWrapper fluidStack) {
 			FluidRenderer.INSTANCE.render(graphics, i, j, fluidStack.stack());
 		}

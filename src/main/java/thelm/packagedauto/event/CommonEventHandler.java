@@ -1,5 +1,7 @@
 package thelm.packagedauto.event;
 
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -7,11 +9,14 @@ import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.config.ModConfigEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.ICapabilityProvider;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.block.PackagedAutoBlocks;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
@@ -61,6 +66,7 @@ public class CommonEventHandler {
 			modEventBus.register(AppEngEventHandler.getInstance());
 		}, ()->()->{}).run();
 		NeoForge.EVENT_BUS.addListener(this::onServerAboutToStart);
+		NeoForge.EVENT_BUS.addListener(this::onDatapackSync);
 		PackagedAutoConfig.registerConfig(modContainer);
 
 		PackagedAutoBlocks.BLOCKS.register(modEventBus);
@@ -84,26 +90,30 @@ public class CommonEventHandler {
 
 	@SubscribeEvent
 	public void onRegisterCapabilities(RegisterCapabilitiesEvent event) {
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, PackagedAutoBlockEntities.PACKAGER.get(), BaseBlockEntity::getItemHandler);
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, PackagedAutoBlockEntities.PACKAGER_EXTENSION.get(), BaseBlockEntity::getItemHandler);
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, PackagedAutoBlockEntities.UNPACKAGER.get(), BaseBlockEntity::getItemHandler);
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, PackagedAutoBlockEntities.CRAFTER.get(), BaseBlockEntity::getItemHandler);
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, PackagedAutoBlockEntities.FLUID_PACKAGE_FILLER.get(), BaseBlockEntity::getItemHandler);
+		event.registerBlockEntity(Capabilities.Item.BLOCK, PackagedAutoBlockEntities.PACKAGER.get(), BaseBlockEntity::getItemHandler);
+		event.registerBlockEntity(Capabilities.Item.BLOCK, PackagedAutoBlockEntities.PACKAGER_EXTENSION.get(), BaseBlockEntity::getItemHandler);
+		event.registerBlockEntity(Capabilities.Item.BLOCK, PackagedAutoBlockEntities.UNPACKAGER.get(), BaseBlockEntity::getItemHandler);
+		event.registerBlockEntity(Capabilities.Item.BLOCK, PackagedAutoBlockEntities.CRAFTER.get(), BaseBlockEntity::getItemHandler);
+		event.registerBlockEntity(Capabilities.Item.BLOCK, PackagedAutoBlockEntities.FLUID_PACKAGE_FILLER.get(), BaseBlockEntity::getItemHandler);
 
-		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, PackagedAutoBlockEntities.PACKAGER.get(), BaseBlockEntity::getEnergyStorage);
-		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, PackagedAutoBlockEntities.PACKAGER_EXTENSION.get(), BaseBlockEntity::getEnergyStorage);
-		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, PackagedAutoBlockEntities.UNPACKAGER.get(), BaseBlockEntity::getEnergyStorage);
-		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, PackagedAutoBlockEntities.CRAFTER.get(), BaseBlockEntity::getEnergyStorage);
-		event.registerBlockEntity(Capabilities.EnergyStorage.BLOCK, PackagedAutoBlockEntities.FLUID_PACKAGE_FILLER.get(), BaseBlockEntity::getEnergyStorage);
+		event.registerBlockEntity(Capabilities.Energy.BLOCK, PackagedAutoBlockEntities.PACKAGER.get(), BaseBlockEntity::getEnergyStorage);
+		event.registerBlockEntity(Capabilities.Energy.BLOCK, PackagedAutoBlockEntities.PACKAGER_EXTENSION.get(), BaseBlockEntity::getEnergyStorage);
+		event.registerBlockEntity(Capabilities.Energy.BLOCK, PackagedAutoBlockEntities.UNPACKAGER.get(), BaseBlockEntity::getEnergyStorage);
+		event.registerBlockEntity(Capabilities.Energy.BLOCK, PackagedAutoBlockEntities.CRAFTER.get(), BaseBlockEntity::getEnergyStorage);
+		event.registerBlockEntity(Capabilities.Energy.BLOCK, PackagedAutoBlockEntities.FLUID_PACKAGE_FILLER.get(), BaseBlockEntity::getEnergyStorage);
 
 		for(IVolumeType volumeType : ApiImpl.INSTANCE.getVolumeTypeRegistry().values()) {
-			event.registerItem(volumeType.getItemCapability(), (stack, ctx)->{
-				if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) && volumeType == stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType()) {
-					return volumeType.makeItemCapability(stack);
-				}
-				return null;
-			}, PackagedAutoItems.VOLUME_PACKAGE);
+			event.registerItem(volumeType.getItemCapability(), volumeItemCap(volumeType), PackagedAutoItems.VOLUME_PACKAGE);
 		}
+	}
+
+	<T> ICapabilityProvider<ItemStack, ItemAccess, T> volumeItemCap(IVolumeType volumeType) {
+		return (stack, access)->{
+			if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) && volumeType == stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType()) {
+				return (T)volumeType.makeItemCapability(access);
+			}
+			return null;
+		};
 	}
 
 	@SubscribeEvent
@@ -145,5 +155,9 @@ public class CommonEventHandler {
 
 	public void onServerAboutToStart(ServerAboutToStartEvent event) {
 		MiscHelper.INSTANCE.setServer(event.getServer());
+	}
+
+	public void onDatapackSync(OnDatapackSyncEvent event) {
+		event.sendRecipes(RecipeType.CRAFTING);
 	}
 }

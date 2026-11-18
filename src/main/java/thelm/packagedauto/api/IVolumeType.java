@@ -7,29 +7,30 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.ItemCapability;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 public interface IVolumeType {
 
-	static final Codec<IVolumeType> CODEC = ResourceLocation.CODEC.comapFlatMap(
+	static final Codec<IVolumeType> CODEC = Identifier.CODEC.comapFlatMap(
 			DataResult.partialGet(PackagedAutoApi.instance()::getVolumeType, ()->"Unknown volume type "), IVolumeType::getName);
-	static final StreamCodec<ByteBuf, IVolumeType> STREAM_CODEC = ResourceLocation.STREAM_CODEC.
+	static final StreamCodec<ByteBuf, IVolumeType> STREAM_CODEC = Identifier.STREAM_CODEC.
 			map(PackagedAutoApi.instance()::getVolumeType, IVolumeType::getName);
 
-	ResourceLocation getName();
+	Identifier getName();
 
 	Class<?> getTypeClass();
 
@@ -55,37 +56,33 @@ public interface IVolumeType {
 
 	void setStack(ItemStack stack, IVolumeStackWrapper volumeStack);
 
-	Codec<? extends IVolumeStackWrapper> getStackCodec();
+	MapCodec<? extends IVolumeStackWrapper> getStackCodec();
 
 	StreamCodec<RegistryFriendlyByteBuf, ? extends IVolumeStackWrapper> getStackStreamCodec();
 
-	default CompoundTag saveRawStack(CompoundTag nbt, IVolumeStackWrapper stack, HolderLookup.Provider registries) {
-		Codec<IVolumeStackWrapper> codecCast = (Codec<IVolumeStackWrapper>)getStackCodec();
-		if(!(codecCast instanceof MapCodec.MapCodecCodec)) {
-			codecCast = codecCast.fieldOf("stack").codec();
-		}
-		return nbt.merge((CompoundTag)codecCast.encodeStart(registries.createSerializationContext(NbtOps.INSTANCE), stack).result().orElse(new CompoundTag()));
+	default void serializeStack(IVolumeStackWrapper stack, ValueOutput output) {
+		MapCodec<IVolumeStackWrapper> codecCast = (MapCodec<IVolumeStackWrapper>)getStackCodec();
+		output.store(codecCast, stack);
 	}
 
-	default IVolumeStackWrapper loadRawStack(CompoundTag nbt, HolderLookup.Provider registries) {
-		Codec<IVolumeStackWrapper> codecCast = (Codec<IVolumeStackWrapper>)getStackCodec();
-		return codecCast.parse(registries.createSerializationContext(NbtOps.INSTANCE), nbt).result().orElse(getEmptyStackInstance());
+	default IVolumeStackWrapper deserializeStack(ValueInput input) {
+		MapCodec<IVolumeStackWrapper> codecCast = (MapCodec<IVolumeStackWrapper>)getStackCodec();
+		return input.read(codecCast).orElse(getEmptyStackInstance());
 	}
 
-	Object makeItemCapability(ItemStack volumePackage);
+	Object makeItemCapability(ItemAccess itemAccess);
 
-	@SuppressWarnings("rawtypes")
-	ItemCapability getItemCapability();
+	ItemCapability<?, ItemAccess> getItemCapability();
 
 	boolean hasBlockCapability(Level level, BlockPos pos, Direction direction);
 
 	boolean isEmpty(Level level, BlockPos pos, Direction direction);
 
-	int fill(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, boolean simulate);
+	int insert(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, TransactionContext transaction);
 
-	IVolumeStackWrapper drain(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, boolean simulate);
+	int extract(Level level, BlockPos pos, Direction direction, IVolumeStackWrapper resource, TransactionContext transaction);
 
-	void render(GuiGraphics graphics, int i, int j, IVolumeStackWrapper stack);
+	void render(GuiGraphicsExtractor graphics, int i, int j, IVolumeStackWrapper stack);
 
 	default int[] getIncrements() {
 		return new int[] {100, 500, 1000};

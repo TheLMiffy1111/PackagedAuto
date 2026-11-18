@@ -13,10 +13,4 @@ public class PackageItemSubtypeInterpreter implements ISubtypeInterpreter<ItemSt
 	public Object getSubtypeData(ItemStack ingredient, UidContext context) {
 		return List.of(ingredient.get(PackagedAutoDataComponents.RECIPE), ingredient.get(PackagedAutoDataComponents.PACKAGE_INDEX));
 	}
-
-	@Override
-	public String getLegacyStringSubtypeInfo(ItemStack ingredient, UidContext context) {
-		Object data = getSubtypeData(ingredient, context);
-		return data == null ? "" : data.toString();
-	}
 }

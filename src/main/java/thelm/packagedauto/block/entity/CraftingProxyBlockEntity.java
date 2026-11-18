@@ -9,11 +9,7 @@ import com.google.common.cache.CacheBuilder;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -24,13 +20,15 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 import thelm.packagedauto.api.DirectionalGlobalPos;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
-import thelm.packagedauto.inventory.CraftingProxyItemHandler;
+import thelm.packagedauto.inventory.CraftingProxyItemResourceHandler;
 import thelm.packagedauto.item.PackagedAutoItems;
 import thelm.packagedauto.menu.CraftingProxyMenu;
 import thelm.packagedauto.packet.BeamPacket;
@@ -47,7 +45,7 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 
 	public CraftingProxyBlockEntity(BlockPos pos, BlockState state) {
 		super(PackagedAutoBlockEntities.CRAFTING_PROXY.get(), pos, state);
-		setItemHandler(new CraftingProxyItemHandler(this));
+		setItemHandler(new CraftingProxyItemResourceHandler(this));
 	}
 
 	@Override
@@ -72,7 +70,7 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 			if(machine.acceptPackage(recipeInfo, stacks, target.direction(), blocking)) {
 				Direction dir = target.direction();
 				Vec3 source = Vec3.atCenterOf(worldPosition);
-				Vec3 delta = Vec3.atLowerCornerOf(target.blockPos().subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getNormal()).scale(0.5));
+				Vec3 delta = Vec3.atLowerCornerOf(target.blockPos().subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getUnitVec3i()).scale(0.5));
 				BeamPacket.sendBeams((ServerLevel)level, source, List.of(delta), 0xFF7F00, 6, true, 32);
 				return true;
 			}
@@ -105,7 +103,7 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 			if(target != null) {
 				Direction dir = target.direction();
 				Vec3 source = Vec3.atCenterOf(worldPosition);
-				Vec3 delta = Vec3.atLowerCornerOf(target.blockPos().subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getNormal()).scale(0.5));
+				Vec3 delta = Vec3.atLowerCornerOf(target.blockPos().subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getUnitVec3i()).scale(0.5));
 				DirectionalMarkerPacket.sendDirectionalMarkers(player, List.of(target), 0xFFFF00, 200);
 				BeamPacket.sendBeams(player, source, List.of(delta), 0xFFFF00, 200, false);
 			}
@@ -116,15 +114,16 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 	}
 
 	@Override
-	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
-		if(!nbt.contains("target")) {
+	public ISettingsCloneable.Result loadConfig(ValueInput input, Player player) {
+		DirectionalGlobalPos target = input.read("target", DirectionalGlobalPos.CODEC).orElse(null);
+		if(target == null) {
 			return ISettingsCloneable.Result.fail(Component.translatable("item.packagedauto.settings_cloner.invalid"));
 		}
 		int availableCount = 0;
 		Inventory playerInventory = player.getInventory();
-		if(!itemHandler.getStackInSlot(0).isEmpty()) {
-			if(itemHandler.getStackInSlot(0).is(PackagedAutoItems.PROXY_MARKER)) {
-				availableCount += itemHandler.getStackInSlot(0).getCount();
+		if(!itemHandler.getStack(0).isEmpty()) {
+			if(itemHandler.getStack(0).is(PackagedAutoItems.PROXY_MARKER)) {
+				availableCount += itemHandler.getStack(0).getCount();
 			}
 			else {
 				return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.crafting_proxy.non_marker_present"));
@@ -142,8 +141,8 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 			}
 			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.crafting_proxy.no_markers"));
 		}
-		int removedCount = itemHandler.getStackInSlot(0).getCount();
-		itemHandler.setStackInSlot(0, ItemStack.EMPTY);
+		int removedCount = itemHandler.getStack(0).getCount();
+		itemHandler.setStack(0, ItemStack.EMPTY);
 		if(removedCount < 1) {
 			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
 				ItemStack stack = playerInventory.getItem(i);
@@ -163,24 +162,21 @@ public class CraftingProxyBlockEntity extends BaseBlockEntity implements IPackag
 				level.addFreshEntity(item);
 			}
 		}
-		Tag targetTag = nbt.get("target");
-		DirectionalGlobalPos globalPos = DirectionalGlobalPos.CODEC.parse(NbtOps.INSTANCE, targetTag).result().get();
 		ItemStack stack = PackagedAutoItems.PROXY_MARKER.toStack();
 		DataComponentPatch patch = DataComponentPatch.builder().
-				set(PackagedAutoDataComponents.MARKER_POS.get(), globalPos).
+				set(PackagedAutoDataComponents.MARKER_POS.get(), target).
 				build();
 		stack.applyComponents(patch);
-		itemHandler.setStackInSlot(0, stack);
+		itemHandler.setStack(0, stack);
 		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+	public ISettingsCloneable.Result saveConfig(ValueOutput output, Player player) {
 		if(target == null) {
 			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.crafting_proxy.empty"));
 		}
-		Tag targetTag = DirectionalGlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, target).result().get();
-		nbt.put("target", targetTag);
+		output.store("target", DirectionalGlobalPos.CODEC, target);
 		return ISettingsCloneable.Result.success();
 	}
 

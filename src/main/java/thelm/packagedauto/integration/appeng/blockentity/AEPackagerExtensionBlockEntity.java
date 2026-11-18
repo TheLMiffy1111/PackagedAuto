@@ -21,11 +21,12 @@ import appeng.api.util.AECableType;
 import appeng.api.util.AEColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import thelm.packagedauto.block.PackagedAutoBlocks;
 import thelm.packagedauto.block.entity.PackagerExtensionBlockEntity;
 
@@ -45,7 +46,7 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 			getMainNode().create(level, worldPosition);
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
+		if(drawMEEnergy && !level.isClientSide() && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -108,15 +109,15 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 			IStorageService storageService = grid.getStorageService();
 			IEnergyService energyService = grid.getEnergyService();
 			MEStorage inventory = storageService.getInventory();
-			ItemStack is = itemHandler.getStackInSlot(9);
+			ItemStack is = itemHandler.getStack(9);
 			AEItemKey key = AEItemKey.of(is);
 			int count = is.getCount();
 			int inserted = (int)StorageHelper.poweredInsert(energyService, inventory, key, count, source, Actionable.MODULATE);
 			if(inserted == count) {
-				itemHandler.setStackInSlot(9, ItemStack.EMPTY);
+				itemHandler.setStack(9, ItemStack.EMPTY);
 			}
 			else {
-				itemHandler.setStackInSlot(9, key.toStack(count-inserted));
+				itemHandler.setStack(9, key.toStack(count-inserted));
 			}
 		}
 		else {
@@ -129,27 +130,30 @@ public class AEPackagerExtensionBlockEntity extends PackagerExtensionBlockEntity
 			IGrid grid = getMainNode().getGrid();
 			IEnergyService energyService = grid.getEnergyService();
 			double conversion = PowerUnit.FE.convertTo(PowerUnit.AE, 1);
-			int request = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored()-energyStorage.getEnergyStored());
+			int request = Math.min(energyStorage.getMaxInsert(), energyStorage.getCapacityAsInt()-energyStorage.getAmountAsInt());
 			double available = energyService.extractAEPower((request+0.5)*conversion, Actionable.SIMULATE, PowerMultiplier.CONFIG);
 			int extract = (int)(available/conversion);
 			energyService.extractAEPower(extract*conversion, Actionable.MODULATE, PowerMultiplier.CONFIG);
-			energyStorage.receiveEnergy(extract, false);
+			try(Transaction transaction = Transaction.openRoot()) {
+				energyStorage.insert(extract, transaction);
+				transaction.commit();
+			}
 		}
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
-		if(nbt.contains("node")) {
-			getMainNode().loadFromNBT(nbt);
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		if(input.child("node").isPresent()) {
+			getMainNode().deserialize(input);
 		}
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
 		if(gridNode != null) {
-			gridNode.saveToNBT(nbt);
+			gridNode.serialize(output);
 		}
 	}
 }

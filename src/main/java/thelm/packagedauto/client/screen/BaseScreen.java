@@ -1,13 +1,12 @@
 package thelm.packagedauto.client.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.Slot;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
@@ -21,36 +20,38 @@ public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContaine
 	public final C menu;
 
 	public BaseScreen(C menu, Inventory inventory, Component title) {
-		super(menu, inventory, title);
+		this(menu, inventory, title, 176, 166);
+	}
+
+	public BaseScreen(C menu, Inventory inventory, Component title, int imageWidth, int imageHeight) {
+		super(menu, inventory, title, imageWidth, imageHeight);
 		this.menu = menu;
+		titleLabelX = imageWidth/2 - font.width(title)/2;
+		titleLabelY = 6;
+		inventoryLabelX = menu.getPlayerInvX();
+		inventoryLabelY = menu.getPlayerInvY()-11;
 	}
 
-	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-		super.render(graphics, mouseX, mouseY, partialTicks);
-		renderTooltip(graphics, mouseX, mouseY);
-	}
-
-	protected abstract ResourceLocation getBackgroundTexture();
+	protected abstract Identifier getBackgroundTexture();
 
 	@Override
-	protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+		super.extractBackground(graphics, mouseX, mouseY, partialTicks);
 		if(imageWidth > 256 || imageHeight > 256) {
-			graphics.blit(getBackgroundTexture(), leftPos, topPos, 0, 0, imageWidth, imageHeight, 512, 512);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, getBackgroundTexture(), leftPos, topPos, 0, 0, imageWidth, imageHeight, 512, 512);
 		}
 		else {
-			graphics.blit(getBackgroundTexture(), leftPos, topPos, 0, 0, imageWidth, imageHeight);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, getBackgroundTexture(), leftPos, topPos, 0, 0, imageWidth, imageHeight, 256, 256);
 		}
-		renderBgAdditional(graphics, partialTicks, mouseX, mouseY);
+		extractBackgroundAdditional(graphics, mouseX, mouseY, partialTicks);
 		for(int i = 0; i < menu.slots.size(); ++i) {
 			Slot slot = menu.slots.get(i);
 			if(slot.isActive()) {
 				if(slot instanceof FalseCopyVolumeSlot vSlot) {
-					IVolumeStackWrapper stack = vSlot.volumeInventory.getStackInSlot(slot.getSlotIndex());
+					IVolumeStackWrapper stack = vSlot.volumeInventory.getStack(slot.getSlotIndex());
 					if(!stack.isEmpty()) {
 						stack.getVolumeType().render(graphics, leftPos+slot.x, topPos+slot.y, stack);
-						renderQuantity(graphics, leftPos+slot.x, topPos+slot.y, String.valueOf(stack.getAmount()), 0xFFFFFF);
+						extractQuantity(graphics, leftPos+slot.x, topPos+slot.y, String.valueOf(stack.getAmount()), 0xFFFFFF);
 					}
 				}
 				else if((slot instanceof FalseCopySlot || slot instanceof PreviewSlot)
@@ -64,30 +65,31 @@ public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContaine
 		}
 	}
 
-	protected void renderBgAdditional(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {}
+	protected void extractBackgroundAdditional(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {}
 
 	@Override
-	protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+	protected void extractTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		super.extractTooltip(graphics, mouseX, mouseY);
 		for(int i = 0; i < menu.slots.size(); ++i) {
 			Slot slot = menu.slots.get(i);
 			if(slot.isActive() && slot instanceof FalseCopyVolumeSlot vSlot) {
-				IVolumeStackWrapper stack = vSlot.volumeInventory.getStackInSlot(slot.getSlotIndex());
+				IVolumeStackWrapper stack = vSlot.volumeInventory.getStack(slot.getSlotIndex());
 				if(!stack.isEmpty() && inBounds(slot.x, slot.y, 17, 17, mouseX-leftPos, mouseY-topPos)) {
-					graphics.renderComponentTooltip(font, stack.getTooltip(), mouseX-leftPos, mouseY-topPos);
+					graphics.setComponentTooltipForNextFrame(font, stack.getTooltip(), mouseX, mouseY);
 				}
 			}
 		}
 	}
 
 	@Override
-	protected void slotClicked(Slot slot, int slotId, int mouseButton, ClickType type) {
+	protected void slotClicked(Slot slot, int slotId, int mouseButton, ContainerInput containerInput) {
 		if(mouseButton == 0 &&
-				type != ClickType.QUICK_MOVE &&
+				containerInput != ContainerInput.QUICK_MOVE &&
 				menu.getCarried().isEmpty() &&
 				slot instanceof FalseCopySlot &&
 				slot.isActive() &&
 				!slot.getItem().isEmpty()) {
-			if(!hasControlDown() && slot.getItem().has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK)) {
+			if(!minecraft.hasControlDown() && slot.getItem().has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK)) {
 				minecraft.setScreen(new VolumeAmountSpecifyingScreen(
 						this, minecraft.player.getInventory(), slot.index, slot.getItem().get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK), getVolumeAmountSpecificationLimit(slot)));
 			}
@@ -97,7 +99,7 @@ public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContaine
 			}
 		}
 		else {
-			super.slotClicked(slot, slotId, mouseButton, type);
+			super.slotClicked(slot, slotId, mouseButton, containerInput);
 		}
 	}
 
@@ -113,14 +115,14 @@ public abstract class BaseScreen<C extends BaseMenu<?>> extends AbstractContaine
 		return ox >= x && ox <= x + w && oy >= y && oy <= y + h;
 	}
 
-	public void renderQuantity(GuiGraphics graphics, int x, int y, String qty, int color) {
+	public void extractQuantity(GuiGraphicsExtractor graphics, int x, int y, String qty, int color) {
 		boolean large = minecraft.isEnforceUnicode();
-		graphics.pose().pushPose();
-		graphics.pose().translate(x, y, 300);
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(x, y);
 		if(!large) {
-			graphics.pose().scale(0.5F, 0.5F, 1);
+			graphics.pose().scale(0.5F, 0.5F);
 		}
-		graphics.drawString(font, qty, (large ? 16 : 30) - font.width(qty), large ? 8 : 22, color, true);
-		graphics.pose().popPose();
+		graphics.text(font, qty, (large ? 16 : 30) - font.width(qty), large ? 8 : 22, color, true);
+		graphics.pose().popMatrix();
 	}
 }

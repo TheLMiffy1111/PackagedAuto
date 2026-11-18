@@ -6,7 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -16,10 +16,10 @@ import thelm.packagedauto.client.WorldOverlayRenderer;
 
 public record BeamPacket(Vec3 source, List<Vec3> deltas, int color, int lifetime, boolean fadeout) implements CustomPacketPayload {
 
-	public static final Type<BeamPacket> TYPE = new Type<>(ResourceLocation.parse("packagedauto:beam"));
+	public static final Type<BeamPacket> TYPE = new Type<>(Identifier.parse("packagedauto:beam"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, BeamPacket> STREAM_CODEC = StreamCodec.composite(
-			PacketStreamCodecs.VEC3, BeamPacket::source,
-			PacketStreamCodecs.VEC3.apply(ByteBufCodecs.list()), BeamPacket::deltas,
+			Vec3.STREAM_CODEC, BeamPacket::source,
+			Vec3.STREAM_CODEC.apply(ByteBufCodecs.list()), BeamPacket::deltas,
 			PacketStreamCodecs.UNSIGNED_MEDIUM, BeamPacket::color,
 			ByteBufCodecs.UNSIGNED_SHORT, BeamPacket::lifetime,
 			ByteBufCodecs.BOOL, BeamPacket::fadeout,

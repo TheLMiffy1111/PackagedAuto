@@ -2,15 +2,15 @@ package thelm.packagedauto.menu;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.Slot;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 import thelm.packagedauto.block.entity.EncoderBlockEntity;
-import thelm.packagedauto.inventory.EncoderPatternItemHandler;
+import thelm.packagedauto.inventory.EncoderPatternItemResourceHandler;
 import thelm.packagedauto.slot.FalseCopySlot;
 import thelm.packagedauto.slot.PreviewSlot;
 
 public class EncoderMenu extends BaseMenu<EncoderBlockEntity> {
 
-	public EncoderPatternItemHandler patternItemHandler;
+	public EncoderPatternItemResourceHandler patternItemHandler;
 
 	public EncoderMenu(int windowId, Inventory playerInventory, EncoderBlockEntity blockEntity) {
 		super(PackagedAutoMenus.ENCODER.get(), windowId, playerInventory, blockEntity);
@@ -24,7 +24,7 @@ public class EncoderMenu extends BaseMenu<EncoderBlockEntity> {
 	protected void setupSlots(boolean init) {
 		patternItemHandler = blockEntity.patternItemHandlers[blockEntity.patternIndex];
 		if(init) {
-			addSlot(new SlotItemHandler(itemHandler, 0, 8, 26));
+			addSlot(new ResourceHandlerSlot(itemHandler, itemHandler, 0, 8, 26));
 		}
 		for(int i = 0; i < 9; ++i) {
 			for(int j = 0; j < 9; ++j) {
@@ -50,11 +50,11 @@ public class EncoderMenu extends BaseMenu<EncoderBlockEntity> {
 		}
 	}
 
-	protected void addPatternSlot(EncoderPatternItemHandler patternItemHandler, int index, int x, int y, boolean init) {
+	protected void addPatternSlot(EncoderPatternItemResourceHandler patternItemHandler, int index, int x, int y, boolean init) {
 		Slot slot;
 		int slotIndex = index + 1;
 		if((index < 81 || index < 90 && patternItemHandler.recipeType.canSetOutput()) && patternItemHandler.recipeType.getEnabledSlots().contains(index)) {
-			slot = new FalseCopySlot(patternItemHandler, index, x, y);
+			slot = new FalseCopySlot(patternItemHandler, patternItemHandler, index, x, y);
 		}
 		else {
 			slot = new PreviewSlot(patternItemHandler, index, x, y);

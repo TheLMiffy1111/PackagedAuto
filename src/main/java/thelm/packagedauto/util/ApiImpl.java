@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.CrudeIncrementalIntIdentityHashBiMap;
 import thelm.packagedauto.api.IMiscHelper;
 import thelm.packagedauto.api.IPackageRecipeType;
@@ -24,10 +24,10 @@ public class ApiImpl extends PackagedAutoApi {
 	public static final ApiImpl INSTANCE = new ApiImpl();
 
 	private static final Logger LOGGER = LogManager.getLogger();
-	private static final NavigableMap<ResourceLocation, IPackageRecipeType> RECIPE_REGISTRY = new TreeMap<>();
+	private static final NavigableMap<Identifier, IPackageRecipeType> RECIPE_REGISTRY = new TreeMap<>();
 	private static final Multimap<String, IPackageRecipeType> RECIPE_ORDER = MultimapBuilder.treeKeys().arrayListValues().build();
 	private static final CrudeIncrementalIntIdentityHashBiMap<IPackageRecipeType> RECIPE_IDS = CrudeIncrementalIntIdentityHashBiMap.create(4);
-	private static final NavigableMap<ResourceLocation, IVolumeType> VOLUME_REGISTRY = new TreeMap<>();
+	private static final NavigableMap<Identifier, IVolumeType> VOLUME_REGISTRY = new TreeMap<>();
 	private static final Map<Class<?>, IVolumeType> VOLUME_CLASS_REGISTRY = new HashMap<>();
 
 	private ApiImpl() {}
@@ -44,7 +44,7 @@ public class ApiImpl extends PackagedAutoApi {
 	}
 
 	@Override
-	public IPackageRecipeType getRecipeType(ResourceLocation name) {
+	public IPackageRecipeType getRecipeType(Identifier name) {
 		return RECIPE_REGISTRY.get(name);
 	}
 
@@ -62,12 +62,12 @@ public class ApiImpl extends PackagedAutoApi {
 
 	private synchronized void computeIds() {
 		if(RECIPE_IDS.size() == 0) {
-			RECIPE_ORDER.forEach((mod, type)->RECIPE_IDS.add(type));
+			RECIPE_ORDER.forEach((_, type)->RECIPE_IDS.add(type));
 		}
 	}
 
 	@Override
-	public NavigableMap<ResourceLocation, IPackageRecipeType> getRecipeTypeRegistry() {
+	public NavigableMap<Identifier, IPackageRecipeType> getRecipeTypeRegistry() {
 		return Collections.unmodifiableNavigableMap(RECIPE_REGISTRY);
 	}
 
@@ -90,7 +90,7 @@ public class ApiImpl extends PackagedAutoApi {
 	}
 
 	@Override
-	public IVolumeType getVolumeType(ResourceLocation name) {
+	public IVolumeType getVolumeType(Identifier name) {
 		return VOLUME_REGISTRY.get(name);
 	}
 
@@ -102,7 +102,7 @@ public class ApiImpl extends PackagedAutoApi {
 	}
 
 	@Override
-	public NavigableMap<ResourceLocation, IVolumeType> getVolumeTypeRegistry() {
+	public NavigableMap<Identifier, IVolumeType> getVolumeTypeRegistry() {
 		return Collections.unmodifiableNavigableMap(VOLUME_REGISTRY);
 	}
 

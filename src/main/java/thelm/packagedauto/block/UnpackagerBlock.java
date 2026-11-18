@@ -7,18 +7,17 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.redstone.Orientation;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 import thelm.packagedauto.block.entity.PackagedAutoBlockEntities;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
-import thelm.packagedauto.block.entity.UnpackagerBlockEntity.PackageTracker;
 
 public class UnpackagerBlock extends BaseBlock {
 
-	protected UnpackagerBlock() {
-		super(BlockBehaviour.Properties.of().strength(10F, 15F).mapColor(MapColor.METAL).sound(SoundType.METAL));
+	protected UnpackagerBlock(Properties properties) {
+		super(properties.strength(10F, 15F).mapColor(MapColor.METAL).sound(SoundType.METAL));
 	}
 
 	@Override
@@ -32,21 +31,7 @@ public class UnpackagerBlock extends BaseBlock {
 	}
 
 	@Override
-	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving) {
-		if(state.getBlock() != newState.getBlock()) {
-			if(level.getBlockEntity(pos) instanceof UnpackagerBlockEntity blockEntity) {
-				for(PackageTracker tracker : blockEntity.trackers) {
-					if(!tracker.isEmpty()) {
-						tracker.ejectItems();
-					}
-				}
-			}
-		}
-		super.onRemove(state, level, pos, newState, isMoving);
-	}
-
-	@Override
-	public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+	protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, Orientation orientation, boolean movedByPiston) {
 		level.getBlockEntity(pos, PackagedAutoBlockEntities.UNPACKAGER.get()).ifPresent(UnpackagerBlockEntity::updatePowered);
 	}
 }

@@ -10,14 +10,8 @@
 		"GWG"
 	],
 	"key": {
-		"E": {
-			"item": "minecraft:ender_eye"
-		},
-		"W": {
-			"tag": "minecraft:planks"
-		},
-		"G": {
-			"tag": "c:ingots/gold"
-		}
+		"E": "minecraft:ender_eye",
+		"W": "#minecraft:planks",
+		"G": "#c:ingots/gold"
 	}
 }

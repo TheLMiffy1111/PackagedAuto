@@ -1,6 +1,7 @@
 package thelm.packagedauto.api;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import io.netty.buffer.ByteBuf;
@@ -14,11 +15,12 @@ import net.minecraft.world.level.Level;
 
 public record SettingsClonerData(String type, CompoundTag data, GlobalPos globalPos) {
 
-	public static final Codec<SettingsClonerData> CODEC = RecordCodecBuilder.create(instance->instance.group(
+	public static final MapCodec<SettingsClonerData> MAP_CODEC = RecordCodecBuilder.mapCodec(instance->instance.group(
 			Codec.STRING.fieldOf("type").forGetter(SettingsClonerData::type),
 			CompoundTag.CODEC.fieldOf("data").forGetter(SettingsClonerData::data),
 			GlobalPos.MAP_CODEC.forGetter(SettingsClonerData::globalPos)).
 			apply(instance, SettingsClonerData::new));
+	public static final Codec<SettingsClonerData> CODEC = Codec.lazyInitialized(MAP_CODEC::codec);
 	public static final StreamCodec<ByteBuf, SettingsClonerData> STREAM_CODEC = StreamCodec.composite(
 			ByteBufCodecs.STRING_UTF8, SettingsClonerData::type,
 			ByteBufCodecs.COMPOUND_TAG, SettingsClonerData::data,

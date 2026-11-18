@@ -14,7 +14,7 @@ issueTrackerURL = "https://github.com/TheLMiffy1111/PackagedAuto/issues"
 
 [[dependencies.packagedauto]]
 	modId = "neoforge"
-	versionRange = "[21,)"
+	versionRange = "[26.1,)"
 	type = "required"
 
 [[dependencies.packagedauto]]

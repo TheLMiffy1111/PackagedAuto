@@ -2,19 +2,24 @@ package thelm.packagedauto.block.entity;
 
 import java.util.UUID;
 
+import com.mojang.logging.LogUtils;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.player.Player;
@@ -22,14 +27,18 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import thelm.packagedauto.energy.EnergyStorage;
-import thelm.packagedauto.inventory.BaseItemHandler;
+import thelm.packagedauto.inventory.BaseItemResourceHandler;
 
 public abstract class BaseBlockEntity extends BlockEntity implements Nameable, MenuProvider {
 
-	protected BaseItemHandler<?> itemHandler = new BaseItemHandler<>(this, 0);
+	protected BaseItemResourceHandler<?> itemHandler = new BaseItemResourceHandler<>(this, 0);
 	protected EnergyStorage energyStorage = new EnergyStorage(this, 0);
 	public Component customName = null;
 	protected UUID ownerUUID = null;
@@ -38,15 +47,15 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 		super(blockEntityType, pos, state);
 	}
 
-	public BaseItemHandler<?> getItemHandler() {
+	public BaseItemResourceHandler<?> getItemHandler() {
 		return itemHandler;
 	}
 
-	public IItemHandler getItemHandler(Direction direction) {
+	public ResourceHandler<ItemResource> getItemHandler(Direction direction) {
 		return itemHandler.getWrapperForDirection(direction);
 	}
 
-	public void setItemHandler(BaseItemHandler<?> itemHandler) {
+	public void setItemHandler(BaseItemResourceHandler<?> itemHandler) {
 		this.itemHandler = itemHandler;
 	}
 
@@ -86,13 +95,25 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 	public void tick() {}
 
 	public int getComparatorSignal() {
-		return ItemHandlerHelper.calcRedstoneFromInventory(itemHandler.getWrapperForDirection(null));
+		return ResourceHandlerUtil.getRedstoneSignalFromResourceHandler(itemHandler.getWrapperForDirection(null));
 	}
 
 	@Override
-	protected void applyImplicitComponents(DataComponentInput componentInput) {
-		super.applyImplicitComponents(componentInput);
-		customName = componentInput.get(DataComponents.CUSTOM_NAME);
+	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		if(level != null) {
+			for(int i = 0; i < itemHandler.size(); ++i) {
+				ItemResource resource = itemHandler.getResource(i);
+				if(!resource.isEmpty()) {
+					Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), resource.toStack(itemHandler.getAmountAsInt(i)));
+				}
+			}
+		}
+	}
+
+	@Override
+	protected void applyImplicitComponents(DataComponentGetter components) {
+		super.applyImplicitComponents(components);
+		customName = components.get(DataComponents.CUSTOM_NAME);
 	}
 
 	@Override
@@ -102,46 +123,38 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 	}
 
 	@Override
-	protected void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
-		ownerUUID = null;
-		if(nbt.hasUUID("owner_uuid")) {
-			ownerUUID = nbt.getUUID("owner_uuid");
-		}
-		loadSync(nbt, registries);
-		itemHandler.load(nbt, registries);
-		energyStorage.read(nbt);
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		ownerUUID = input.read("owner_uuid", UUIDUtil.CODEC).orElse(null);
+		loadSync(input);
+		itemHandler.deserialize(input);
+		energyStorage.deserialize(input);
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
 		if(ownerUUID != null) {
-			nbt.putUUID("owner_uuid", ownerUUID);
+			output.store("owner_uuid", UUIDUtil.CODEC, ownerUUID);
 		}
-		saveSync(nbt, registries);
-		itemHandler.save(nbt, registries);
-		energyStorage.save(nbt);
+		saveSync(output);
+		itemHandler.serialize(output);
+		energyStorage.serialize(output);
 	}
 
-	public void loadSync(CompoundTag nbt, HolderLookup.Provider registries) {
-		if(nbt.contains("name")) {
-			customName = ComponentSerialization.CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), nbt.get("name")).result().orElse(null);
-		}
+	protected void loadSync(ValueInput input) {
+		customName = input.read("name", ComponentSerialization.CODEC).orElse(null);
 	}
 
-	public CompoundTag saveSync(CompoundTag nbt, HolderLookup.Provider registries) {
+	protected void saveSync(ValueOutput output) {
 		if(customName != null) {
-			nbt.put("name", ComponentSerialization.CODEC.encodeStart(registries.createSerializationContext(NbtOps.INSTANCE), customName).result().get());
+			output.store("name", ComponentSerialization.CODEC, customName);
 		}
-		return nbt;
 	}
 
 	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries) {
-		if(pkt.getTag() != null) {
-			loadSync(pkt.getTag(), registries);
-		}
+	public void onDataPacket(Connection net, ValueInput input) {
+		loadSync(input);
 	}
 
 	@Override
@@ -150,15 +163,17 @@ public abstract class BaseBlockEntity extends BlockEntity implements Nameable, M
 	}
 
 	@Override
-	public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries) {
-		loadSync(tag, registries);
+	public void handleUpdateTag(ValueInput input) {
+		loadSync(input);
 	}
 
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
-		CompoundTag nbt = super.getUpdateTag(registries);
-		saveSync(nbt, registries);
-		return nbt;
+		try(ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(problemPath(), LogUtils.getLogger())) {
+			TagValueOutput output = TagValueOutput.createWithContext(reporter, registries);
+			saveSync(output);
+			return output.buildResult();
+		}
 	}
 
 	public void sync(boolean rerender) {

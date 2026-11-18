@@ -14,19 +14,19 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public interface IPackageRecipeType {
 
-	static final Codec<IPackageRecipeType> CODEC = ResourceLocation.CODEC.comapFlatMap(
+	static final Codec<IPackageRecipeType> CODEC = Identifier.CODEC.comapFlatMap(
 			DataResult.partialGet(PackagedAutoApi.instance()::getRecipeType, ()->"Unknown recipe type "), IPackageRecipeType::getName).
-			orElse(PackagedAutoApi.instance().getRecipeType(ResourceLocation.parse("packagedauto:ordered_processing")));
-	static final StreamCodec<ByteBuf, IPackageRecipeType> STREAM_CODEC = ResourceLocation.STREAM_CODEC.
+			orElse(PackagedAutoApi.instance().getRecipeType(Identifier.parse("packagedauto:ordered_processing")));
+	static final StreamCodec<ByteBuf, IPackageRecipeType> STREAM_CODEC = Identifier.STREAM_CODEC.
 			map(PackagedAutoApi.instance()::getRecipeType, IPackageRecipeType::getName);
 
-	ResourceLocation getName();
+	Identifier getName();
 
 	MutableComponent getDisplayName();
 
@@ -58,11 +58,11 @@ public interface IPackageRecipeType {
 		return true;
 	}
 
-	default List<ResourceLocation> getJEICategories() {
+	default List<Identifier> getJEICategories() {
 		return List.of();
 	}
 
-	default List<ResourceLocation> getEMICategories() {
+	default List<Identifier> getEMICategories() {
 		return getJEICategories();
 	}
 

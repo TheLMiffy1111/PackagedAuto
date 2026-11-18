@@ -11,14 +11,15 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
@@ -30,37 +31,37 @@ import thelm.packagedauto.util.PackagePattern;
 public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 
 	public static final MapCodec<CraftingPackageRecipeInfo> MAP_CODEC = RecordCodecBuilder.mapCodec(instance->instance.group(
-			ResourceLocation.CODEC.fieldOf("id").forGetter(CraftingPackageRecipeInfo::getRecipeId),
+			Identifier.CODEC.fieldOf("id").forGetter(CraftingPackageRecipeInfo::getRecipeId),
 			Codec.INT.fieldOf("width").forGetter(CraftingPackageRecipeInfo::getMatrixWidth),
 			Codec.INT.fieldOf("height").forGetter(CraftingPackageRecipeInfo::getMatrixHeight),
 			ItemStack.OPTIONAL_CODEC.orElse(ItemStack.EMPTY).sizeLimitedListOf(9).fieldOf("input").forGetter(CraftingPackageRecipeInfo::getMatrixAsList)).
 			apply(instance, CraftingPackageRecipeInfo::new));
 	public static final Codec<CraftingPackageRecipeInfo> CODEC = MAP_CODEC.codec();
 	public static final StreamCodec<RegistryFriendlyByteBuf, CraftingPackageRecipeInfo> STREAM_CODEC = StreamCodec.composite(
-			ResourceLocation.STREAM_CODEC, CraftingPackageRecipeInfo::getRecipeId,
+			Identifier.STREAM_CODEC, CraftingPackageRecipeInfo::getRecipeId,
 			ByteBufCodecs.INT, CraftingPackageRecipeInfo::getMatrixWidth,
 			ByteBufCodecs.INT, CraftingPackageRecipeInfo::getMatrixHeight,
 			ItemStack.OPTIONAL_LIST_STREAM_CODEC, CraftingPackageRecipeInfo::getMatrixAsList,
 			CraftingPackageRecipeInfo::new);
 
-	private final ResourceLocation id;
+	private final Identifier id;
 	private final CraftingRecipe recipe;
 	private final List<ItemStack> input;
 	private final CraftingInput matrix;
 	private final ItemStack output;
 	private final List<IPackagePattern> patterns = new ArrayList<>();
 
-	public CraftingPackageRecipeInfo(ResourceLocation id, int width, int height, List<ItemStack> matrixSer) {
+	public CraftingPackageRecipeInfo(Identifier id, int width, int height, List<ItemStack> matrixSer) {
 		this.id = id;
 		matrix = CraftingInput.of(width, height, matrixSer);
 		input = MiscHelper.INSTANCE.condenseStacks(matrix.items());
 		for(int i = 0; i*9 < input.size(); ++i) {
 			patterns.add(new PackagePattern(this, i));
 		}
-		Recipe<?> recipeSer = MiscHelper.INSTANCE.getRecipeManager().byKey(id).map(RecipeHolder::value).orElse(null);
-		if(recipeSer instanceof CraftingRecipe craftingRecipe) {
+		RecipeHolder<?> recipeHolder = MiscHelper.INSTANCE.getRecipeMap().byKey(ResourceKey.create(Registries.RECIPE, id));
+		if(recipeHolder != null && recipeHolder.value() instanceof CraftingRecipe craftingRecipe) {
 			recipe = craftingRecipe;
-			output = recipe.assemble(matrix, MiscHelper.INSTANCE.getRegistryAccess()).copy();
+			output = recipe.assemble(matrix).copy();
 		}
 		else {
 			recipe = null;
@@ -77,11 +78,11 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 			matrixList.set(i, toSet.copy());
 		}
 		matrix = CraftingInput.of(3, 3, matrixList);
-		RecipeHolder<CraftingRecipe> recipeHolder = MiscHelper.INSTANCE.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, matrix, level).orElse(null);
+		RecipeHolder<CraftingRecipe> recipeHolder = MiscHelper.INSTANCE.getRecipeMap().getRecipesFor(RecipeType.CRAFTING, matrix, level).findFirst().orElse(null);
 		if(recipeHolder != null) {
-			id = recipeHolder.id();
+			id = recipeHolder.id().identifier();
 			recipe = recipeHolder.value();
-			output = recipe.assemble(matrix, level.registryAccess()).copy();
+			output = recipe.assemble(matrix).copy();
 		}
 		else {
 			id = null;
@@ -124,7 +125,7 @@ public class CraftingPackageRecipeInfo implements ICraftingPackageRecipeInfo {
 		return recipe;
 	}
 
-	public ResourceLocation getRecipeId() {
+	public Identifier getRecipeId() {
 		return id;
 	}
 

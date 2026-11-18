@@ -12,7 +12,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import thelm.packagedauto.api.IPackageRecipeInfo;
@@ -24,12 +24,12 @@ import thelm.packagedauto.util.MiscHelper;
 public class PositionedProcessingPackageRecipeType extends OrderedProcessingPackageRecipeType {
 
 	public static final PositionedProcessingPackageRecipeType INSTANCE = new PositionedProcessingPackageRecipeType();
-	public static final ResourceLocation NAME = ResourceLocation.parse("packagedauto:positioned_processing");
+	public static final Identifier NAME = Identifier.parse("packagedauto:positioned_processing");
 
 	protected PositionedProcessingPackageRecipeType() {}
 
 	@Override
-	public ResourceLocation getName() {
+	public Identifier getName() {
 		return NAME;
 	}
 

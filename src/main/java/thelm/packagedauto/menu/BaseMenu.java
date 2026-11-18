@@ -7,13 +7,13 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerData;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
-import thelm.packagedauto.inventory.BaseItemHandler;
+import thelm.packagedauto.inventory.BaseItemResourceHandler;
 import thelm.packagedauto.slot.FalseCopySlot;
 import thelm.packagedauto.util.MiscHelper;
 import thelm.packagedauto.util.OptionalIntDataSlot;
@@ -23,13 +23,13 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 
 	public final T blockEntity;
 	public final Inventory inventory;
-	public final BaseItemHandler<?> itemHandler;
+	public final BaseItemResourceHandler<?> itemHandler;
 
 	public BaseMenu(MenuType<?> menuType, int windowId, Inventory inventory, T blockEntity) {
 		super(menuType, windowId);
 		this.blockEntity = blockEntity;
 		this.inventory = inventory;
-		itemHandler = blockEntity != null ? blockEntity.getItemHandler() : new BaseItemHandler<>(null, 0);
+		itemHandler = blockEntity != null ? blockEntity.getItemHandler() : new BaseItemResourceHandler<>(null, 0);
 		addDataSlots(itemHandler);
 	}
 
@@ -62,7 +62,7 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 	}
 
 	public int getSizeInventory() {
-		return itemHandler.getSlots();
+		return itemHandler.size();
 	}
 
 	public boolean supportsShiftClick(Player player, int slotIndex) {
@@ -171,8 +171,8 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 	protected List<Slot> dragSlots = new ArrayList<>();
 
 	@Override
-	public void clicked(int slotId, int clickSubtype, ClickType clickType, Player player) {
-		if(clickType == ClickType.QUICK_CRAFT) {
+	public void clicked(int slotId, int clickSubtype, ContainerInput containerInput, Player player) {
+		if(containerInput == ContainerInput.QUICK_CRAFT) {
 			if(clickSubtype == 1 && slotId >= 0) {
 				dragCount++;
 				if(slots.get(slotId) instanceof FalseCopySlot slot) {
@@ -190,8 +190,8 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 				dragSlots.clear();
 			}
 		}
-		else if(clickType != ClickType.CLONE && slotId >= 0 && slots.get(slotId) instanceof FalseCopySlot slot) {
-			if(clickType == ClickType.QUICK_MOVE) {
+		else if(containerInput != ContainerInput.CLONE && slotId >= 0 && slots.get(slotId) instanceof FalseCopySlot slot) {
+			if(containerInput == ContainerInput.QUICK_MOVE) {
 				slot.set(ItemStack.EMPTY);
 			}
 			else {
@@ -219,7 +219,7 @@ public class BaseMenu<T extends BaseBlockEntity> extends AbstractContainerMenu {
 			}
 			return;
 		}
-		super.clicked(slotId, clickSubtype, clickType, player);
+		super.clicked(slotId, clickSubtype, containerInput, player);
 	}
 
 	@Override

@@ -20,12 +20,12 @@ public class PackagedAutoItems {
 	public static final DeferredItem<?> FLUID_PACKAGE_FILLER = ITEMS.registerSimpleBlockItem(PackagedAutoBlocks.FLUID_PACKAGE_FILLER);
 	public static final DeferredItem<?> PACKAGING_PROVIDER = ITEMS.registerSimpleBlockItem(PackagedAutoBlocks.PACKAGING_PROVIDER);
 
-	public static final DeferredItem<RecipeHolderItem> RECIPE_HOLDER = ITEMS.register("recipe_holder", RecipeHolderItem::new);
+	public static final DeferredItem<RecipeHolderItem> RECIPE_HOLDER = ITEMS.registerItem("recipe_holder", RecipeHolderItem::new);
 	public static final DeferredItem<MarkerItem> DISTRIBUTOR_MARKER = ITEMS.registerItem("distributor_marker", MarkerItem::new);
 	public static final DeferredItem<MarkerItem> PROXY_MARKER = ITEMS.registerItem("proxy_marker", MarkerItem::new);
-	public static final DeferredItem<SettingsClonerItem> SETTINGS_CLONER = ITEMS.register("settings_cloner", SettingsClonerItem::new);
-	public static final DeferredItem<PackageItem> PACKAGE = ITEMS.register("package", PackageItem::new);
-	public static final DeferredItem<VolumePackageItem> VOLUME_PACKAGE = ITEMS.register("volume_package", VolumePackageItem::new);
+	public static final DeferredItem<SettingsClonerItem> SETTINGS_CLONER = ITEMS.registerItem("settings_cloner", SettingsClonerItem::new);
+	public static final DeferredItem<PackageItem> PACKAGE = ITEMS.registerItem("package", PackageItem::new);
+	public static final DeferredItem<VolumePackageItem> VOLUME_PACKAGE = ITEMS.registerItem("volume_package", VolumePackageItem::new);
 	public static final DeferredItem<?> PACKAGE_COMPONENT = ITEMS.registerSimpleItem("package_component");
 	public static final DeferredItem<?> ME_PACKAGE_COMPONENT = ITEMS.registerSimpleItem("me_package_component");
 }

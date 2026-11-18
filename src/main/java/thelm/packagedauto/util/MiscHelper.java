@@ -1,10 +1,12 @@
 package thelm.packagedauto.util;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -19,6 +21,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import it.unimi.dsi.fastutil.objects.Object2IntLinkedOpenHashMap;
@@ -27,25 +30,27 @@ import it.unimi.dsi.fastutil.objects.ObjectRBTreeSet;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeMap;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueInput.ValueInputList;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueOutput.ValueOutputList;
 import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.common.util.DataComponentUtil;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 import thelm.packagedauto.api.IMiscHelper;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
@@ -62,6 +67,7 @@ public class MiscHelper implements IMiscHelper {
 	private static final Logger LOGGER = LogManager.getLogger();
 
 	private static MinecraftServer server;
+	private static RecipeMap recipeMap;
 
 	private MiscHelper() {}
 
@@ -75,10 +81,10 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
-	public List<ItemStack> condenseStacks(IItemHandler itemHandler) {
-		List<ItemStack> stacks = new ArrayList<>(itemHandler.getSlots());
-		for(int i = 0; i < itemHandler.getSlots(); ++i) {
-			stacks.add(itemHandler.getStackInSlot(i));
+	public List<ItemStack> condenseStacks(ResourceHandler<ItemResource> itemHandler) {
+		List<ItemStack> stacks = new ArrayList<>(itemHandler.size());
+		for(int i = 0; i < itemHandler.size(); ++i) {
+			stacks.add(itemHandler.getResource(i).toStack(itemHandler.getAmountAsInt(i)));
 		}
 		return condenseStacks(stacks);
 	}
@@ -136,70 +142,56 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
-	public ListTag saveAllItems(ListTag tagList, List<ItemStack> list, HolderLookup.Provider registries) {
-		return saveAllItems(tagList, list, "Index", registries);
+	public void serializeItemList(List<ItemStack> list, ValueOutputList output) {
+		serializeItemList(list, "index", output);
 	}
 
 	@Override
-	public ListTag saveAllItems(ListTag tagList, List<ItemStack> list, String indexKey, HolderLookup.Provider registries) {
+	public void serializeItemList(List<ItemStack> list, String indexKey, ValueOutputList output) {
 		for(int i = 0; i < list.size(); ++i) {
 			ItemStack stack = list.get(i);
 			boolean empty = stack.isEmpty();
 			if(!empty || i == list.size()-1) {
-				if(empty) {
-					stack = ItemStack.EMPTY;
+				ValueOutput child = output.addChild();
+				child.putByte(indexKey, (byte)i);
+				if(!empty) {
+					child.store(LARGE_ITEM_MAP_CODEC, stack);
 				}
-				CompoundTag nbt = new CompoundTag();
-				nbt.putByte(indexKey, (byte)i);
-				saveItemWithLargeCount(nbt, stack, registries);
-				tagList.add(nbt);
 			}
 		}
-		return tagList;
 	}
 
 	@Override
-	public void loadAllItems(ListTag tagList, List<ItemStack> list, HolderLookup.Provider registries) {
-		loadAllItems(tagList, list, "Index", registries);
+	public void deserializeItemList(List<ItemStack> list, ValueInputList input) {
+		deserializeItemList(list, "index", input);
 	}
 
 	@Override
-	public void loadAllItems(ListTag tagList, List<ItemStack> list, String indexKey, HolderLookup.Provider registries) {
+	public void deserializeItemList(List<ItemStack> list, String indexKey, ValueInputList input) {
 		list.clear();
 		try {
-			for(int i = 0; i < tagList.size(); ++i) {
-				CompoundTag nbt = tagList.getCompound(i);
-				int j = nbt.getByte(indexKey) & 255;
-				while(j >= list.size()) {
+			for(ValueInput child : input) {
+				int i = child.getByteOr(indexKey, (byte)0) & 255;
+				while(i >= list.size()) {
 					list.add(ItemStack.EMPTY);
 				}
-				if(j >= 0)  {
-					ItemStack stack = loadItemWithLargeCount(nbt, registries);
-					list.set(j, stack.isEmpty() ? ItemStack.EMPTY : stack);
+				if(i >= 0)  {
+					ItemStack stack = child.read(LARGE_ITEM_MAP_CODEC).orElse(ItemStack.EMPTY);
+					list.set(i, stack.isEmpty() ? ItemStack.EMPTY : stack);
 				}
 			}
 		}
 		catch(UnsupportedOperationException | IndexOutOfBoundsException e) {}
 	}
 
-	public static final Codec<ItemStack> LARGE_ITEM_CODEC = RecordCodecBuilder.create(instance->instance.group(
-			ItemStack.ITEM_NON_AIR_CODEC.fieldOf("item").forGetter(ItemStack::getItemHolder),
+	public static final MapCodec<ItemStack> LARGE_ITEM_MAP_CODEC = RecordCodecBuilder.mapCodec(instance->instance.group(
+			Item.CODEC_WITH_BOUND_COMPONENTS.fieldOf("item").forGetter(ItemStack::typeHolder),
 			ExtraCodecs.POSITIVE_INT.fieldOf("count").orElse(1).forGetter(ItemStack::getCount),
 			DataComponentPatch.CODEC.optionalFieldOf("components", DataComponentPatch.EMPTY).forGetter(ItemStack::getComponentsPatch)).
 			apply(instance, ItemStack::new));
-
-	@Override
-	public CompoundTag saveItemWithLargeCount(CompoundTag nbt, ItemStack stack, HolderLookup.Provider registries) {
-		if(!stack.isEmpty()) {
-			nbt.merge((CompoundTag)DataComponentUtil.wrapEncodingExceptions(stack, LARGE_ITEM_CODEC, registries));
-		}
-		return nbt;
-	}
-
-	@Override
-	public ItemStack loadItemWithLargeCount(CompoundTag nbt, HolderLookup.Provider registries) {
-		return LARGE_ITEM_CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), nbt).result().orElse(ItemStack.EMPTY);
-	}
+	public static final Codec<ItemStack> LARGE_ITEM_CODEC = Codec.lazyInitialized(LARGE_ITEM_MAP_CODEC::codec);
+	public static final Codec<ItemStack> LARGE_ITEM_OPTIONAL_CODEC = ExtraCodecs.optionalEmptyMap(LARGE_ITEM_CODEC).
+			xmap(itemStack->itemStack.orElse(ItemStack.EMPTY), itemStack->itemStack.isEmpty() ? Optional.empty() : Optional.of(itemStack));
 
 	@Override
 	public IPackagePattern getPattern(IPackageRecipeInfo recipeInfo, int index) {
@@ -235,8 +227,8 @@ public class MiscHelper implements IMiscHelper {
 		if(stack.isEmpty()) {
 			return ItemStack.EMPTY;
 		}
-		if(stack.getItem().hasCraftingRemainingItem(stack)) {
-			stack = stack.getItem().getCraftingRemainingItem(stack);
+		if(stack.getCraftingRemainder() != null) {
+			stack = stack.getCraftingRemainder().create();
 			if(!stack.isEmpty() && stack.isDamageableItem() && stack.getDamageValue() > stack.getMaxDamage()) {
 				return ItemStack.EMPTY;
 			}
@@ -268,12 +260,17 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
-	public boolean isEmpty(IItemHandler itemHandler) {
-		if(itemHandler == null || itemHandler.getSlots() == 0) {
+	public boolean isPackage(ItemResource resource) {
+		return resource.has(PackagedAutoDataComponents.RECIPE) && resource.has(PackagedAutoDataComponents.PACKAGE_INDEX);
+	}
+
+	@Override
+	public boolean isEmpty(ResourceHandler<ItemResource> itemHandler) {
+		if(itemHandler == null || itemHandler.size() == 0) {
 			return false;
 		}
-		for(int i = 0; i < itemHandler.getSlots(); ++i) {
-			if(!itemHandler.getStackInSlot(i).isEmpty()) {
+		for(int i = 0; i < itemHandler.size(); ++i) {
+			if(itemHandler.getAmountAsLong(i) > 0) {
 				return false;
 			}
 		}
@@ -291,39 +288,19 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
-	public CompoundTag saveRecipe(CompoundTag nbt, IPackageRecipeInfo recipe, HolderLookup.Provider registries) {
-		return nbt.merge((CompoundTag)IPackageRecipeInfo.CODEC.encodeStart(registries.createSerializationContext(NbtOps.INSTANCE), recipe).result().orElse(new CompoundTag()));
-	}
-
-	@Override
-	public IPackageRecipeInfo loadRecipe(CompoundTag nbt, HolderLookup.Provider registries) {
-		IPackageRecipeInfo recipe = RECIPE_CACHE.getIfPresent(nbt);
-		if(recipe != null) {
-			return recipe;
-		}
-		recipe = IPackageRecipeInfo.CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), nbt).result().orElse(null);
-		if(recipe != null) {
-			RECIPE_CACHE.put(nbt, recipe);
-		}
-		return recipe;
-	}
-
-	@Override
-	public ListTag saveRecipeList(ListTag tagList, List<IPackageRecipeInfo> recipes, HolderLookup.Provider registries) {
+	public void serializeRecipeList(List<IPackageRecipeInfo> recipes, ValueOutputList output) {
 		for(IPackageRecipeInfo recipe : recipes) {
-			tagList.add(saveRecipe(new CompoundTag(), recipe, registries));
+			if(recipe != null) {
+				output.addChild().store(IPackageRecipeInfo.MAP_CODEC, recipe);
+			}
 		}
-		return tagList;
 	}
 
 	@Override
-	public List<IPackageRecipeInfo> loadRecipeList(ListTag tagList, HolderLookup.Provider registries) {
-		List<IPackageRecipeInfo> recipes = new ArrayList<>(tagList.size());
-		for(int i = 0; i < tagList.size(); ++i) {
-			IPackageRecipeInfo recipe = loadRecipe(tagList.getCompound(i), registries);
-			if(recipe != null) {
-				recipes.add(recipe);
-			}
+	public List<IPackageRecipeInfo> deserializeRecipeList(ValueInputList input) {
+		List<IPackageRecipeInfo> recipes = new ArrayList<>();
+		for(ValueInput child : input) {
+			child.read(IPackageRecipeInfo.MAP_CODEC).ifPresent(recipes::add);
 		}
 		return recipes;
 	}
@@ -423,51 +400,53 @@ public class MiscHelper implements IMiscHelper {
 	}
 
 	@Override
-	public ItemStack insertItem(IItemHandler itemHandler, ItemStack stack, boolean requireEmptySlot, boolean simulate) {
+	public int insertItem(ResourceHandler<ItemResource> itemHandler, ItemStack stack, boolean requireEmptySlot, TransactionContext transaction) {
 		if(itemHandler == null || stack.isEmpty()) {
-			return stack;
+			return 0;
 		}
+		ItemResource resource = ItemResource.of(stack);
+		int count = stack.count();
 		if(!requireEmptySlot) {
-			return ItemHandlerHelper.insertItem(itemHandler, stack, simulate);
+			return itemHandler.insert(resource, count, transaction);
 		}
-		for(int slot = 0; slot < itemHandler.getSlots(); ++slot) {
-			if(itemHandler.getStackInSlot(slot).isEmpty()) {
-				stack = itemHandler.insertItem(slot, stack, simulate);
-				if(stack.isEmpty()) {
-					return ItemStack.EMPTY;
-				}
-			}
-		}
-		return stack;
-	}
-
-	@Override
-	public ItemStack fillVolume(Level level, BlockPos pos, Direction direction, ItemStack stack, boolean simulate) {
-		if(stack.isEmpty()) {
-			return stack;
-		}
-		if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
-				stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, pos, direction)) {
-			stack = stack.copy();
-			IVolumeStackWrapper vStack = stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK);
-			IVolumeType vType = vStack.getVolumeType();
-			while(!stack.isEmpty()) {
-				int simulateFilled = vType.fill(level, pos, direction, vStack, true);
-				if(simulateFilled == vStack.getAmount()) {
-					if(!simulate) {
-						vType.fill(level, pos, direction, vStack, false);
-					}
-					stack.shrink(1);
-					if(stack.isEmpty()) {
-						return ItemStack.EMPTY;
-					}
-				}
-				else {
+		int inserted = 0;
+		for(int slot = 0; slot < itemHandler.size(); ++slot) {
+			if(itemHandler.getAmountAsLong(slot) == 0) {
+				inserted += itemHandler.insert(slot, resource, count - inserted, transaction);
+				if(inserted >= count) {
 					break;
 				}
 			}
 		}
-		return stack;
+		return inserted;
+	}
+
+	@Override
+	public int insertVolume(Level level, BlockPos pos, Direction direction, ItemStack stack, TransactionContext transaction) {
+		if(stack.isEmpty()) {
+			return 0;
+		}
+		if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
+				stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, pos, direction)) {
+			int count = stack.count();
+			int inserted = 0;
+			IVolumeStackWrapper vStack = stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK);
+			IVolumeType vType = vStack.getVolumeType();
+			while(inserted < count) {
+				Transaction subTransaction = Transaction.open(transaction);
+				int subInserted = vType.insert(level, pos, direction, vStack, subTransaction);
+				if(subInserted == vStack.getAmount()) {
+					subTransaction.commit();
+					++inserted;
+				}
+				else {
+					subTransaction.close();
+					break;
+				}
+			}
+			return inserted;
+		}
+		return 0;
 	}
 
 	@Override
@@ -484,15 +463,20 @@ public class MiscHelper implements IMiscHelper {
 		MiscHelper.server = server;
 	}
 
+	public void setRecipeMap(RecipeMap recipeMap) {
+		MiscHelper.recipeMap = recipeMap;
+	}
+
 	@Override
-	public RecipeManager getRecipeManager() {
-		return server != null ? server.getRecipeManager() :
-			conditionalSupplier(FMLEnvironment.dist::isClient, ()->()->Minecraft.getInstance().level.getRecipeManager(), ()->()->null).get();
+	public RecipeMap getRecipeMap() {
+		return server != null ? server.getRecipeManager().recipeMap() : recipeMap;
 	}
 
 	@Override
 	public RegistryAccess getRegistryAccess() {
 		return server != null ? server.registryAccess() :
-			conditionalSupplier(FMLEnvironment.dist::isClient, ()->()->Minecraft.getInstance().level.registryAccess(), ()->()->null).get();
+			conditionalSupplier(FMLEnvironment.getDist()::isClient, ()->()->Minecraft.getInstance().level.registryAccess(), ()->()->null).get();
 	}
+
+	public static final Codec<byte[]> BYTE_ARRAY_CODEC = Codec.BYTE_BUFFER.xmap(ByteBuffer::array, ByteBuffer::wrap);
 }

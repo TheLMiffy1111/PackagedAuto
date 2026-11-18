@@ -1,28 +1,28 @@
 package thelm.packagedauto.inventory;
 
 import net.minecraft.core.Direction;
-import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
-public class FluidPackageFillerItemHandlerWrapper extends SidedItemHandlerWrapper<FluidPackageFillerItemHandler> {
+public class FluidPackageFillerItemHandlerWrapper extends SidedItemResourceHandlerWrapper<FluidPackageFillerItemHandler> {
 
-	public static final int[] SLOTS = {1};
+	public static final int[] INDICES = {1};
 
-	public FluidPackageFillerItemHandlerWrapper(FluidPackageFillerItemHandler itemHandler, Direction direction) {
-		super(itemHandler, direction);
+	public FluidPackageFillerItemHandlerWrapper(FluidPackageFillerItemHandler wrapped, Direction direction) {
+		super(wrapped, direction);
 	}
 
 	@Override
-	public int[] getSlotsForDirection(Direction direction) {
-		return SLOTS;
+	public int[] getIndicesForDirection(Direction direction) {
+		return INDICES;
 	}
 
 	@Override
-	public boolean canInsertItem(int slot, ItemStack stack, Direction direction) {
+	public boolean canInsertItem(int index, ItemResource resource, Direction direction) {
 		return false;
 	}
 
 	@Override
-	public boolean canExtractItem(int slot, Direction direction) {
-		return slot == 1;
+	public boolean canExtractItem(int index, ItemResource resource, Direction direction) {
+		return index == 1;
 	}
 }

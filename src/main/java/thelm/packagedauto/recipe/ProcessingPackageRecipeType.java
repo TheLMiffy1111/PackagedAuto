@@ -16,7 +16,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -25,14 +25,13 @@ import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.api.IRecipeSlotViewWrapper;
 import thelm.packagedauto.api.IRecipeSlotsViewWrapper;
-import thelm.packagedauto.integration.emi.PackagedAutoEMIPlugin;
 import thelm.packagedauto.integration.jei.PackagedAutoJEIPlugin;
 import thelm.packagedauto.util.MiscHelper;
 
 public class ProcessingPackageRecipeType implements IPackageRecipeType {
 
 	public static final ProcessingPackageRecipeType INSTANCE = new ProcessingPackageRecipeType();
-	public static final ResourceLocation NAME = ResourceLocation.parse("packagedauto:processing");
+	public static final Identifier NAME = Identifier.parse("packagedauto:processing");
 	public static final IntSet SLOTS;
 	public static final Vec3i COLOR = new Vec3i(139, 139, 139);
 	public static final Vec3i COLOR_HIGHLIGHT = new Vec3i(139, 139, 179);
@@ -45,7 +44,7 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 	protected ProcessingPackageRecipeType() {}
 
 	@Override
-	public ResourceLocation getName() {
+	public Identifier getName() {
 		return NAME;
 	}
 
@@ -100,16 +99,16 @@ public class ProcessingPackageRecipeType implements IPackageRecipeType {
 	}
 
 	@Override
-	public List<ResourceLocation> getJEICategories() {
+	public List<Identifier> getJEICategories() {
 		return MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("jei"),
-				()->PackagedAutoJEIPlugin::getAllRecipeCategories, ()->List::<ResourceLocation>of).get();
+				()->PackagedAutoJEIPlugin::getAllRecipeCategories, ()->List::<Identifier>of).get();
 	}
 
-	@Override
-	public List<ResourceLocation> getEMICategories() {
-		return MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("emi"),
-				()->PackagedAutoEMIPlugin::getAllRecipeCategories, ()->List::<ResourceLocation>of).get();
-	}
+	//@Override
+	//public List<Identifier> getEMICategories() {
+	//	return MiscHelper.INSTANCE.conditionalSupplier(()->ModList.get().isLoaded("emi"),
+	//			()->PackagedAutoEMIPlugin::getAllRecipeCategories, ()->List::<Identifier>of).get();
+	//}
 
 	@Override
 	public Int2ObjectMap<ItemStack> getRecipeTransferMap(IRecipeSlotsViewWrapper recipeLayoutWrapper) {

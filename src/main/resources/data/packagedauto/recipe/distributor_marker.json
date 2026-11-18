@@ -5,17 +5,9 @@
 		"count": 4
 	},
 	"ingredients": [
-		{
-			"tag": "c:ender_pearls"
-		},
-		{
-			"item": "minecraft:chorus_fruit"
-		},
-		{
-			"tag": "c:dusts/redstone"
-		},
-		{
-			"tag": "c:ingots/gold"
-		}
+		"#c:ender_pearls",
+		"minecraft:chorus_fruit",
+		"#c:dusts/redstone",
+		"#c:ingots/gold"
 	]
 }

@@ -1,0 +1,26 @@
+{
+	"parent": "minecraft:recipes/root",
+	"criteria": {
+		"has_ingredient": {
+			"conditions": {
+				"items": [{
+					"items": "packagedauto:unpackager"
+				}]
+			},
+			"trigger": "minecraft:inventory_changed"
+		},
+		"has_recipe": {
+			"conditions": {
+				"recipe": "packagedauto/proxy_marker"
+			},
+			"trigger": "minecraft:recipe_unlocked"
+		}
+	},
+	"requirements": [[
+		"has_ingredient",
+		"has_recipe"
+	]],
+	"rewards": {
+		"recipes": ["packagedauto:proxy_marker"]
+	}
+}

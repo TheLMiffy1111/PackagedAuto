@@ -24,12 +24,13 @@ import appeng.api.util.AECableType;
 import appeng.api.util.AEColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.block.PackagedAutoBlocks;
 import thelm.packagedauto.block.entity.UnpackagerBlockEntity;
@@ -52,7 +53,7 @@ public class AEUnpackagerBlockEntity extends UnpackagerBlockEntity implements II
 			getMainNode().create(level, worldPosition);
 		}
 		super.tick();
-		if(drawMEEnergy && !level.isClientSide && level.getGameTime() % refreshInterval == 0) {
+		if(drawMEEnergy && !level.isClientSide() && level.getGameTime() % refreshInterval == 0) {
 			chargeMEEnergy();
 		}
 	}
@@ -121,10 +122,13 @@ public class AEUnpackagerBlockEntity extends UnpackagerBlockEntity implements II
 	public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
 		if(getMainNode().isActive() && !isBusy() && patternDetails instanceof RecipeCraftingPatternDetails pattern) {
 			int energyReq = energyUsage*pattern.recipe.getPatterns().size();
-			if(energyStorage.getEnergyStored() >= energyReq) {
+			if(energyStorage.getAmountAsInt() >= energyReq) {
 				PackageTracker tracker = Arrays.stream(trackers).limit(trackerCount).filter(PackageTracker::isEmpty).findFirst().get();
 				tracker.fillRecipe(pattern.recipe);
-				energyStorage.extractEnergy(energyReq, false);
+				try(Transaction transaction = Transaction.openRoot()) {
+					energyStorage.extract(energyReq, transaction);
+					transaction.commit();
+				}
 				return true;
 			}
 		}
@@ -164,27 +168,30 @@ public class AEUnpackagerBlockEntity extends UnpackagerBlockEntity implements II
 			IGrid grid = getMainNode().getGrid();
 			IEnergyService energyService = grid.getEnergyService();
 			double conversion = PowerUnit.FE.convertTo(PowerUnit.AE, 1);
-			int request = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored()-energyStorage.getEnergyStored());
+			int request = Math.min(energyStorage.getMaxInsert(), energyStorage.getCapacityAsInt()-energyStorage.getAmountAsInt());
 			double available = energyService.extractAEPower((request+0.5)*conversion, Actionable.SIMULATE, PowerMultiplier.CONFIG);
 			int extract = (int)(available/conversion);
 			energyService.extractAEPower(extract*conversion, Actionable.MODULATE, PowerMultiplier.CONFIG);
-			energyStorage.receiveEnergy(extract, false);
+			try(Transaction transaction = Transaction.openRoot()) {
+				energyStorage.insert(extract, transaction);
+				transaction.commit();
+			}
 		}
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
-		if(nbt.contains("node")) {
-			getMainNode().loadFromNBT(nbt);
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		if(input.child("node").isPresent()) {
+			getMainNode().deserialize(input);
 		}
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
 		if(gridNode != null) {
-			gridNode.saveToNBT(nbt);
+			gridNode.serialize(output);
 		}
 	}
 }

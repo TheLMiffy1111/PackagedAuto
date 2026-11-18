@@ -32,15 +32,17 @@ import appeng.api.util.AECableType;
 import appeng.api.util.AEColor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.block.PackagedAutoBlocks;
@@ -111,18 +113,21 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 				sendDirection = null;
 				return;
 			}
-			IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, offsetPos, sendDirection.getOpposite());
+			ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, offsetPos, sendDirection.getOpposite());
 			for(int i = 0; i < toSend.size(); ++i) {
-				ItemStack stack = toSend.get(i);
-				ItemStack stackRem = stack;
-				if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
-						stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, offsetPos, sendDirection.getOpposite())) {
-					stackRem = MiscHelper.INSTANCE.fillVolume(level, offsetPos, sendDirection.getOpposite(), stack, false);
+				try(Transaction transaction = Transaction.openRoot()) {
+					ItemStack stack = toSend.get(i);
+					int inserted = 0;
+					if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
+							stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, offsetPos, sendDirection.getOpposite())) {
+						inserted = MiscHelper.INSTANCE.insertVolume(level, offsetPos, sendDirection.getOpposite(), stack, transaction);
+					}
+					else if(itemHandler != null) {
+						inserted = MiscHelper.INSTANCE.insertItem(itemHandler, stack, sendOrdered, transaction);
+					}
+					transaction.commit();
+					toSend.set(i, stack.copyWithCount(stack.count()-inserted));
 				}
-				else if(itemHandler != null) {
-					stackRem = MiscHelper.INSTANCE.insertItem(itemHandler, stack, sendOrdered, false);
-				}
-				toSend.set(i, stackRem);
 			}
 			toSend.removeIf(ItemStack::isEmpty);
 			setChanged();
@@ -264,7 +269,7 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 						if(!validSendTarget(blockEntity, direction.getOpposite())) {
 							continue;
 						}
-						IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, offsetPos, direction.getOpposite());
+						ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, offsetPos, direction.getOpposite());
 						if(blocking) {
 							for(int i = 0; i < toSend.size(); ++i) {
 								ItemStack stack = toSend.get(i);
@@ -281,16 +286,18 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 						}
 						boolean acceptsAll = true;
 						for(int i = 0; i < toSend.size(); ++i) {
-							ItemStack stack = toSend.get(i);
-							ItemStack stackRem = stack;
-							if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
-									stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, offsetPos, direction.getOpposite())) {
-								stackRem = MiscHelper.INSTANCE.fillVolume(level, offsetPos, direction.getOpposite(), stack, true);
+							try(Transaction transaction = Transaction.openRoot()) {
+								ItemStack stack = toSend.get(i);
+								int inserted = 0;
+								if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
+										stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, offsetPos, direction.getOpposite())) {
+									inserted = MiscHelper.INSTANCE.insertVolume(level, offsetPos, direction.getOpposite(), stack, transaction);
+								}
+								else if(itemHandler != null) {
+									inserted = MiscHelper.INSTANCE.insertItem(itemHandler, stack, false, transaction);
+								}
+								acceptsAll &= inserted > 0;
 							}
-							else if(itemHandler != null) {
-								stackRem = MiscHelper.INSTANCE.insertItem(itemHandler, stack, false, true);
-							}
-							acceptsAll &= stackRem.getCount() < stack.getCount();
 						}
 						if(acceptsAll) {
 							energyService.extractAEPower(request, Actionable.MODULATE, PowerMultiplier.CONFIG);
@@ -357,18 +364,18 @@ public class AEPackagingProviderBlockEntity extends PackagingProviderBlockEntity
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
-		if(nbt.contains("node")) {
-			getMainNode().loadFromNBT(nbt);
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		if(input.child("node").isPresent()) {
+			getMainNode().deserialize(input);
 		}
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
 		if(gridNode != null) {
-			gridNode.saveToNBT(nbt);
+			gridNode.serialize(output);
 		}
 	}
 }

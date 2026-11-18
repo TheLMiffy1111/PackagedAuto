@@ -1,0 +1,14 @@
+{
+	"model": {
+		"type": "minecraft:condition",
+		"property": "packagedauto:bound",
+		"on_false": {
+			"type": "minecraft:model",
+			"model": "packagedauto:item/distributor_marker"
+		},
+		"on_true": {
+			"type": "minecraft:model",
+			"model": "packagedauto:item/distributor_marker_bound"
+		}
+	}
+}

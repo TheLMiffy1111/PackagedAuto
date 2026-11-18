@@ -1,18 +1,18 @@
 package thelm.packagedauto.item;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import thelm.packagedauto.api.DirectionalGlobalPos;
@@ -28,7 +28,7 @@ public class MarkerItem extends Item {
 	public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
 		Level level = context.getLevel();
 		Player player = context.getPlayer();
-		if(!level.isClientSide && !player.isShiftKeyDown()) {
+		if(!level.isClientSide() && !player.isShiftKeyDown()) {
 			if(stack.has(PackagedAutoDataComponents.MARKER_POS)) {
 				return super.onItemUseFirst(stack, context);
 			}
@@ -48,35 +48,35 @@ public class MarkerItem extends Item {
 			else {
 				stack.applyComponents(patch);
 			}
-			return InteractionResult.SUCCESS;
+			return InteractionResult.SUCCESS_SERVER;
 		}
 		return super.onItemUseFirst(stack, context);
 	}
 
 	@Override
-	public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
-		if(!level.isClientSide && player.isShiftKeyDown() && player.getItemInHand(hand).has(PackagedAutoDataComponents.MARKER_POS)) {
-			ItemStack stack = player.getItemInHand(hand).copy();
+	public InteractionResult use(Level level, Player player, InteractionHand hand) {
+		if(!level.isClientSide() && player.isShiftKeyDown() && player.getItemInHand(hand).has(PackagedAutoDataComponents.MARKER_POS)) {
+			ItemStack stack = player.getItemInHand(hand);
 			DataComponentPatch patch = DataComponentPatch.builder().
 					remove(PackagedAutoDataComponents.MARKER_POS.get()).
 					build();
 			stack.applyComponents(patch);
-			return InteractionResultHolder.success(stack);
+			return InteractionResult.SUCCESS_SERVER;
 		}
 		return super.use(level, player, hand);
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag isAdvanced) {
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag tooltipFlag) {
 		if(stack.has(PackagedAutoDataComponents.MARKER_POS)) {
 			DirectionalGlobalPos pos = stack.get(PackagedAutoDataComponents.MARKER_POS);
-			Component dimComponent = Component.literal(pos.dimension().location().toString());
-			tooltip.add(Component.translatable("misc.packagedauto.dimension", dimComponent));
+			Component dimComponent = Component.literal(pos.dimension().identifier().toString());
+			builder.accept(Component.translatable("misc.packagedauto.dimension", dimComponent));
 			Component posComponent = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pos.x(), pos.y(), pos.z()));
-			tooltip.add(Component.translatable("misc.packagedauto.position", posComponent));
+			builder.accept(Component.translatable("misc.packagedauto.position", posComponent));
 			Component dirComponent = Component.translatable("misc.packagedauto."+pos.direction().getName());
-			tooltip.add(Component.translatable("misc.packagedauto.direction", dirComponent));
+			builder.accept(Component.translatable("misc.packagedauto.direction", dirComponent));
 		}
-		super.appendHoverText(stack, context, tooltip, isAdvanced);
+		super.appendHoverText(stack, context, display, builder, tooltipFlag);
 	}
 }

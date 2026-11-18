@@ -1,13 +1,18 @@
 package thelm.packagedauto.client.event;
 
-import net.minecraft.client.renderer.item.ItemProperties;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
+import net.neoforged.neoforge.client.event.RecipesReceivedEvent;
+import net.neoforged.neoforge.client.event.RegisterConditionalItemModelPropertyEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterRenderBuffersEvent;
+import net.neoforged.neoforge.client.event.RegisterRenderPipelinesEvent;
+import net.neoforged.neoforge.common.NeoForge;
 import thelm.packagedauto.client.WorldOverlayRenderer;
+import thelm.packagedauto.client.property.BoundItemModelProperty;
+import thelm.packagedauto.client.property.FilledItemModelProperty;
 import thelm.packagedauto.client.screen.CrafterScreen;
 import thelm.packagedauto.client.screen.CraftingProxyScreen;
 import thelm.packagedauto.client.screen.DistributorScreen;
@@ -17,9 +22,8 @@ import thelm.packagedauto.client.screen.PackagerExtensionScreen;
 import thelm.packagedauto.client.screen.PackagerScreen;
 import thelm.packagedauto.client.screen.PackagingProviderScreen;
 import thelm.packagedauto.client.screen.UnpackagerScreen;
-import thelm.packagedauto.component.PackagedAutoDataComponents;
-import thelm.packagedauto.item.PackagedAutoItems;
 import thelm.packagedauto.menu.PackagedAutoMenus;
+import thelm.packagedauto.util.MiscHelper;
 
 public class ClientEventHandler {
 
@@ -31,30 +35,12 @@ public class ClientEventHandler {
 
 	public void onConstruct(IEventBus modEventBus) {
 		modEventBus.register(this);
+		NeoForge.EVENT_BUS.addListener(this::onRecipesReceived);
 		WorldOverlayRenderer.INSTANCE.onConstruct();
 	}
 
 	@SubscribeEvent
-	public void onClientSetup(FMLClientSetupEvent event) {
-		event.enqueueWork(()->{
-			ItemProperties.register(PackagedAutoItems.RECIPE_HOLDER.get(),
-					ResourceLocation.parse("packagedauto:filled"), (stack, world, living, seed)->{
-						return stack.has(PackagedAutoDataComponents.RECIPE_LIST) ? 1F : 0F;
-					});
-			ItemProperties.register(PackagedAutoItems.DISTRIBUTOR_MARKER.get(),
-					ResourceLocation.parse("packagedauto:bound"), (stack, world, living, seed)->{
-						return stack.has(PackagedAutoDataComponents.MARKER_POS) ? 1F : 0F;
-					});
-			ItemProperties.register(PackagedAutoItems.PROXY_MARKER.get(),
-					ResourceLocation.parse("packagedauto:bound"), (stack, world, living, seed)->{
-						return stack.has(PackagedAutoDataComponents.MARKER_POS) ? 1F : 0F;
-					});
-			ItemProperties.register(PackagedAutoItems.SETTINGS_CLONER.get(),
-					ResourceLocation.parse("packagedauto:filled"), (stack, world, living, seed)->{
-						return stack.has(PackagedAutoDataComponents.CLONER_DATA) ? 1F : 0F;
-					});
-		});
-	}
+	public void onClientSetup(FMLClientSetupEvent event) {}
 
 	@SubscribeEvent
 	public void onRegisterMenuScreens(RegisterMenuScreensEvent event) {
@@ -70,7 +56,22 @@ public class ClientEventHandler {
 	}
 
 	@SubscribeEvent
+	public void onRegisterConditionalItemModelProperty(RegisterConditionalItemModelPropertyEvent event) {
+		event.register(Identifier.parse("packagedauto:filled"), FilledItemModelProperty.MAP_CODEC);
+		event.register(Identifier.parse("packagedauto:bound"), BoundItemModelProperty.MAP_CODEC);
+	}
+
+	@SubscribeEvent
+	public void onRegisterRenderPipelines(RegisterRenderPipelinesEvent event) {
+		WorldOverlayRenderer.INSTANCE.onRegisterRenderPipelines(event);
+	}
+
+	@SubscribeEvent
 	public void onRegisterRenderBuffers(RegisterRenderBuffersEvent event) {
 		WorldOverlayRenderer.INSTANCE.onRegisterRenderBuffers(event);
+	}
+
+	public void onRecipesReceived(RecipesReceivedEvent event) {
+		MiscHelper.INSTANCE.setRecipeMap(event.getRecipeMap());
 	}
 }

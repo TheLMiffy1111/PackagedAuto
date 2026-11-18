@@ -1,0 +1,26 @@
+{
+	"parent": "minecraft:recipes/root",
+	"criteria": {
+		"has_ingredient": {
+			"conditions": {
+				"items": [{
+					"items": "packagedauto:package_component"
+				}]
+			},
+			"trigger": "minecraft:inventory_changed"
+		},
+		"has_recipe": {
+			"conditions": {
+				"recipe": "packagedauto/encoder"
+			},
+			"trigger": "minecraft:recipe_unlocked"
+		}
+	},
+	"requirements": [[
+		"has_ingredient",
+		"has_recipe"
+	]],
+	"rewards": {
+		"recipes": ["packagedauto:encoder"]
+	}
+}

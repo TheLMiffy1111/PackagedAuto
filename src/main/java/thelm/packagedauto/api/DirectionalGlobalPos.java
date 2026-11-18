@@ -1,6 +1,7 @@
 package thelm.packagedauto.api;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import io.netty.buffer.ByteBuf;
@@ -13,10 +14,11 @@ import net.minecraft.world.level.Level;
 
 public record DirectionalGlobalPos(GlobalPos globalPos, Direction direction) {
 
-	public static final Codec<DirectionalGlobalPos> CODEC = RecordCodecBuilder.create(instance->instance.group(
+	public static final MapCodec<DirectionalGlobalPos> MAP_CODEC = RecordCodecBuilder.mapCodec(instance->instance.group(
 			GlobalPos.MAP_CODEC.forGetter(DirectionalGlobalPos::globalPos),
 			Direction.CODEC.fieldOf("direction").forGetter(DirectionalGlobalPos::direction)).
 			apply(instance, DirectionalGlobalPos::new));
+	public static final Codec<DirectionalGlobalPos> CODEC = Codec.lazyInitialized(MAP_CODEC::codec);
 	public static final StreamCodec<ByteBuf, DirectionalGlobalPos> STREAM_CODEC = StreamCodec.composite(
 			GlobalPos.STREAM_CODEC, DirectionalGlobalPos::globalPos,
 			Direction.STREAM_CODEC, DirectionalGlobalPos::direction,

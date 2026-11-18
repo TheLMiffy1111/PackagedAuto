@@ -1,0 +1,14 @@
+{
+	"model": {
+		"type": "minecraft:condition",
+		"property": "packagedauto:bound",
+		"on_false": {
+			"type": "minecraft:model",
+			"model": "packagedauto:item/proxy_marker"
+		},
+		"on_true": {
+			"type": "minecraft:model",
+			"model": "packagedauto:item/proxy_marker_bound"
+		}
+	}
+}

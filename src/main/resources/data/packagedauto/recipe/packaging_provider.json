@@ -1,10 +1,8 @@
 {
-	"neoforge:conditions": [
-		{
-			"type": "neoforge:mod_loaded",
-			"modid": "ae2"
-		}
-	],
+	"neoforge:conditions": [{
+		"type": "neoforge:mod_loaded",
+		"modid": "ae2"
+	}],
 	"type": "minecraft:crafting_shaped",
 	"result": {
 		"id": "packagedauto:packaging_provider",
@@ -16,20 +14,10 @@
 		"FIF"
 	],
 	"key": {
-		"P": {
-			"item": "packagedauto:packager"
-		},
-		"U": {
-			"item": "packagedauto:unpackager"
-		},
-		"E": {
-			"item": "ae2:engineering_processor"
-		},
-		"F": {
-			"item": "ae2:fluix_pearl"
-		},
-		"I": {
-			"tag": "c:storage_blocks/iron"
-		}
+		"P": "packagedauto:packager",
+		"U": "packagedauto:unpackager",
+		"E": "ae2:engineering_processor",
+		"F": "ae2:fluix_pearl",
+		"I": "#c:storage_blocks/iron"
 	}
 }

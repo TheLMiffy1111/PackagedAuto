@@ -1,0 +1,26 @@
+{
+	"parent": "minecraft:recipes/root",
+	"criteria": {
+		"has_ingredient": {
+			"conditions": {
+				"items": [{
+					"items": "minecraft:ender_eye"
+				}]
+			},
+			"trigger": "minecraft:inventory_changed"
+		},
+		"has_recipe": {
+			"conditions": {
+				"recipe": "packagedauto/package_component"
+			},
+			"trigger": "minecraft:recipe_unlocked"
+		}
+	},
+	"requirements": [[
+		"has_ingredient",
+		"has_recipe"
+	]],
+	"rewards": {
+		"recipes": ["packagedauto:package_component"]
+	}
+}

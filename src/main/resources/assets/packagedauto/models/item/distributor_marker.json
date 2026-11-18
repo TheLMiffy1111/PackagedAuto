@@ -2,13 +2,5 @@
 	"parent": "item/generated",
 	"textures": {
 		"layer0": "packagedauto:item/distributor_marker"
-	},
-	"overrides": [
-		{
-			"predicate": {
-				"packagedauto:bound": 1
-			},
-			"model": "packagedauto:item/distributor_marker_bound"
-		}
-	]
+	}
 }

@@ -4,11 +4,10 @@ import java.util.List;
 
 import com.mojang.serialization.Codec;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public interface IVolumeStackWrapper {
 
@@ -27,7 +26,7 @@ public interface IVolumeStackWrapper {
 
 	boolean isEmpty();
 
-	CompoundTag saveAEKey(CompoundTag tag, HolderLookup.Provider registries);
+	void saveAEKey(ValueOutput output);
 
 	Component getDisplayName();
 

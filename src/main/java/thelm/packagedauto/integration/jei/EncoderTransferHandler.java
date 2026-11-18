@@ -9,11 +9,11 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.transfer.IRecipeTransferError;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.recipe.transfer.IUniversalRecipeTransferHandler;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.menu.EncoderMenu;
 import thelm.packagedauto.packet.SetRecipePacket;
@@ -38,7 +38,7 @@ public class EncoderTransferHandler implements IUniversalRecipeTransferHandler<E
 
 	@Override
 	public IRecipeTransferError transferRecipe(EncoderMenu menu, Object recipe, IRecipeSlotsView recipeSlots, Player player, boolean maxTransfer, boolean doTransfer) {
-		List<ResourceLocation> categories = PackagedAutoJEIPlugin.getRecipeCategoriesForRecipe(recipe);
+		List<Identifier> categories = PackagedAutoJEIPlugin.getRecipeCategoriesForRecipe(recipe);
 		if(categories.isEmpty()) {
 			return transferHelper.createInternalError();
 		}
@@ -53,7 +53,7 @@ public class EncoderTransferHandler implements IUniversalRecipeTransferHandler<E
 		if(!doTransfer) {
 			return null;
 		}
-		PacketDistributor.sendToServer(new SetRecipePacket(map));
+		ClientPacketDistributor.sendToServer(new SetRecipePacket(map));
 		return null;
 	}
 }

@@ -7,17 +7,17 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.redstone.Orientation;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 import thelm.packagedauto.block.entity.PackagedAutoBlockEntities;
 import thelm.packagedauto.block.entity.PackagerBlockEntity;
 
 public class PackagerBlock extends BaseBlock {
 
-	protected PackagerBlock() {
-		super(BlockBehaviour.Properties.of().strength(10F, 15F).mapColor(MapColor.METAL).sound(SoundType.METAL));
+	protected PackagerBlock(Properties properties) {
+		super(properties.strength(10F, 15F).mapColor(MapColor.METAL).sound(SoundType.METAL));
 	}
 
 	@Override
@@ -31,7 +31,7 @@ public class PackagerBlock extends BaseBlock {
 	}
 
 	@Override
-	public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean isMoving) {
+	protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, Orientation orientation, boolean movedByPiston) {
 		level.getBlockEntity(pos, PackagedAutoBlockEntities.PACKAGER.get()).ifPresent(PackagerBlockEntity::updatePowered);
 	}
 }

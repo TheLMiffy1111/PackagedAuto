@@ -1,10 +1,8 @@
 {
-	"neoforge:conditions": [
-		{
-			"type": "neoforge:mod_loaded",
-			"modid": "ae2"
-		}
-	],
+	"neoforge:conditions": [{
+		"type": "neoforge:mod_loaded",
+		"modid": "ae2"
+	}],
 	"type": "minecraft:crafting_shaped",
 	"result": {
 		"id": "packagedauto:crafter",
@@ -16,20 +14,10 @@
 		"IHI"
 	],
 	"key": {
-		"C": {
-			"item": "packagedauto:me_package_component"
-		},
-		"T": {
-			"item": "minecraft:crafter"
-		},
-		"H": {
-			"item": "minecraft:hopper"
-		},
-		"I": {
-			"tag": "c:ingots/iron"
-		},
-		"R": {
-			"tag": "c:dusts/redstone"
-		}
+		"C": "packagedauto:me_package_component",
+		"T": "minecraft:crafter",
+		"H": "minecraft:hopper",
+		"I": "#c:ingots/iron",
+		"R": "#c:dusts/redstone"
 	}
 }

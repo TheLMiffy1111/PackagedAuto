@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.phys.BlockHitResult;
@@ -19,8 +18,8 @@ import thelm.packagedauto.block.entity.PackagedAutoBlockEntities;
 
 public class CraftingProxyBlock extends BaseBlock {
 
-	protected CraftingProxyBlock() {
-		super(BlockBehaviour.Properties.of().strength(10F, 15F).mapColor(MapColor.METAL).sound(SoundType.METAL));
+	protected CraftingProxyBlock(Properties properties) {
+		super(properties.strength(10F, 15F).mapColor(MapColor.METAL).sound(SoundType.METAL));
 	}
 
 	@Override
@@ -37,7 +36,7 @@ public class CraftingProxyBlock extends BaseBlock {
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
 		if(player.isShiftKeyDown()) {
 			if(level.getBlockEntity(pos) instanceof CraftingProxyBlockEntity proxy) {
-				if(!level.isClientSide) {
+				if(!level.isClientSide()) {
 					proxy.sendPreview((ServerPlayer)player);
 				}
 				return InteractionResult.SUCCESS;

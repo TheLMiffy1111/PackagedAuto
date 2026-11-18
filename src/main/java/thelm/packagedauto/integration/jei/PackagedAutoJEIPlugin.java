@@ -15,7 +15,7 @@ import mezz.jei.api.registration.ISubtypeRegistration;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.fml.ModList;
 import thelm.packagedauto.client.screen.EncoderScreen;
 import thelm.packagedauto.integration.jei.category.FluidPackageContentsCategory;
@@ -29,14 +29,14 @@ import thelm.packagedauto.item.PackagedAutoItems;
 @JeiPlugin
 public class PackagedAutoJEIPlugin implements IModPlugin {
 
-	public static final ResourceLocation UID = ResourceLocation.parse("packagedauto:jei");
-	public static final ResourceLocation BACKGROUND = ResourceLocation.parse("packagedauto:textures/gui/jei.png");
+	public static final Identifier UID = Identifier.parse("packagedauto:jei");
+	public static final Identifier BACKGROUND = Identifier.parse("packagedauto:textures/gui/jei.png");
 
 	public static IJeiRuntime jeiRuntime;
-	private static List<ResourceLocation> allCategories;
+	private static List<Identifier> allCategories;
 
 	@Override
-	public ResourceLocation getPluginUid() {
+	public Identifier getPluginUid() {
 		return UID;
 	}
 
@@ -72,11 +72,11 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 	@Override
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration) {
 		if(!ModList.get().isLoaded("emi")) {
-			registration.addRecipeCatalyst(PackagedAutoItems.ENCODER.toStack(), PackageRecipeCategory.TYPE);
-			registration.addRecipeCatalyst(PackagedAutoItems.PACKAGER.toStack(), PackagingCategory.TYPE);
-			registration.addRecipeCatalyst(PackagedAutoItems.PACKAGER_EXTENSION.toStack(), PackagingCategory.TYPE);
-			registration.addRecipeCatalyst(PackagedAutoItems.UNPACKAGER.toStack(), PackageProcessingCategory.TYPE);
-			registration.addRecipeCatalyst(PackagedAutoItems.FLUID_PACKAGE_FILLER.toStack(), FluidPackageFillingCategory.TYPE);
+			registration.addCraftingStation(PackageRecipeCategory.TYPE, PackagedAutoItems.ENCODER);
+			registration.addCraftingStation(PackagingCategory.TYPE, PackagedAutoItems.PACKAGER);
+			registration.addCraftingStation(PackagingCategory.TYPE, PackagedAutoItems.PACKAGER_EXTENSION);
+			registration.addCraftingStation(PackageProcessingCategory.TYPE, PackagedAutoItems.UNPACKAGER);
+			registration.addCraftingStation(FluidPackageFillingCategory.TYPE, PackagedAutoItems.FLUID_PACKAGE_FILLER);
 		}
 	}
 
@@ -103,7 +103,7 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 		PackagedAutoJEIPlugin.jeiRuntime = jeiRuntime;
 	}
 
-	public static List<ResourceLocation> getAllRecipeCategories() {
+	public static List<Identifier> getAllRecipeCategories() {	
 		if(allCategories == null) {
 			if(jeiRuntime == null) {
 				return List.of();
@@ -113,7 +113,7 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 		return allCategories;
 	}
 
-	public static List<ResourceLocation> getRecipeCategoriesForRecipe(Object recipe) {
+	public static List<Identifier> getRecipeCategoriesForRecipe(Object recipe) {
 		if(jeiRuntime == null) {
 			return List.of();
 		}

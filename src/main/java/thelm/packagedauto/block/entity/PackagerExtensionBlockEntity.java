@@ -7,9 +7,6 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -17,18 +14,25 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.util.RecipeMatcher;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.energy.EnergyHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.ISettingsCloneable;
+import thelm.packagedauto.block.entity.PackagerBlockEntity.Mode;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
 import thelm.packagedauto.energy.EnergyStorage;
-import thelm.packagedauto.inventory.PackagerExtensionItemHandler;
+import thelm.packagedauto.inventory.PackagerExtensionItemResourceHandler;
 import thelm.packagedauto.menu.PackagerExtensionMenu;
 import thelm.packagedauto.util.MiscHelper;
 
@@ -40,11 +44,13 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 	public static int refreshInterval = 4;
 	public static boolean drawMEEnergy = true;
 
+	public final ResourceHandler<ItemResource> packageSlot;
+
 	public boolean firstTick = true;
 	public boolean isWorking = false;
 	public int remainingProgress = 0;
 	public PackagerBlockEntity packager;
-	public IItemHandlerModifiable listStackItemHandler = new ItemStackHandler(1);
+	public ItemStack listStack = ItemStack.EMPTY;
 	public List<IPackagePattern> patternList = new ArrayList<>();
 	public IPackagePattern currentPattern;
 	public boolean lockPattern = false;
@@ -54,8 +60,9 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 
 	public PackagerExtensionBlockEntity(BlockPos pos, BlockState state) {
 		super(PackagedAutoBlockEntities.PACKAGER_EXTENSION.get(), pos, state);
-		setItemHandler(new PackagerExtensionItemHandler(this));
+		setItemHandler(new PackagerExtensionItemResourceHandler(this));
 		setEnergyStorage(new EnergyStorage(this, energyCapacity));
+		packageSlot = RangedResourceHandler.ofSingleIndex(this::getItemHandler, 9);
 	}
 
 	@Override
@@ -75,12 +82,12 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 			updatePatternList();
 			updatePowered();
 		}
-		if(!level.isClientSide) {
+		if(!level.isClientSide()) {
 			if(isWorking) {
 				tickProcess();
 				if(remainingProgress <= 0 && isInputValid()) {
 					finishProcess();
-					if(!itemHandler.getStackInSlot(9).isEmpty()) {
+					if(!itemHandler.getStack(9).isEmpty()) {
 						ejectItem();
 					}
 					if(!canStart()) {
@@ -100,7 +107,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 			}
 			chargeEnergy();
 			if(level.getGameTime() % refreshInterval == 0) {
-				if(!itemHandler.getStackInSlot(9).isEmpty()) {
+				if(!itemHandler.getStack(9).isEmpty()) {
 					ejectItem();
 				}
 			}
@@ -142,7 +149,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 		if(!isInputValid()) {
 			return false;
 		}
-		ItemStack slotStack = itemHandler.getStackInSlot(9);
+		ItemStack slotStack = itemHandler.getStack(9);
 		ItemStack outputStack = currentPattern.getOutput();
 		return slotStack.isEmpty() || ItemStack.isSameItemSameComponents(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
 	}
@@ -184,14 +191,13 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 
 	public void updatePatternList() {
 		packager = null;
-		listStackItemHandler.setStackInSlot(0, ItemStack.EMPTY);
+		listStack = ItemStack.EMPTY;
 		patternList.clear();
 		if(level != null) {
 			for(BlockPos posP : BlockPos.betweenClosed(worldPosition.offset(-1, -1, -1), worldPosition.offset(1, 1, 1))) {
 				if(level.getBlockEntity(posP) instanceof PackagerBlockEntity packager) {
 					this.packager = packager;
-					ItemStack listStack = packager.itemHandler.getStackInSlot(10);
-					listStackItemHandler.setStackInSlot(0, listStack);
+					this.listStack = packager.itemHandler.getStack(10);
 					patternList.addAll(packager.patternList);
 					disjoint = switch(mode) {
 					case EXACT -> false;
@@ -205,8 +211,11 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 	}
 
 	protected void tickProcess() {
-		int energy = energyStorage.extractEnergy(Math.min(energyUsage, remainingProgress), false);
-		remainingProgress -= energy;
+		try(Transaction transaction = Transaction.openRoot()) {
+			int energy = energyStorage.extract(Math.min(energyUsage, remainingProgress), transaction);
+			transaction.commit();
+			remainingProgress -= energy;
+		}
 	}
 
 	protected void finishProcess() {
@@ -227,11 +236,11 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 				endProcess();
 				return;
 			}
-			if(itemHandler.getStackInSlot(9).isEmpty()) {
-				itemHandler.setStackInSlot(9, currentPattern.getOutput());
+			if(itemHandler.getStack(9).isEmpty()) {
+				itemHandler.setStack(9, currentPattern.getOutput());
 			}
-			else if(MiscHelper.INSTANCE.isPackage(itemHandler.getStackInSlot(9))) {
-				itemHandler.getStackInSlot(9).grow(1);
+			else if(MiscHelper.INSTANCE.isPackage(itemHandler.getStack(9))) {
+				itemHandler.getStack(9).grow(1);
 			}
 			else {
 				endProcess();
@@ -246,11 +255,11 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 				endProcess();
 				return;
 			}
-			if(itemHandler.getStackInSlot(9).isEmpty()) {
-				itemHandler.setStackInSlot(9, currentPattern.getOutput());
+			if(itemHandler.getStack(9).isEmpty()) {
+				itemHandler.setStack(9, currentPattern.getOutput());
 			}
-			else if(MiscHelper.INSTANCE.isPackage(itemHandler.getStackInSlot(9))) {
-				itemHandler.getStackInSlot(9).grow(1);
+			else if(MiscHelper.INSTANCE.isPackage(itemHandler.getStack(9))) {
+				itemHandler.getStack(9).grow(1);
 			}
 			else {
 				endProcess();
@@ -261,8 +270,8 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 			}
 		}
 		for(int i = 0; i < 9; ++i) {
-			if(itemHandler.getStackInSlot(i).isEmpty()) {
-				itemHandler.setStackInSlot(i, ItemStack.EMPTY);
+			if(itemHandler.getStack(i).isEmpty()) {
+				itemHandler.setStack(i, ItemStack.EMPTY);
 			}
 		}
 	}
@@ -282,24 +291,18 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 	protected void ejectItem() {
 		for(Direction direction : Direction.values()) {
 			if(level.getBlockEntity(worldPosition.relative(direction)) instanceof UnpackagerBlockEntity unpackager) {
-				ItemStack stack = itemHandler.getStackInSlot(9);
-				if(!stack.isEmpty()) {
-					ItemStack stackRem = ItemHandlerHelper.insertItem(unpackager.itemHandler, stack, false);
-					itemHandler.setStackInSlot(9, stackRem);
+				int moveCount = packageSlot.getAmountAsInt(0);
+				if(moveCount > 0) {
+					ResourceHandlerUtil.moveStacking(packageSlot, unpackager.itemHandler, _->true, moveCount, null);
 				}
 			}
 		}
 	}
 
 	protected void chargeEnergy() {
-		ItemStack energyStack = itemHandler.getStackInSlot(10);
-		IEnergyStorage itemEnergyStorage = energyStack.getCapability(Capabilities.EnergyStorage.ITEM);
+		EnergyHandler itemEnergyStorage = ItemAccess.forHandlerIndex(itemHandler, 10).getCapability(Capabilities.Energy.ITEM);
 		if(itemEnergyStorage != null) {
-			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(itemEnergyStorage.extractEnergy(energyRequest, false), false);
-			if(energyStack.getCount() <= 0) {
-				itemHandler.setStackInSlot(10, ItemStack.EMPTY);
-			}
+			EnergyHandlerUtil.move(itemEnergyStorage, energyStorage, energyStorage.getMaxInsert(), null);
 		}
 	}
 
@@ -316,7 +319,7 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 		if(isWorking) {
 			return 1;
 		}
-		if(!itemHandler.getStackInSlot(9).isEmpty()) {
+		if(!itemHandler.getStack(9).isEmpty()) {
 			return 15;
 		}
 		return 0;
@@ -327,59 +330,44 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 	}
 
 	@Override
-	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
-		mode = PackagerBlockEntity.Mode.values()[nbt.getByte("mode")];
+	public ISettingsCloneable.Result loadConfig(ValueInput input, Player player) {
+		mode = Mode.values()[input.getByteOr("mode", (byte)0)];
 		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
-		nbt.putByte("mode", (byte)mode.ordinal());
-		ItemStack listStack = listStackItemHandler.getStackInSlot(0);
+	public ISettingsCloneable.Result saveConfig(ValueOutput output, Player player) {
+		output.putByte("mode", (byte)mode.ordinal());
 		if(listStack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
 			List<IPackageRecipeInfo> recipeList = listStack.get(PackagedAutoDataComponents.RECIPE_LIST);
 			if(!recipeList.isEmpty()) {
-				nbt.put("recipes", MiscHelper.INSTANCE.saveRecipeList(new ListTag(), recipeList, registries));
+				MiscHelper.INSTANCE.serializeRecipeList(recipeList, output.childrenList("recipes"));
 			}
 		}
 		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		mode = PackagerBlockEntity.Mode.values()[nbt.getByte("mode")];
-		super.loadAdditional(nbt, registries);
+	protected void loadAdditional(ValueInput input) {
+		mode = Mode.values()[input.getByteOr("mode", (byte)0)];
+		super.loadAdditional(input);
 		updatePatternList();
-		isWorking = nbt.getBoolean("working");
-		remainingProgress = nbt.getInt("progress");
-		powered = nbt.getBoolean("powered");
-		lockPattern = false;
-		currentPattern = null;
-		if(nbt.contains("pattern")) {
-			CompoundTag tag = nbt.getCompound("pattern");
-			IPackageRecipeInfo recipe = MiscHelper.INSTANCE.loadRecipe(tag, registries);
-			if(recipe != null) {
-				List<IPackagePattern> patterns = recipe.getPatterns();
-				byte index = tag.getByte("index");
-				if(index >= 0 && index < patterns.size()) {
-					currentPattern = patterns.get(index);
-					lockPattern = true;
-				}
-			}
-		}
+		isWorking = input.getBooleanOr("working", false);
+		remainingProgress = input.getIntOr("progress", 0);
+		powered = input.getBooleanOr("powered", false);
+		currentPattern = input.read("pattern", IPackagePattern.CODEC).orElse(null);
+		lockPattern = currentPattern != null;
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
-		nbt.putByte("mode", (byte)mode.ordinal());
-		nbt.putBoolean("working", isWorking);
-		nbt.putInt("progress", remainingProgress);
-		nbt.putBoolean("powered", powered);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
+		output.putByte("mode", (byte)mode.ordinal());
+		output.putBoolean("working", isWorking);
+		output.putInt("progress", remainingProgress);
+		output.putBoolean("powered", powered);
 		if(lockPattern) {
-			CompoundTag tag = MiscHelper.INSTANCE.saveRecipe(new CompoundTag(), currentPattern.getRecipeInfo(), registries);
-			tag.putByte("index", (byte)currentPattern.getIndex());
-			nbt.put("pattern", tag);
+			output.store("pattern", IPackagePattern.CODEC, currentPattern);
 		}
 	}
 
@@ -398,10 +386,10 @@ public class PackagerExtensionBlockEntity extends BaseBlockEntity implements ISe
 	}
 
 	public int getScaledEnergy(int scale) {
-		if(energyStorage.getMaxEnergyStored() <= 0) {
+		if(energyStorage.getCapacityAsInt() <= 0) {
 			return 0;
 		}
-		return Math.min(scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored(), scale);
+		return Math.min(scale * energyStorage.getAmountAsInt() / energyStorage.getCapacityAsInt(), scale);
 	}
 
 	public int getScaledProgress(int scale) {

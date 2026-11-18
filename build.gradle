@@ -1,5 +1,5 @@
 plugins {
-	id "com.crystaelix.loom" version "1.17-SNAPSHOT"
+	id "com.crystaelix.loom-no-remap" version "1.17-SNAPSHOT"
 	id "eclipse"
 	id "idea"
 	id "maven-publish"
@@ -66,14 +66,14 @@ repositories {
 	}
 }
 
-def mcVersion = "1.21.1"
+def mcVersion = "26.1.2"
 def modName = "PackagedAuto"
 def modId = "packagedauto"
-def specVersion = "4"
+def specVersion = "5"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "4.0.8.22"
+version = "5.0.0.0"
 
 def archivesName = "${modName}-${mcVersion}"
 base.archivesName = archivesName
@@ -84,7 +84,7 @@ sourceSets {
 
 java {
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(25)
 		vendor = JvmVendorSpec.AZUL
 	}
 	withSourcesJar()
@@ -95,7 +95,6 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 loom {
-	silentMojangMappingsLicense()
 	runs {
 		configureEach {
 			property "forge.logging.console.level", "debug"
@@ -107,33 +106,27 @@ loom {
 
 dependencies {
 	// Minecraft
-	minecraft "com.mojang:minecraft:1.21.1"
-	mappings loom.layered {
-		officialMojangMappings()
-		parchment "org.parchmentmc.data:parchment-1.21.1:2024.11.17@zip"
-	}
-	neoForge "net.neoforged:neoforge:21.1.249"
+	minecraft "com.mojang:minecraft:26.1.2"
+	neoForge "net.neoforged:neoforge:26.1.2.127"
 
 	// Dependencies
-	implementation("net.mezzdev.config:mezz_config-1.21.1-neoforge:0.7.1") {transitive = false}
-	implementation("mezz.jei:jei-1.21.1-neoforge:19.57.0.450") {transitive = false}
-	implementation "dev.emi:emi-neoforge:1.1.24+1.21.1"
-	implementation "org.appliedenergistics:guideme:21.1.17"
-	implementation "org.appliedenergistics:appliedenergistics2:19.2.17"
-	implementation "curse.maven:ae2-jei-integration-1074338:7727898"
-	implementation "vazkii.patchouli:Patchouli:1.21.1-93-NEOFORGE"
-	implementation "curse.maven:mouse-tweaks-60089:5437296"
+	implementation("net.mezzdev.config:mezz_config-26.1.2-neoforge:0.7.1") {transitive = false}
+	implementation("mezz.jei:jei-26.1.2-neoforge:29.53.0.115") {transitive = false}
+	implementation "org.appliedenergistics:guideme:26.1.17-beta"
+	implementation "org.appliedenergistics:appliedenergistics2:26.1.13-beta"
+	implementation "vazkii.patchouli:patchouli-neoforge:26.1-94"
+	implementation "curse.maven:mouse-tweaks-60089:7840778"
 
 	// Testing
-	implementation "curse.maven:cucumber-272335:8035802"
-	implementation "curse.maven:extended-crafting-268387:8796905"
-	implementation "mekanism:Mekanism:1.21.1-10.7.19.85"
-	implementation "curse.maven:applied-mekanistics-574300:7096962"
+	implementation "curse.maven:cucumber-272335:9459215"
+	implementation "curse.maven:extended-crafting-268387:9042099"
+	implementation "curse.maven:mekanism-version-locked-1713956:9267959"
+	implementation "curse.maven:applied-mekanistics-version-locked-1742374:9153209"
 
 	//Performance
-	implementation "curse.maven:yeetusexperimentus-635427:5444189"
-	implementation "curse.maven:modernfix-790626:8774737"
-	implementation "curse.maven:ferritecore-429235:7524151"
+	implementation "curse.maven:yeetusexperimentus-635427:7830957"
+	implementation "curse.maven:modernfix-790626:8774761"
+	implementation "curse.maven:ferritecore-429235:7806039"
 }
 
 def replacements = [
@@ -174,7 +167,7 @@ publishing {
 	publications {
 		register("mavenJava", MavenPublication) {
 			artifactId = archivesName
-			artifact remapJar
+			artifact jar
 			artifact sourcesJar
 		}
 	}
@@ -190,10 +183,10 @@ publishing {
 }
 
 publishMods {
-	file = remapJar.archiveFile
+	file = jar.archiveFile
 	version = displayName = "${mcVersion}-${project.version}"
 	changelog = file("changelog.md").text
-	type = STABLE
+	type = BETA
 	modLoaders.add("neoforge")
 	additionalFiles.from(sourcesJar.archiveFile)
 

@@ -1,14 +1,14 @@
 package thelm.packagedauto.energy;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
 import thelm.packagedauto.packet.SyncEnergyPacket;
 
-public class EnergyStorage extends net.neoforged.neoforge.energy.EnergyStorage {
+public class EnergyStorage extends SimpleEnergyHandler {
 
 	public final BaseBlockEntity blockEntity;
-	public int prevEnergy;
+	public boolean requireSync;
 
 	public EnergyStorage(BaseBlockEntity blockEntity, int capacity) {
 		this(blockEntity, capacity, capacity, capacity, 0);
@@ -18,28 +18,13 @@ public class EnergyStorage extends net.neoforged.neoforge.energy.EnergyStorage {
 		this(blockEntity, capacity, maxTransfer, maxTransfer, 0);
 	}
 
-	public EnergyStorage(BaseBlockEntity blockEntity, int capacity, int maxReceive, int maxExtract) {
-		this(blockEntity, capacity, maxReceive, maxExtract, 0);
+	public EnergyStorage(BaseBlockEntity blockEntity, int capacity, int maxInsert, int maxExtract) {
+		this(blockEntity, capacity, maxInsert, maxExtract, 0);
 	}
 
-	public EnergyStorage(BaseBlockEntity blockEntity, int capacity, int maxReceive, int maxExtract, int energy) {
-		super(capacity, maxReceive, maxExtract, energy);
+	public EnergyStorage(BaseBlockEntity blockEntity, int capacity, int maxInsert, int maxExtract, int energy) {
+		super(capacity, maxInsert, maxExtract, energy);
 		this.blockEntity = blockEntity;
-	}
-
-	public EnergyStorage read(CompoundTag nbt) {
-		energy = nbt.getInt("energy");
-		if(energy > capacity) {
-			energy = capacity;
-		}
-		return this;
-	}
-
-	public void save(CompoundTag nbt) {
-		if(energy < 0) {
-			energy = 0;
-		}
-		nbt.putInt("energy", energy);
 	}
 
 	public EnergyStorage setCapacity(int capacity) {
@@ -51,13 +36,13 @@ public class EnergyStorage extends net.neoforged.neoforge.energy.EnergyStorage {
 	}
 
 	public EnergyStorage setMaxTransfer(int maxTransfer) {
-		setMaxReceive(maxTransfer);
+		setMaxInsert(maxTransfer);
 		setMaxExtract(maxTransfer);
 		return this;
 	}
 
-	public EnergyStorage setMaxReceive(int maxReceive) {
-		this.maxReceive = maxReceive;
+	public EnergyStorage setMaxInsert(int maxInsert) {
+		this.maxInsert = maxInsert;
 		return this;
 	}
 
@@ -66,8 +51,8 @@ public class EnergyStorage extends net.neoforged.neoforge.energy.EnergyStorage {
 		return this;
 	}
 
-	public int getMaxReceive() {
-		return maxReceive;
+	public int getMaxInsert() {
+		return maxInsert;
 	}
 
 	public int getMaxExtract() {
@@ -75,31 +60,45 @@ public class EnergyStorage extends net.neoforged.neoforge.energy.EnergyStorage {
 	}
 
 	public void setEnergyStored(int energy) {
-		this.energy = energy;
-		if(this.energy > capacity) {
-			this.energy = capacity;
-		}
-		else if(this.energy < 0) {
-			this.energy = 0;
+		if(energy != this.energy) {
+			int prevEnergy = this.energy;
+			this.energy = energy;
+			if(this.energy > capacity) {
+				this.energy = capacity;
+			}
+			else if(this.energy < 0) {
+				this.energy = 0;
+			}
+			onEnergyChanged(prevEnergy);
 		}
 	}
 
 	public void modifyEnergyStored(int energy) {
-		this.energy += energy;
-		if(this.energy > capacity) {
-			this.energy = capacity;
-		}
-		else if(this.energy < 0) {
-			this.energy = 0;
+		if(energy != 0) {
+			int prevEnergy = this.energy;
+			this.energy += energy;
+			if(this.energy > capacity) {
+				this.energy = capacity;
+			}
+			else if(this.energy < 0) {
+				this.energy = 0;
+			}
+			onEnergyChanged(prevEnergy);
 		}
 	}
 
-	public void updateIfChanged() {
-		int currentEnergy = getEnergyStored();
-		if(!blockEntity.getLevel().isClientSide && prevEnergy != currentEnergy) {
-			SyncEnergyPacket.syncEnergy((ServerLevel)blockEntity.getLevel(), blockEntity.getBlockPos(), currentEnergy, 8);
+	@Override
+	protected void onEnergyChanged(int previousAmount) {
+		requireSync = true;
+		if(!blockEntity.getLevel().isClientSide()) {
 			blockEntity.setChanged();
 		}
-		prevEnergy = currentEnergy;
+	}
+
+	public void syncEnergy() {
+		if(requireSync && !blockEntity.getLevel().isClientSide()) {
+			SyncEnergyPacket.syncEnergy((ServerLevel)blockEntity.getLevel(), blockEntity.getBlockPos(), energy, 8);
+		}
+		requireSync = false;
 	}
 }

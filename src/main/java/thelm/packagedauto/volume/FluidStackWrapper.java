@@ -3,17 +3,14 @@ package thelm.packagedauto.volume;
 import java.util.List;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.RegistryOps;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.fluids.FluidStack;
 import thelm.packagedauto.api.IFluidStackWrapper;
 import thelm.packagedauto.api.IVolumeStackWrapper;
@@ -23,8 +20,9 @@ public record FluidStackWrapper(FluidStack stack) implements IFluidStackWrapper 
 
 	public static final FluidStackWrapper EMPTY = new FluidStackWrapper(FluidStack.EMPTY);
 
-	public static final Codec<FluidStackWrapper> CODEC = FluidStack.CODEC.xmap(
+	public static final MapCodec<FluidStackWrapper> MAP_CODEC = FluidStack.MAP_CODEC.xmap(
 			FluidStackWrapper::of, FluidStackWrapper::getFluid);
+	public static final Codec<FluidStackWrapper> CODEC = Codec.lazyInitialized(MAP_CODEC::codec);
 	public static final StreamCodec<RegistryFriendlyByteBuf, FluidStackWrapper> STREAM_CODEC = FluidStack.STREAM_CODEC.map(
 			FluidStackWrapper::of, FluidStackWrapper::getFluid);
 
@@ -66,14 +64,10 @@ public record FluidStackWrapper(FluidStack stack) implements IFluidStackWrapper 
 	}
 
 	@Override
-	public CompoundTag saveAEKey(CompoundTag tag, HolderLookup.Provider registries) {
-		RegistryOps<Tag> ops = registries.createSerializationContext(NbtOps.INSTANCE);
-		tag.putString("#t", "ae2:f");
-		tag.putString("id", BuiltInRegistries.FLUID.getKey(stack.getFluid()).toString());
-		if(!stack.isComponentsPatchEmpty()) {
-			tag.put("components", DataComponentPatch.CODEC.encodeStart(ops, stack.getComponentsPatch()).getOrThrow());
-		}
-		return tag;
+	public void saveAEKey(ValueOutput output) {
+		output.putString("#t", "ae2:f");
+		output.store("id", BuiltInRegistries.FLUID.byNameCodec(), stack.getFluid());
+		output.store("components", DataComponentPatch.CODEC, stack.getComponentsPatch());
 	}
 
 	@Override

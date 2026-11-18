@@ -9,12 +9,10 @@ import com.google.common.collect.Lists;
 
 import it.unimi.dsi.fastutil.booleans.BooleanArrayList;
 import it.unimi.dsi.fastutil.booleans.BooleanList;
+import it.unimi.dsi.fastutil.bytes.ByteArrays;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
@@ -23,16 +21,24 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueInput.ValueInputList;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.common.util.ValueIOSerializable;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.energy.EnergyHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
 import thelm.packagedauto.energy.EnergyStorage;
-import thelm.packagedauto.inventory.UnpackagerItemHandler;
+import thelm.packagedauto.inventory.UnpackagerItemResourceHandler;
 import thelm.packagedauto.item.PackagedAutoItems;
 import thelm.packagedauto.menu.UnpackagerMenu;
 import thelm.packagedauto.util.MiscHelper;
@@ -54,7 +60,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 
 	public UnpackagerBlockEntity(BlockPos pos, BlockState state) {
 		super(PackagedAutoBlockEntities.UNPACKAGER.get(), pos, state);
-		setItemHandler(new UnpackagerItemHandler(this));
+		setItemHandler(new UnpackagerItemResourceHandler(this));
 		setEnergyStorage(new EnergyStorage(this, energyCapacity));
 		for(int i = 0; i < trackers.length; ++i) {
 			trackers[i] = new PackageTracker();
@@ -75,12 +81,12 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 	public void tick() {
 		if(firstTick) {
 			firstTick = false;
-			if(!level.isClientSide) {
+			if(!level.isClientSide()) {
 				postPatternChange();
 			}
 			updatePowered();
 		}
-		if(!level.isClientSide) {
+		if(!level.isClientSide()) {
 			chargeEnergy();
 			if(level.getGameTime() % refreshInterval == 0) {
 				fillTrackers();
@@ -93,8 +99,8 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 		List<PackageTracker> emptyTrackers = Arrays.stream(trackers).limit(trackerCount).filter(t->t.isEmpty()).toList();
 		List<PackageTracker> nonEmptyTrackers = Arrays.stream(trackers).filter(t->!t.isEmpty()).filter(t->!t.isFilled()).toList();
 		for(int i = 0; i < 9; ++i) {
-			if(energyStorage.getEnergyStored() >= energyUsage) {
-				ItemStack stack = itemHandler.getStackInSlot(i);
+			if(energyStorage.getAmountAsInt() >= energyUsage) {
+				ItemStack stack = itemHandler.getStack(i);
 				if(!stack.isEmpty() && MiscHelper.INSTANCE.isPackage(stack)) {
 					boolean flag = false;
 					for(PackageTracker tracker : nonEmptyTrackers) {
@@ -102,12 +108,15 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 							flag = true;
 							stack.shrink(1);
 							if(stack.isEmpty()) {
-								itemHandler.setStackInSlot(i, ItemStack.EMPTY);
+								itemHandler.setStack(i, ItemStack.EMPTY);
 							}
 							else {
 								tracker.setRejectedIndex(i, true);
 							}
-							energyStorage.extractEnergy(energyUsage, false);
+							try(Transaction transaction = Transaction.openRoot()) {
+								energyStorage.extract(energyUsage, transaction);
+								transaction.commit();
+							}
 							break;
 						}
 						else {
@@ -119,12 +128,15 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 							if(tracker.tryAcceptPackage(stack, i)) {
 								stack.shrink(1);
 								if(stack.isEmpty()) {
-									itemHandler.setStackInSlot(i, ItemStack.EMPTY);
+									itemHandler.setStack(i, ItemStack.EMPTY);
 								}
 								else {
 									tracker.setRejectedIndex(i, true);
 								}
-								energyStorage.extractEnergy(energyUsage, false);
+								try(Transaction transaction = Transaction.openRoot()) {
+									energyStorage.extract(energyUsage, transaction);
+									transaction.commit();
+								}
 								break;
 							}
 							else {
@@ -171,7 +183,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 				if(trackerToEmpty.toSend.isEmpty()) {
 					trackerToEmpty.setupToSend();
 				}
-				IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, offsetPos, direction.getOpposite());
+				ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, offsetPos, direction.getOpposite());
 				if(blocking) {
 					for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
 						ItemStack stack = trackerToEmpty.toSend.get(i);
@@ -188,16 +200,18 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 				}
 				boolean acceptsAll = true;
 				for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
-					ItemStack stack = trackerToEmpty.toSend.get(i);
-					ItemStack stackRem = stack;
-					if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
-							stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, offsetPos, direction.getOpposite())) {
-						stackRem = MiscHelper.INSTANCE.fillVolume(level, offsetPos, direction.getOpposite(), stack, true);
+					try(Transaction transaction = Transaction.openRoot()) {
+						ItemStack stack = trackerToEmpty.toSend.get(i);
+						int inserted = 0;
+						if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
+								stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, offsetPos, direction.getOpposite())) {
+							inserted = MiscHelper.INSTANCE.insertVolume(level, offsetPos, direction.getOpposite(), stack, transaction);
+						}
+						else if(itemHandler != null) {
+							inserted = MiscHelper.INSTANCE.insertItem(itemHandler, stack, false, transaction);
+						}
+						acceptsAll &= inserted > 0;
 					}
-					else if(itemHandler != null) {
-						stackRem = MiscHelper.INSTANCE.insertItem(itemHandler, stack, false, true);
-					}
-					acceptsAll &= stackRem.getCount() < stack.getCount();
 				}
 				if(acceptsAll) {
 					trackerToEmpty.direction = direction;
@@ -224,18 +238,21 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 				trackerToEmpty.direction = null;
 				continue;
 			}
-			IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, offsetPos, direction.getOpposite());
+			ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, offsetPos, direction.getOpposite());
 			for(int i = 0; i < trackerToEmpty.toSend.size(); ++i) {
-				ItemStack stack = trackerToEmpty.toSend.get(i);
-				ItemStack stackRem = stack;
-				if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
-						stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, offsetPos, direction.getOpposite())) {
-					stackRem = MiscHelper.INSTANCE.fillVolume(level, offsetPos, direction.getOpposite(), stack, false);
+				try(Transaction transaction = Transaction.openRoot()) {
+					ItemStack stack = trackerToEmpty.toSend.get(i);
+					int inserted = 0;
+					if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
+							stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, offsetPos, direction.getOpposite())) {
+						inserted = MiscHelper.INSTANCE.insertVolume(level, offsetPos, direction.getOpposite(), stack, transaction);
+					}
+					else if(itemHandler != null) {
+						inserted = MiscHelper.INSTANCE.insertItem(itemHandler, stack, ordered, transaction);
+					}
+					transaction.commit();
+					trackerToEmpty.toSend.set(i, stack.copyWithCount(stack.count()-inserted));
 				}
-				else if(itemHandler != null) {
-					stackRem = MiscHelper.INSTANCE.insertItem(itemHandler, stack, ordered, false);
-				}
-				trackerToEmpty.toSend.set(i, stackRem);
 			}
 			trackerToEmpty.toSend.removeIf(ItemStack::isEmpty);
 			if(trackerToEmpty.toSend.isEmpty()) {
@@ -254,14 +271,9 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 	}
 
 	protected void chargeEnergy() {
-		ItemStack energyStack = itemHandler.getStackInSlot(10);
-		IEnergyStorage itemEnergyStorage = energyStack.getCapability(Capabilities.EnergyStorage.ITEM);
+		EnergyHandler itemEnergyStorage = ItemAccess.forHandlerIndex(itemHandler, 10).getCapability(Capabilities.Energy.ITEM);
 		if(itemEnergyStorage != null) {
-			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(itemEnergyStorage.extractEnergy(energyRequest, false), false);
-			if(energyStack.getCount() <= 0) {
-				itemHandler.setStackInSlot(10, ItemStack.EMPTY);
-			}
+			EnergyHandlerUtil.move(itemEnergyStorage, energyStorage, energyStorage.getMaxInsert(), null);
 		}
 	}
 
@@ -281,32 +293,43 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 	public void postPatternChange() {}
 
 	public int getScaledEnergy(int scale) {
-		if(energyStorage.getMaxEnergyStored() <= 0) {
+		if(energyStorage.getCapacityAsInt() <= 0) {
 			return 0;
 		}
-		return Math.min(scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored(), scale);
+		return Math.min(scale * energyStorage.getAmountAsInt() / energyStorage.getCapacityAsInt(), scale);
 	}
 
 	@Override
-	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
-		blocking = nbt.getBoolean("blocking");
-		trackerCount = nbt.getByte("trackers");
+	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		super.preRemoveSideEffects(pos, state);
+		for(PackageTracker tracker : trackers) {
+			if(!tracker.isEmpty()) {
+				tracker.ejectItems();
+			}
+		}
+	}
+
+	@Override
+	public ISettingsCloneable.Result loadConfig(ValueInput input, Player player) {
+		blocking = input.getBooleanOr("blocking", false);
+		trackerCount = input.getByteOr("trackers", (byte)6);
 		Component message = null;
-		if(nbt.contains("recipes")) {
-			f:if(itemHandler.getStackInSlot(9).isEmpty()) {
+		ValueInputList recipesInput = input.childrenList("recipes").orElse(null);
+		if(recipesInput != null) {
+			f:if(itemHandler.getStack(9).isEmpty()) {
 				Inventory playerInventory = player.getInventory();
 				for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
 					ItemStack stack = playerInventory.getItem(i);
 					if(!stack.isEmpty() && stack.is(PackagedAutoItems.RECIPE_HOLDER) && !stack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
 						ItemStack stackCopy = stack.split(1);
-						List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.loadRecipeList(nbt.getList("recipes", 10), registries);
+						List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.deserializeRecipeList(recipesInput);
 						if(!recipeList.isEmpty()) {
 							DataComponentPatch patch = DataComponentPatch.builder().
 									set(PackagedAutoDataComponents.RECIPE_LIST.get(), recipeList).
 									build();
 							stackCopy.applyComponents(patch);
 						}
-						itemHandler.setStackInSlot(9, stackCopy);
+						itemHandler.setStack(9, stackCopy);
 						break f;
 					}
 				}
@@ -325,36 +348,34 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 	}
 
 	@Override
-	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
-		nbt.putBoolean("blocking", blocking);
-		nbt.putByte("trackers", (byte)trackerCount);
+	public ISettingsCloneable.Result saveConfig(ValueOutput output, Player player) {
+		output.putBoolean("blocking", blocking);
+		output.putByte("trackers", (byte)trackerCount);
 		if(!recipeList.isEmpty()) {
-			nbt.put("recipes", MiscHelper.INSTANCE.saveRecipeList(new ListTag(), recipeList, registries));
+			MiscHelper.INSTANCE.serializeRecipeList(recipeList, output.childrenList("recipes"));
 		}
 		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
-		blocking = nbt.getBoolean("blocking");
-		trackerCount = nbt.contains("trackers") ? nbt.getByte("trackers") : 6;
-		powered = nbt.getBoolean("powered");
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		blocking = input.getBooleanOr("blocking", false);
+		trackerCount = input.getByteOr("trackers", (byte)6);
+		powered = input.getBooleanOr("powered", false);
 		for(int i = 0; i < trackers.length; ++i) {
-			trackers[i].load(nbt.getCompound(String.format("tracker_%02d", i)), registries);
+			input.readChild(String.format("tracker_%02d", i), trackers[i]);
 		}
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
-		nbt.putBoolean("blocking", blocking);
-		nbt.putByte("trackers", (byte)trackerCount);
-		nbt.putBoolean("powered", powered);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
+		output.putBoolean("blocking", blocking);
+		output.putByte("trackers", (byte)trackerCount);
+		output.putBoolean("powered", powered);
 		for(int i = 0; i < trackers.length; ++i) {
-			CompoundTag subNBT = new CompoundTag();
-			trackers[i].save(subNBT, registries);
-			nbt.put(String.format("tracker_%02d", i), subNBT);
+			output.putChild(String.format("tracker_%02d", i), trackers[i]);
 		}
 	}
 
@@ -374,7 +395,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 		return new UnpackagerMenu(windowId, inventory, this);
 	}
 
-	public class PackageTracker {
+	public class PackageTracker implements ValueIOSerializable {
 
 		public boolean[] rejectedIndexes = new boolean[9];
 		public IPackageRecipeInfo recipe;
@@ -389,7 +410,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 			amount = 0;
 			received.clear();
 			direction = null;
-			if(level != null && !level.isClientSide) {
+			if(level != null && !level.isClientSide()) {
 				setChanged();
 			}
 		}
@@ -402,7 +423,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 			for(int i = 0; i < received.size(); ++i) {
 				received.set(i, true);
 			}
-			if(level != null && !level.isClientSide) {
+			if(level != null && !level.isClientSide()) {
 				setChanged();
 			}
 		}
@@ -412,9 +433,9 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 				if(!toSend.isEmpty()) {
 					for(ItemStack stack : toSend) {
 						if(!stack.isEmpty()) {
-							double dx = level.random.nextFloat()/2+0.25;
-							double dy = level.random.nextFloat()/2+0.75;
-							double dz = level.random.nextFloat()/2+0.25;
+							double dx = level.getRandom().nextFloat()/2+0.25;
+							double dy = level.getRandom().nextFloat()/2+0.75;
+							double dz = level.getRandom().nextFloat()/2+0.25;
 							ItemEntity itemEntity = new ItemEntity(level, worldPosition.getX()+dx, worldPosition.getY()+dy, worldPosition.getZ()+dz, stack);
 							itemEntity.setDefaultPickUpDelay();
 							level.addFreshEntity(itemEntity);
@@ -425,9 +446,9 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 					List<IPackagePattern> patterns = recipe.getPatterns();
 					for(int i = 0; i < received.size() && i < patterns.size(); ++i) {
 						if(received.getBoolean(i)) {
-							double dx = level.random.nextFloat()/2+0.25;
-							double dy = level.random.nextFloat()/2+0.75;
-							double dz = level.random.nextFloat()/2+0.25;
+							double dx = level.getRandom().nextFloat()/2+0.25;
+							double dy = level.getRandom().nextFloat()/2+0.75;
+							double dz = level.getRandom().nextFloat()/2+0.25;
 							ItemEntity itemEntity = new ItemEntity(level, worldPosition.getX()+dx, worldPosition.getY()+dy, worldPosition.getZ()+dz, patterns.get(i).getOutput());
 							itemEntity.setDefaultPickUpDelay();
 							level.addFreshEntity(itemEntity);
@@ -500,42 +521,35 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 			toSend.addAll(Lists.transform(recipe.getInputs(), ItemStack::copy));
 		}
 
-		public void load(CompoundTag nbt, HolderLookup.Provider registries) {
-			clearRecipe();
-			if(nbt.contains("recipe")) {
-				CompoundTag tag = nbt.getCompound("recipe");
-				IPackageRecipeInfo recipe = MiscHelper.INSTANCE.loadRecipe(tag, registries);
-				if(recipe != null) {
-					this.recipe = recipe;
-					amount = nbt.getByte("amount");
-					received.size(amount);
-					byte[] receivedArray = nbt.getByteArray("received");
-					for(int i = 0; i < received.size(); ++i) {
-						received.set(i, receivedArray[i] != 0);
-					}
-				}
-			}
-			MiscHelper.INSTANCE.loadAllItems(nbt.getList("to_send", 10), toSend, registries);
-			if(nbt.contains("direction")) {
-				direction = Direction.from3DDataValue(nbt.getByte("direction"));
-			}
-		}
-
-		public void save(CompoundTag nbt, HolderLookup.Provider registries) {
+		@Override
+		public void serialize(ValueOutput output) {
 			if(recipe != null) {
-				CompoundTag tag = MiscHelper.INSTANCE.saveRecipe(new CompoundTag(), recipe, registries);
-				nbt.put("recipe", tag);
-				nbt.putByte("amount", (byte)amount);
+				output.store("recipe", IPackageRecipeInfo.CODEC, recipe);
+				output.putByte("amount", (byte)amount);
 				byte[] receivedArray = new byte[received.size()];
 				for(int i = 0; i < received.size(); ++i) {
 					receivedArray[i] = (byte)(received.getBoolean(i) ? 1 : 0);
 				}
-				nbt.putByteArray("received", receivedArray);
+				output.store("received", MiscHelper.BYTE_ARRAY_CODEC, receivedArray);
 			}
-			nbt.put("to_send", MiscHelper.INSTANCE.saveAllItems(new ListTag(), toSend, registries));
-			if(direction != null) {
-				nbt.putByte("direction", (byte)direction.get3DDataValue());
+			MiscHelper.INSTANCE.serializeItemList(toSend, output.childrenList("to_send"));
+			output.storeNullable("direction", Direction.LEGACY_ID_CODEC, direction);
+		}
+
+		@Override
+		public void deserialize(ValueInput input) {
+			clearRecipe();
+			recipe = input.read("recipe", IPackageRecipeInfo.CODEC).orElse(null);
+			if(recipe != null) {
+				amount = input.getByteOr("amount", (byte)0);
+				received.size(amount);
+				byte[] receivedArray = input.read("received", MiscHelper.BYTE_ARRAY_CODEC).orElse(ByteArrays.EMPTY_ARRAY);
+				for(int i = 0; i < received.size(); ++i) {
+					received.set(i, receivedArray[i] != 0);
+				}
 			}
+			MiscHelper.INSTANCE.deserializeItemList(toSend, input.childrenListOrEmpty("to_send"));
+			direction = input.read("direction", Direction.LEGACY_ID_CODEC).orElse(null);
 		}
 
 		public int getSyncValue() {

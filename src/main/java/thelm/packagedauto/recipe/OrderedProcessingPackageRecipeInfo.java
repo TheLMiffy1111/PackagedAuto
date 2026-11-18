@@ -27,8 +27,8 @@ public class OrderedProcessingPackageRecipeInfo implements IPackageRecipeInfo {
 			apply(instance, OrderedProcessingPackageRecipeInfo::new));
 	public static final Codec<OrderedProcessingPackageRecipeInfo> CODEC = MAP_CODEC.codec();
 	public static final StreamCodec<RegistryFriendlyByteBuf, OrderedProcessingPackageRecipeInfo> STREAM_CODEC = StreamCodec.composite(
-			ItemStack.LIST_STREAM_CODEC, IPackageRecipeInfo::getInputs,
-			ItemStack.LIST_STREAM_CODEC, IPackageRecipeInfo::getOutputs,
+			ItemStack.OPTIONAL_LIST_STREAM_CODEC, IPackageRecipeInfo::getInputs,
+			ItemStack.OPTIONAL_LIST_STREAM_CODEC, IPackageRecipeInfo::getOutputs,
 			OrderedProcessingPackageRecipeInfo::new);
 
 	private final List<ItemStack> input;

@@ -1,17 +1,17 @@
 package thelm.packagedauto.api;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public interface ISettingsCloneable {
 
 	String getConfigTypeName();
 
-	Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player);
+	Result saveConfig(ValueOutput output, Player player);
 
-	Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player);
+	Result loadConfig(ValueInput input, Player player);
 
 	record Result(ResultType type, Component message) {
 

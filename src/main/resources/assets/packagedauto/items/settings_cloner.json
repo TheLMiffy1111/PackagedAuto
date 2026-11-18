@@ -1,0 +1,14 @@
+{
+	"model": {
+		"type": "minecraft:condition",
+		"property": "packagedauto:filled",
+		"on_false": {
+			"type": "minecraft:model",
+			"model": "packagedauto:item/settings_cloner"
+		},
+		"on_true": {
+			"type": "minecraft:model",
+			"model": "packagedauto:item/settings_cloner_filled"
+		}
+	}
+}

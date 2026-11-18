@@ -2,17 +2,14 @@ package thelm.packagedauto.menu;
 
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
 import thelm.packagedauto.block.entity.BaseBlockEntity;
-import thelm.packagedauto.slot.PreviewSlot;
+import thelm.packagedauto.slot.PreviewStackSlot;
 
 public class ItemAmountSpecifyingMenu extends BaseMenu<BaseBlockEntity> {
 
 	public ItemAmountSpecifyingMenu(Inventory inventory, ItemStack stack) {
 		super(null, 0, inventory, null);
-		ItemStackHandler itemInventory = new ItemStackHandler(1);
-		itemInventory.setStackInSlot(0, stack.copyWithCount(1));
-		addSlot(new PreviewSlot(itemInventory, 0, 89, 48));
+		addSlot(new PreviewStackSlot(()->stack, 89, 48));
 	}
 
 	@Override

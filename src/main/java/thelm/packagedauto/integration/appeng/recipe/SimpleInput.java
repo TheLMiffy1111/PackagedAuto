@@ -1,12 +1,17 @@
 package thelm.packagedauto.integration.appeng.recipe;
 
+import com.mojang.logging.LogUtils;
+
 import appeng.api.crafting.IPatternDetails.IInput;
 import appeng.api.stacks.AEItemKey;
 import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
@@ -50,9 +55,14 @@ public class SimpleInput implements IInput {
 		if(stack.what() instanceof AEItemKey itemKey && itemKey.toStack().has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK)) {
 			IVolumeStackWrapper vStack = itemKey.toStack().get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK);
 			if(!vStack.isEmpty() && vStack.getVolumeType().supportsAE()) {
-				AEKey key = AEKey.fromTagGeneric(registries, vStack.saveAEKey(new CompoundTag(), registries));
-				if(key != null) {
-					return new GenericStack(key, vStack.getAmount());
+				try(ProblemReporter.ScopedCollector reporter = new ProblemReporter.ScopedCollector(()->"ae_key_convert", LogUtils.getLogger())) {
+					TagValueOutput output = TagValueOutput.createWithContext(reporter, registries);
+					vStack.saveAEKey(output);
+					ValueInput input = TagValueInput.create(reporter, registries, output.buildResult());
+					AEKey key = AEKey.fromTagGeneric(input);
+					if(key != null) {
+						return new GenericStack(key, vStack.getAmount());
+					}
 				}
 			}
 		}

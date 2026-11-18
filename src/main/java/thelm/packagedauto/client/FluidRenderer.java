@@ -1,26 +1,14 @@
 package thelm.packagedauto.client;
 
-import org.joml.Matrix4f;
-
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.block.FluidModel;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
-import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 
-// Code from Refined Storage
 public class FluidRenderer {
 
 	public static final FluidRenderer INSTANCE = new FluidRenderer(16, 16, 16);
@@ -38,54 +26,22 @@ public class FluidRenderer {
 		this.minHeight = minHeight;
 	}
 
-	private static TextureAtlasSprite getStillFluidSprite(FluidStack fluidStack) {
-		ResourceLocation fluidStill = IClientFluidTypeExtensions.of(fluidStack.getFluid()).getStillTexture(fluidStack);
-		return Minecraft.getInstance().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(fluidStill);
-	}
-
-	private static void setGLColorFromInt(int color) {
-		float red = (color >> 16 & 0xFF) / 255.0F;
-		float green = (color >> 8 & 0xFF) / 255.0F;
-		float blue = (color & 0xFF) / 255.0F;
-		float alpha = ((color >> 24) & 0xFF) / 255F;
-		RenderSystem.setShaderColor(red, green, blue, alpha);
-	}
-
-	private static void drawTextureWithMasking(Matrix4f matrix, float xCoord, float yCoord, TextureAtlasSprite textureSprite, int maskTop, int maskRight, float zLevel) {
-		float uMin = textureSprite.getU0();
-		float uMax = textureSprite.getU1();
-		float vMin = textureSprite.getV0();
-		float vMax = textureSprite.getV1();
-		uMax = uMax - (maskRight / 16F * (uMax - uMin));
-		vMin = vMin + (maskTop / 16F * (vMax - vMin));
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		Tesselator tessellator = Tesselator.getInstance();
-		BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-		bufferBuilder.addVertex(matrix, xCoord, yCoord + 16, zLevel).setUv(uMin, vMax);
-		bufferBuilder.addVertex(matrix, xCoord + 16 - maskRight, yCoord + 16, zLevel).setUv(uMax, vMax);
-		bufferBuilder.addVertex(matrix, xCoord + 16 - maskRight, yCoord + maskTop, zLevel).setUv(uMax, vMin);
-		bufferBuilder.addVertex(matrix, xCoord, yCoord + maskTop, zLevel).setUv(uMin, vMin);
-		BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-	}
-
-	public void render(GuiGraphics graphics, int xPosition, int yPosition, FluidStack fluidStack) {
+	public void render(GuiGraphicsExtractor graphics, int xPosition, int yPosition, FluidStack fluidStack) {
 		render(graphics, xPosition, yPosition, fluidStack, FluidType.BUCKET_VOLUME);
 	}
 
-	public void render(GuiGraphics graphics, int xPosition, int yPosition, FluidStack fluidStack, int capacity) {
-		RenderSystem.enableBlend();
+	public void render(GuiGraphicsExtractor graphics, int xPosition, int yPosition, FluidStack fluidStack, int capacity) {
 		drawFluid(graphics, xPosition, yPosition, fluidStack, capacity);
-		RenderSystem.setShaderColor(1, 1, 1, 1);
-		RenderSystem.disableBlend();
 	}
 
-	private void drawFluid(GuiGraphics graphics, int xPosition, int yPosition, FluidStack fluidStack, int capacity) {
+	private void drawFluid(GuiGraphicsExtractor graphics, int xPosition, int yPosition, FluidStack fluidStack, int capacity) {
 		if(capacity <= 0 || fluidStack == null || fluidStack.isEmpty()) {
 			return;
 		}
 		Fluid fluid = fluidStack.getFluid();
-		TextureAtlasSprite fluidStillSprite = getStillFluidSprite(fluidStack);
-		int fluidColor = IClientFluidTypeExtensions.of(fluid).getTintColor(fluidStack);
+		FluidModel fluidModel = Minecraft.getInstance().getModelManager().getFluidStateModelSet().get(fluid.defaultFluidState());
+		TextureAtlasSprite fluidStillSprite = fluidModel.stillMaterial().sprite();
+		int fluidColor = fluidModel.fluidTintSource().colorAsStack(fluidStack);
 		int amount = fluidStack.getAmount();
 		int scaledAmount = (amount * height) / capacity;
 		if(amount > 0 && scaledAmount < minHeight) {
@@ -97,10 +53,7 @@ public class FluidRenderer {
 		drawTiledSprite(graphics, xPosition, yPosition, width, height, fluidColor, scaledAmount, fluidStillSprite);
 	}
 
-	private void drawTiledSprite(GuiGraphics graphics, int xPosition, int yPosition, int tiledWidth, int tiledHeight, int color, int scaledAmount, TextureAtlasSprite sprite) {
-		RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-		Matrix4f matrix = graphics.pose().last().pose();
-		setGLColorFromInt(color);
+	private void drawTiledSprite(GuiGraphicsExtractor graphics, int xPosition, int yPosition, int tiledWidth, int tiledHeight, int color, int scaledAmount, TextureAtlasSprite sprite) {
 		int xTileCount = tiledWidth / TEX_WIDTH;
 		int xRemainder = tiledWidth - (xTileCount * TEX_WIDTH);
 		int yTileCount = scaledAmount / TEX_HEIGHT;
@@ -113,9 +66,9 @@ public class FluidRenderer {
 				int x = xPosition + (xTile * TEX_WIDTH);
 				int y = yStart - ((yTile + 1) * TEX_HEIGHT);
 				if(width > 0 && height > 0) {
-					int maskTop = TEX_HEIGHT - height;
-					int maskRight = TEX_WIDTH - width;
-					drawTextureWithMasking(matrix, x, y, sprite, maskTop, maskRight, 100);
+					graphics.enableScissor(x, y + TEX_HEIGHT - height, x + width, y + TEX_HEIGHT);
+					graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, x, y, TEX_WIDTH, TEX_HEIGHT, color);
+					graphics.disableScissor();
 				}
 			}
 		}

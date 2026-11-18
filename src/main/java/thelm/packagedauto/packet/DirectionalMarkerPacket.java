@@ -6,7 +6,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -15,7 +15,7 @@ import thelm.packagedauto.client.WorldOverlayRenderer;
 
 public record DirectionalMarkerPacket(List<DirectionalGlobalPos> positions, int color, int lifetime) implements CustomPacketPayload {
 
-	public static final Type<DirectionalMarkerPacket> TYPE = new Type<>(ResourceLocation.parse("packagedauto:directional_marker"));
+	public static final Type<DirectionalMarkerPacket> TYPE = new Type<>(Identifier.parse("packagedauto:directional_marker"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, DirectionalMarkerPacket> STREAM_CODEC = StreamCodec.composite(
 			DirectionalGlobalPos.STREAM_CODEC.apply(ByteBufCodecs.list()), DirectionalMarkerPacket::positions,
 			PacketStreamCodecs.UNSIGNED_MEDIUM, DirectionalMarkerPacket::color,

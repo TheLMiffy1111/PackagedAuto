@@ -7,25 +7,26 @@ import java.util.function.IntFunction;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.ByIdMap.OutOfBoundsStrategy;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueInput.ValueInputList;
+import net.minecraft.world.level.storage.ValueOutput;
 import thelm.packagedauto.api.IPackagePattern;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
-import thelm.packagedauto.inventory.PackagingProviderItemHandler;
+import thelm.packagedauto.inventory.PackagingProviderItemResourceHandler;
 import thelm.packagedauto.item.PackagedAutoItems;
 import thelm.packagedauto.menu.PackagingProviderMenu;
 import thelm.packagedauto.util.MiscHelper;
@@ -45,7 +46,7 @@ public class PackagingProviderBlockEntity extends BaseBlockEntity implements ISe
 
 	public PackagingProviderBlockEntity(BlockPos pos, BlockState state) {
 		super(PackagedAutoBlockEntities.PACKAGING_PROVIDER.get(), pos, state);
-		setItemHandler(new PackagingProviderItemHandler(this));
+		setItemHandler(new PackagingProviderItemResourceHandler(this));
 	}
 
 	@Override
@@ -107,27 +108,47 @@ public class PackagingProviderBlockEntity extends BaseBlockEntity implements ISe
 	public void postPatternChange() {}
 
 	@Override
-	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
-		blocking = nbt.getBoolean("blocking");
-		provideDirect = nbt.getBoolean("direct");
-		providePackaging = nbt.getBoolean("packaging");
-		provideUnpackaging = nbt.getBoolean("unpackaging");
+	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		super.preRemoveSideEffects(pos, state);
+		if(currentPattern != null) {
+			for(ItemStack stack : currentPattern.getInputs()) {
+				if(!stack.isEmpty()) {
+					Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
+				}
+			}
+		}
+		if(!toSend.isEmpty()) {
+			for(ItemStack stack : toSend) {
+				if(!stack.isEmpty()) {
+					Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
+				}
+			}
+		}
+	}
+
+	@Override
+	public ISettingsCloneable.Result loadConfig(ValueInput input, Player player) {
+		blocking = input.getBooleanOr("blocking", false);
+		provideDirect = input.getBooleanOr("direct", false);
+		providePackaging = input.getBooleanOr("packaging", false);
+		provideUnpackaging = input.getBooleanOr("unpackaging", false);
 		Component message = null;
-		if(nbt.contains("recipes")) {
-			f:if(itemHandler.getStackInSlot(0).isEmpty()) {
+		ValueInputList recipesInput = input.childrenList("recipes").orElse(null);
+		if(recipesInput != null) {
+			f:if(itemHandler.getStack(0).isEmpty()) {
 				Inventory playerInventory = player.getInventory();
 				for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
 					ItemStack stack = playerInventory.getItem(i);
 					if(!stack.isEmpty() && stack.is(PackagedAutoItems.RECIPE_HOLDER) && !stack.has(PackagedAutoDataComponents.RECIPE_LIST)) {
 						ItemStack stackCopy = stack.split(1);
-						List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.loadRecipeList(nbt.getList("recipes", 10), registries);
+						List<IPackageRecipeInfo> recipeList = MiscHelper.INSTANCE.deserializeRecipeList(recipesInput);
 						if(!recipeList.isEmpty()) {
 							DataComponentPatch patch = DataComponentPatch.builder().
 									set(PackagedAutoDataComponents.RECIPE_LIST.get(), recipeList).
 									build();
 							stackCopy.applyComponents(patch);
 						}
-						itemHandler.setStackInSlot(0, stackCopy);
+						itemHandler.setStack(0, stackCopy);
 						break f;
 					}
 				}
@@ -142,61 +163,43 @@ public class PackagingProviderBlockEntity extends BaseBlockEntity implements ISe
 	}
 
 	@Override
-	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
-		nbt.putBoolean("blocking", blocking);
-		nbt.putBoolean("direct", provideDirect);
-		nbt.putBoolean("packaging", providePackaging);
-		nbt.putBoolean("unpackaging", provideUnpackaging);
+	public ISettingsCloneable.Result saveConfig(ValueOutput output, Player player) {
+		output.putBoolean("blocking", blocking);
+		output.putBoolean("direct", provideDirect);
+		output.putBoolean("packaging", providePackaging);
+		output.putBoolean("unpackaging", provideUnpackaging);
 		if(!recipeList.isEmpty()) {
-			nbt.put("recipes", MiscHelper.INSTANCE.saveRecipeList(new ListTag(), recipeList, registries));
+			MiscHelper.INSTANCE.serializeRecipeList(recipeList, output.childrenList("recipes"));
 		}
 		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
-		blocking = nbt.getBoolean("blocking");
-		provideDirect = nbt.getBoolean("direct");
-		providePackaging = nbt.getBoolean("packaging");
-		provideUnpackaging = nbt.getBoolean("unpackaging");
-		powered = nbt.getBoolean("powered");
-		if(nbt.contains("pattern")) {
-			CompoundTag tag = nbt.getCompound("pattern");
-			IPackageRecipeInfo recipe = MiscHelper.INSTANCE.loadRecipe(tag, registries);
-			if(recipe != null) {
-				List<IPackagePattern> patterns = recipe.getPatterns();
-				byte index = tag.getByte("index");
-				if(index >= 0 && index < patterns.size()) {
-					currentPattern = patterns.get(index);
-				}
-			}
-		}
-		MiscHelper.INSTANCE.loadAllItems(nbt.getList("to_send", 10), toSend, registries);
-		if(nbt.contains("send_direction")) {
-			sendDirection = Direction.from3DDataValue(nbt.getByte("send_direction"));
-		}
-		sendOrdered = nbt.getBoolean("send_ordered");
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		blocking = input.getBooleanOr("blocking", false);
+		provideDirect = input.getBooleanOr("direct", false);
+		providePackaging = input.getBooleanOr("packaging", false);
+		provideUnpackaging = input.getBooleanOr("unpackaging", false);
+		powered = input.getBooleanOr("powered", false);
+		currentPattern = input.read("pattern", IPackagePattern.CODEC).orElse(null);
+		MiscHelper.INSTANCE.deserializeItemList(toSend, input.childrenListOrEmpty("to_send"));
+		sendDirection = input.read("send_direction", Direction.LEGACY_ID_CODEC).orElse(null);
+		sendOrdered = input.getBooleanOr("send_ordered", false);
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
-		nbt.putBoolean("blocking", blocking);
-		nbt.putBoolean("direct", provideDirect);
-		nbt.putBoolean("packaging", providePackaging);
-		nbt.putBoolean("unpackaging", provideUnpackaging);
-		nbt.putBoolean("powered", powered);
-		if(currentPattern != null) {
-			CompoundTag tag = MiscHelper.INSTANCE.saveRecipe(new CompoundTag(), currentPattern.getRecipeInfo(), registries);
-			tag.putByte("index", (byte)currentPattern.getIndex());
-			nbt.put("pattern", tag);
-		}
-		nbt.put("to_send", MiscHelper.INSTANCE.saveAllItems(new ListTag(), toSend, registries));
-		if(sendDirection != null) {
-			nbt.putByte("send_direction", (byte)sendDirection.get3DDataValue());
-		}
-		nbt.putBoolean("send_ordered", sendOrdered);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
+		output.putBoolean("blocking", blocking);
+		output.putBoolean("direct", provideDirect);
+		output.putBoolean("packaging", providePackaging);
+		output.putBoolean("unpackaging", provideUnpackaging);
+		output.putBoolean("powered", powered);
+		output.storeNullable("pattern", IPackagePattern.CODEC, currentPattern);
+		MiscHelper.INSTANCE.serializeItemList(toSend, output.childrenList("to_send"));
+		output.storeNullable("send_direction", Direction.LEGACY_ID_CODEC, sendDirection);
+		output.putBoolean("send_ordered", sendOrdered);
 	}
 
 	@Override

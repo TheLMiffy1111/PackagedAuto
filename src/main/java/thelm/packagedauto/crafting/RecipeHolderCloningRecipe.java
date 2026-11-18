@@ -2,10 +2,12 @@ package thelm.packagedauto.crafting;
 
 import java.util.List;
 
-import net.minecraft.core.HolderLookup;
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -16,12 +18,12 @@ import thelm.packagedauto.item.PackagedAutoItems;
 
 public class RecipeHolderCloningRecipe extends CustomRecipe {
 
-	public RecipeHolderCloningRecipe(CraftingBookCategory category) {
-		super(category);
-	}
+	public static final RecipeHolderCloningRecipe INSTANCE = new RecipeHolderCloningRecipe();
+	public static final MapCodec<RecipeHolderCloningRecipe> CODEC = MapCodec.unit(INSTANCE);
+	public static final StreamCodec<RegistryFriendlyByteBuf, RecipeHolderCloningRecipe> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
 	@Override
-	public RecipeSerializer<?> getSerializer() {
+	public RecipeSerializer<RecipeHolderCloningRecipe> getSerializer() {
 		return PackagedAutoRecipeSerializers.RECIPE_HOLDER_CLONING.get();
 	}
 
@@ -49,7 +51,7 @@ public class RecipeHolderCloningRecipe extends CustomRecipe {
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput input, HolderLookup.Provider registry) {
+	public ItemStack assemble(CraftingInput input) {
 		List<IPackageRecipeInfo> template = null;
 		boolean clearing = false;
 		int count = 0;
@@ -85,10 +87,5 @@ public class RecipeHolderCloningRecipe extends CustomRecipe {
 		else {
 			return ItemStack.EMPTY;
 		}
-	}
-
-	@Override
-	public boolean canCraftInDimensions(int width, int height) {
-		return true;
 	}
 }

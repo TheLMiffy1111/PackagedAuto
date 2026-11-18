@@ -1,10 +1,9 @@
 package thelm.packagedauto.client.screen;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import thelm.packagedauto.menu.ItemAmountSpecifyingMenu;
 import thelm.packagedauto.packet.SetItemStackPacket;
 
@@ -47,7 +46,7 @@ public class ItemAmountSpecifyingScreen extends AmountSpecifyingScreen<ItemAmoun
 			int amount = Math.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
 			ItemStack newStack = stack.copy();
 			newStack.setCount(amount);
-			PacketDistributor.sendToServer(new SetItemStackPacket(containerSlot, newStack));
+			ClientPacketDistributor.sendToServer(new SetItemStackPacket(containerSlot, newStack));
 			close();
 		}
 		catch(NumberFormatException e) {

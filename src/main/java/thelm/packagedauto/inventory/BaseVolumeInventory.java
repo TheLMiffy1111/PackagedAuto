@@ -2,13 +2,15 @@ package thelm.packagedauto.inventory;
 
 import java.util.Arrays;
 
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueInput.ValueInputList;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueOutput.ValueOutputList;
+import net.neoforged.neoforge.common.util.ValueIOSerializable;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 
-public class BaseVolumeInventory {
+public class BaseVolumeInventory implements ValueIOSerializable {
 
 	public final IVolumeType type;
 	public final IVolumeStackWrapper[] stacks;
@@ -19,7 +21,7 @@ public class BaseVolumeInventory {
 		Arrays.fill(stacks, type.getEmptyStackInstance());
 	}
 
-	public int getSlots() {
+	public int size() {
 		return stacks.length;
 	}
 
@@ -32,11 +34,11 @@ public class BaseVolumeInventory {
 		return true;
 	}
 
-	public IVolumeStackWrapper getStackInSlot(int index) {
+	public IVolumeStackWrapper getStack(int index) {
 		return index >= 0 && index < stacks.length ? stacks[index] : type.getEmptyStackInstance();
 	}
 
-	public void setStackInSlot(int index, IVolumeStackWrapper stack) {
+	public void setStack(int index, IVolumeStackWrapper stack) {
 		if(index >= 0 && index < stacks.length) {
 			if(stack.isEmpty()) {
 				stack = type.getEmptyStackInstance();
@@ -45,30 +47,28 @@ public class BaseVolumeInventory {
 		}
 	}
 
-	public void load(CompoundTag nbt, HolderLookup.Provider registries) {
-		Arrays.fill(stacks, type.getEmptyStackInstance());
-		ListTag tagList = nbt.getList("volumes", 10);
-		for(int i = 0; i < tagList.size(); ++i) {
-			CompoundTag tag = tagList.getCompound(i);
-			int j = tag.getByte("slot") & 255;
-			if(j >= 0 && j < stacks.length) {
-				stacks[j] = type.loadRawStack(tag, registries);
+	@Override
+	public void serialize(ValueOutput output) {
+		ValueOutputList list = output.childrenList("volumes");
+		for(int i = 0; i < stacks.length; ++i) {
+			IVolumeStackWrapper stack = stacks[i];
+			if(!stack.isEmpty()) {
+				ValueOutput child = list.addChild();
+				child.putByte("slot", (byte)i);
+				type.serializeStack(stack, child);
 			}
 		}
 	}
 
-	public CompoundTag save(CompoundTag nbt, HolderLookup.Provider registries) {
-		ListTag tagList = new ListTag();
-		for(int i = 0; i < stacks.length; ++i) {
-			IVolumeStackWrapper stack = stacks[i];
-			if(!stack.isEmpty()) {
-				CompoundTag tag = new CompoundTag();
-				tag.putByte("slot", (byte)i);
-				type.saveRawStack(tag, stack, registries);
-				tagList.add(tag);
+	@Override
+	public void deserialize(ValueInput input) {
+		Arrays.fill(stacks, type.getEmptyStackInstance());
+		ValueInputList list = input.childrenListOrEmpty("volumes");
+		for(ValueInput child : list) {
+			int i = child.getByteOr("slot", (byte)0) & 255;
+			if(i >= 0 && i < stacks.length) {
+				stacks[i] = type.deserializeStack(input);
 			}
 		}
-		nbt.put("volumes", tagList);
-		return nbt;
 	}
 }

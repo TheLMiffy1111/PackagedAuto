@@ -2,8 +2,6 @@ package thelm.packagedauto.block.entity;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -11,14 +9,20 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.energy.IEnergyStorage;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.neoforged.neoforge.fluids.FluidUtil;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.access.ItemAccess;
+import net.neoforged.neoforge.transfer.energy.EnergyHandler;
+import net.neoforged.neoforge.transfer.energy.EnergyHandlerUtil;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.block.PackagedAutoBlocks;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
@@ -34,9 +38,11 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements IS
 	public static int energyUsage = 100;
 	public static int refreshInterval = 4;
 
+	public final ResourceHandler<ItemResource> packageSlot;
+
 	public boolean firstTick = true;
 	public boolean isWorking = false;
-	public FluidStack currentFluid = FluidStack.EMPTY;
+	public FluidResource currentFluid = FluidResource.EMPTY;
 	public int requiredAmount = 100;
 	public int amount = 0;
 	public int remainingProgress = 0;
@@ -47,6 +53,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements IS
 		super(PackagedAutoBlockEntities.FLUID_PACKAGE_FILLER.get(), pos, state);
 		setItemHandler(new FluidPackageFillerItemHandler(this));
 		setEnergyStorage(new EnergyStorage(this, energyCapacity));
+		packageSlot = RangedResourceHandler.ofSingleIndex(this::getItemHandler, 1);
 	}
 
 	@Override
@@ -65,12 +72,12 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements IS
 			firstTick = false;
 			updatePowered();
 		}
-		if(!level.isClientSide) {
+		if(!level.isClientSide()) {
 			if(isWorking) {
 				tickProcess();
 				if(remainingProgress <= 0 && isTemplateValid()) {
 					finishProcess();
-					if(!itemHandler.getStackInSlot(1).isEmpty()) {
+					if(!itemHandler.getStack(1).isEmpty()) {
 						ejectItem();
 					}
 					if(!canStart()) {
@@ -91,7 +98,7 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements IS
 			}
 			chargeEnergy();
 			if(level.getGameTime() % refreshInterval == 0) {
-				if(!itemHandler.getStackInSlot(1).isEmpty()) {
+				if(!itemHandler.getStack(1).isEmpty()) {
 					ejectItem();
 				}
 			}
@@ -116,8 +123,8 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements IS
 		if(!isTemplateValid()) {
 			return false;
 		}
-		ItemStack slotStack = itemHandler.getStackInSlot(1);
-		ItemStack outputStack = MiscHelper.INSTANCE.tryMakeVolumePackage(currentFluid);
+		ItemStack slotStack = itemHandler.getStack(1);
+		ItemStack outputStack = MiscHelper.INSTANCE.tryMakeVolumePackage(currentFluid.toStack(requiredAmount));
 		return slotStack.isEmpty() || ItemStack.isSameItemSameComponents(slotStack, outputStack) && slotStack.getCount()+1 <= outputStack.getMaxStackSize();
 	}
 
@@ -126,30 +133,36 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements IS
 	}
 
 	protected void getFluid() {
-		currentFluid = FluidStack.EMPTY;
-		ItemStack template = itemHandler.getStackInSlot(0);
+		currentFluid = FluidResource.EMPTY;
+		ItemStack template = itemHandler.getStack(0);
 		if(template.isEmpty()) {
 			return;
 		}
-		FluidUtil.getFluidContained(template).filter(s->!s.isEmpty()).ifPresent(s->{
-			(currentFluid = s.copy()).setAmount(requiredAmount);
-		});
+		FluidStack stack = FluidUtil.getFirstStackContained(template);
+		if(!stack.isEmpty()) {
+			currentFluid = FluidResource.of(stack);
+		}
 	}
 
 	protected void tickProcess() {
 		if(amount < requiredAmount) {
 			for(Direction direction : Direction.values()) {
-				IFluidHandler fluidHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, worldPosition.relative(direction), direction.getOpposite());
+				ResourceHandler<FluidResource> fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, worldPosition.relative(direction), direction.getOpposite());
 				if(fluidHandler != null) {
-					FluidStack toDrain = currentFluid.copy();
-					toDrain.setAmount(requiredAmount-amount);
-					amount += fluidHandler.drain(toDrain, FluidAction.EXECUTE).getAmount();
+					try(Transaction transaction = Transaction.openRoot()) {
+						int drained = fluidHandler.extract(currentFluid, requiredAmount-amount, transaction);
+						transaction.commit();
+						amount += drained;
+					}
 				}
 			}
 		}
 		if(amount >= requiredAmount) {
-			int energy = energyStorage.extractEnergy(Math.min(energyUsage, remainingProgress), false);
-			remainingProgress -= energy;
+			try(Transaction transaction = Transaction.openRoot()) {
+				int energy = energyStorage.extract(Math.min(energyUsage, remainingProgress), transaction);
+				transaction.commit();
+				remainingProgress -= energy;
+			}
 		}
 	}
 
@@ -161,11 +174,11 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements IS
 			endProcess();
 			return;
 		}
-		if(itemHandler.getStackInSlot(1).isEmpty()) {
-			itemHandler.setStackInSlot(1, MiscHelper.INSTANCE.tryMakeVolumePackage(currentFluid));
+		if(itemHandler.getStack(1).isEmpty()) {
+			itemHandler.setStack(1, MiscHelper.INSTANCE.tryMakeVolumePackage(currentFluid.toStack(requiredAmount)));
 		}
-		else if(itemHandler.getStackInSlot(1).has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK)) {
-			itemHandler.getStackInSlot(1).grow(1);
+		else if(itemHandler.getStack(1).has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK)) {
+			itemHandler.getStack(1).grow(1);
 		}
 		endProcess();
 	}
@@ -188,27 +201,21 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements IS
 		for(Direction direction : Direction.values()) {
 			BlockPos offsetPos = worldPosition.relative(direction);
 			Block block = level.getBlockState(offsetPos).getBlock();
-			IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, offsetPos, direction.getOpposite());
-			IFluidHandler fluidHandler = level.getCapability(Capabilities.FluidHandler.BLOCK, offsetPos, direction.getOpposite());
+			ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, offsetPos, direction.getOpposite());
+			ResourceHandler<FluidResource> fluidHandler = level.getCapability(Capabilities.Fluid.BLOCK, offsetPos, direction.getOpposite());
 			if(block != PackagedAutoBlocks.UNPACKAGER.get() && itemHandler != null && fluidHandler == null) {
-				ItemStack stack = this.itemHandler.getStackInSlot(1);
-				if(!stack.isEmpty()) {
-					ItemStack stackRem = ItemHandlerHelper.insertItem(itemHandler, stack, false);
-					this.itemHandler.setStackInSlot(1, stackRem);
+				int moveCount = packageSlot.getAmountAsInt(0);
+				if(moveCount > 0) {
+					ResourceHandlerUtil.moveStacking(packageSlot, itemHandler, _->true, moveCount, null);
 				}
 			}
 		}
 	}
 
 	protected void chargeEnergy() {
-		ItemStack energyStack = itemHandler.getStackInSlot(2);
-		IEnergyStorage itemEnergyStorage = energyStack.getCapability(Capabilities.EnergyStorage.ITEM);
+		EnergyHandler itemEnergyStorage = ItemAccess.forHandlerIndex(itemHandler, 2).getCapability(Capabilities.Energy.ITEM);
 		if(itemEnergyStorage != null) {
-			int energyRequest = Math.min(energyStorage.getMaxReceive(), energyStorage.getMaxEnergyStored() - energyStorage.getEnergyStored());
-			energyStorage.receiveEnergy(itemEnergyStorage.extractEnergy(energyRequest, false), false);
-			if(energyStack.getCount() <= 0) {
-				itemHandler.setStackInSlot(2, ItemStack.EMPTY);
-			}
+			EnergyHandlerUtil.move(itemEnergyStorage, energyStorage, energyStorage.getMaxInsert(), null);
 		}
 	}
 
@@ -228,55 +235,54 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements IS
 		if(isWorking) {
 			return 1;
 		}
-		if(!itemHandler.getStackInSlot(1).isEmpty()) {
+		if(!itemHandler.getStack(1).isEmpty()) {
 			return 15;
 		}
 		return 0;
 	}
 
 	@Override
-	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
-		requiredAmount = nbt.getInt("amount_req");
+	public ISettingsCloneable.Result loadConfig(ValueInput input, Player player) {
+		requiredAmount = input.getIntOr("amount_req", 100);
 		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
-		nbt.putInt("amount_req", requiredAmount);
+	public ISettingsCloneable.Result saveConfig(ValueOutput output, Player player) {
+		output.putInt("amount_req", requiredAmount);
 		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
-		isWorking = nbt.getBoolean("working");
-		amount = nbt.getInt("amount");
-		remainingProgress = nbt.getInt("progress");
-		powered = nbt.getBoolean("powered");
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
+		isWorking = input.getBooleanOr("working", false);
+		amount = input.getIntOr("amount", 0);
+		remainingProgress = input.getIntOr("progress", 0);
+		powered = input.getBooleanOr("powered", false);
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
-		nbt.putBoolean("working", isWorking);
-		nbt.putInt("amount", amount);
-		nbt.putInt("progress", remainingProgress);
-		nbt.putBoolean("powered", powered);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
+		output.putBoolean("working", isWorking);
+		output.putInt("amount", amount);
+		output.putInt("progress", remainingProgress);
+		output.putBoolean("powered", powered);
 	}
 
 	@Override
-	public void loadSync(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadSync(nbt, registries);
-		currentFluid = FluidStack.parseOptional(registries, nbt.getCompound("fluid"));
-		requiredAmount = nbt.getInt("amount_req");
+	protected void loadSync(ValueInput input) {
+		super.loadSync(input);
+		currentFluid = input.read("fluid", FluidResource.OPTIONAL_CODEC).orElse(FluidResource.EMPTY);
+		requiredAmount = input.getIntOr("amount_req", 100);
 	}
 
 	@Override
-	public CompoundTag saveSync(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveSync(nbt, registries);
-		nbt.put("fluid", currentFluid.saveOptional(registries));
-		nbt.putInt("amount_req", requiredAmount);
-		return nbt;
+	protected void saveSync(ValueOutput output) {
+		super.saveSync(output);
+		output.store("fluid", FluidResource.OPTIONAL_CODEC, currentFluid);
+		output.putInt("amount_req", requiredAmount);
 	}
 
 	@Override
@@ -288,10 +294,10 @@ public class FluidPackageFillerBlockEntity extends BaseBlockEntity implements IS
 	}
 
 	public int getScaledEnergy(int scale) {
-		if(energyStorage.getMaxEnergyStored() <= 0) {
+		if(energyStorage.getCapacityAsInt() <= 0) {
 			return 0;
 		}
-		return Math.min(scale * energyStorage.getEnergyStored() / energyStorage.getMaxEnergyStored(), scale);
+		return Math.min(scale * energyStorage.getAmountAsInt() / energyStorage.getCapacityAsInt(), scale);
 	}
 
 	public int getScaledProgress(int scale) {

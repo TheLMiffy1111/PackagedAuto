@@ -2,20 +2,17 @@ package thelm.packagedauto.slot;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.world.inventory.StackCopySlot;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.inventory.BaseVolumeInventory;
 
-public class FalseCopyVolumeSlot extends SlotItemHandler {
+public class FalseCopyVolumeSlot extends StackCopySlot {
 
-	public int slotIndex;
 	public BaseVolumeInventory volumeInventory;
 
 	public FalseCopyVolumeSlot(BaseVolumeInventory volumeInventory, int index, int x, int y) {
-		super(new ItemStackHandler(volumeInventory.getSlots()), index, x, y);
-		slotIndex = index;
+		super(index, x, y);
 		this.volumeInventory = volumeInventory;
 	}
 
@@ -25,15 +22,20 @@ public class FalseCopyVolumeSlot extends SlotItemHandler {
 	}
 
 	@Override
-	public void set(ItemStack stack) {
+	protected ItemStack getStackCopy() {
+		return ItemStack.EMPTY;
+	}
+
+	@Override
+	protected void setStackCopy(ItemStack stack) {
 		IVolumeType type = volumeInventory.type;
 		if(stack.isEmpty()) {
-			volumeInventory.setStackInSlot(getSlotIndex(), type.getEmptyStackInstance());
+			volumeInventory.setStack(getSlotIndex(), type.getEmptyStackInstance());
 		}
 		else {
 			IVolumeStackWrapper vStack = type.getStackContained(stack).orElse(type.getEmptyStackInstance());
 			if(!vStack.isEmpty()) {
-				volumeInventory.setStackInSlot(getSlotIndex(), vStack);
+				volumeInventory.setStack(getSlotIndex(), vStack.copy());
 			}
 		}
 	}

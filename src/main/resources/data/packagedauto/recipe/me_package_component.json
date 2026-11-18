@@ -1,10 +1,8 @@
 {
-	"neoforge:conditions": [
-		{
-			"type": "neoforge:mod_loaded",
-			"modid": "ae2"
-		}
-	],
+	"neoforge:conditions": [{
+		"type": "neoforge:mod_loaded",
+		"modid": "ae2"
+	}],
 	"type": "minecraft:crafting_shaped",
 	"result": {
 		"id": "packagedauto:me_package_component",
@@ -16,20 +14,10 @@
 		"IGI"
 	],
 	"key": {
-		"C": {
-			"item": "packagedauto:package_component"
-		},
-		"A": {
-			"item": "ae2:annihilation_core"
-		},
-		"F": {
-			"item": "ae2:formation_core"
-		},
-		"G": {
-			"item": "ae2:quartz_glass"
-		},
-		"I": {
-			"tag": "c:ingots/iron"
-		}
+		"C": "packagedauto:package_component",
+		"A": "ae2:annihilation_core",
+		"F": "ae2:formation_core",
+		"G": "ae2:quartz_glass",
+		"I": "#c:ingots/iron"
 	}
 }

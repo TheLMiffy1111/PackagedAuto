@@ -1,2 +1,1 @@
-Persist amount in amount specification fields  
-Fix packaging provider send direction save key  
+Port to 26.1.2  

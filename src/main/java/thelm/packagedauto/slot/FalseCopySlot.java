@@ -2,16 +2,20 @@ package thelm.packagedauto.slot;
 
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.IndexModifier;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 //Code from CoFHCore
-public class FalseCopySlot extends SlotItemHandler {
+public class FalseCopySlot extends ResourceHandlerSlot {
 
+	public IndexModifier<ItemResource> slotModifier;
 	public int slotIndex;
 
-	public FalseCopySlot(IItemHandler itemHandler, int index, int x, int y) {
-		super(itemHandler, index, x, y);
+	public FalseCopySlot(ResourceHandler<ItemResource> itemHandler, IndexModifier<ItemResource> slotModifier, int index, int x, int y) {
+		super(itemHandler, slotModifier, index, x, y);
+		this.slotModifier = slotModifier;
 		slotIndex = index;
 	}
 
@@ -21,10 +25,10 @@ public class FalseCopySlot extends SlotItemHandler {
 	}
 
 	@Override
-	public void set(ItemStack stack) {
+	protected void setStackCopy(ItemStack stack) {
 		if(!stack.isEmpty() && !mayPlace(stack)) {
 			return;
 		}
-		super.set(stack);
+		super.setStackCopy(stack);
 	}
 }

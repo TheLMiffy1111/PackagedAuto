@@ -13,30 +13,33 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponentPatch;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueInput.ValueInputList;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueOutput.ValueOutputList;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import thelm.packagedauto.api.DirectionalGlobalPos;
 import thelm.packagedauto.api.IPackageCraftingMachine;
 import thelm.packagedauto.api.IPackageRecipeInfo;
 import thelm.packagedauto.api.ISettingsCloneable;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
-import thelm.packagedauto.inventory.DistributorItemHandler;
+import thelm.packagedauto.inventory.DistributorItemResourceHandler;
 import thelm.packagedauto.item.PackagedAutoItems;
 import thelm.packagedauto.menu.DistributorMenu;
 import thelm.packagedauto.packet.BeamPacket;
@@ -56,7 +59,7 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 
 	public DistributorBlockEntity(BlockPos pos, BlockState state) {
 		super(PackagedAutoBlockEntities.DISTRIBUTOR.get(), pos, state);
-		setItemHandler(new DistributorItemHandler(this));
+		setItemHandler(new DistributorItemResourceHandler(this));
 	}
 
 	@Override
@@ -71,7 +74,7 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 
 	@Override
 	public void tick() {
-		if(!level.isClientSide) {
+		if(!level.isClientSide()) {
 			if(level.getGameTime() % refreshInterval == 0 && !pending.isEmpty()) {
 				distributeItems();
 			}
@@ -97,22 +100,26 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 				}
 				ItemStack stack = entry.getValue().copy();
 				Direction dir = positions.get(entry.getIntKey()).direction();
-				IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, dir);
+				ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, pos, dir);
 				if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
 						stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, pos, dir)) {
 					if(blocking && !stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().isEmpty(level, pos, dir)) {
 						return false;
 					}
-					if(MiscHelper.INSTANCE.fillVolume(level, pos, dir, stack, true).getCount() == stack.getCount()) {
-						return false;
+					try(Transaction transaction = Transaction.openRoot()) {
+						if(MiscHelper.INSTANCE.insertVolume(level, pos, dir, stack, transaction) == 0) {
+							return false;
+						}
 					}
 				}
 				else if(itemHandler != null) {
 					if(blocking && !MiscHelper.INSTANCE.isEmpty(itemHandler)) {
 						return false;
 					}
-					if(ItemHandlerHelper.insertItem(itemHandler, stack, true).getCount() == stack.getCount()) {
-						return false;
+					try(Transaction transaction = Transaction.openRoot()) {
+						if(ResourceHandlerUtil.insertStacking(itemHandler, ItemResource.of(stack), stack.count(), transaction) == 0) {
+							return false;
+						}
 					}
 				}
 				else {
@@ -146,28 +153,34 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 			}
 			ItemStack stack = pending.get(i);
 			Direction dir = positions.get(i).direction();
-			IItemHandler itemHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, dir);
-			ItemStack stackRem = stack;
+			ResourceHandler<ItemResource> itemHandler = level.getCapability(Capabilities.Item.BLOCK, pos, dir);
+			int inserted = 0;
 			if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK) &&
 					stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK).getVolumeType().hasBlockCapability(level, pos, dir)) {
-				stackRem = MiscHelper.INSTANCE.fillVolume(level, pos, dir, stack, false);
+				try(Transaction transaction = Transaction.openRoot()) {
+					inserted = MiscHelper.INSTANCE.insertVolume(level, pos, dir, stack, transaction);
+					transaction.commit();
+				}
 			}
 			else if(itemHandler != null) {
-				stackRem = ItemHandlerHelper.insertItem(itemHandler, stack, false);
+				try(Transaction transaction = Transaction.openRoot()) {
+					inserted = ResourceHandlerUtil.insertStacking(itemHandler, ItemResource.of(stack), stack.count(), transaction);
+					transaction.commit();
+				}
 			}
 			else {
 				ejectItems();
 				break;
 			}
-			if(stackRem.getCount() < stack.getCount()) {
-				Vec3 delta = Vec3.atLowerCornerOf(pos.subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getNormal()).scale(0.5));
+			if(inserted > 0) {
+				Vec3 delta = Vec3.atLowerCornerOf(pos.subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getUnitVec3i()).scale(0.5));
 				deltas.add(delta);
 			}
-			if(stackRem.isEmpty()) {
+			if(inserted == stack.count()) {
 				pending.remove(i);
 			}
 			else {
-				pending.put(i, stackRem);
+				pending.put(i, stack.copyWithCount(stack.count()-inserted));
 			}
 			setChanged();
 		}
@@ -183,9 +196,9 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 			if(pending.containsKey(i)) {
 				ItemStack stack = pending.remove(i);
 				if(!stack.isEmpty()) {
-					double dx = level.random.nextFloat()/2+0.25;
-					double dy = level.random.nextFloat()/2+0.75;
-					double dz = level.random.nextFloat()/2+0.25;
+					double dx = level.getRandom().nextFloat()/2+0.25;
+					double dy = level.getRandom().nextFloat()/2+0.75;
+					double dz = level.getRandom().nextFloat()/2+0.25;
 					ItemEntity itemEntity = new ItemEntity(level, worldPosition.getX()+dx, worldPosition.getY()+dy, worldPosition.getZ()+dz, stack);
 					itemEntity.setDefaultPickUpDelay();
 					level.addFreshEntity(itemEntity);
@@ -204,7 +217,7 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 				List<Vec3> deltas = positions.values().stream().map(globalPos->{
 					BlockPos pos = globalPos.blockPos();
 					Direction dir = globalPos.direction();
-					return Vec3.atLowerCornerOf(pos.subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getNormal()).scale(0.5));
+					return Vec3.atLowerCornerOf(pos.subtract(worldPosition)).add(Vec3.atLowerCornerOf(dir.getUnitVec3i()).scale(0.5));
 				}).collect(Collectors.toList());
 				Vec3 source = Vec3.atCenterOf(worldPosition);
 				DirectionalMarkerPacket.sendDirectionalMarkers(player, new ArrayList<>(positions.values()), 0x00FF7F, 200);
@@ -225,16 +238,32 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 	}
 
 	@Override
-	public ISettingsCloneable.Result loadConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
-		ListTag positionsTag = nbt.getList("positions", 10);
-		if(positionsTag.isEmpty()) {
+	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		super.preRemoveSideEffects(pos, state);
+		for(Int2ObjectMap.Entry<ItemStack> entry : pending.int2ObjectEntrySet()) {
+			Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), entry.getValue());
+		}
+	}
+
+	@Override
+	public ISettingsCloneable.Result loadConfig(ValueInput input, Player player) {
+		ValueInputList positionsInput = input.childrenListOrEmpty("positions");
+		if(positionsInput.isEmpty()) {
 			return ISettingsCloneable.Result.fail(Component.translatable("item.packagedauto.settings_cloner.invalid"));
 		}
-		int requiredCount = positionsTag.size();
+		Int2ObjectMap<DirectionalGlobalPos> positions = new Int2ObjectArrayMap<>(81); 
+		for(ValueInput positionInput : positionsInput) {
+			int index = positionInput.getByteOr("index", (byte)-1);
+			DirectionalGlobalPos globalPos = positionInput.read(DirectionalGlobalPos.MAP_CODEC).orElse(null);
+			if(index > 0 && globalPos != null) {
+				positions.put(index, globalPos);
+			}
+		}
+		int requiredCount = positions.size();
 		int availableCount = 0;
 		Inventory playerInventory = player.getInventory();
-		for(int i = 0; i < itemHandler.getSlots(); ++i) {
-			ItemStack stack = itemHandler.getStackInSlot(i);
+		for(int i = 0; i < itemHandler.size(); ++i) {
+			ItemStack stack = itemHandler.getStack(i);
 			if(!stack.isEmpty()) {
 				if(stack.is(PackagedAutoItems.DISTRIBUTOR_MARKER)) {
 					availableCount += stack.getCount();
@@ -257,9 +286,9 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.distributor.no_markers"));
 		}
 		int removedCount = 0;
-		for(int i = 0; i < itemHandler.getSlots(); ++i) {
-			removedCount += itemHandler.getStackInSlot(i).getCount();
-			itemHandler.setStackInSlot(i, ItemStack.EMPTY);
+		for(int i = 0; i < itemHandler.size(); ++i) {
+			removedCount += itemHandler.getStack(i).getCount();
+			itemHandler.setStack(i, ItemStack.EMPTY);
 		}
 		if(removedCount < requiredCount) {
 			for(int i = 0; i < playerInventory.getContainerSize(); ++i) {
@@ -280,42 +309,40 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 				level.addFreshEntity(item);
 			}
 		}
-		for(int i = 0; i < requiredCount; ++i) {
-			CompoundTag positionTag = positionsTag.getCompound(i);
-			int index = positionTag.getByte("index");
-			DirectionalGlobalPos globalPos = DirectionalGlobalPos.CODEC.parse(NbtOps.INSTANCE, positionTag).result().get();
+		for(Int2ObjectMap.Entry<DirectionalGlobalPos> entry : positions.int2ObjectEntrySet()) {
+			int index = entry.getIntKey();
+			DirectionalGlobalPos globalPos = entry.getValue();
 			ItemStack stack = PackagedAutoItems.DISTRIBUTOR_MARKER.toStack();
 			DataComponentPatch patch = DataComponentPatch.builder().
 					set(PackagedAutoDataComponents.MARKER_POS.get(), globalPos).
 					build();
 			stack.applyComponents(patch);
-			itemHandler.setStackInSlot(index, stack);
+			itemHandler.setStack(index, stack);
 		}
 		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public ISettingsCloneable.Result saveConfig(CompoundTag nbt, HolderLookup.Provider registries, Player player) {
+	public ISettingsCloneable.Result saveConfig(ValueOutput output, Player player) {
 		if(positions.isEmpty()) {
 			return ISettingsCloneable.Result.fail(Component.translatable("block.packagedauto.distributor.empty"));
 		}
-		ListTag positionsTag = new ListTag();
+		ValueOutputList positionsOutput = output.childrenList("positions");
 		for(Int2ObjectMap.Entry<DirectionalGlobalPos> entry : positions.int2ObjectEntrySet()) {
+			ValueOutput positionOutput = positionsOutput.addChild();
 			DirectionalGlobalPos pos = entry.getValue();
-			CompoundTag positionTag = (CompoundTag)DirectionalGlobalPos.CODEC.encodeStart(NbtOps.INSTANCE, pos).result().get();
-			positionTag.putByte("index", (byte)entry.getIntKey());
-			positionsTag.add(positionTag);
+			positionOutput.store(DirectionalGlobalPos.MAP_CODEC, pos);
+			positionOutput.putByte("index", (byte)entry.getIntKey());
 		}
-		nbt.put("positions", positionsTag);
 		return ISettingsCloneable.Result.success();
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.loadAdditional(nbt, registries);
+	protected void loadAdditional(ValueInput input) {
+		super.loadAdditional(input);
 		pending.clear();
 		List<ItemStack> pendingList = new ArrayList<>();
-		MiscHelper.INSTANCE.loadAllItems(nbt.getList("pending", 10), pendingList, registries);
+		MiscHelper.INSTANCE.deserializeItemList(pendingList, input.childrenListOrEmpty("pending"));
 		for(int i = 0; i < 81 && i < pendingList.size(); ++i) {
 			ItemStack stack = pendingList.get(i);
 			if(!stack.isEmpty()) {
@@ -325,14 +352,13 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
-		super.saveAdditional(nbt, registries);
+	protected void saveAdditional(ValueOutput output) {
+		super.saveAdditional(output);
 		List<ItemStack> pendingList = new ArrayList<>();
 		for(int i = 0; i < 81; ++i) {
 			pendingList.add(pending.getOrDefault(i, ItemStack.EMPTY));
 		}
-		ListTag pendingTag = MiscHelper.INSTANCE.saveAllItems(new ListTag(), pendingList, registries);
-		nbt.put("pending", pendingTag);
+		MiscHelper.INSTANCE.serializeItemList(pendingList, output.childrenList("pending"));
 	}
 
 	@Override

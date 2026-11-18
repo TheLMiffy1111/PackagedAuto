@@ -2,23 +2,25 @@ package thelm.packagedauto.client.screen;
 
 import java.util.List;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.minecraft.world.item.ItemStackTemplate;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import thelm.packagedauto.api.IPackageRecipeType;
 import thelm.packagedauto.menu.EncoderMenu;
 import thelm.packagedauto.packet.CycleRecipeTypePacket;
@@ -30,16 +32,14 @@ import yalter.mousetweaks.api.MouseTweaksDisableWheelTweak;
 @MouseTweaksDisableWheelTweak
 public class EncoderScreen extends BaseScreen<EncoderMenu> {
 
-	public static final ResourceLocation BACKGROUND = ResourceLocation.parse("packagedauto:textures/gui/encoder.png");
+	public static final Identifier BACKGROUND = Identifier.parse("packagedauto:textures/gui/encoder.png");
 
 	public EncoderScreen(EncoderMenu menu, Inventory inventory, Component title) {
-		super(menu, inventory, title);
-		imageWidth = 258;
-		imageHeight = 314;
+		super(menu, inventory, title, 258, 314);
 	}
 
 	@Override
-	protected ResourceLocation getBackgroundTexture() {
+	protected Identifier getBackgroundTexture() {
 		return BACKGROUND;
 	}
 
@@ -59,45 +59,42 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 	}
 
 	@Override
-	protected void renderBgAdditional(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
+	protected void extractBackgroundAdditional(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
 		for(int i = 0; i < 9; ++i) {
 			for(int j = 0; j < 9; ++j) {
 				Vec3i color = recipeType.getSlotColor(i*9+j);
-				RenderSystem.setShaderColor(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
-				graphics.blit(BACKGROUND, leftPos+8+j*18, topPos+57+i*18, 258, 0, 16, 16, 512, 512);
+				graphics.fill(leftPos+8+j*18, topPos+57+i*18, leftPos+24+j*18, topPos+73+i*18, ARGB.color(color.getX(), color.getY(), color.getZ()));
 			}
 		}
 		for(int i = 0; i < 3; ++i) {
 			for(int j = 0; j < 3; ++j) {
 				int slotIndex = 81+(i*3+j == 4 ? 0 : i*3+j < 4 ? i*3+j+1 : i*3+j);
 				Vec3i color = recipeType.getSlotColor(slotIndex);
-				RenderSystem.setShaderColor(color.getX()/255F, color.getY()/255F, color.getZ()/255F, 1F);
-				graphics.blit(BACKGROUND, leftPos+198+j*18, topPos+111+i*18, 258, 0, 16, 16, 512, 512);
+				graphics.fill(leftPos+198+j*18, topPos+111+i*18, leftPos+214+j*18, topPos+127+i*18, ARGB.color(color.getX(), color.getY(), color.getZ()));
 			}
 		}
-		RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
 	}
 
 	@Override
-	protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-		String s = menu.blockEntity.getDisplayName().getString();
-		graphics.drawString(font, s, imageWidth/2 - font.width(s)/2, 6, 0x404040, false);
-		graphics.drawString(font, menu.inventory.getDisplayName().getString(), menu.getPlayerInvX(), menu.getPlayerInvY()-11, 0x404040, false);
-		String str = menu.patternItemHandler.recipeType.getShortDisplayName().getString();
-		graphics.drawString(font, str, 212 - font.width(str)/2, 64, 0x404040, false);
-		super.renderLabels(graphics, mouseX, mouseY);
+	protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+		Component name = menu.patternItemHandler.recipeType.getShortDisplayName();
+		graphics.text(font, name, 212 - font.width(name)/2, 64, 0xFF404040, false);
+		super.extractLabels(graphics, mouseX, mouseY);
 		IPackageRecipeType recipeType = menu.patternItemHandler.recipeType;
 		if(recipeType != null) {
 			Object rep = recipeType.getRepresentation();
 			if(rep instanceof TextureAtlasSprite sprite) {
-				RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-				RenderSystem.setShaderTexture(0, InventoryMenu.BLOCK_ATLAS);
-				graphics.blit(204, 75, 0, 16, 16, sprite);
+				graphics.blitSprite(RenderPipelines.GUI_TEXTURED, sprite, 204, 75, 16, 16);
 			}
 			if(rep instanceof ItemStack stack) {
-				RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-				graphics.renderItem(stack, 204, 75);
+				graphics.item(stack, 204, 75);
+			}
+			if(rep instanceof ItemStackTemplate stack) {
+				graphics.item(stack.create(), 204, 75);
+			}
+			if(rep instanceof ItemResource resource) {
+				graphics.item(resource.toStack(), 204, 75);
 			}
 		}
 	}
@@ -123,13 +120,12 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+			extractDefaultSprite(graphics);
 			for(int i = 81; i < 90; ++i) {
-				ItemStack stack = menu.blockEntity.patternItemHandlers[id].getStackInSlot(i);
+				ItemStack stack = menu.blockEntity.patternItemHandlers[id].getStack(i);
 				if(!stack.isEmpty()) {
-					RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-					graphics.renderItem(stack, getX()+1, getY()+1);
+					graphics.item(stack, getX()+1, getY()+1);
 					break;
 				}
 			}
@@ -139,8 +135,8 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
-		public void onPress() {
-			PacketDistributor.sendToServer(new SetPatternIndexPacket(id));
+		public void onPress(InputWithModifiers input) {
+			ClientPacketDistributor.sendToServer(new SetPatternIndexPacket(id));
 			menu.blockEntity.setPatternIndex(id);
 			menu.setupSlots();
 		}
@@ -157,18 +153,17 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-			graphics.blit(BACKGROUND, getX()+1, getY()+1, prev ? 258 : 266, 48, 8, 16, 512, 512);
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+			extractDefaultSprite(graphics);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, getX()+1, getY()+1, prev ? 258 : 266, 48, 8, 16, 512, 512);
 		}
 
 		@Override
 		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
-		public void onPress() {
-			PacketDistributor.sendToServer(new CycleRecipeTypePacket(prev));
+		public void onPress(InputWithModifiers input) {
+			ClientPacketDistributor.sendToServer(new CycleRecipeTypePacket(prev));
 			menu.patternItemHandler.cycleRecipeType(prev);
 			menu.setupSlots();
 		}
@@ -184,19 +179,18 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-			graphics.blit(BACKGROUND, getX()+1, getY()+1, 258, 16, 34, 16, 512, 512);
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+			extractDefaultSprite(graphics);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, getX()+1, getY()+1, 258, 16, 34, 16, 512, 512);
 		}
 
 		@Override
 		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
-		public void onPress() {
-			boolean single = hasShiftDown();
-			PacketDistributor.sendToServer(new SaveRecipeListPacket(single));
+		public void onPress(InputWithModifiers input) {
+			boolean single = input.hasShiftDown();
+			ClientPacketDistributor.sendToServer(new SaveRecipeListPacket(single));
 		}
 	}
 
@@ -210,19 +204,18 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-			graphics.blit(BACKGROUND, getX()+1, getY()+1, 258, 32, 34, 16, 512, 512);
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+			extractDefaultSprite(graphics);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, getX()+1, getY()+1, 258, 32, 34, 16, 512, 512);
 		}
 
 		@Override
 		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
-		public void onPress() {
-			boolean single = hasShiftDown();
-			PacketDistributor.sendToServer(new LoadRecipeListPacket(single, false));
+		public void onPress(InputWithModifiers input) {
+			boolean single = input.hasShiftDown();
+			ClientPacketDistributor.sendToServer(new LoadRecipeListPacket(single, false));
 			menu.blockEntity.loadRecipeList(single, false);
 			menu.setupSlots();
 		}
@@ -238,15 +231,15 @@ public class EncoderScreen extends BaseScreen<EncoderMenu> {
 		}
 
 		@Override
-		protected void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {}
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {}
 
 		@Override
 		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
-		public void onPress() {
-			boolean single = !hasShiftDown();
-			PacketDistributor.sendToServer(new LoadRecipeListPacket(single, true));
+		public void onPress(InputWithModifiers input) {
+			boolean single = input.hasShiftDown();
+			ClientPacketDistributor.sendToServer(new LoadRecipeListPacket(single, true));
 			menu.blockEntity.loadRecipeList(single, true);
 			menu.setupSlots();
 		}

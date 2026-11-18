@@ -1,0 +1,14 @@
+{
+	"model": {
+		"type": "minecraft:condition",
+		"property": "packagedauto:filled",
+		"on_false": {
+			"type": "minecraft:model",
+			"model": "packagedauto:item/recipe_holder"
+		},
+		"on_true": {
+			"type": "minecraft:model",
+			"model": "packagedauto:item/recipe_holder_filled"
+		}
+	}
+}

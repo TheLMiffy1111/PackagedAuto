@@ -29,7 +29,7 @@ public class PositionedProcessingPackageRecipeInfo implements IPositionedProcess
 	public static final Codec<PositionedProcessingPackageRecipeInfo> CODEC = MAP_CODEC.codec();
 	public static final StreamCodec<RegistryFriendlyByteBuf, PositionedProcessingPackageRecipeInfo> STREAM_CODEC = StreamCodec.composite(
 			ItemStack.OPTIONAL_LIST_STREAM_CODEC, PositionedProcessingPackageRecipeInfo::getMatrixAsList,
-			ItemStack.LIST_STREAM_CODEC, IPackageRecipeInfo::getOutputs,
+			ItemStack.OPTIONAL_LIST_STREAM_CODEC, IPackageRecipeInfo::getOutputs,
 			PositionedProcessingPackageRecipeInfo::new);
 
 	private final List<ItemStack> input = new ArrayList<>();

@@ -9,7 +9,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -18,10 +18,10 @@ import thelm.packagedauto.api.IPackageRecipeInfo;
 public class OrderedProcessingPackageRecipeType extends ProcessingPackageRecipeType {
 
 	public static final OrderedProcessingPackageRecipeType INSTANCE = new OrderedProcessingPackageRecipeType();
-	public static final ResourceLocation NAME = ResourceLocation.parse("packagedauto:ordered_processing");
+	public static final Identifier NAME = Identifier.parse("packagedauto:ordered_processing");
 
 	@Override
-	public ResourceLocation getName() {
+	public Identifier getName() {
 		return NAME;
 	}
 

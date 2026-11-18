@@ -1,12 +1,13 @@
 package thelm.packagedauto.item;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import thelm.packagedauto.api.IVolumeStackWrapper;
 import thelm.packagedauto.api.IVolumeType;
 import thelm.packagedauto.component.PackagedAutoDataComponents;
@@ -14,8 +15,8 @@ import thelm.packagedauto.util.ApiImpl;
 
 public class VolumePackageItem extends Item {
 
-	protected VolumePackageItem() {
-		super(new Item.Properties());
+	protected VolumePackageItem(Properties properties) {
+		super(properties);
 	}
 
 	public static ItemStack makeVolumePackage(IVolumeStackWrapper volumeStack) {
@@ -42,13 +43,13 @@ public class VolumePackageItem extends Item {
 	}
 
 	@Override
-	public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag isAdvanced) {
+	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag tooltipFlag) {
 		if(stack.has(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK)) {
 			IVolumeStackWrapper volumeStack = stack.get(PackagedAutoDataComponents.VOLUME_PACKAGE_STACK);
-			tooltip.add(volumeStack.getVolumeType().getDisplayName().append(": ").
+			builder.accept(volumeStack.getVolumeType().getDisplayName().append(": ").
 					append(volumeStack.getDisplayName()).append(" ").
 					append(volumeStack.getAmountDesc()));
 		}
-		super.appendHoverText(stack, context, tooltip, isAdvanced);
+		super.appendHoverText(stack, context, display, builder, tooltipFlag);
 	}
 }

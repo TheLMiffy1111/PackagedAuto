@@ -1,15 +1,15 @@
 package thelm.packagedauto.client.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.input.InputWithModifiers;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.client.network.ClientPacketDistributor;
 import thelm.packagedauto.block.entity.PackagingProviderBlockEntity;
 import thelm.packagedauto.menu.PackagingProviderMenu;
 import thelm.packagedauto.packet.ChangeBlockingPacket;
@@ -17,14 +17,14 @@ import thelm.packagedauto.packet.ChangeProvidingPacket;
 
 public class PackagingProviderScreen extends BaseScreen<PackagingProviderMenu> {
 
-	public static final ResourceLocation BACKGROUND = ResourceLocation.parse("packagedauto:textures/gui/packaging_provider.png");
+	public static final Identifier BACKGROUND = Identifier.parse("packagedauto:textures/gui/packaging_provider.png");
 
 	public PackagingProviderScreen(PackagingProviderMenu menu, Inventory inventory, Component title) {
 		super(menu, inventory, title);
 	}
 
 	@Override
-	protected ResourceLocation getBackgroundTexture() {
+	protected Identifier getBackgroundTexture() {
 		return BACKGROUND;
 	}
 
@@ -38,14 +38,6 @@ public class PackagingProviderScreen extends BaseScreen<PackagingProviderMenu> {
 		addRenderableWidget(new ButtonChangeProvideUnpackaging(leftPos+134, topPos+34));
 	}
 
-	@Override
-	protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-		String s = menu.blockEntity.getDisplayName().getString();
-		graphics.drawString(font, s, imageWidth/2 - font.width(s)/2, 6, 0x404040, false);
-		graphics.drawString(font, menu.inventory.getDisplayName().getString(), menu.getPlayerInvX(), menu.getPlayerInvY()-11, 0x404040, false);
-		super.renderLabels(graphics, mouseX, mouseY);
-	}
-
 	class ButtonChangeBlocking extends AbstractButton {
 
 		final Tooltip trueTooltip = Tooltip.create(Component.translatable("block.packagedauto.unpackager.blocking.true"));
@@ -56,20 +48,18 @@ public class PackagingProviderScreen extends BaseScreen<PackagingProviderMenu> {
 		}
 
 		@Override
-		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 			setTooltip(menu.blockEntity.blocking ? trueTooltip : falseTooltip);
-			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-			RenderSystem.setShaderTexture(0, BACKGROUND);
-			graphics.blit(BACKGROUND, getX()+1, getY()+2, 176, menu.blockEntity.blocking ? 14 : 0, 14, 14);
+			extractDefaultSprite(graphics);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, getX()+1, getY()+2, 176, menu.blockEntity.blocking ? 14 : 0, 14, 14, 256, 256);
 		}
 
 		@Override
 		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
-		public void onPress() {
-			PacketDistributor.sendToServer(ChangeBlockingPacket.INSTANCE);
+		public void onPress(InputWithModifiers input) {
+			ClientPacketDistributor.sendToServer(ChangeBlockingPacket.INSTANCE);
 		}
 	}
 
@@ -83,20 +73,18 @@ public class PackagingProviderScreen extends BaseScreen<PackagingProviderMenu> {
 		}
 
 		@Override
-		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 			setTooltip(menu.blockEntity.provideDirect ? trueTooltip : falseTooltip);
-			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-			RenderSystem.setShaderTexture(0, BACKGROUND);
-			graphics.blit(BACKGROUND, getX()+1, getY()+2, 176, menu.blockEntity.provideDirect ? 42 : 28, 14, 14);
+			extractDefaultSprite(graphics);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, getX()+1, getY()+2, 176, menu.blockEntity.provideDirect ? 42 : 28, 14, 14, 256, 256);
 		}
 
 		@Override
 		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
-		public void onPress() {
-			PacketDistributor.sendToServer(new ChangeProvidingPacket(PackagingProviderBlockEntity.Type.DIRECT));
+		public void onPress(InputWithModifiers input) {
+			ClientPacketDistributor.sendToServer(new ChangeProvidingPacket(PackagingProviderBlockEntity.Type.DIRECT));
 		}
 	}
 
@@ -110,20 +98,18 @@ public class PackagingProviderScreen extends BaseScreen<PackagingProviderMenu> {
 		}
 
 		@Override
-		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 			setTooltip(menu.blockEntity.providePackaging ? trueTooltip : falseTooltip);
-			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-			RenderSystem.setShaderTexture(0, BACKGROUND);
-			graphics.blit(BACKGROUND, getX()+1, getY()+2, 176, menu.blockEntity.providePackaging ? 70 : 56, 14, 14);
+			extractDefaultSprite(graphics);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, getX()+1, getY()+2, 176, menu.blockEntity.providePackaging ? 70 : 56, 14, 14, 256, 256);
 		}
 
 		@Override
 		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
-		public void onPress() {
-			PacketDistributor.sendToServer(new ChangeProvidingPacket(PackagingProviderBlockEntity.Type.PACKAGING));
+		public void onPress(InputWithModifiers input) {
+			ClientPacketDistributor.sendToServer(new ChangeProvidingPacket(PackagingProviderBlockEntity.Type.PACKAGING));
 		}
 	}
 
@@ -137,20 +123,18 @@ public class PackagingProviderScreen extends BaseScreen<PackagingProviderMenu> {
 		}
 
 		@Override
-		public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
+		protected void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
 			setTooltip(menu.blockEntity.provideUnpackaging ? trueTooltip : falseTooltip);
-			super.renderWidget(graphics, mouseX, mouseY, partialTicks);
-			RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
-			RenderSystem.setShaderTexture(0, BACKGROUND);
-			graphics.blit(BACKGROUND, getX()+1, getY()+2, 176, menu.blockEntity.provideUnpackaging ? 98 : 84, 14, 14);
+			extractDefaultSprite(graphics);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, getX()+1, getY()+2, 176, menu.blockEntity.provideUnpackaging ? 98 : 84, 14, 14, 256, 256);
 		}
 
 		@Override
 		public void updateWidgetNarration(NarrationElementOutput narrationElementOutput) {}
 
 		@Override
-		public void onPress() {
-			PacketDistributor.sendToServer(new ChangeProvidingPacket(PackagingProviderBlockEntity.Type.UNPACKAGING));
+		public void onPress(InputWithModifiers input) {
+			ClientPacketDistributor.sendToServer(new ChangeProvidingPacket(PackagingProviderBlockEntity.Type.UNPACKAGING));
 		}
 	}
 }

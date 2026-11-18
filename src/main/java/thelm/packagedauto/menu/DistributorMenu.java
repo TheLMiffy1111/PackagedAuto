@@ -10,7 +10,7 @@ public class DistributorMenu extends BaseMenu<DistributorBlockEntity> {
 		super(PackagedAutoMenus.DISTRIBUTOR.get(), windowId, inventory, blockEntity);
 		for(int i = 0; i < 9; ++i)  {
 			for(int j = 0; j < 9; ++j) {
-				addSlot(new SingleStackSlot(itemHandler, j+i*9, 8+j*18, 17+i*18));
+				addSlot(new SingleStackSlot(itemHandler, itemHandler, j+i*9, 8+j*18, 17+i*18));
 			}
 		}
 		setupPlayerInventory();
