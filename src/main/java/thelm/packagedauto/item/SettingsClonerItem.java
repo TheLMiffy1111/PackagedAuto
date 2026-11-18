@@ -97,9 +97,9 @@ public class SettingsClonerItem extends Item {
 			Component typeComponent = Component.translatable(data.type());
 			tooltip.add(Component.translatable("item.packagedauto.settings_cloner.contents", typeComponent));
 			Component dimComponent = Component.literal(data.dimension().location().toString());
-			tooltip.add(Component.translatable("item.packagedauto.settings_cloner.dimension", dimComponent));
+			tooltip.add(Component.translatable("misc.packagedauto.dimension", dimComponent));
 			Component posComponent = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", data.x(), data.y(), data.z()));
-			tooltip.add(Component.translatable("item.packagedauto.settings_cloner.position", posComponent));
+			tooltip.add(Component.translatable("misc.packagedauto.position", posComponent));
 		}
 		super.appendHoverText(stack, context, tooltip, isAdvanced);
 	}
