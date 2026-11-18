@@ -29,6 +29,7 @@ repositories {
 			}
 		}
 		filter {
+			includeGroup "net.mezzdev.config"
 			includeGroup "mezz.jei"
 			includeGroup "vazkii.patchouli"
 		}
@@ -73,7 +74,7 @@ def specVersion = "3"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "3.4.15.46"
+version = "3.4.15.47"
 
 def archivesName = "${modName}-${mcVersion}"
 base.archivesName = archivesName
@@ -115,7 +116,8 @@ dependencies {
 	forge "net.minecraftforge:forge:1.20.1-47.4.23"
 
 	// Dependencies
-	modImplementation("mezz.jei:jei-1.20.1-forge:15.49.0.193") {transitive = false}
+	modImplementation("net.mezzdev.config:mezz_config-1.20.1-forge:0.7.1") {transitive = false}
+	modImplementation("mezz.jei:jei-1.20.1-forge:15.62.0.217") {transitive = false}
 	modImplementation "dev.emi:emi-forge:1.1.24+1.20.1"
 	modImplementation "org.appliedenergistics:guideme:20.1.15"
 	modImplementation "appeng:appliedenergistics2-forge:15.4.10"
