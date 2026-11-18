@@ -16,7 +16,6 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -365,7 +364,7 @@ public class UnpackagerBlockEntity extends BaseBlockEntity implements ISettingsC
 	}
 
 	public void changeTrackerCount(boolean decrease) {
-		trackerCount = Mth.clamp(trackerCount + (decrease ? -1 : 1), 1, 10);
+		trackerCount = Math.clamp(trackerCount + (decrease ? -1 : 1), 1, 10);
 		setChanged();
 	}
 

@@ -194,7 +194,7 @@ public class PackagingProviderBlockEntity extends BaseBlockEntity implements ISe
 		}
 		nbt.put("to_send", MiscHelper.INSTANCE.saveAllItems(new ListTag(), toSend, registries));
 		if(sendDirection != null) {
-			nbt.putByte("send_irection", (byte)sendDirection.get3DDataValue());
+			nbt.putByte("send_direction", (byte)sendDirection.get3DDataValue());
 		}
 		nbt.putBoolean("send_ordered", sendOrdered);
 	}

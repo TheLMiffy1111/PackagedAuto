@@ -44,7 +44,7 @@ public class ItemAmountSpecifyingScreen extends AmountSpecifyingScreen<ItemAmoun
 	@Override
 	protected void onOkButtonPressed(boolean shiftDown) {
 		try {
-			int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
+			int amount = Math.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
 			ItemStack newStack = stack.copy();
 			newStack.setCount(amount);
 			PacketDistributor.sendToServer(new SetItemStackPacket(containerSlot, newStack));

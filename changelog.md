@@ -1,1 +1,2 @@
-Use better validity checks in core recipe handling  
+Persist amount in amount specification fields  
+Fix packaging provider send direction save key  

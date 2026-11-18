@@ -45,7 +45,7 @@ public class VolumeAmountSpecifyingScreen extends AmountSpecifyingScreen<VolumeA
 	@Override
 	protected void onOkButtonPressed(boolean shiftDown) {
 		try {
-			int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
+			int amount = Math.clamp(Integer.parseInt(amountField.getValue()), 0, maxAmount);
 			IVolumeStackWrapper newStack = stack.withAmount(amount);
 			PacketDistributor.sendToServer(new SetItemStackPacket(containerSlot, MiscHelper.INSTANCE.makeVolumePackage(newStack)));
 			close();

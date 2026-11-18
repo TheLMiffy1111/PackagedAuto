@@ -55,8 +55,9 @@ public class FluidPackageFillerScreen extends BaseScreen<FluidPackageFillerMenu>
 		});
 		amountField.setResponder(s->{
 			try {
-				int amount = Mth.clamp(Integer.parseInt(amountField.getValue()), 1, 1000000000);
+				int amount = Math.clamp(Integer.parseInt(amountField.getValue()), 1, 1000000000);
 				if(amount != menu.blockEntity.requiredAmount) {
+					menu.blockEntity.requiredAmount = amount;
 					PacketDistributor.sendToServer(new SetFluidAmountPacket(amount));
 				}
 			}

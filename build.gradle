@@ -29,6 +29,7 @@ repositories {
 			}
 		}
 		filter {
+			includeGroup "net.mezzdev.config"
 			includeGroup "mezz.jei"
 			includeGroup "vazkii.patchouli"
 		}
@@ -72,7 +73,7 @@ def specVersion = "4"
 def vendor = "thelm"
 
 group = "thelm.packagedauto"
-version = "4.0.8.21"
+version = "4.0.8.22"
 
 def archivesName = "${modName}-${mcVersion}"
 base.archivesName = archivesName
@@ -114,7 +115,8 @@ dependencies {
 	neoForge "net.neoforged:neoforge:21.1.249"
 
 	// Dependencies
-	implementation("mezz.jei:jei-1.21.1-neoforge:19.44.0.405") {transitive = false}
+	implementation("net.mezzdev.config:mezz_config-1.21.1-neoforge:0.7.1") {transitive = false}
+	implementation("mezz.jei:jei-1.21.1-neoforge:19.57.0.450") {transitive = false}
 	implementation "dev.emi:emi-neoforge:1.1.24+1.21.1"
 	implementation "org.appliedenergistics:guideme:21.1.17"
 	implementation "org.appliedenergistics:appliedenergistics2:19.2.17"
