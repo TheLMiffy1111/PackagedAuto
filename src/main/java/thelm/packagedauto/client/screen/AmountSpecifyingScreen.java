@@ -53,9 +53,10 @@ public abstract class AmountSpecifyingScreen<C extends BaseMenu<?>> extends Base
 		addRenderableWidget(new ButtonSet(leftPos+114, topPos+22, new TranslatableComponent("misc.packagedauto.set")));
 		addRenderableWidget(new ButtonCancel(leftPos+114, topPos+22+24, new TranslatableComponent("gui.cancel")));
 
+		String amountText = amountField == null ? String.valueOf(getDefaultAmount()) : amountField.getValue();
 		amountField = new EditBox(font, leftPos+9, topPos+51, 63, font.lineHeight, TextComponent.EMPTY);
+		amountField.setValue(amountText);
 		amountField.setBordered(false);
-		amountField.setValue(String.valueOf(getDefaultAmount()));
 		amountField.setTextColor(0xFFFFFF);
 		amountField.setFilter(s->{
 			if(s.isEmpty()) {
