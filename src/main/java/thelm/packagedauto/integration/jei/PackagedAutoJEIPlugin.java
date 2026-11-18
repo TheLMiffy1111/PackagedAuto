@@ -64,6 +64,7 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 				new FluidPackageContentsCategory(guiHelper));
 	}
 
+	@SuppressWarnings("removal")
 	@Override
 	public void registerRecipeTransferHandlers(IRecipeTransferRegistration registration) {
 		if(!ModList.get().isLoaded("emi")) {
