@@ -51,9 +51,10 @@ public abstract class GuiAmountSpecifying<C extends ContainerTileBase<?>> extend
 		addButton(new ButtonSet(0, guiLeft+114, guiTop+22, I18n.translateToLocal("misc.packagedauto.set")));
 		addButton(new ButtonCancel(0, guiLeft+114, guiTop+22+24, I18n.translateToLocal("gui.cancel")));
 
+		String amountText = amountField == null ? String.valueOf(getDefaultAmount()) : amountField.getText();
 		amountField = new GuiTextField(0, fontRenderer, guiLeft+9, guiTop+51, 63, fontRenderer.FONT_HEIGHT);
+		amountField.setText(amountText);
 		amountField.setEnableBackgroundDrawing(false);
-		amountField.setText(String.valueOf(getDefaultAmount()));
 		amountField.setTextColor(0xFFFFFF);
 		amountField.setValidator(s->{
 			if(s.isEmpty()) {
