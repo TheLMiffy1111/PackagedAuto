@@ -52,9 +52,10 @@ public abstract class AmountSpecifyingScreen<C extends BaseContainer<?>> extends
 		addButton(new ButtonSet(leftPos+114, topPos+22, new TranslationTextComponent("misc.packagedauto.set")));
 		addButton(new ButtonCancel(leftPos+114, topPos+22+24, new TranslationTextComponent("gui.cancel")));
 
+		String amountText = amountField == null ? String.valueOf(getDefaultAmount()) : amountField.getValue();
 		amountField = new TextFieldWidget(font, leftPos+9, topPos+51, 63, font.lineHeight, StringTextComponent.EMPTY);
+		amountField.setValue(amountText);
 		amountField.setBordered(false);
-		amountField.setValue(String.valueOf(getDefaultAmount()));
 		amountField.setTextColor(0xFFFFFF);
 		amountField.setFilter(s->{
 			if(s.isEmpty()) {
