@@ -193,7 +193,7 @@ publishMods {
 	file = remapJar.archiveFile
 	version = displayName = "${mcVersion}-${project.version}"
 	changelog = file("changelog.md").text
-	type = BETA
+	type = STABLE
 	modLoaders.add("neoforge")
 	additionalFiles.from(sourcesJar.archiveFile)
 
