@@ -14,7 +14,7 @@ public class PackagedAutoBlocks {
 	private PackagedAutoBlocks() {}
 
 	public static final UnaryOperator<BlockBehaviour.Properties> MACHINE = p->p.strength(10F, 15F).mapColor(MapColor.METAL).sound(SoundType.METAL);
-	
+
 	public static final DeferredRegister.Blocks BLOCKS = DeferredRegister.createBlocks("packagedauto");
 
 	public static final DeferredBlock<Block> ENCODER = BLOCKS.registerBlock("encoder", EncoderBlock::new);

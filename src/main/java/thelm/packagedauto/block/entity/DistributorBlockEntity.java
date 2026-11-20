@@ -251,7 +251,7 @@ public class DistributorBlockEntity extends BaseBlockEntity implements IPackageC
 		if(positionsInput.isEmpty()) {
 			return ISettingsCloneable.Result.fail(Component.translatable("item.packagedauto.settings_cloner.invalid"));
 		}
-		Int2ObjectMap<DirectionalGlobalPos> positions = new Int2ObjectArrayMap<>(81); 
+		Int2ObjectMap<DirectionalGlobalPos> positions = new Int2ObjectArrayMap<>(81);
 		for(ValueInput positionInput : positionsInput) {
 			int index = positionInput.getByteOr("index", (byte)-1);
 			DirectionalGlobalPos globalPos = positionInput.read(DirectionalGlobalPos.MAP_CODEC).orElse(null);

@@ -103,7 +103,7 @@ public class PackagedAutoJEIPlugin implements IModPlugin {
 		PackagedAutoJEIPlugin.jeiRuntime = jeiRuntime;
 	}
 
-	public static List<Identifier> getAllRecipeCategories() {	
+	public static List<Identifier> getAllRecipeCategories() {
 		if(allCategories == null) {
 			if(jeiRuntime == null) {
 				return List.of();
