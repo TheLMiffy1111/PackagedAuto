@@ -11,7 +11,7 @@
 		},
 		"has_recipe": {
 			"conditions": {
-				"recipe": "packagedauto/proxy_marker"
+				"recipe": "packagedauto:proxy_marker"
 			},
 			"trigger": "minecraft:recipe_unlocked"
 		}

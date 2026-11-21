@@ -11,7 +11,7 @@
 		},
 		"has_recipe": {
 			"conditions": {
-				"recipe": "packagedauto/crafting_proxy"
+				"recipe": "packagedauto:crafting_proxy"
 			},
 			"trigger": "minecraft:recipe_unlocked"
 		}

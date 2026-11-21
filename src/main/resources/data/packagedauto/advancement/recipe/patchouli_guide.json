@@ -15,7 +15,7 @@
 		},
 		"has_recipe": {
 			"conditions": {
-				"recipe": "packagedauto/patchouli_guide"
+				"recipe": "packagedauto:patchouli_guide"
 			},
 			"trigger": "minecraft:recipe_unlocked"
 		}

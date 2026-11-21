@@ -11,7 +11,7 @@
 		},
 		"has_recipe": {
 			"conditions": {
-				"recipe": "packagedauto/fluid_package_filler"
+				"recipe": "packagedauto:fluid_package_filler"
 			},
 			"trigger": "minecraft:recipe_unlocked"
 		}

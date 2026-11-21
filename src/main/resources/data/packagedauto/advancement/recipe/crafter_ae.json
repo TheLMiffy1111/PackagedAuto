@@ -15,7 +15,7 @@
 		},
 		"has_recipe": {
 			"conditions": {
-				"recipe": "packagedauto/crafter_ae"
+				"recipe": "packagedauto:crafter_ae"
 			},
 			"trigger": "minecraft:recipe_unlocked"
 		}

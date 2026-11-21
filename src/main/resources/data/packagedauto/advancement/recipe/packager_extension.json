@@ -18,7 +18,7 @@
 		},
 		"has_recipe": {
 			"conditions": {
-				"recipe": "packagedauto/packager_extension"
+				"recipe": "packagedauto:packager_extension"
 			},
 			"trigger": "minecraft:recipe_unlocked"
 		}

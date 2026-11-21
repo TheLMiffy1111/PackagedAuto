@@ -11,7 +11,7 @@
 		},
 		"has_recipe": {
 			"conditions": {
-				"recipe": "packagedauto/settings_cloner"
+				"recipe": "packagedauto:settings_cloner"
 			},
 			"trigger": "minecraft:recipe_unlocked"
 		}
